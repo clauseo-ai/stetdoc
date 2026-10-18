@@ -380,7 +380,9 @@ fn for_each_word_part(docs: &[Doc], mut f: impl FnMut(&Doc, &str, &[u8])) {
             let Ok(entry) = zip.by_index(i) else {
                 continue;
             };
-            let name = entry.name().to_string();
+            let Ok(name) = entry.name().map(|n| n.into_owned()) else {
+                continue;
+            };
             if !name.starts_with("word/") || !name.ends_with(".xml") || entry.size() > cap {
                 continue;
             }

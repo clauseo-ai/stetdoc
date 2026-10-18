@@ -32,7 +32,7 @@ tempfile = "3"
 # Tests only. `roxmltree` is the independent parser the xml tests compare the span tree with; `zip`
 # reads the packages of the corpus runs in schema, which may not depend on `package`.
 roxmltree = "0.20"
-zip = { version = "2", default-features = false, features = ["deflate"] }
+zip = { version = "9.0.5", default-features = false, features = ["deflate-flate2"] }
 
 # The public data types derive serde and schemars, so the napi types, `--json` and the JSON Schema
 # come from one source, and batches are read from JSON.

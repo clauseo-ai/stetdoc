@@ -1,0 +1,9 @@
+A folder that stetdoc did not write is not a working copy.
+
+```console
+$ stetdoc view .
+? 3
+error[not_found]: . is a directory, and not a working copy: it has no .stet/manifest.
+next: Name the folder that stetdoc unpack wrote, or unpack the .docx first.
+
+```

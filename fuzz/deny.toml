@@ -1,0 +1,38 @@
+# The cargo-deny policy for the fuzz crate, run by `cargo xtask check` and CI next to the root
+# one. The fuzz crate is a workspace of its own, so the root run does not see its lock file.
+#
+# This is the root `deny.toml` with two changes, and a test checks that nothing else differs:
+# NCSA is allowed, because `libfuzzer-sys` carries the libFuzzer sources under it, and an unused
+# allowance is not reported, because this graph is smaller than the root one. The fuzz binaries
+# are test tools and are never shipped, which is why this licence may be allowed here and is not
+# allowed in the root policy.
+
+[graph]
+all-features = true
+
+[advisories]
+yanked = "deny"
+
+[licenses]
+# Permissive licences only. Add a licence here only after checking that code under it
+# can be shipped in a binary that users may take under MIT or Apache-2.0.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Unicode-3.0",
+    "ISC",
+    "NCSA",
+]
+unused-allowed-license = "allow"
+confidence-threshold = 0.93
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# Path dependencies between workspace crates carry no version.
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

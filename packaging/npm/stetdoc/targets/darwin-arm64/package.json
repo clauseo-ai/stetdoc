@@ -1,0 +1,25 @@
+{
+  "name": "@stetdoc/cli-darwin-arm64",
+  "version": "1.0.0-dev",
+  "description": "The stetdoc command-line tool for aarch64-apple-darwin. Install `stetdoc`, which depends on it.",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "packaging/npm/stetdoc/targets/darwin-arm64"
+  },
+  "homepage": "https://github.com/clauseo-ai/stetdoc#readme",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "files": [
+    "bin/stetdoc"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ]
+}

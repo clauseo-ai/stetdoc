@@ -1,0 +1,51 @@
+977ab1796980c1580bb7c7ccaecc852c94261c2a677890c4fced8952999b4b32	2619	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/CC763-NestedContentControls.docx
+7997c054ee19cd1d9ee12857acec97517580f97e356d1587c06fd527bdc0f6c6	4201	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/DD/DD001-DenseBookmarkXrefFootnote.docx
+a4271f1e693994f5d7e6b05d843939f457726ccf8de561e6baf69deb33c3192c	3517	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/DD/DD002-DenseComments.docx
+b450ee098b2010955a6de2ed5ed0a86ee1d65a39e08f2c377eeee8040505778a	12835	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/001-DeletedRun.docx
+78121e6f3a70b55de406068114e265f6473b5f31251a9a6d9c156999f10fdff1	13911	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/002-DeletedNumberedParagraphs.docx
+a8dfe1bc8a894fccb793c0563281d7b8bd05d9bc0c49c1b200c9009e45377c1b	12556	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/003-DeletedFieldCode.docx
+9b6201c3a3f261995507af5315b53ece92be07639fa68fa62a7d7c6cd2275d2e	13760	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/004-InsertedNumberingProperties.docx
+ee3a6f716542e63a2d19027ce0a23bb5a4143d282c8cf31a6e443307975fabe8	13897	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/005-InsertedNumberedParagraph.docx
+5d13c05e0611d6605f02b676ca2bd4a2296e4898ac1fbb4105312be3cf8c518b	12888	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/006-DeletedTableRow.docx
+1dfe5cd404590b175a336a36534a8926a1e881f32d8e77ece06c330a8694f0e5	12989	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/007-InsertedTableRow.docx
+83da7f6807a61f7dfdce9606e136a5f0bc6da85ff37d4d16739fc430d7641496	12619	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/008-InsertedFieldCode.docx
+9c7f7093944faa9acc0e26cd8283a4ec4eca690ae88a291101b924726df6ed45	12660	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/009-InsertedParagraph.docx
+8fc6f738938cdbd7de6bfc3f4f8d9e8c9e3884e023970e3b47388ba4f57ad3f4	12652	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/010-InsertedRun.docx
+a5ae5cea27aded1661b315fa1807e93c943adce69e36cf590c8f5d327332b8d2	12467	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/011-InsertedMathChar.docx
+fc49b4f9a6bd6d132d270568d54be89138da267466205bd96a07f1a203969dc6	12449	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/012-DeletedMathChar.docx
+fd7882db9e4b6b9cd0851757367456caedf4170aae1dd3de3cc9e9ecf2203ee8	12654	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/013-DeletedParagraph.docx
+5ece311f0e8485704c4cf778666b0e2b8a9f0568abfeec6059f9126ad4a59a3b	12931	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/014-MovedParagraph.docx
+c4fbfbf7c20cb596309b1ab864495787e74f488f3d760866cddbd5503d28cb06	19225	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/015-InsertedContentControl.docx
+a5de1960daaca4ad23f98f01a0eab332a024c2f2e9b8927ff6d0f8d5da910d1b	19220	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/016-DeletedContentControl.docx
+59d3c2cd95fb6cb676db3177b29ee37d4a254053b8aac7166e4a52324aae1fa3	14124	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/017-NumberingChange.docx
+411a1cee4523b8c891d1ea640422095bdefa494db37ca90296e95aef9c8d2748	12819	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/018-ParagraphPropertiesChange.docx
+1ec4e47848d39633f6e435c5691e2e8ccd9c4ed019a9b1f10e0d0929ffb19dd2	12841	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/019-RunPropertiesChange.docx
+13b0013ea5e97a6b5a669d3b2dc315d5340a28af817cd09232bd160d26fa43d9	12921	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/020-SectionPropertiesChange.docx
+3ff415a82da654bfd58400c54dd0a67447c0f1b7ab1326b5e843d7d5335046b7	13451	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/021-TableGridChange.docx
+83ee3c24996bd4126abbf641a71160387bea0db7423a597b054dc29b6ab89913	14019	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/022-TablePropertiesChange.docx
+b8f73f19785736c166be7357c6e1771be008857df845773d3bf6173879d3ec0c	13427	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/023-CellPropertiesChange.docx
+7022e0afff31a0db3b6b0602d97e507ad15c4e3680123254c0b7e50995ef723b	13253	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/FA/RevTracking/024-RowPropertiesChange.docx
+a87f65361383da0084548bc22c7415c5d0a6ba0f9c0c0f259e47ad5c12ba65ad	9531	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/HistoryArchive/agreement-comparison.docx
+5ad0115afae50d06da1fc7cb21aa61714026fa59b9fa67e454741622d2689346	6873	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/HistoryArchive/agreement-v1.docx
+57368637326be4a20495eb5d4baa6b1d4f586022d512ac82d040e8ec40c9715e	6912	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/HistoryArchive/agreement-v2.docx
+e9872fb74a615b1638d86d0857fd868c01b57e24bc2acbe453c87a7f192ad60e	142503	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	TestFiles/HistoryArchive/charter-collaboration-comparison.docx
+cdb362884fa12a1dd4caa879adf5afb091812913b8d1153ad15a560f6c3d3a7b	146791	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	TestFiles/HistoryArchive/charter-collaboration-conflicting-proposal.docx
+d75600769c12724990de48149d7a2bb161f3522daa54b1783672f93697d87d29	147622	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	TestFiles/HistoryArchive/charter-collaboration-v1.docx
+a208b046d26deed1681989384b4f3d26d7149520dbb1d8586ff9cbee22bfd389	146791	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	TestFiles/HistoryArchive/charter-collaboration-v3.docx
+635f14f57d9f11f3c002529f765ad94dcf6e28d21cd050fc1086d705f8d18a3f	1094949	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	TestFiles/HistoryArchive/charter-collaboration-v5.docx
+bda99aea144da6e5b3a704889bc52b8aaac92616fc75b20f200d3b8fab304a17	3843	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/IM762-ImageCoverage.docx
+881045435b850eedf5d18119ba4ff38fde3a1562ef07d27e85b42d4d27296e77	1845	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/RC/RC100-Conflict-Alice.docx
+12a29ae254f8806b9e1c7d8a932d9065812cabc88f70c199172c6235e76a58de	1838	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/RC/RC100-Conflict-Base.docx
+d41522693f40d7a0ecf2081b0c91f55748eeb3a2bed82c14f559d90e2709573f	1845	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/RC/RC100-Conflict-Bob.docx
+b145f4aa040c8a24fbb369fe2dd098ac4b57c359311126a3d8ea7594c3278ba0	13896	word-authored	ok	-	-	-	MIT	Microsoft Word	n	TestFiles/RP/RP015-MoveFrom-MoveTo-Accepted.docx
+83c7b878584fc8748c65d14c9b63548177745eef3733005577993b18c57a16e5	13893	word-authored	ok	-	-	-	MIT	Microsoft Word	n	TestFiles/RP/RP015-MoveFrom-MoveTo-Rejected.docx
+3a3f2b9f15576a3b79d0a5ad7ab49361729e03f6ea72c6736648be9bc52bbd97	1549	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/RPR-FivePageTestDoc.docx
+ac4d5d049557dbb9da6eff23b8aa9c953df864768f8b983a40869476ff08be14	2077	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/RPR-TenPageTestDoc.docx
+207fdf72c9221c2e95982782988b92c2d0fa0843b3b754e7121d5cbac77430f2	19521	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/VP/VP001-Chart-Stacked-Column.docx
+733dd8177bfa53d535adeb56d6be00934c3861566c11fc602c27786f27d946db	11213	word-authored	ok	-	-	-	MIT	Microsoft Word	n	TestFiles/VP/VP002-Image-Wrap-Tight.docx
+e51b73ae672efcf92d9312e14fade03ff95be2b89a1c06950d98e961e8a61600	3449	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/VP/VP003-Two-Column-Section.docx
+50c62c244e4c7f68b6085cd1aea3db03f77b339ecb6a57a7a6208ae56c8ad248	2126658	edge	ok	-	-	-	MIT	Microsoft Word	n	TestFiles/WC/WC-BodyBookmarks-After.docx
+ae354ab2cae422815eec6a189ea3e9291dd4e9fc1c98b563021051d1820a590f	1925781	word-authored	ok	-	-	-	MIT	Microsoft Word	y	TestFiles/WC/WC-BodyBookmarks-Before.docx
+67268a42d3e6a9ffa34d61c583af6bbc224fc8a7f3990ca47d85865b2d903f0d	2254	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	TestFiles/WM001-Bordered-Boxes.docx
+0562613e6917befcfb03f4a23248d3863238bea0a808e050c3e2f2042e9667c7	43040	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	docs/demo/docxodus-demo-guide.docx
+488860c4a137d7492c6c5f1a59ef907628c97008902c32bbea67ebe3537f8407	20800	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	docs/images/arcade-doom-ascii-frame.docx

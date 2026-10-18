@@ -1,0 +1,13 @@
+# With --json a failure is data on stdout, in the shape napi throws.
+bin.name = "stetdoc"
+args = ["--json", "edit", "contract.docx", "-o", "edited.docx", "--author", "Jane Doe"]
+stdin = """
+base: 0000000000000000:0:0000000000000000
+---
+@replace
+ref: p4
+find: thirty
+with: sixty
+"""
+status.code = 4
+fs.sandbox = true

@@ -1,0 +1,36 @@
+1c5f88a791e465c20688f93a2ffb83739870a159656d83d389258496307e805c	15161	other-producers	ok	-	-	-	MIT	docx.js or docx-rs	n	.claude/skills/weak-agent-test/scenarios/contract-finalize/contract-redlined.docx
+eebda55f7be3eb5e9ae41c36c4764753122e4f0dfb91ef729f9e900670606f42	14249	other-producers	ok	-	-	-	MIT	docx.js or docx-rs	n	.claude/skills/weak-agent-test/scenarios/contract-markup/contract.docx
+af23fff89be5d664ded556e1ac8ccb5b46f4e1adb4ce4611fc6bb82ffed96878	21764	word-authored	ok	-	-	-	MIT	Microsoft Word	y	.claude/skills/weak-agent-test/scenarios/invoice/invoice.docx
+18e07001c3ebfc749833e10836eda4fe0d302ab0a7519a0388696be3df86b566	28664	word-authored	ok	-	-	-	MIT	Microsoft Word	y	.claude/skills/weak-agent-test/scenarios/mnda/mnda.docx
+acb7d106b353c2910561e93789a41682536b868bc59c2d885c9aeb5de236ebe4	28426	word-authored	ok	-	-	-	MIT	Microsoft Word	y	.claude/skills/weak-agent-test/scenarios/resume/resume.docx
+e9aa7c3d97831da712abac2724043d2022dded199e1cb09d1d7397d35855acbb	39395	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/academic-paper.docx
+5cb697f1c6a9a2e2190f0396ff4b44040ad4cb409fd42fd2850a3b3ac877326f	6317	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/chained-tracked-edits.docx
+3e3c5d601aa5f30811f876b82fb1ed5def9109f5f2298810beecf9a787c72ea8	6278	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/comments-batch.docx
+5ce022dbd3d5ae8f8bafa41a8751771f18b5f5e43ed8a145aaf092a61214f84f	7275	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/comments-threaded.docx
+4a191368157eaf8f22acdc50879291acec012af43f4bbc1d2c1a6d681641b710	10939	edge	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/equations.docx
+dc47e999e346502c04ed20d4cc3a85a60cdb122503497941e9050da2bd21642a	7410	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/footnotes-mutations.docx
+0ea4d1b4c3e758e428638bf37baaa5d679c1d874b8073b41a2ae8b74b592d5fa	7656	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/headers-footers.docx
+82d7f82d7d332a2fde21324bac10974ab2e73524aeed0840342aa3e1b58f8861	20312	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/images.docx
+7558e244fa241a1f3dba0b16863c67d1f517f2d2d4e3b134cfb51b00b07b45c2	1963720	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/large-mixed.docx
+90be4d9340ab6632270e5592a8d6366f0991a44bc1caa5b5aff0d10941d2b9d9	6830	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/letter.docx
+dc7bc5899848aa603fe4116bf668332ff28b4e6647f3d68d2f6869fe7ab599fe	7534	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/lists.docx
+7c505d79597c308370eb94a46ad2c5222527cd8f1d97f1af69dca93abcb54132	17484	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/markdown-import.docx
+58f971cba85b3f1f8740f2b894fa0d72148a906ce7358e589b4d77cbd99e4260	6772	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/minimal.docx
+9a6602c554f9c86cbe5acffdc08c03e35a6db9199094be650c7b5a0f70ffdde7	486225	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/multi-column.docx
+c496036149979d1cae7fc2daea88e50a229a90f205dc3e54e2734187565ccc3b	6395	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/multi-tracked.docx
+cffc5e643bd3729a76ab31046b870e844a4031ec876b345f0d047220883b5975	6361	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/normalize-query.docx
+a8a5b1b9f57ef1d721e30ed29eddbf14014061f9c2f72464f840c0e45938f48d	7011	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/notes.docx
+26dc852dd93968fb5105078ddf9f82a536ffeaca70dd76a3d95f0805b7bcf16a	6904	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/raw-ooxml.docx
+418938cb67b7ee79b07b894b77525d0e3f40299e1067b3b374d23cf25a9b2c00	28780	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/resume-styling.docx
+b4ed955e809b22c0334b607f477f1a90dc02fae29c3fb3626609545502d2a7a7	9345	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/sections.docx
+501b6fc288ce8c95498d0d38ea4faff5e000b26a5e0b59de6e373b1dcd8598b2	6692	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/style-defs.docx
+112f2b57856af24899d52925b9c4e807d6451b9976d01bb039c5590fdc33b81b	6413	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/styles-injection.docx
+2918fc85b77d557c89182dfa8fdab649f075bcb7501d89bec3b01d13fcf0d167	56428	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/tables-and-lists.docx
+fd50a25e3518b36de57acbd6f4798e11f289bb64edd9cc54ef1b3197b86cef79	7005	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/tables-mutations.docx
+2b02df7a0bda11e5f200c82fc792bd9b284247dea96c167aa23398cb7e3cbbad	7213	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/task-lists-tracked.docx
+19cdf0ee7124f48fb3ece85b56a7b75db19eb91074148a72722ba775134d874f	7035	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/task-lists-web.docx
+6a374ce00d9afd4d320fda64e52eccb6b11e9b79cb29fe556c64266a9e7fa0d0	7083	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/task-lists.docx
+0f65b073238416036f114f9f6f0746c1939252c9c5081cd26b818f20c336cbda	7509	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/text-boxes.docx
+8bdb280b008680cee56e544b190325c2a713e79b1c8bfbc3915e34638144fb43	6267	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/tracked-moves.docx
+4d9427a4b227412d0c295de185893ea69aa22ac37fcf809bc827f8d82105fe16	6295	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/transparent-wrappers.docx
+b01d9dd8f500db23df961b4e0b3974dad77849cbcdfaeba374129dfeecfb2b16	6679	other-producers	ok	-	-	-	MIT	docx-cli	n	tests/fixtures/word-formatted.docx

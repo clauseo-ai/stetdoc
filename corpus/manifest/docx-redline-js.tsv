@@ -1,0 +1,63 @@
+1cb528138518c8d25c3b23955c54bdb9f5f02d3a758d6de9b829b1af030638ba	15248	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/agentic-lists/nested-lists-source.docx
+faaf91d5bc55785d28d40cf9e18beccd3671f613469a7dda04c8cfdea9e094e8	13327	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-boundary-end-accepted.docx
+398a6c3f8409be3ce6f78b944119f33ac55a8dc43b20eb54425aab75f47067bd	14257	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-boundary-end-pending.docx
+8eff63708f1ab586e4521456546836fd33ff0673658d7fccfc1d7a8a0714f140	13322	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-boundary-end-rejected.docx
+b63cddf0e10774841a8a3bf2fbd6466a7aaf4f36dde70ca43446445629d2bb79	13340	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-boundary-start-accepted.docx
+7a8c98e0dca7bebc837d3ad6ad4b806294607d0015836b5584b0bc22b9ed35b4	14278	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-boundary-start-pending.docx
+1bb5e133a3cc98fbd7e13acddf0955c90f06dd0c6f10800f554f173435e8caef	13318	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-boundary-start-rejected.docx
+5371332483fb46883e9711e82eb8313c389ce39d1d238eb943cbed2e9c9e1cf3	13353	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-interior-accepted.docx
+ea139e08daf8e36c1e008d32cd6d0a13888c890ebf90b2162e6cad03e6e1a9c0	14276	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-interior-pending.docx
+7ab4d3541e9713f62ce70c28e6de316c555c164d0ca993bcce60426f8e605a10	13323	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-interior-rejected.docx
+e27105509154efc95c15b9602e5377a358205e65bbe88c3fc471d7953ff31ce3	13316	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-straddle-baseline-insertion-accepted.docx
+065feeb46699cd7301210bac9a3f7a720f831e9b2df9410b0990a718974c56b8	14252	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-straddle-baseline-insertion-pending.docx
+c280e42a7b37b9eb2afbc5882689cf6742aaa27e6acb57397b8a65df48bcfe00	13328	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/delete-straddle-baseline-insertion-rejected.docx
+5aad6e03ac78a3e4806cb50216ddb6f26e4539b1a573ed965654133513320bc6	13344	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/insert-interior-accepted.docx
+d3c66fb34fc8c941deab27105cf14a19ae29a551866d8e23d78d17234a95d337	14238	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/insert-interior-pending.docx
+973af530ce4f4f83b0fde0fedc7c4b162885ec69285cd0053a7038b5b196478f	13333	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/insert-interior-rejected.docx
+97dbd747677aa7a3b07c43626d10e41ff6802e92958a62e36da7dbfa297a918a	13341	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/multi-author-stacked-accepted.docx
+b37a6928d3e0550d3a19d30cceee3a894eb162afb4ea62a80598cc5c65098343	14304	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/multi-author-stacked-pending.docx
+099a15c20de5e2b076b3b560e007273f536bc35e9027b8283e5515b66fd481bc	13331	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/cross-author-slicing/multi-author-stacked-rejected.docx
+3923ae098cc783ab59cf9dc5f75334d15cee72538dd5fd9efe7283481a867bca	17595	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/adjacent-bookmark-comment-accepted.docx
+e5cbc4d9d8ac540014ddffdd891f2fa5395bbb028baa715c4ec9d05b860241d5	17693	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/adjacent-bookmark-comment-pending.docx
+28d79132e13b594a67960843c99a2101aacff1d6f6605bef9a8fbfb6561d44ef	17632	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/adjacent-bookmark-comment-rejected.docx
+2735010202ee9225ce909ebbb454436a65a5336793f7b6478f97e44820181f4e	13315	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/delete-boundary-accepted.docx
+74ac8408ac5e3b9829663ca07b1efcae70d41a6a29e73b590b418185089314b7	14185	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/delete-boundary-pending.docx
+149d25940bfc3d40c328173662df2367b1274ebb89ce0ce38d2a12ea5ef114ed	13344	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/delete-boundary-rejected.docx
+84c846f5d96cab73518dfe1edc3e4383c48f879cda07c5266b3f7e0b461a6843	13342	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/delete-middle-paragraph-accepted.docx
+d309ff901c3d97e8b993b7d6af727055f3a4a99cae77dd8b6eea3d3249c786d3	14239	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/delete-middle-paragraph-pending.docx
+66d850cbde148f954dd6008ba3e38d32f613001ca30f7f32df06547e3a3bbd99	13363	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/delete-middle-paragraph-rejected.docx
+d26047dd6e3549f83e90851855325cb675f89f7f105104bca8db124ecdcf61c8	14368	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/different-list-levels-boundary-accepted.docx
+f8af3842dafab19243a3993055c5c15a5c4e084bde74895dcba9d4835f15027c	15269	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/different-list-levels-boundary-pending.docx
+f8d3e6f29832cd8baa04b23179fcdf89a45d3c7314b2141e81fc536ea834493d	14416	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/different-list-levels-boundary-rejected.docx
+b709489ce9dc30c732b4db707097ebf9c73792ace725975db4fb79cd51d5183d	13352	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/different-styles-boundary-accepted.docx
+1aaf068cf713fca43cd4ef21c02f9141f86a8e01b980d2f7810bda77cee4999e	14237	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/different-styles-boundary-pending.docx
+896b5afad31d45a2b3352a94f522e7c8dce7d1edf33ab697a3faff9c521559d4	13392	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/different-styles-boundary-rejected.docx
+702921a652c848bc3a5252b244f194a28424c9a323e48404501922313d524c52	13351	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/insert-blank-paragraph-accepted.docx
+4de912777f6ebab06dd036b7d5fb6a4270cf53f9cb8793a319cf2fb689ee5c85	14189	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/insert-blank-paragraph-pending.docx
+91a47276c00543755754d54e0957c28e48b91f050acc5ecb06e7776f5fc5c4b7	13334	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/insert-blank-paragraph-rejected.docx
+178a03de1048e04031845ae890aa4e922c5d8648137c79134f1ba085b8e6b643	13350	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/multi-author-boundary-accepted.docx
+cac23ef16550a8f6ff777821151c48c1f8e1ec7a7f5811c747dcc8e36bfb5ccd	14225	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/multi-author-boundary-pending.docx
+565fad88df2990a16022d25755159790f440d1275fbc1bc9d2c743994d010bc2	13322	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/multi-author-boundary-rejected.docx
+3d0cb6d05c953584ab5f1737efcbf23a63658a28ffea1871223987f0bf3a9c63	13320	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/section-break-boundary-accepted.docx
+466d9152878a474aa0c11f197c4bbe4721145f17509dd3c1771a8ae5efdea789	14191	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/section-break-boundary-pending.docx
+167eb350cc9cc5e656408bad401ab62d8a6e980acfdba3045753fd4741a65de9	13375	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/section-break-boundary-rejected.docx
+83cefb66a5ce5fc63c89aeaac221b04b473d4eddc22a8af33df8e6b35cfb43be	13354	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/split-middle-accepted.docx
+f37566c88aa37a17e20002f804c308e0120c25dccf74e7c4647f6e53be96d2ef	14191	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/split-middle-pending.docx
+64436be4d78a7d88db8433e9e2ffa0b44d8752deb029715f45a76dc892b5920e	13319	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/split-middle-rejected.docx
+c1d0913aa7856bac9b7baca6f1031c2e394d1b5efa3087b0f4fa0a87bbf3758a	13508	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/table-cell-boundary-accepted.docx
+9884d4b6d672c61b626c0a84b1da57cdc074e5189254c8b36e7358d41877d693	14378	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/table-cell-boundary-pending.docx
+8632c01f3fc977d568b63946103a78e1de66deddb3bd302f4fa4f7e5442e75bd	13511	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/paragraph-boundaries/table-cell-boundary-rejected.docx
+10cecb4bf3373b14c3598783106a611b9fc999020021e3a9c0fd124fc53fb2be	3688	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	tests/fixtures/reredline-stress/mixed-contract-operations-rerelined.docx
+7b074be4715d70a16c7498aa6121d537f77cec7b506ad97607485e47ba4a4933	3422	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	tests/fixtures/reredline-stress/mixed-contract-operations-round1.docx
+e6b4b6e7b8e6a694cfe81488419a1a28af0e71b2f814152f81712fbc4119e32e	2943	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	tests/fixtures/reredline-stress/mixed-contract-operations-source.docx
+35b3eb1d1ecb8229e527e1d04773e7cdadea35729a90207cd8247cea82ce6ea0	3719	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	tests/fixtures/reredline-stress/mixed-policy-review-rerelined.docx
+85e79ba3d31711bb5809f9d036bd37ddb3205ae7cd23d539ce53e8c216b817d7	3443	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	tests/fixtures/reredline-stress/mixed-policy-review-round1.docx
+444e709c90b380d3941c9dca1051ab24b11798dbf3670c8dfc9c18ad9a8d67a9	2970	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	tests/fixtures/reredline-stress/mixed-policy-review-source.docx
+002e298c4da41565aab93501e3a187e9eaa905eb24927efdc8c1ca943bd16113	18218	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/sample_doc_test.docx
+b24223e13a19a4aafccd8a9ad5c0ac036f4746590e81e5bc69d966a4fed4aea2	18913	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/comment-edge-cases.docx
+963f53d5b390676394221ca9f312aed74ead43a1a110fb02b6d7d8b8f68db4f9	20147	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/header-footer.docx
+adb90c5e274ca6d8818a332df85a5c433c7cee0d1bf78cf3a4e47051412fde0c	16883	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/multi-paragraph-thread.docx
+e7547ca7a32e45b6db924e15f2afb1e6f08ce80085b5536358361109f21adb2d	20798	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/multi-section-headers.docx
+72c8fe957f3feda43d97b8033e34f448214325519d33a9f17c9610c0d0626134	16814	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/reply-to-resolved.docx
+d322ca79bd0c6449074d286cf9f08c0fdce9c0c8c430d216c20b6e8c8819deb4	17067	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/resolved-threads.docx
+d8fa5d22e92f29c3b74fdf1fca71c928e93ae00d2680d8878e448dc3e46032b5	17071	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/word-authored/threaded-comments.docx

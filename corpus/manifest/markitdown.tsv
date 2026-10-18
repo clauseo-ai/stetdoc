@@ -1,0 +1,10 @@
+6eb2b1e9d68dae67d5b5c622efa2ef434d0a2ed1dda9baf0db44e34f55d85d92	42547	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	packages/markitdown-ocr/tests/ocr_test_data/docx_complex_layout.docx
+d70f656aad4d69a7cd7b403203d11a304ac0d358f8fc7ca7274c3fce2d6dd4a3	41358	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	packages/markitdown-ocr/tests/ocr_test_data/docx_image_end.docx
+3e81e34da11b174bc2dfae75674bf08c801d4f08fa61b0e97473838a349c971e	41465	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	packages/markitdown-ocr/tests/ocr_test_data/docx_image_middle.docx
+58b3a260d88803baaab86090c889e2ac7b2978d22dde13eab3d3d331e03362d2	41476	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	packages/markitdown-ocr/tests/ocr_test_data/docx_image_start.docx
+f1c5f87bd2ad57fc26780fa203bd6f5fc6a4db82b372026122c9f29e3ed30f42	48583	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	packages/markitdown-ocr/tests/ocr_test_data/docx_multipage.docx
+2a7c3210bdae1b14ff4e6eee0e19ae9dc436e22c366be79c6210ed458c1b22c4	45052	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	packages/markitdown-ocr/tests/ocr_test_data/docx_multiple_images.docx
+339b064492530598859de0bde8504de7a4aefead88210baf3e9f3db0ed925b40	15235	word-authored	ok	-	-	-	MIT	Microsoft Word	y	packages/markitdown/tests/test_files/equations.docx
+ac135ae40a3232ca4f235ca79d2f52cad36a885f20dadba21e6f1b5e5669f0b7	13708	word-authored	ok	-	-	-	MIT	Microsoft Word	y	packages/markitdown/tests/test_files/rlink.docx
+ee1974633f3b1e8bb54201abce779a755cb1cd5259641a08cf7b1b9b36dec42b	135824	word-authored	ok	-	-	-	MIT	Microsoft Word	y	packages/markitdown/tests/test_files/test.docx
+296fdb38ac2869f153db77e5f85ddbd74a1f931d8a3524cd5e12e3c5936d56a0	12971	other-producers	ok	-	-	-	MIT	LibreOffice	n	packages/markitdown/tests/test_files/test_with_comment.docx

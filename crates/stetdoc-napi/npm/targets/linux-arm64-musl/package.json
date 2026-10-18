@@ -1,0 +1,29 @@
+{
+  "name": "@stetdoc/node-linux-arm64-musl",
+  "version": "1.0.0-dev",
+  "description": "The stetdoc native addon for linux-arm64-musl. Install `stetdoc`, which depends on it.",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "crates/stetdoc-napi/npm/targets/linux-arm64-musl"
+  },
+  "homepage": "https://github.com/clauseo-ai/stetdoc#readme",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "main": "stetdoc.linux-arm64-musl.node",
+  "files": [
+    "stetdoc.linux-arm64-musl.node"
+  ],
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "libc": [
+    "musl"
+  ]
+}

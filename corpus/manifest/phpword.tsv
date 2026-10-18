@@ -1,0 +1,25 @@
+bfe96383d59625f3dca07edf3ba56693c413c1c1418522d67014fb1d9d550623	22835	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	samples/resources/Sample_07_TemplateCloneRow.docx
+05019ac5727f0aefa47d2f51dfc3da08b7815534f0e058fb78245105e4b3895d	63832	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	samples/resources/Sample_11_ReadWord2007.docx
+3e93ec460d95c41f27f6315f7238acbbec61f50d84e4b288a947db633586a367	22510	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	samples/resources/Sample_23_TemplateBlock.docx
+250634ca9fc06023c4368d14e3af514e9048a899123fad65ef82872a04944d3a	14735	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	samples/resources/Sample_40_TemplateSetComplexValue.docx
+bc4816ff18854b5d3a1929eaf6a82fae636ee6c5612623cac5f49391ce8b93cf	9576	other-producers	ok	-	-	-	LGPL-3.0-only	LibreOffice	n	samples/resources/Sample_41_TemplateSetChart.docx
+292107ed4c9ba803e704480199438f53cb6f1e46da8734b7f0f76125e39ec0bc	13161	other-producers	ok	-	-	-	LGPL-3.0-only	unknown (no Application)	n	samples/resources/Sample_42_TemplateSetCheckbox.docx
+1b4c3c6a914ed9cbd59b97defbd7dd04e3884c237b4c3d0c63b143dbff5b3b2f	12981	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	samples/resources/Sample_44_ExtractVariablesFromReaderWord2007.docx
+138f9ebe1688eebf7a72e4cd91f4c5469eb79e5ea3cb1835d1cf0488f05d2781	36938	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	tests/PhpWordTests/_files/documents/reader-2011.docx
+f59837b9a28ca32dcb535d29620e0e08182ce408de8e03cde78fa20968ceb0e7	12895	edge	ok	-	-	-	LGPL-3.0-only	WPS Office	n	tests/PhpWordTests/_files/documents/reader-comments.docx
+f91dbb85847c66972927cb2a8356866c94cbae15ef175557acbb1f0eeb3286ec	4292	other-producers	ok	-	-	-	LGPL-3.0-only	LibreOffice	n	tests/PhpWordTests/_files/documents/reader-formula.docx
+503c3302eb72d9d89cfc0423740f5a1f888ec5e29c05a26909ac1fc708b13d58	63587	other-producers	ok	-	-	-	LGPL-3.0-only	LibreOffice	n	tests/PhpWordTests/_files/documents/reader-styles.docx
+3957ed4690a4c9d52cc68752e22322a9080d99eda45d999e8362a1e7dd745631	105726	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word for Mac	y	tests/PhpWordTests/_files/documents/reader.docx
+90ddc300295d40576cda06c7dcf67be783f0a294436cb0b5cbf711249b91ee3e	6304	other-producers	ok	-	-	-	LGPL-3.0-only	LibreOffice	n	tests/PhpWordTests/_files/documents/without_table_macros.docx
+b94394bc6a54d1d5877a963865d4a8efd7793872a75ec762de32736829e90857	3785	other-producers	ok	-	-	-	LGPL-3.0-only	unknown (no Application)	n	tests/PhpWordTests/_files/templates/blank.docx
+f002623ee7d31f9386b4095cfc3d9025bcebf16b8e725dbac14bc612de6ec6a0	17676	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	tests/PhpWordTests/_files/templates/clone-delete-block.docx
+44e8e3a41846f39788ed578194f98e8d65aebaf363f692edded2ed484f3dbcaf	8566	edge	ok	-	-	-	LGPL-3.0-only	Google Docs	n	tests/PhpWordTests/_files/templates/clone-merge-with-custom-macro.docx
+e223b928ddc83a5e0e753a93f621332ce2142b75787101779cbf5dfa95f2477f	14690	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	tests/PhpWordTests/_files/templates/clone-merge.docx
+54193346c6dd7cd8ae9336d4afd2d02f45141d0d649b8db00dd7ff0d3c1d03fe	3806	hostile	malformed_input	xml	word/document.xml	xml.unbalanced_tags_by_count;xml.not_wellformed.core_part	LGPL-3.0-only	unknown (no Application)	n	tests/PhpWordTests/_files/templates/corrupted_main_document_part.docx
+bcc106a4a87c22f1455226a02712bf7228f56eef5f07e3b2d8f2f48246cace3a	13171	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	tests/PhpWordTests/_files/templates/delete-row.docx
+f48fe7ebdd6235716806c71bdc5d6ace551ca80528d6419609851bb0ddeaa7f5	11144	edge	ok	-	-	-	LGPL-3.0-only	Microsoft Word	n	tests/PhpWordTests/_files/templates/document22-with-custom-macro-xml.docx
+ed2834a6fa3d5979386b46b5c7cb2e9719bb8fcf2cae725fa14b66a5599ae3fa	11126	edge	ok	-	-	-	LGPL-3.0-only	Microsoft Word	n	tests/PhpWordTests/_files/templates/document22-xml.docx
+f83171dc0aa607ddd0ea556ab9a1277bd7465b4727f1ce9658f690a59f3cbd20	12575	word-authored	ok	-	-	-	LGPL-3.0-only	Microsoft Word	y	tests/PhpWordTests/_files/templates/extract-variable.docx
+368daa1db7dbd79b2944c6984f5da85f215f7034346bce2b8976966aae02e9f4	15776	hostile	malformed_input	xml	word/document.xml	xml.epilog.junk;xml.not_wellformed.core_part	LGPL-3.0-only	unknown (no Application)	n	tests/PhpWordTests/_files/templates/header-footer-with-custom-macro.docx
+b1b49ce664102f78fb56ea45fb1eeb77cacab1ce82d20d435063957a50d88306	15730	other-producers	ok	-	-	-	LGPL-3.0-only	unknown (no Application)	n	tests/PhpWordTests/_files/templates/header-footer.docx
+15a525e7ce10f36db93b9f4595836e7a59b6c53925d813cab66eb7a1d5955d33	7379	other-producers	ok	-	-	-	LGPL-3.0-only	LibreOffice	n	tests/PhpWordTests/_files/templates/with_table_macros.docx

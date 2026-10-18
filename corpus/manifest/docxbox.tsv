@@ -1,0 +1,7 @@
+8b5fa14d633efdbd4fcd7ed7f5a48e9f3c4f489fda2e83ca0e4ae6d2a64497e8	114427	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/assets/documents/docx/bio_assay.docx
+bb080d0567427f05db2b62abcb0c085bdbdf934df6a3ab769c05ef12d58d3ddd	23862	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/assets/documents/docx/mergefields.docx
+5c56b341b9acece47757754fe93a98216f9bde308f1692483b64680a0c5a0a8a	11868	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/assets/documents/docx/plain_text.docx
+c04c06823b359efac4ec3686d4d79b297aed3f0fb386a38351dd3c282db00ab0	14383	other-producers	ok	-	-	-	MIT	other:TextMaker free rev.971	n	test/assets/documents/docx/plain_text_and_table.docx
+33fcc5b11aa90bc762a2fabdd7ebd7389b8d3123a560a657d6ae93788f8d5f89	15894	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/assets/documents/docx/policy_with_bullets.docx
+141d7a9cdcc45638243561482b13a1323f788b0d2530e2194a0cded4863f6235	124353	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/assets/documents/docx/table_unordered_list_images.docx
+9b01d0810af920cb512dc9aaf4f261117a7e1ff95731fa36edc181b484d2eea6	164318	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/assets/documents/docx/text_with_styles.docx

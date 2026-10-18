@@ -1,0 +1,51 @@
+2a3baa73290947d8a3db422459664cc08853086d3bb93c7d3ee3a3fc606c1429	13760	word-authored	ok	-	-	-	MIT	Microsoft Word	n	src/DocSharp.Markdown/Docx/Resources/markdown-template.docx
+09f6519ef2a8b05cb79bd8064d1c08a260bc8a2a622231c7daab55937c3275fd	21126	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Basic.docx
+a194d958aa122ff25b30bf690172489fdf978bcf04c4931bb1b38472aed14f45	67052	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Compatibility.docx
+d0ac8cefdaa4c3a023b043472e40e58d26769219afa6b1a7421607ae268447a3	106056	edge	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Complex 1.docx
+10e4d0e74b346fe3b54bd36a2e88a7d69e07dcd2673d022aaaed94c060c9fe23	33575	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Complex 2.docx
+25630820b1f2a5a52b7b82b4c3559a04b6dc2c47ea09f0994612a3dcac806312	262426	edge	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Complex 3.docx
+1139f2bbad5f9bc4b106f8a6e57b1d2c424336fa2a15046c9746ecf5aaffc377	13578	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Document background - gradient.docx
+8fa14238b4de809a89ea49de6acc1b01f03d69fbe90817ce5d2488a6bde10e14	2033567	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Document background - image.docx
+a4fc9b956ee1347b68c5d9b94098b0714fa9759577cae97d465d83e3ddad81e0	13858	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Document background - pattern.docx
+17f5e1f15162c7530f97b481eae539fbd51262df4a0e69c3dff6b5581ddbadf4	16486	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Document background - texture.docx
+bee856d01b011260625bd53da1446ddc0498f8de1198c46b60269edf478546af	66724	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Drawing canvas.docx
+0c9f2803db59ac748d514f71f0b45333b0c39b9bf89f2ea7f77fc1bafa4506a6	17255	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Grouped shapes.docx
+305510dbc1800ba9f5fb2db5013db507f7c365b456c271df82fb431112794d85	13683	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Horizontal lines 1.docx
+98faf84ec5c62062d02898c074feceefc81b01fd9d56cd6ab546c0b89e41b543	13730	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Horizontal lines 2.docx
+dc484c284ca811ea55bdf1c502832d749fead765e2a4ffba305dceb520f494f3	13684	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Hyphentation.docx
+88a39e2d9f7548d209862ba1d6983aeb7ea628fa0af6d343db0a3c610a7a80bd	14245	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Marked as final.docx
+7fecc3dfdd358555c269d0648eb5012f7b49d2e2d5b7f6cf2d3d2dd3ca1b800b	16108	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Math.docx
+688f78ed365a6c94e9a0cda201b00d64ede85f6bd53ed65b7e0da59e8028e7e3	14706	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Nested list without restart.docx
+06495df5a0dc0ce789d780a6f6d9f8cc38ce64c26f81c6df061a6263bd530f1d	15281	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Paragraph borders and shading.docx
+b34bc34649bcfdb175ffcb39e972514efbb9f1d0bb72447369d03f11cfe8ba05	13545	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Read-only recommended.docx
+47bf3266e5cdef8d47038f8d9371577339fc17a045ae89342b05c8d55c251f60	44720	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Shapes.docx
+b06ceddc06ec1f38c68f005258c45c9701d7810b6b5f6f8c47b59e92424efdcf	14747	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Structured list.docx
+1b56fecdb56e6910ce1c15ffafbcaef56aa678db129d2d59a5d602012c904273	14647	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Table margins and spacing.docx
+bdecfacc726be3a6071def84ad635fec275892213896cd6ef026ffcf8155947c	14282	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/Text direction.docx
+0da4e4d74fff95f6de104982fb534afacca0ddf39f19b6963965cd1fd7049881	46303	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/DOCX/VML shapes.docx
+3f2c21037565fa22363bd329c9c9d7c196b8f7d3fcc4a95fbf805b3a0d371c97	33241	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	test-files/DOCX/WordPad.docx
+f84f786997c5f57657465e977e0e29031f1444f761213105aa17304fdba9ca68	17837	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Markdown/Append.docx
+114b7403806360d82a569cb75e8800cadb47f0a6fcdb6f6a63202ea55cdfac7d	18768	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Markdown/Custom styles.docx
+b02a82ecff40b56ab1461b13cfd49cade1febed318e14dc409a3ca357dcbd39a	13548	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Breaks.docx
+020007098da137b6d20521b93cd6acbed4edd48c7e5dcda208f9cc9661be2f7f	14154	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Character formatting.docx
+c34925f442021ae05c3e0821709b1b1590f996cacfb928dec45e9380753a5cd4	13993	edge	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Emojis and symbols.docx
+9c9fb5cb8335f4632841883c637b48b8fcc7f36c01afdf51ffc49b261cd13e28	13435	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Empty paragraphs.docx
+bdcb59bb688e5a92461f93f566cff9983b73c7ff1f69179611d27884b97b5eee	21034	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Fields.docx
+4dc5e2a73ba1cd17f0c6f221786bca285c45e6c7473898d9cf31e07c4195a073	17106	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Footnotes, endnotes 1.docx
+50f385797d962860a6b184d84d427f4b8be866b818b2fb2fe497b0757bc25a75	17162	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Footnotes, endnotes 2.docx
+ac14a206aae395860a34ebbb80c060f8acf169e227e03fc9765f3d883bfa1752	23982	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Header and footer - complex.docx
+79d812fcc253c0538c05b602df7b9ee5bc4c9dc19a8b153ef8361185e02298e9	17425	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Header and footer - simple.docx
+12b3e06a6f941ff7f56707cdd6820688f6010d363c6f588e29bf2b7f1c9bfb69	14061	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Hyperlinks.docx
+f786df7bad75bfb8a5216479bed56d398e886262814c3fffb1130a51b802f1ac	58501	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Icons.docx
+fe28c9c71d4ff0f94002e2ad6f03f40c2b3344520fb70ee55800caea6a34a6b0	15928	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Lists.docx
+e522da6f9ad315c2d794ab18ffa8e65866f65b3c6a9645347418b74d6090bd4c	13866	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Multi column.docx
+f251f6e1a18426d1930f0d5bf91f3e1f109f115592e06d7c708a68cc05d8347c	32154	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/OLE object.docx
+d62a502b8d113f3236faf69cea5b1797da83abdd2b88755b7f785a63e600b03c	13453	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Page color.docx
+776de6682555464e8883455ec09b14d20a8203b3376b64908aa501a7a0f68424	16862	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Page number.docx
+a499334465d7616329c44d9b8332f655dea521a92ef2da7d7c297689d89e49a3	14935	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Page size, orientation, margins.docx
+3ea9cff1c65094f920c1d9c4d979c17cc59819d335f8ab32885b9a30767e693f	14636	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Paragraph formatting.docx
+ae88e02f8fceb33163f6f81b99496b4f3165362fe03506f300564e20fcd839b2	290893	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Pictures.docx
+33463141fdca17141985ca6247bd2afc6c25da4df4ec5eea70a75b22a90b115a	14475	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Signature line.docx
+c700d03f1ee09c119560b5ce1d926c67747dce38f2cdff2ddee2924cd39681ff	16531	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Table of contents.docx
+db473415f7d6d5c39e7e7a7f32156cf2b154c327a5f0b4c480d1f8c1977550ce	19409	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Tables.docx
+65db8dd27b4ae6ad47d8812878368ef4f8b8c27514cf82fda5cad12ebee03118	13528	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test-files/Renderer/Title and author.docx

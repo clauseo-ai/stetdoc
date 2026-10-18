@@ -1,0 +1,5 @@
+# A range that is not a range of refs.
+bin.name = "stetdoc"
+args = ["view", "contract.docx", "--range", "p4.."]
+status.code = 2
+fs.sandbox = true

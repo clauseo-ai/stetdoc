@@ -1,0 +1,76 @@
+# reason	meaning (the names are census keys where the census has one; the refusals of corpus/manifest and of the testkit fixtures use only these)
+zip.not_zip.ole_cfb	The file is an OLE compound file, which is how Word stores an encrypted or password-protected .docx, and not a ZIP archive.
+zip.not_zip.other	The file is not a ZIP archive: it is empty or does not start like one.
+zip.no_eocd	There is no end of central directory record, so the archive is cut short or is not a ZIP archive.
+zip.eocd_truncated	The end of central directory record is cut short.
+zip.eocd_comment_truncated	The comment length in the end record is larger than the bytes that follow it.
+zip.cd_not_found	The end record points at a central directory that is not in the file.
+zip.cd_truncated	The central directory is shorter than the end record says.
+zip.cd_entry_count_mismatch	The entry count in the end record differs from the number of records in the central directory.
+zip.local_header_missing	A central directory record points at an offset where there is no local file header.
+zip.cd_offset_mismatch	The central directory is not where the end record says it is.
+zip.overlapping_or_nonmonotonic_entries	Entries overlap or are not in increasing offset order, so two entries can share bytes.
+zip.cd_overlaps_entries	The central directory overlaps the data of an entry.
+zip.lh_cd_disagree.name	A local header names an entry differently from the central directory, so readers disagree about which part it is.
+zip.lh_cd_disagree.method	A local header and the central directory give different compression methods for one entry, so readers decode different bytes.
+zip.lh_cd_disagree.crc_or_sizes	A local header and the central directory give different CRC-32 values or sizes for one entry.
+zip.name.dotdot_segment	An entry name contains a `..` segment, the path traversal pattern.
+zip.name.dot_segment	An entry name contains a `.` segment, so two spellings name the same part.
+zip.name.empty_segment	An entry name contains an empty segment, such as a double slash.
+zip.name.absolute	An entry name is absolute or starts with a drive letter.
+zip.name.backslash	An entry name contains a backslash.
+zip.name.nul	An entry name contains a NUL byte.
+zip.name.control_char	An entry name contains a control character.
+zip.name.longer_than_255	An entry name is longer than 255 bytes; a ZIP name field holds up to 65,535.
+zip.duplicate_entry_name	Two entries have the same name, so readers disagree about which one is the part.
+zip.case_insensitive_duplicate_name	Two entries have names that differ only by case, and part names are case-insensitive.
+zip.entries_ge_10000	The archive has 10,000 or more entries.
+zip.declared_usize_ge_256mb	An entry declares an uncompressed size of 256 MB or more.
+zip.entry_larger_than_cap	An entry declares an uncompressed size above the limit.
+zip.bytes_between_entries	Bytes lie between two entries, or between the last entry and the central directory, that belong to no entry. A reader that goes through the file in order sees what is in them, and a reader that goes by the central directory does not, so a hidden entry shows in one and not the other.
+zip.two_archives	The bytes in front of the first entry start like a ZIP file: the file is one archive followed by another. The readers that look for the end record read the second, and a reader that goes through the file from the front reads the first.
+zip.zip64.record_disagrees_with_eocd	A ZIP64 locator precedes the end record and leads to a ZIP64 end record whose entry count, directory size or directory offset differs from the end record's. The readers that follow the ZIP64 record and the ones that use the end record read different archives.
+zip.csize_beyond_file	An entry's recorded compressed size runs past the end of the file.
+zip.multi_disk	The end record names a disk other than the first, so the archive is split over several files.
+zip.dd.not_found_at_expected_offset	A data descriptor is not where the entry sizes put it.
+zip.crc_mismatch	The CRC-32 of an entry differs from the one recorded.
+zip.deflate_error	The deflate stream of an entry is invalid.
+zip.usize_mismatch	An entry inflates to a size other than the declared one.
+zip.encrypted_entry	An entry has the encrypted flag set.
+zip.method.other.99	An entry uses compression method 99 (AES encryption), which stetdoc does not support.
+zip.method.other.12	An entry uses compression method 12 (bzip2), which stetdoc does not support.
+zip.method.other.14	An entry uses compression method 14 (LZMA), which stetdoc does not support.
+zip.stored_size_mismatch	A stored entry records a size that differs from the bytes it holds.
+zip.high_compression_ratio	An entry compresses far better than text does, which is the shape of a decompression bomb.
+xml.depth_ge_100	The XML nests 100 levels or more.
+xml.element_with_ge_50_attrs	An element has 50 or more attributes.
+xml.doctype	The part has a DOCTYPE declaration, which OOXML parts do not use.
+xml.doctype.entity_declaration	The DOCTYPE declares entities, the starting point of entity expansion and external entity attacks.
+xml.doctype.external_id	The DOCTYPE names an external DTD, which must never be fetched.
+xml.doctype.internal_subset	The DOCTYPE has an internal subset.
+xml.ref.bare_ampersand	An ampersand that does not start a reference, which is not well-formed XML.
+xml.ref.undefined_entity	A reference to an entity that XML does not define, such as the HTML entity for a non-breaking space.
+xml.ref.numeric.invalid	A numeric character reference to a code point that XML forbids.
+xml.decl.version_not_1_0	The XML declaration gives a version other than 1.0, and OOXML parts are XML 1.0.
+xml.decl_encoding_conflicts_with_bytes	The declared encoding does not match the bytes of the part.
+xml.decl.encoding_not_utf	The declaration names an encoding that is neither UTF-8 nor UTF-16, and OPC allows only those two.
+xml.invalid_xml_chars	The part contains characters that XML 1.0 forbids.
+xml.invalid_encoding_bytes	The part contains bytes that are not valid in its encoding.
+xml.unbalanced_tags_by_count	Start tags and end tags do not balance.
+xml.junk_before_root	Text or markup comes before the root element.
+xml.epilog.junk	Content follows the root element.
+xml.attr.duplicate_attribute	An element repeats an attribute.
+xml.attr.lt_in_value	An attribute value contains a literal `<`, which XML forbids.
+xml.attr.unterminated	An attribute value has no closing quote.
+xml.cdata_end_in_text	The text of an element contains `]]>`, which XML allows only at the end of a CDATA section; a `>` after `]]` is written `&gt;`.
+xml.comment.unterminated	A comment is opened and never closed.
+xml.comment.double_hyphen	A comment contains `--`, which XML 1.0 forbids but which changes no structure.
+xml.no_root_element_found	The part has no root element.
+xml.ns.undeclared_prefix	A name uses a namespace prefix that is not declared.
+xml.not_wellformed.core_part	A part the package needs is not well-formed XML.
+zip.missing_content_types	The archive has no [Content_Types].xml, so it is not an OPC package.
+opc.missing_root_rels	The archive has no _rels/.rels, so nothing says which part is the main document.
+opc.main_part_missing	The root relationship names a main document part that is not in the package.
+opc.main_part_not_wordprocessingml	The root relationship names a main part that is in the package but is not a WordprocessingML document: its content type is something else, such as a theme manager or a spreadsheet.
+opc.rel_target_escapes_package	A relationship target walks above the package root. The package opens and the target is never resolved outside it.
+part.nested_zip_inside_part	A part is itself a ZIP archive. It is an opaque part and is never opened.

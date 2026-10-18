@@ -1,0 +1,35 @@
+[package]
+name = "stetdoc"
+description = "The stetdoc command-line tool: edit Word documents as tracked changes, for people and AI agents"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+publish = true
+repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords = ["docx", "word", "tracked-changes", "redline", "ai-agents"]
+categories = ["command-line-utilities", "text-processing"]
+
+[lints]
+workspace = true
+
+[[bin]]
+name = "stetdoc"
+path = "src/main.rs"
+
+[dependencies]
+stetdoc-core.workspace = true
+clap.workspace = true
+dunce.workspace = true
+jiff.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+[dev-dependencies]
+stetdoc-testkit.workspace = true
+tempfile.workspace = true
+trycmd.workspace = true

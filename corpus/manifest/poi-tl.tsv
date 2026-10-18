@@ -1,0 +1,116 @@
+8b6d7919efd1d7acd3e082cbd4c1cbb61fbfc456cc4af4ed949a7b1a2cb47b87	245548	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl-cli/src/test/resources/markdown_template.docx
+d4dd53b6ec75afe61880b46d37138276a6b6d5dacc75a0ba28a0ff0216d8c4f0	35714	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl-cli/src/test/resources/template.docx
+cd4eff90256978c6fff82714212fa3482a8ae2ceb4ce79ff3a75038f60ef49ad	15651	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl-plugin-highlight/src/test/resources/hightlight/highlight_template.docx
+26bf270950fb4c304b5cceb7b7e7f35c0ddd2f23f838165807cbe7ac171858e7	24341	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl-plugin-highlight/src/test/resources/swagger/swagger.docx
+7a4b11c8ec99176b6d83e6a1f20ed45e1d0086b8396da0ba7d584bebf468c5c2	245539	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl-plugin-markdown/src/test/resources/markdown/markdown_template.docx
+2ef63255015b5670ad230e4c1903b56fbe4f92664ffbbeea9db83e464d95ddaa	386447	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/animal/animal.docx
+cd24d7be23d2f013e7658a80d0ce1e38f0468a7c182709e332c53f06df2d1728	1074922	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/certificate/certificate.docx
+74979941c64c54dc6eb5a0dea977d7e64013596e5d505031628552604fe5117b	22322	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/111.docx
+59e0bc0e110dd14a781f5b2efae83257c1f485ea9d2fedb69eca9b2bd73bf365	24371	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/149.docx
+599ca2fc26e7743f122c5818521020c4733397130c713aa97e65f38777cdbf4f	23472	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/157_MERGE.docx
+76626b079461a2e350654f771a846aeaa970ef1df436b6d3fb77d5a44fa8cc8c	1749557	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/160.docx
+333dd25f60ee3b7b4dd796053b572a9c2f8602a0f260f00f50cbf5087e858c80	2630461	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/160_merge.docx
+ffce934d696dd51bbef34f7654cd716093745234dd49f1ce49191c70d585a834	16287	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/161.docx
+6dd41968a799979905a98b39c6ac2f510d7f224cb27367a056ec7efb600a130e	18391	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/225.docx
+62e7bb222670775f6e7ca88fccfa27cb3294ebc6ed7d87baa0cd3b3860dccc26	22657	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/244.docx
+ce0042bbbb2403560712621a31a708273754e4f3edff03989b2770b859db286d	24865	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/257.docx
+4aecc1d98c938f7dff6508d2698c4172a7022a17dd2414169cb2cebe86355dec	27374	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/257_MERGE.docx
+4304ce324bf078319874f8afa1c01ad7e1a163993cc9f08c1a44f4bac880bc5d	22047	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/313.docx
+e9b1badd4255d00e8aac4d144de6bcdca5634e64a408d54d2b35096b20776bc2	24137	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/331.docx
+17570ba89de1400d51cc1be115cb1be98a21d6a2445d37bf8624c822b1ec7c1e	25941	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/331_hyper.docx
+099732f8b27716e57fd6cd59243ef2a5873ddf718ef41765a5bcfeefec525052	112209	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/issue/361.docx
+e4effbd6d165451ad1820b9b37c263f1230e7070d3520c40138d8b73a678973b	2266	other-producers	ok	-	-	-	Apache-2.0	Apache POI	n	poi-tl/src/test/resources/issue/370.docx
+27445d5974be527b5b4145334ecafad887b465b321b601f9fb956e7d389d05ab	48144	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/407.docx
+9e7ea6613aa0da2723c26d059ffafcf36e8fd97a0bce0fb2ad54bce92fbe5e68	27250	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/499.docx
+9e9859c897821a0ed23e1f9e967ad993cf8ed042a8d96b238f6c96364ef4bd3c	13259	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/499_MERGE.docx
+4bc73d9d5c58fa2dad42115f3da9ae51e8856e75803c49e42d44a2c1ec1bb999	12043	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/540.docx
+03975b99162a6ddd97c7d268ce6bd6e8c9edac04653cc14ab9b3f07d055ee835	11964	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/540_MERGE.docx
+1a62ca559f82847237907b49e7dcf1106f24cc23074d81d726abe4cd8bb91a22	40973	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/554.docx
+7210ece48e73b1c9c6a6edd7274cbf44de8327315d4a899224bf8e32d7a7a9d3	28153	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/issue/627.docx
+204e9084a0811f65c3b7c9be187c20315cc934410093c0fde2dd43980406dc86	23980	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/636.docx
+826cebbab5e2999df1932cd12a896b50970e314e6b7b7ab2c81244f0d9f9d580	11416	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/issue/649.docx
+241723e08ec56ef875845283875a066ba7559f9f09b49d922082376a205611ef	22439	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/issue/649_MERGE.docx
+26fd38aff899fe98eb04f270ea993d09814c76c6b77adbc1d97efb3d59362352	26151	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/656.docx
+f14029db15e4b0f056748a095717cf79f50328afdaea081d04f90335bf0132e0	26302	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/657.docx
+de867f7be06178673bc3134dd147e027117eef939c72697dcf5646178569ec83	12389	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/687.docx
+604c02cb55da9a51c5e95c1f468ad82d3421aed9c495f3a9f1d36a9e90f61ce9	21154	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/713.docx
+6b439322eaef71a5710247556d11fff432ff344ef33170910d80c2e1de3f89b1	26814	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/716.docx
+ad59acc9482c3c2a462350d075c531133ee7e5885201885fe00c730cad68a3f6	12094	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/760.docx
+03e952c91d115809872d0f0d37e3494396a5ab84d4b0ddd7f2d8419c497c2660	20018	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/760_MERGE.docx
+68a955eb503f16ac59e0b8b9290ed649b17a4b2cb2f6b1b56502fb83f14dbe85	12929	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/761.docx
+2da62807e9db17fe587e04f58c1fa40135c4258f4ec3c7c690286e487eda1c06	12739	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/761_sub1.docx
+a40bcd688ef603d25b1d1467e399c2b1db0c9adafc6eabfe3ab024c4704b5fbc	12752	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/761_sub2.docx
+bfca0616d3695a36334f033e9171e2b6270b993340d7e5c287cab884059601ad	12755	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/761_subsub.docx
+20ccff67b7db52baf2dc252263d7fe38ec3778493cdc5c68ee4f76aa4923c328	15357	other-producers	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/issue/810.docx
+e1ce01f29fa7be751d1c9600487a3cbcb1e477c5684f66d2516774f69b5b1861	12885	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/818.docx
+994a5ebfb141f701bffb96029c5c4e1135fdfc1ca166806083807862e01368fd	12758	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/834.docx
+d2716e50cc31112048a6da6b3fd017881ee7cbb4e05f3c66607c67af02bb4dbe	16138	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/898.docx
+985f6cb17a5b2c83a52aac197be6b8a3e4e681592f0825ea0ce5df264135a1a8	18893	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/914.docx
+86e748ef0c1d82cbab91b9951ce95784631078327956b2c7790f8598aadc31c4	13278	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/928.docx
+2f0fbe869664d8983be08dbbfe1ef777555429adc33c667328050e6ea9685514	10085	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/issue/935.docx
+9475bbf4edb8c8e42d07b500a1ebb50432dd97a7d9c0a947cfb68a0d1ca2aabe	14272	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/966.docx
+7f16ede8d4c25a84af01c8d0c9fbd7e39de874dd83ad8a9e53ca2fae385cb8d7	15107	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/bug-in-2007.docx
+8a83c6f5acef486aa472cadd02448359e0b6ede8f620d8bf0979a648a35d8bdf	4513283	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/issue/ditu.docx
+a4f8b7fe4fc61a8783cf41e3eecadce618d939ac48e6353280dd9cba80e71d35	30825	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/okr/OKR.docx
+ac7d58a6bef21340a4746d6510b46caedb04b068402232a426b6203fb0698ff6	19418	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/payment/payment.docx
+7714c4ed9548d02ea25676fcfd982689146c8af4e60ba14150d34cac77ebbc2b	52570	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/resume/resume.docx
+6cd9d8d548528c8441cd3884ba805fb0064913ee9b45f784aff4cf7caec79d55	28773	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/resume/segment.docx
+aad325fad0596f715a6a36812cb380e4fc099f7e36b547e2b9aeaae0a12a1424	25654	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/source/chart.docx
+90b3ea8e8874c1e24992192583dd5a8d8e1379f738d50986d165c3dc52d848a8	18613	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/story/iterable_story.docx
+40fbe5955c50f7bef4616b61291a90609e8d65dc155960ebb192f06245b9b154	13422	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/story/segment.docx
+8d64dff05251b36ab1425dc5625e5bb5f3a62515ff5cd8db893a438d46ae993b	13726	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/story/story.docx
+af476d06e6e86549433b4a94c09186a7308e30d5ded571562cbe8aedb735a34b	12043	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/attachment.docx
+2cca67e646f2affc33ad7f2025527a1fd0cb6db40e8b9411cf8106f89b235599	15538	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/config.docx
+e50b1dfde2aedffa5b22db2a6f7867ef7474ab8b95efee3ffe5be60e08d26ba2	13154	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/config_chinese.docx
+19e49db2b8c43144b56c8729f539f52b19513f389cf64df2341f21dc7e622b73	13999	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/config_elmode.docx
+9601f2fd9a086ebe2f8a1c68ce52932d0118e92359b894c21ac65f9d28a75cbd	36799	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/config_sea.docx
+b53de29ab3806462fbbd3e1c0e23f5b92f27fcd82e132de932e10a4eefff7b4b	12140	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/config_spel.docx
+4af6e9b470f2c1cf9904fd284971a4da0400eb2735d0a9cb229b1df669fc52ad	14727	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/ifcol.docx
+aa09f0769e3a2acdd3b735fc183e279d155882db7fb06010d099038bc7ba5268	22200	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/iterable_basic.docx
+aad1f2471c0d792f2f07d5e57cb02632b346a6302de28bf216b2df3913562dc6	201743	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/iterable_foreach.docx
+124e43b75bc2ff58f78bffe6e326d89cdd53576a5907f74d0a7574af6d579822	233445	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/iterable_foreach_all.docx
+4e59ac88dabb9b86ccea55da9a64440d3f0ec96e890fcf75be9e932c557e6f47	19788	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/iterable_foreach_withstyle.docx
+e34ba3d6c865099095a0b7d30b8cc78332c4595e17193e70939a0243d93fd155	22630	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/iterable_hyperlink.docx
+cd934626346f16f5f8f39f68c7275d92680f651f64a43d7d6cb087992288021a	20770	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/iterable_if1.docx
+b413f7c20191c1830c278abc507754aefa6d10fe55343b3a5bc288cf0801f724	21577	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/iterable_if2.docx
+0655d908c3b9c2788e267fb1873ce3d991457cb47129d657baaa8b8dff0c3ab2	44391	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/iterable_numbering.docx
+52f52e1859acde7d22437c745736c2d73707138628ddac9f4278cb046ebe0d65	25291	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/iterable_payment.docx
+fc191a10133ac03e617623e48fd952ddd79b1cf4b8129f191f6459842a07af7e	24849	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/iterable_resume.docx
+17dbcd94368e9d17d7d2a6da5a610da5b7c12022b5b31df61b47c996e1762c01	400014	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/reference_chart.docx
+45fdc99518fe77aa904b8197f0b211f9bf215b3ca2f7bdf01f8204425c4c174c	30176	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/reference_pict.docx
+a336a5455ea2705965f772043b3a9a611ab33e6e013eb7593817af39fb094b16	31045	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/reference_pict_iterable.docx
+348f809eb015309e2ba0e17f86b80e520ac0d8262f2a62fc12230999f3021df0	112062	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/reference_picture.docx
+8883ae7ffd9bcd3387ede0a8a107b4b9768f0844f40e9230c3946b670b9de86e	106774	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/reference_picture_iterable.docx
+0f36554d48ea29ca4189814e435e2abc049871298f2428070359f0386844a606	14027	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/reference_picture_svg.docx
+5cb50fcf9b2533e27c50184e0558e27553e2349ade108372a23646d8f9e46ef0	14211	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render-multiple-row.docx
+94d00c5151bb374af206f6ed5cd639b1e319363dfd11729fe9855f5f7375b78a	26528	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_attachment.docx
+9eda668a6c6b22cac546c555f03df69159e89775775ead9e3442c3999237a8f3	30187	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/render_bookmark.docx
+305b3f53a0934eee3906d40b3db4f8f442fd1a0049e248a4d1d4bf5db02a1f21	93806	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/render_chart_template.docx
+e9598ee8ed24d8e8e7952cc3f7ee10277fc1df7899d7101c2d0ee36356207c83	15700	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_comment.docx
+c1bb852f10b4623deb42b5ee81bb9ac304bde389ac00d9ff764cd2ecfee1a5e5	14952	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_document.docx
+f2fb7705d9a26a6d0fafbe5d3ce32ecf82e8242faffd150c78aeb6a99c52ca94	25201	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_hackloop.docx
+db503d05fdbfaa59d52be28a4c11ad3aef58dd88610ee0a91da200e4be080c39	13070	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/render_include.docx
+7b045a90bd66c38cf6ec5346b81829a69ef7ba9030946aeb2e07c66a5f8e7344	59212	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_include_all.docx
+91dd7212417d2dfef86315ee2235bce06dd9e9ba52d0059e251ad0f6f07f8059	17201	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_include_merge_template.docx
+a64deefd47014e8128f70ae48eae7ab0095e0dc64e1abf833d2a4b5806a688de	20837	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_include_picture.docx
+379504fe07183375c11cad7445cec2aa0ce0f19c7c10e0d58ea4d51ca0042f07	12276	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_include_sect.docx
+96488e2aa2456ab9be9b7b0c1d788161daee208d60d366853f6a545cdeac4168	13076	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_include_table.docx
+012c16646954b8cb2b73e4e5b3b55442f63658125b26c94fa9c268db34c17f82	12499	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_json.docx
+32953d73b7a20de11b5fb359cb1adfff94c3a9eb72681032a7dce3e79ceed046	27634	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/render_list.docx
+074bf7daea839f579b25f47e6b20a341ddadf79d2a98c065586fb2116e814b43	15555	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_loopcolumn.docx
+5bf115b75fa03d74bb82c4856d7ce287a582ea5dff716e8541dde701c96aff85	17012	edge	ok	-	-	-	Apache-2.0	WPS Office	n	poi-tl/src/test/resources/template/render_multiple_column.docx
+de88c5bfeb131e654847da38b21f85d90232c6997577c1e3dbbb66dcbb7aa4d8	14505	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_numbering.docx
+92dccba6c235e477da6e4688cd3d5135fdfad825060355203189b0f536d2884a	13101	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_paragraph.docx
+ad0f9a61d2a3e656067f36f9da3556022d0c3738c1146d13eec4c124ff4bfa55	20313	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_picture.docx
+5c470b79c184ce045d174aca8fb708116e7dd8957d79ee77e18a458680388660	14817	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_table.docx
+043fbdeec6c5593d1aa3e6a5efd533f05c7e02a91c014bd837576851c72255e2	12378	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_tablev2.docx
+19a39054338bf0f3eb25a8c1dc463c8076aeb0128b6e9b873dd011f5018a0c3a	20200	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/render_text.docx
+8c1803017b4f9fbe87f49e9ad3ec6b64322bd592246b2efa5b9487d2757b3cf5	22749	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/resolver_running_run.docx
+72336601685311ca1f60e0247ec987072e44b99adf925262f9aa5e992bfea768	22908	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	y	poi-tl/src/test/resources/template/resolver_running_run_custom.docx
+a4598ae36838ab201a470c6c19940a1cd17b136d8451df46d388f39f4030077d	165446	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/sdt.docx
+d080f97796295bd62017444cd3f69201299a9faa73eccd1fad8c482454365fe4	31603	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/sdt_cell.docx
+397d39904c2cfae5d5056edb42d4728b282059c3a05ae31d01f7fd4495711fb6	80743	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/sdt_core.docx
+fa0dc4d3fad84f7fd6b6a12feee099cae7091cf39dcc9c1b06baa643e4bbf52e	14865	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/template_notes.docx
+8972024fe1d6651bf9cd0e1e8a57151dfc7f48da26f59a00ebfcf185a67ed474	27905	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/template_sdt.docx
+3d1dad9b062f1a16287332f5fd4f7ab048acfcfee5c944d428b7a1cb47c9291c	21501	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/template_textbox.docx
+1dfccc26a37910e590f05ba52a4b5b24bce2299446599dd354905c10f2081850	18478	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	poi-tl/src/test/resources/template/width_fit.docx

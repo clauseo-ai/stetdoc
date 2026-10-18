@@ -1,0 +1,5 @@
+# An argument error is exit 2, from clap.
+bin.name = "stetdoc"
+args = ["view"]
+status.code = 2
+fs.sandbox = true

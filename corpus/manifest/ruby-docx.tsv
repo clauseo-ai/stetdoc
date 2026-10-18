@@ -1,0 +1,21 @@
+06b1694fd4c43ad12875a567f3fa0819e5874a7a984d5dccb70bd9da9d4edfd6	16972	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/basic.docx
+89defade5ee3654466540c6b467230de02647387fa161052c1d5332960848b87	13482	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/bookmark_outside_paragraph.docx
+d4a7ac5045725372c1f9121ddf8b0fa966a90da7e26c625349c2668c61846ef7	13616	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/editing.docx
+e3c6a2ef3913a76e6eafeadc605be6dfd55b0dd2fd71b6e168b945aa67e3cbe2	11173	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/formatting.docx
+bcac7d4ed1adc7b13cd57a10cb1c4fd0b94d18df58d8ceb011b467b89d7f3966	9849	edge	ok	-	-	-	MIT	Microsoft Word	n	spec/fixtures/internal-links.docx
+ab6d12f03774326d519e0ec1ffd9b63e637134342e065ec4737ab0d7785584fb	13753	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/malformed_hyperlink_rels.docx
+2a57bda76f513dd8209b970b7ddae803907f36b9613210e549df4d5c4d1f4219	6282	other-producers	ok	-	-	-	MIT	LibreOffice	n	spec/fixtures/multi_doc.docx
+36dc627c85a910505ab397d9e486770ea1a74990c6d9aad12919b4e990bc7ac1	6147	other-producers	ok	-	-	-	MIT	LibreOffice	n	spec/fixtures/multi_doc_bookmarks.docx
+c76de953068b5d73f55525d054141a4566ae933f2eab10bcd7061294d8570027	13762	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/no_default_paragraph_style.docx
+1dc26b79b5834f93b24190747dca19aeedb5894a5b97d38009c3b2a921223d61	3540	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	spec/fixtures/no_styles.docx
+7d707785f82a8b9c9203556edd87b3f93377dfad99bfd3b280b510e69d8192e8	9089	edge	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/no_styles_with_hyperlink.docx
+6788378d9459f30a6cdc623194c3509d9417b2f5bdf10a9f25a441d7c4e13b9e	11021	edge	ok	-	-	-	MIT	Microsoft Word	n	spec/fixtures/office365.docx
+470fc242a92b9f34cd688a4839ef21865fc766a2cb9e682e0aeea1aa9e947560	20913	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/replacement.docx
+5cc4dd0c74631f8a5ea93763d1728eac800481b71107a6fad485bffc07351834	13314	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/saving.docx
+143723ae4b90023b9c597660faa4f8dad11c04b2941ef7d9dd8ce681f60fec20	11665	edge	ok	-	-	-	MIT	WPS Office	n	spec/fixtures/saving_wps.docx
+596e5b06dfe7ef887b390c64bdccea17c12caf17be135fe054fbca7800d93fc6	13785	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/split_placeholder.docx
+2e5c8062cd4041092417e80165c0562b2236c93a652caefd2cb8f837efbe5905	10214	word-authored	ok	-	-	-	MIT	Microsoft Word	n	spec/fixtures/styles.docx
+33733c4b7c9a1327a1a3f8b2139d330ec33b29b22ef2546877a9fc25baa5d95f	6231	edge	ok	-	-	-	MIT	unknown (no docProps)	n	spec/fixtures/substitution.docx
+39a4bb99a9bf19248bc5514db8bbe66b938a4bd549f4099dba4e5348126b8e41	14432	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	spec/fixtures/tables.docx
+f73b0824b41efb591505078ed776745079ac470fe16e1fcce70dc6f2d8ab5584	21180	word-authored	ok	-	-	-	MIT	Microsoft Word	y	spec/fixtures/test_with_style.docx
+b43af6784eeefb2522e57e196803d4cfd9b00c3f2bd7b38dc9dc99abe6140ab3	13796	edge	ok	-	-	-	MIT	Microsoft Word	n	spec/fixtures/weird_docx.docx

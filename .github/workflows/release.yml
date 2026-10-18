@@ -1,0 +1,370 @@
+name: release
+
+# Builds a release on a `v*` tag, or by hand: the `stetdoc` CLI and the napi addon for the seven release targets, smoke
+# tests of both, and a draft GitHub release holding the archives, their SHA-256 files, the npm tarballs (the addon's and the
+# CLI's), and the Homebrew formula filled for this version. `packaging-check` validates the packaging files first. Nothing
+# here publishes to npm, a tap or any other registry: publishing is a maintainer's manual step, from the draft release's assets.
+# `cargo xtask release check` (run by the tests) keeps the target list here in step with the npm packages.
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+# Least privilege: every job reads the repository, and only `release` may write, to make the draft release.
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+
+jobs:
+  cli:
+    name: cli ${{ matrix.target.triple }}
+    runs-on: ${{ matrix.target.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { npm: linux-x64-gnu, triple: x86_64-unknown-linux-gnu, runner: ubuntu-24.04 }
+          - { npm: linux-arm64-gnu, triple: aarch64-unknown-linux-gnu, runner: ubuntu-24.04-arm }
+          - { npm: linux-x64-musl, triple: x86_64-unknown-linux-musl, runner: ubuntu-24.04, musl: true }
+          - { npm: linux-arm64-musl, triple: aarch64-unknown-linux-musl, runner: ubuntu-24.04-arm, musl: true }
+          - { npm: darwin-x64, triple: x86_64-apple-darwin, runner: macos-15 }
+          - { npm: darwin-arm64, triple: aarch64-apple-darwin, runner: macos-15 }
+          - { npm: win32-x64-msvc, triple: x86_64-pc-windows-msvc, runner: windows-2025 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain and the target
+        shell: bash
+        run: |
+          rustup toolchain install
+          rustup target add ${{ matrix.target.triple }}
+
+      - name: Install musl
+        if: ${{ matrix.target.musl }}
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      # The musl targets link statically by default, so the binary has no dependency on the host's libc.
+      - name: Build
+        shell: bash
+        run: cargo build --release --locked -p stetdoc --target ${{ matrix.target.triple }}
+
+      # Every target's binary runs on its own runner.
+      - name: Run it
+        shell: bash
+        run: |
+          bin=target/${{ matrix.target.triple }}/release/stetdoc
+          "$bin" --version
+          "$bin" capabilities --json > /dev/null
+
+      - name: Archive
+        shell: bash
+        run: |
+          name=stetdoc-${{ matrix.target.triple }}
+          mkdir -p "dist/$name"
+          ext=""
+          if [ "${{ runner.os }}" = "Windows" ]; then ext=".exe"; fi
+          cp "target/${{ matrix.target.triple }}/release/stetdoc$ext" LICENSE-MIT LICENSE-APACHE NOTICE README.md "dist/$name/"
+          cd dist
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            7z a -tzip "$name.zip" "$name" > /dev/null
+            archive="$name.zip"
+          else
+            tar -czf "$name.tar.gz" "$name"
+            archive="$name.tar.gz"
+          fi
+          if command -v sha256sum > /dev/null; then sha256sum "$archive" > "$archive.sha256"; else shasum -a 256 "$archive" > "$archive.sha256"; fi
+          rm -r "$name"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cli-${{ matrix.target.triple }}
+          path: dist/*
+          if-no-files-found: error
+
+  addon:
+    name: addon ${{ matrix.target.npm }}
+    runs-on: ${{ matrix.target.runner }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - { npm: linux-x64-gnu, triple: x86_64-unknown-linux-gnu, runner: ubuntu-24.04, lib: libstetdoc_napi.so }
+          - { npm: linux-arm64-gnu, triple: aarch64-unknown-linux-gnu, runner: ubuntu-24.04-arm, lib: libstetdoc_napi.so }
+          - { npm: linux-x64-musl, triple: x86_64-unknown-linux-musl, runner: ubuntu-24.04, lib: libstetdoc_napi.so, musl: true }
+          - { npm: linux-arm64-musl, triple: aarch64-unknown-linux-musl, runner: ubuntu-24.04-arm, lib: libstetdoc_napi.so, musl: true }
+          - { npm: darwin-x64, triple: x86_64-apple-darwin, runner: macos-15-intel, lib: libstetdoc_napi.dylib }
+          - { npm: darwin-arm64, triple: aarch64-apple-darwin, runner: macos-15, lib: libstetdoc_napi.dylib }
+          - { npm: win32-x64-msvc, triple: x86_64-pc-windows-msvc, runner: windows-2025, lib: stetdoc_napi.dll }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain and the target
+        if: ${{ !matrix.target.musl }}
+        shell: bash
+        run: |
+          rustup toolchain install
+          rustup target add ${{ matrix.target.triple }}
+
+      - name: Build
+        if: ${{ !matrix.target.musl }}
+        shell: bash
+        run: cargo build --release --locked -p stetdoc-napi --target ${{ matrix.target.triple }}
+
+      # The musl addons are built inside Alpine, whose C library, C compiler and linker are musl's, so the addon links
+      # against musl alone and never needs glibc. An addon is a shared library, which cannot carry a static C runtime, so
+      # it links musl dynamically (-crt-static), as the Alpine host that loads it provides. Docker runs the build because
+      # JavaScript actions cannot run inside an Alpine container on an arm64 runner. The image's Rust is the pinned one.
+      - name: Build in Alpine
+        if: ${{ matrix.target.musl }}
+        run: |
+          docker run --rm -v "$PWD:/work" -w /work rust:1.92.0-alpine sh -euc '
+            apk add --no-cache musl-dev binutils
+            RUSTFLAGS="-C target-feature=-crt-static" cargo build --release --locked -p stetdoc-napi --target ${{ matrix.target.triple }}
+            out=target/${{ matrix.target.triple }}/release/${{ matrix.target.lib }}
+            readelf -d "$out" | grep NEEDED
+            if readelf -d "$out" | grep -E "NEEDED.*(libc\.so\.6|ld-linux)"; then echo "the musl addon needs glibc" >&2; exit 1; fi
+          '
+
+      - name: Collect
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.target.triple }}/release/${{ matrix.target.lib }}" "dist/stetdoc.${{ matrix.target.npm }}.node"
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: addon-${{ matrix.target.npm }}
+          path: dist/*
+          if-no-files-found: error
+
+  # The smoke test of the library on each runtime the project supports: Bun 1.3.13 and 1.3.14 and Node LTS on
+  # linux-x64-gnu, and Node on every other target, the musl ones in Alpine.
+  smoke:
+    name: smoke ${{ matrix.case.npm }} ${{ matrix.case.runtime }} ${{ matrix.case.version }}
+    needs: addon
+    runs-on: ${{ matrix.case.runner }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - { npm: linux-x64-gnu, runner: ubuntu-24.04, runtime: bun, version: 1.3.13 }
+          - { npm: linux-x64-gnu, runner: ubuntu-24.04, runtime: bun, version: 1.3.14 }
+          - { npm: linux-x64-gnu, runner: ubuntu-24.04, runtime: node, version: 24 }
+          - { npm: linux-arm64-gnu, runner: ubuntu-24.04-arm, runtime: node, version: 24 }
+          - { npm: linux-x64-musl, runner: ubuntu-24.04, runtime: node, version: 24, alpine: true }
+          - { npm: linux-arm64-musl, runner: ubuntu-24.04-arm, runtime: node, version: 24, alpine: true }
+          - { npm: darwin-arm64, runner: macos-15, runtime: node, version: 24 }
+          - { npm: darwin-arm64, runner: macos-15, runtime: bun, version: 1.3.14 }
+          - { npm: darwin-x64, runner: macos-15-intel, runtime: node, version: 24 }
+          - { npm: win32-x64-msvc, runner: windows-2025, runtime: node, version: 24 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: addon-${{ matrix.case.npm }}
+          path: crates/stetdoc-napi/npm
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        if: ${{ matrix.case.runtime == 'node' && !matrix.case.alpine }}
+        with:
+          node-version: ${{ matrix.case.version }}
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        if: ${{ matrix.case.runtime == 'bun' }}
+        with:
+          bun-version: ${{ matrix.case.version }}
+
+      # No shell is named, so the step runs in bash, and in PowerShell on Windows.
+      - name: Smoke test
+        if: ${{ !matrix.case.alpine }}
+        working-directory: crates/stetdoc-napi/npm
+        run: ${{ matrix.case.runtime }} test/smoke.mts
+
+      # The musl addons are smoke-tested in Alpine, which has no glibc, so a load that needed it would fail here.
+      - name: Smoke test in Alpine
+        if: ${{ matrix.case.alpine }}
+        run: docker run --rm -v "$PWD:/work" -w /work/crates/stetdoc-napi/npm node:24-alpine node test/smoke.mts
+
+  # The npm tarballs: the main package and one per target, holding the addon built above. `npm pack` only writes files.
+  package:
+    name: npm tarballs
+    needs: [addon, smoke]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: addon-*
+          path: addons
+          merge-multiple: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Pack
+        run: node crates/stetdoc-napi/npm/scripts/pack.mjs addons dist
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: npm
+          path: dist/*
+          if-no-files-found: error
+
+  # The packaging files (the install script, the Homebrew formula, the CLI's npm packages, the plugin and listing manifests)
+  # are checked here, so a broken one stops the draft. Every tool is on the runner, so nothing is installed.
+  packaging-check:
+    name: packaging checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check the install script
+        run: |
+          sh -n packaging/install.sh
+          shellcheck packaging/install.sh
+
+      - name: Check the JSON files
+        run: |
+          find packaging plugins .claude-plugin .agents -name '*.json' -exec python3 -m json.tool {} \; > /dev/null
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Check the versions against the workspace
+        run: node packaging/scripts/stamp.mjs --check
+
+  # The Homebrew formula for the tap, filled from the release's checksum files. It only writes the file: nothing is pushed.
+  homebrew:
+    name: homebrew formula
+    needs: [cli]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: cli-*
+          path: archives
+          merge-multiple: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      - name: Fill the formula
+        run: |
+          version="$(node packaging/scripts/stamp.mjs --version)"
+          mkdir -p dist
+          node packaging/scripts/fill-formula.mjs packaging/homebrew/stetdoc.rb archives "$version" dist/stetdoc.rb
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: homebrew
+          path: dist/*
+          if-no-files-found: error
+
+  # The npm tarballs of the CLI: a main package `stetdoc` that starts the binary of the platform, and one package per
+  # target, `@stetdoc/cli-<target>`, that holds it. The binaries come out of the archives the cli jobs built, so these are
+  # the binaries that were smoke-tested. `npm pack` only writes files.
+  npm-cli:
+    name: npm cli tarballs
+    needs: [cli]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: cli-*
+          path: archives
+          merge-multiple: true
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 24
+
+      # One line per target: the Rust triple, then the npm target name. Windows ships a zip, the others a tar.gz.
+      - name: Unpack the binaries
+        run: |
+          mkdir -p bins staging
+          while read -r triple npm; do
+            mkdir -p "bins/$npm" "staging/$triple"
+            if [ "${triple#*windows}" != "$triple" ]; then
+              unzip -q "archives/stetdoc-$triple.zip" -d "staging/$triple"
+              cp "staging/$triple/stetdoc-$triple/stetdoc.exe" "bins/$npm/stetdoc.exe"
+            else
+              tar -xzf "archives/stetdoc-$triple.tar.gz" -C "staging/$triple"
+              cp "staging/$triple/stetdoc-$triple/stetdoc" "bins/$npm/stetdoc"
+            fi
+          done <<'EOF'
+          x86_64-unknown-linux-gnu linux-x64-gnu
+          aarch64-unknown-linux-gnu linux-arm64-gnu
+          x86_64-unknown-linux-musl linux-x64-musl
+          aarch64-unknown-linux-musl linux-arm64-musl
+          x86_64-apple-darwin darwin-x64
+          aarch64-apple-darwin darwin-arm64
+          x86_64-pc-windows-msvc win32-x64-msvc
+          EOF
+
+      - name: Pack
+        run: |
+          node packaging/scripts/stamp.mjs --write
+          node packaging/npm/stetdoc/scripts/pack.mjs bins dist
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: npm-cli
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: draft release
+    needs: [cli, package, npm-cli, homebrew, packaging-check]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: assets
+          merge-multiple: true
+
+      # A draft is visible only to maintainers until someone publishes it by hand. A manual run of the workflow on a branch
+      # stops here without a release, because a release needs a tag.
+      - name: Create the draft release
+        if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: gh release create "$TAG" assets/* --draft --title "stetdoc $TAG" --notes "See CHANGELOG.md for what changed."

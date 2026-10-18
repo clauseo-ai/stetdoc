@@ -1,0 +1,320 @@
+3a9bc394f1aa2ae68869d9c6690ac8a235a2201d7e99d815e4c725871dce1062	14931	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Absolute position tab.docx
+537db04a758392aa67eabad7e3e6573e8f754defb943771b8346ee614e2943a1	23959	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/ActiveX controls.docx
+555fef47f217f4ce8fa46903ac2bf92c02b3122bec392de934c24eae390ca57d	12359	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Asian typography.docx
+69b8cc80c67e752617705223429d62fc45b18212f901b84354d8a376b56d53a6	16312	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Background images.docx
+53d5e1ce059e063010aed999c2037d1d971decceff0532ff486e42e5f68d05ec	15345	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Bibliography sources.docx
+9b2d9d8f8440a80c075489ff804d05c1125790e6ed1a805fc8762995827b8a3f	21024	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Bibliography.docx
+175e36f6b6f19d76be2322583ac2b2caae045f41a162365d48cf1a595d3822a2	1270366	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Big document.docx
+217cda9fb0a72098193d4a3955bcb2628a0adbf0b8498bf34de0178a7b96ff49	18723	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Blank pages.docx
+de285c0c06cf79dc8dd234f69476cfe60e9ad8559b44814ac35c9dffff49bde5	12293	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Blank.docx
+ec09ef3eddaaac6c447be9ae0b0d45cab8dd75bda6315a4bc30b4dbc78a83a70	19350	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Bookmarks in headers and footers.docx
+3eddb78c99475c192f82391d75d485e4d179a84eb38fbcb2a50ae1a6f863a10c	14188	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Bookmarks.docx
+1a235334b8e9729d9457bb60d2813d0d43806aa79192f6b153d05c14bf00bba9	16265	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Borders.docx
+eb67bcc43660ddb2f85970390d3342b24f58ddab39934d3ac875ee852b961f8e	19546	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Bullet points with alternative font.docx
+9078f9fe72e4074bad3033588cfbeed29d54734243bab65b16168ceb82c1b1d1	612658	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Business brochure.dotx
+96365ad98cf7125d5b0f060b616a94e7e4b3b131f8b1f1f4d5215f1a093ca0bb	14473	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Cell revisions.docx
+aef36428dc0742b864afeca06f0f4cea30878f4a1d1d36e1e9182fc9053a1151	235915	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Colored pages.docx
+db0c7b7026e14a1926db4876233dad208da139eb1f189b4382794c7caedd402d	27017	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Combo chart.docx
+fa7de837bc576a2119506d95faf6bf5f5e4fe02066c9c23bac6bbb074ece2920	24550	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Comments.docx
+1ba11574eb55ff1ee637d07875d49c7f442bfca58b331df92fea154c0b2545c0	16648	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Content-ID.docx
+3f1cf82dad0c0d80bdf3a7d389d179399afb1b193087d8d70040e5bce9cfedb7	20111	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Continuous section page numbering.docx
+b9b22535ce8734b19e68809d26c04a4b196900aa8056eb08c9476756642a8bbe	11286	hostile	malformed_input	open	-	zip.local_header_missing;zip.cd_offset_mismatch	MIT	Microsoft Word	y	Examples/Data/Corrupted document.docx
+d1c04d710e74da1e4735b9f877e69115e164b7551cc3ecacabdd35231524d335	146236	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Corrupted footnotes.docx
+3ac3fe5111a1acd85436b00e997f205bcadf69cf8ada69057273d8f728b4729e	219337	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Corrupted image.docx
+b9a2c3c0de42d9f63cfcdc1104ddac2e4f6f11501febaec4ea26efc3da01fab2	27005	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Custom XML part in structured document tag.docx
+8c665f63337a550406e13708d9e464220273d66b560652bc4f0f8532ce3e257e	17631	edge	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Custom list numbering.docx
+c283eb48137d8c74413dab3f6d054f72da7b8b88daf5e5e7bb5e0cb2e3a6a5a9	14510	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Custom parts OOXML package.docx
+99d94e9a5ae179e5953249d87b975d0ba3e74779b42889897d3eeceafcc9bd19	16140	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Custom style.docx
+e752d1dc2fee52e1cbe40a6bb04e05a88717c0e855112f2a89798ec3093b7d03	37184	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Customized menu.docx
+d86475e4dfad24cf2ecc6cd04130ed1327779c2b9350c54504b03a107d563838	97782	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DML unique ID compare.docx
+ef1cf2b4d7474b1e04be38ad6709f7824c09cdf4d07f4efa9aadd883b8d343c8	97782	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DML unique ID original.docx
+441fd09151d74061317471ef0860541b444ef67530e585b569cd99cddcf26397	48101	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DataPoint format.docx
+417a368dec422eaf6e8565c40d0da75da94afb9133cae5fe47a396782ffa1b37	15240	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DateTime field.docx
+c6892d80d0e08f18c30c5196b68653b72790ed98170fb5a74606b1ba2d62ccc0	26760	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DateTime sdt.docx
+a2f1d51173418e84baa67a89d0b9fd69beac08571d14b504ab8b0e8d6237c553	73245	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Decorative shapes.docx
+5dbb1d2f503a6a832a3d4c2114b0a58007345280e6816ca9be7647dd45477b5a	19204	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Different lists.docx
+7cfe04c42643a2598c14fdbaa7b8998c157b1cd1f09a7394af86cdfc0a607e36	17133	edge	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Digitally signed.docx
+4139820e82b43c9c94d0dbe87ea68ead05a677e39b67cebab46c127032208983	7326	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Dirty field.docx
+940ed41a74bffee2b9b4bd1b7ab36573a7945a3a0f713879fee70beacef771ac	46049	other-producers	ok	-	-	-	MIT	Aspose.Words	y	Examples/Data/Document destination with list.docx
+a587d94e904170ad900bdee48e8d4dccfc848da57579892e183e5da5cc8712ec	12329	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document insertion 1.docx
+93f6303cb161e08216a5844690811460868331c66b0475021a88d4a268e28de8	11973	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document insertion 2.docx
+1d9409120414a9456e686913dd1da165054c51b5ddc05c9d9af5e102f8b21e23	14761	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document insertion destination.docx
+25e9273764e0697f0b6946d224154ff22aa3e35b7d2276b06d1df1cc8e93ab29	19244	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document layout.docx
+dc1e4cf807706c32bcc639be4606b22469af5dc836b69263da446e01ffd851b0	26417	other-producers	ok	-	-	-	MIT	Aspose.Words	y	Examples/Data/Document source with list.docx
+33266831f75fbe2103a0d6d1acc0488388c872d9d69ccf8f75d5bb6c8d46d253	49786	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document source.docx
+14c9c6b3131bc21d07ec7dfb5c5fb5e20cc13d58e3c6af11e1f1ec337bc2b6df	46065	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document with SDT 1.docx
+3757d19a1a30d91a8a493fba1729b43fb02a2d57ba66a1968ab2be519f7b384d	21878	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document with SDT 2.docx
+b12eb41f8b6adec580c6df60bad65b0adbe728b3f18f034fd7af0061317216fc	24350	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document with WebP image.docx
+8348fa1cd092bc63f0878b744356ef3e7296c456f6b8c941def74c944d576122	18105	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Document.docx
+818c251be1e57e7cac2f78e02ecf384234a949baeff33182cb4fff02cca9f704	39310	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DocumentVisitor-compatible features.docx
+b89129dd8c3348bce4f8962db5285bcbdea3d3a30287e8cef4b3f42b2dd1cabd	78662	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DrawingML shape 3D effects.docx
+032c50b0a0c3744de0832f68e910c52d572fa48320e2bc61b36808b8577c9c9d	40351	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DrawingML shape effects.docx
+926fda7dfa97378e64ae4e2660ae9de75b7740dfbb5b43d0aadaed8539dc3fcd	80867	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DrawingML shape fallbacks.docx
+1d75e517d73acbe0d1b5268dc51723f06573251970d9c3d447d6d2423e5599c0	18787	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/DrawingML text effects.docx
+bbe265059b0b9440b5e12fe16676f7fe3a13bc79b6eb211d6cd4f50a992306f6	24560	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/EMF.docx
+b8467d7b7a04de5e6199af75db149f9bcbd29a5d54d6b5429108f53323fa6f96	111801	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Embedded font rights.docx
+040c50deb8b9f9fb31db89bc9825587609c96452a8a9c640d03caaaf168f90bf	1482633	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Embedded font.docx
+b232d870c2d3df394c0ad252d1297a5957f206b77040de41c2b2c4b353f16cf4	11851	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Emphases markdown warning.docx
+f4f528e812278f3a02c548a06542fa0ff2d0c6ddb802b2b9d853880246e69ee9	18432	hostile	unsupported	open	-	zip.not_zip.ole_cfb	MIT	unknown (no docProps)	?	Examples/Data/Encrypted.docx
+acdb3a259b39238374b53ae9ec5104307422a7c4f952eafb35d71605b98e6d0b	14499	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Extended properties.docx
+419c34932f982a9de2bbc3f8f3e5fb23fea4acd1d88e9383a7096e187ea18859	10671	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/External XML schema.docx
+c23c462b5cab18e6eb8ec022a2b890c0f30ed245412d3ac939e20ebeed8672d3	77006	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Extract content.docx
+20816fd8c84cc6aabaf889fb2befac5a418869b908c941f9520e4b85dd2259b9	18174	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - ADDIN.docx
+6608bb63ba4b4902f36c741c2aaf476a42ffd90828a64b98b77f42cdcc26612e	17279	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - ADDRESSBLOCK.docx
+0bf212f1da710bd3d523195f81427ffb572ffb33aec06cad4ba922c769bc8352	14107	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - BARCODE.docx
+695f6e96f0b44b39d8585b27846d80b9ac749a2897c476aed410a222258224b0	7536	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - EQ.docx
+e20437d517fcf8013d9338f0135123f10e817610dbb7dda5491a786fbd941d7f	29051	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - Field with data.docx
+4de77c68dcc1d1159292605c4b35fd0bf3dfe1dd9d1acbb12945a283e0a25439	18629	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - INCLUDEPICTURE.docx
+9169fdc69db738045b692537d3005a93a353cdbdc33cfa59a338adf4a92cdbf5	18197	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - MERGEFIELD.docx
+7c69be7e4ccf7fe6c9cae2f7b9b4bab7b6670c5b44d03bdf3f8e0346eca1a94c	18731	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - PRINTDATE.docx
+629971b7dd7a48ff9a8e8dfeb369f4e5fffe7889a0ebc1eebe624162b1d461af	18409	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - PRIVATE.docx
+bfd5171ad402de3572d2986f88b589ca2e3f00513415b9bf70e70f48c760690e	20724	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Field sample - TOC.docx
+296609ad4e4c282adcf375da3a080692da30770b99a23287dd5faaefef1506e0	12144	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Find and highlight.docx
+d8b4810754f66c53096c33efe6241c5e504f5cf4ac06ca616b0a755c5919e816	15911	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Floating object.docx
+90c5a095b98c48ec34138c20540c0c3ed66c4a711f89ffb1a6be255a2eb59cb9	29286	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Footer.docx
+be9210aa3e861e720b2b0afdcaf9cd8d71fd3f3a8779d77e6e864d47536123ae	16635	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Footnotes and endnotes.docx
+3346f10c0946a4d58bce9b42870da7eabb2e19d5388ddb72178fbd4c1ef3a37e	18874	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Form fields.docx
+24ba2ddc17c78d0c959bcd604620bc401e4fff0fdd0ea6d026586756669061e1	17039	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Format revision.docx
+b7c3bdb03bf804f8bb655d90f3ef8534d744213bfba6c709dd0a15f0fc0c5d60	61820	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Formatted elements.docx
+41bd78203e21264baf49150f63ffa1ae12f797ff2c725f7bd0f527d51f4db198	9373	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Frameset.docx
+e4b0b82a6e179fe59c86eb32f8f4b571c38a86811f9f759f30bf3d660a0e082d	23793	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/German text.docx
+fe851c8843979e43dde6aa18f37dddc96c771abbacdd3f5b2bbbd341d3999b92	522931	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Get substitution without suffixes.docx
+b635b5b6f3179f0f151107a349a8dab4491c3a00224a2ed9cb1d71d17d80771c	11290	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/Document.CompareOptions Gold.docx
+454185c8ca9663d05cc54b0437345160967329e623d7307c0c0117908c3b99d9	5745	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/Document.HyphenationOptions Gold.docx
+568c1097bd97fbd79cdd4b825285e67bc15e816841a7763f14aa99e0bba7bdeb	8815	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/DocumentBuilder.InsertDocument Gold.docx
+2451d3264907142ec889c1f521126f28a0d1564395df8b50edb9de18e12e122f	5645	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/DocumentBuilder.MathML Gold.docx
+d7b2d75d5647fa5b203438f7d6841eb1cfde11609d946d660d6fe402f1ce9033	7222	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/DocumentBuilder.NumberFormat Gold.docx
+18524ec36567d510e805fbe87b3713ab167105ddb1b51619a62615d852a52434	5652	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/HyphenationOptions Gold.docx
+dcc9614336baed430a5502db1d322e804096e3ebc728327d8bbd41dcf0227d31	10208	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/MailMerge.CleanupOptions Gold.docx
+c8f1e24be423eca1eee704034747f98306bd0fad84968a016ff033bc5b0b2c56	10117	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.ContextualObjectMemberAccess Gold.docx
+990646d98df921643a28de1c895017a86f7519382cf397dabafca484219227d5	10179	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.CsvData Gold.docx
+2d4efb6a1c4ab80691525337d15f09d2e6ad8c68da7f7bb6f8136cee65f0e260	10244	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.DataSource Gold.docx
+5b0fb38fefb29039e6098698590ffe06f6899216e0a5ef20694aa7e9a6755bf8	9871	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.DataSourceWithNestedElements Gold.docx
+4d32fe65795844ab25ac3987e2c812187218815b877d1971ff44d56111167942	9635	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.DoNotRemoveEmptyParagraphs Gold.docx
+f8e4114c952c728e3b51a66a923a34212d89ffe74759e13820fd9a7c1f886fa6	28313	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.DynamicStretchingImageWithinTextBox Gold.docx
+03a29f082ae1f816f9f2e8d390d20a5274b641bebd6154e6d6fe7464841184d4	10814	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/ReportingEngine.ExtensionMethods Gold.docx
+94eba029f7934206396e63e0ddf74c93ed9f167b6fea2ba4555b69959559864d	8450	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.InsertDocumentDynamically(stream,doc,bytes) Gold.docx
+ee4de90cb0c233b32647389d054c0b8270b4eff2053c42502c98e2a40caae7b2	13780	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/ReportingEngine.InsertDocumentDynamically(uri) Gold.docx
+f46d3408194357644ea83150733d2cfd8ac86d032c9e7def5b0639de98216cdf	8642	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.InsertDocumentDynamicallyWithAdditionalTemplateChecking Gold.docx
+472df7f65c67e969227e391c46dce454afcf6d7b0fb42fbbdad63d7aefc8a23d	243722	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/ReportingEngine.InsertImageDynamically(stream,doc,bytes) Gold.docx
+efd9cd1a059230f0efff3fb62730284fb5402cb65522f898373479ca2a71bd67	9116	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/ReportingEngine.InsertImageDynamically(uri) Gold.docx
+e7ce2e7ce0380a97212cc3042d382c26a8b775f065e170832534123c0ee6e050	13013	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.JsonDataString Gold.docx
+2a84ce1ad240a4e9f1140525876f8df326aeac286ec8022a6d2c06621e858c5a	5563	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Examples/Data/Golds/ReportingEngine.KnownTypes Gold.docx
+6ccf5c4af35676a133c59cf56e9d7d7e17b9c9335be9bfcb6d5328783eee7dc4	11898	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.MergingTableCellsDynamically.Merged Gold.docx
+873578dc73c85df70a8118fafad22a65dad1d91e02f6466c99869fa66f3e92ef	11889	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.MergingTableCellsDynamically.NotMerged Gold.docx
+39f23dfbaf1835f0a4f3b3f7fdb6970f0ef0685719c6efe2237c0f6b0951a336	12630	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.Operators Gold.docx
+00856e472ad9c344bd623f2de6feaee7b1f23e2b81659ffa3ce98057bbb3c188	9623	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.RemoveEmptyParagraphs Gold.docx
+b05157457605c69baf5de49d6428b63655f49b297d077ae5f670d33c399d808b	12441	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.RestartingListNumberingDynamically Gold.docx
+6847b73c8150a5e5b1895a6140aaec98e769deee39943390e7700d02cc48b4f7	9638	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.RestartingListNumberingDynamicallyWhileInsertingDocumentDynamically Gold.docx
+dbf9ef553d6aaeb478a8023495d1a6a9b25d7e4f47b84bfbc757fa47969e472e	10657	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.SelectiveDeletionOfParagraphs Gold.docx
+ebddd71ca03b324142ca0fcdffb463aa479e2fb384015d9bf6229fd0005f8785	13826	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.SetBackgroundColorDynamically Gold.docx
+787857e5511d3133463b50e6879c554229f9e4738f6ba33fa3fad5b4593c147e	36176	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.SetChartSeriesColorDynamically Gold.docx
+720c6341f757a74a04f0e4c67b2d71b7185a9f0142d1e5504fb61bbb949951f4	61509	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.SetPointColorDynamically Gold.docx
+acaaa18f95094bc20f657bc6f839e118d9e265c8150adcc1daf8a839c6935c4b	12554	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.SetTextColorDynamically Gold.docx
+ab5bdf65a1496b69d995bd69263fc8e1d109084ec4f0eaa6bc728c53de9261a1	8322	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.SourseListNumbering Gold.docx
+d1bcd3d428c9f0f598ed975fdda27b2ddc35bbfcc539f45869d074075d9b4150	23033	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.TestBubbleChart Gold.docx
+235fd851b9836e68367fb8f8b920e8a1ee81ae58066ce42ed37b5be75d1eb233	22447	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.TestChart Gold.docx
+62a28a396a78983a4374710a4cc3bb0f401f66d58ba255f1efc58b1320c468ca	11006	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.TestDataTable Gold.docx
+1122961eabe532e50f233f0b35d899280c9b505bd28ed9fbfe4a2aae12181144	23652	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.TestLeaveChartSeries Gold.docx
+08301b33b0124c96c1df5fcc28de370c82a3cd1a2281fbe8ffe36651d3539bf5	10952	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.TestNestedDataTable Gold.docx
+1143cea54903ff3b676cf76007ae703c1ff71abb7ff9073383d3e21435b97790	23587	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.TestRemoveChartSeries Gold.docx
+bf73c15af94bc780982c35fb0c180da2a5a49cab695149dd8f6aa9c4aaa11d53	10413	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/ReportingEngine.Total Gold.docx
+04a2fedff7269ffae9d621a0ca886bdbb2f4d76070d4314da8889cf9a409dd9b	20417	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/Shape.OfficeMath Gold.docx
+d405282b1318e9eba6a30a9b43ea0c1a1097f1ae0423481a0f0c246f1c2fd2e3	19753	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Golds/StructuredDocumentTag.CustomXml Gold.docx
+ca2699fbb84a0269f08809e14d90fedd0e99c7f6acf29541a4534b4a1bd92e55	16924	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Header and footer types.docx
+2dc6c5ad593644e0d4695a752a565c2be23aec9d6f2cd3ed539814ca9b1eba86	10027	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Heading pairs and titles of parts.docx
+ba76a8cd41ebad1e466af2075aeefead4d8502e7a71f231b039b0d0abf0353dc	28765	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Hidden content.docx
+7c2286f38605e759cf4ee63fa8a09a7a6fbfacad1a872b7b8a462e76b0682bea	30783	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Hyperlinks.docx
+554c5ba8382e0f4867384a2fe467e589e059684191ed4961a473d35bc51a2281	102906	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Id prefix.docx
+a0b9440eee7ae143fefc0e00043935b28221f59099eb90e3a3eb23bdaff8e96e	439416	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Image bullet points.docx
+2d3a81c5a2b71117ed7f3b0fbfdda1408222497286361ebc3e593c3fa8022889	1190992	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Images.docx
+b8ce547c41109790fee8aad010d6570d845d4cd27b8e70e7ca1607606525b999	20750	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Ink object.docx
+30966a7043765cc60ff3e6cc0b71274dd5a88c25a7f45ab92d49ed34d0911571	17563	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/JavaScript in HREF.docx
+d0d2eca12e571213e96c9c20e69c84d1047eb205a8b3a694b76eb27136d91660	23244	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Korean backslash symbol.docx
+f91be0e412481209d544930e8d02e9c492d1731d86105983861897c105f51c92	18705	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Layout entities.docx
+90f9e7c5c5d3a5cf0d53066eb2c41133eb62438cc9f288af9bd8e7635f940730	19661	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Legacy drop-down.docx
+24c8dbc185228db77b96d6a06c6570d5a6f557a54576d104a1027e42d0e79975	15595	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Linked fields.docx
+77620965580ada57a0e888e83d33810bd698fa74dd552763cdec2ce4f0078066	14714	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Linked image.docx
+9a46296a7c55460d2c098a04fb0ecc21bd97fb337ae2f7f7c4e3b83cac548245	14155	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/List destination.docx
+41776089e5ea258f70df5c1ccb4087d04327443656cb9c70c69aa086c7387fea	13264	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/List item.docx
+f46bbf8dd90859731069038522244afcecf2a7d8fc1ceab32d13c05ce3c6cad2	12815	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	Examples/Data/List source.docx
+c066f904beead536bcadd021f6a20ef185b5a8ac1ff2dc411a666a082db3e735	14955	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/List with leading zero.docx
+156b8a280ea617402cb29f60dcc103ac8950b8b6e350dc7cb7b9ed4085b22759	6892	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	Examples/Data/List with the same definition identifier - destination.docx
+571901a81318835d4dccf19732b62221a5281121f83d6f283a9861fb84003d35	6606	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	Examples/Data/List with the same definition identifier - source.docx
+58124621dfdc2a0b998c63be334eb09f8aa54a9f35042146959eeaf8aa70eb55	22296	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Macro.docm
+5cf4b5f91ec7ac1f19bf543e61b8a4761e3b92d4e6b783c617480bceda4d7539	46145	other-producers	ok	-	-	-	MIT	Aspose.Words	y	Examples/Data/Mail merge destination - Northwind employees.docx
+e4374f167496b34e7739c00d2d833228fb659d9247344ef8fe7da2e65972bfb0	46160	other-producers	ok	-	-	-	MIT	Aspose.Words	y	Examples/Data/Mail merge destination - Northwind suppliers.docx
+a64a000f4946f9b0417c59e7a974aec72f0861e0a5ea702f97877b93dff4e662	46818	other-producers	ok	-	-	-	MIT	Aspose.Words	y	Examples/Data/Mail merge destination - Suppliers.docx
+2cb5900d5093062045c11df6198343ab4b15cf7e601bcbb2a12f31d4bf3ff40e	27505	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Complex template.docx
+3f4c2905289d635b8887c82739482899fd103670fc413f4b55892f52a34d47bf	16608	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Fax.docx
+9077943000b22551a836523f72fdb77fbfbba7c25ef9e69fc3874b6b5393830e	59649	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Invoice.docx
+27905fb108480c7a0e7a454f4f2c02eea2603aad09592b4eb6fa9d58d2290597	15836	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - LINQ.docx
+0432d50dd98520fca5f285682c5408453ed4aa3d9864e2904ec5186a8e58c8c5	11948	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Mustache syntax.docx
+7353ea7b1ca563c787ec2c9e51e20381ba5e1fdbe8591e87de748eb1ab48453d	14565	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Orders.docx
+d98bb652ff760220022716721fbdb61dc84f325f9522de1bc089a04db9bcd6ca	14886	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Registration complete.docx
+f5da0b5ef899ade4562f3809e200f66db48c3dcfbadf2c42fa10d63c913e24a9	16718	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge destinations - Vendor.docx
+044813ba08da75f9f2a69d3724d2ab4d75674879751deec0a74d1f79ae7dfda1	13389	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge mustache tags.docx
+6f241c31265640b57c5c65122abfccc8a69432bc5bc1322116673e71f5744339	19368	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge regions.docx
+a5d89927613a8ae831c39a505cc2a506a68bfde1906dd05b1d7e7826468d8834	17395	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge tables.docx
+933f0a160fec7c14be70b7a4b51ab6176c1ddb0304a8efff04a4483d6f8201fc	7245	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge template.docx
+1a93f429eae9e6c06156a6f0db56b9e706b7203c602199161c2268310806506d	7560	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge with regions data set.docx
+3f59c109fbabafd99eb3b6ebf1ad0a1428a2172e39ccc0f7b505cdc6abe29a3d	7306	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Mail merge with regions.docx
+2966599b1a97b95dac16d8e0f95d5fe9d9495995c062fa47f22f5976d60964ad	16821	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Master document.docx
+f2e54e302ab47d578bf9f85a299158d9d727054ef2883bee3cd558681bd04159	123310	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Math shapes.docx
+9faa45a2534401633b94a35abb1a59205d7272d67f8fc12b240acdfedd0dce9a	20260	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Merged table.docx
+a203fca8a7010be39ec422334fcb2ad842c7dd5eedb1e6e2a3a142e61d6b6ae3	20436	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Microsoft equation object.docx
+63a44cb3c779607bbdcec0a3a33230496674de8765c5ebb6e8509e2f52abef32	18055	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Missing font.docx
+1da9550b0c0629bb50f47d4843aa32be70f19d38b63fe8158a7ceea0e540da99	19688	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Multi-section structured document tags.docx
+7a0af623b4b10ffe5ffa587304048820f6a436e50941bcda540fe2e14ebf75a0	24666	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Nested fields.docx
+b2fd7a0bfb2de9e4cd60b35272a228ffa5273020fba14613329ceae00b1f1ca9	19119	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Nested tables.docx
+c9fc5bfe598a81861ff0703dd0c42fc8c33f91a8304bce635cdccdb29469e668	17693	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/No default editing language.docx
+c1e5f3573a211a5a1e9d9a981bc31c288dc52aa69ad4df1f22a6064da5ccfe29	15011	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Non compatible table.docx
+ecbc2170bd1ae9c5c8c419c52651e6c7b72c8e0ee396bdd38e50956f33307dc2	45805	other-producers	ok	-	-	-	MIT	Aspose.Words	y	Examples/Data/Northwind traders.docx
+430af2bba4ae6864b134cd99f57549b4b199da179587961abc3e187a6bba7199	20719	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/OLE ActiveX controls.docm
+de1c8f70f81071af0c499954034f0c58f4e406054bb327fef4744779c6764355	23333	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/OLE objects.docx
+78897c6cc0929f96058f2de884da4dc54532004eca160b08dd7d1a0e38f61537	28051	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/OLE spreadsheet.docm
+49b2d7f6f085ecf5419ba30cc7c5bedc4ae2991584c7b5b148dcdc2742c30c0a	9878	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Odso data.docx
+d164c38ef39f4d478e53129a792145ae853c05f5d84b83c7426b1790128b8c83	25242	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Office math.docx
+e438722afa352367b9d9498b85cb4c975306f19402b6674e13acdf0fc966e755	15405	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/OpenType text shaping.docx
+fcb6c34067d1ddb8f864859dcfb7d9dd1ddc00c3145d515c9a5ef216a031754b	20276	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/PDF artifacts.docx
+67cea58d238f96f035234d10e8cadc780f756d632ffd8e0043b0bca489161ba4	20019	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Page fields.docx
+db5e7c0ce01504aec3ca5d2a19790446b0659c5b5452d9a70617e557b643aa51	18098	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Paragraph frame.docx
+1d7aa436fab42d0505538a1b0accf22f28bf1094ce62740861c5a5e963c6f587	20310	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Paragraphs.docx
+a060ae9c4214126847d5cd453dd2520c32b454a82b8817f71bdbea0cd94a275b	15216	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Phonetic guide.docx
+6480eaaa22897412ad688bdc437df7c430bf68d5f433d9b980838339c1299b16	16738	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Properties.docx
+23210da26c566ea750b28c8daeff8bf157368cc351812a693a7a1814ba383b5c	27078	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Radio buttons.docx
+1deb4f85965ce40876a7820ba6054284fe23b595d35a77c62b34e48891700de6	92125	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Rendering.docx
+a4476e546190e5eaded79298cd783786e29f0a92ae01d6a875ac3c5da9f52a83	7193	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Replace regex.docx
+1f7d6136b0a600ad5bda37fd7d763835d955f66d3da2c7d4c2a5fb0b042554ba	13303	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Replace text with fields.docx
+360c94cf122db941d93dd8b5ea4a9fc944b18c4aaafc91c096ead55b02cb5e73	7177	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Report building.docx
+5dabb5495eba58bb3ec42e29401cd7e03ab1c190780cead2a56c6d83a8a1f36f	18943	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Background color.docx
+f3c1e8eb9910f5166d0f0bfa1b8cbc01aabe7bf8b310b93722fc3d4ec531723e	26026	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Bubble chart.docx
+1835f3d999ca50f023842dbae53e80ecdf1cd4c1853c5f7bd750ff29ab1ecb89	18502	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Bulleted list.docx
+b0b7ddc3998c9146648797a0ae58abcd9d4095a7df2caf159c29de86925f7032	12551	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - CSV data destination.docx
+0134f177d4627a44cdbb9b2eda894e8b77a4d2c18ab68ef75277a5cedb8bef74	39608	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Chart series color.docx
+c3b7eebae56d4a136f7ceab42daea89b1f0dc3cf87b77c684d4f4a332b3f5005	26128	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Chart series.docx
+dfbeee556787076bdd45c36ccf1e55818bbe087046ae452f667e75e2876a347c	24604	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Chart with filtering.docx
+fcf9173364a57b479ea05a12da1ce6de4300bcebb5aef8ac3441b0f8d6de8fbb	25288	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Chart.docx
+9ee4acf1922944f7447fe5223b73d805f3c51bf229513719e9df9279f0fa7077	12543	edge	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - CheckBox Content Control.docx
+27f0ae714ca6714ef848162062530728c3f630c892f643736747df568e70ddb1	20429	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Common master detail.docx
+c7197082fdfec22eb206639bee7b1bf60504c72707a64e8e71c29d70c41d82c3	12465	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Contextual object member access.docx
+cf5cee68f54c0953c980066729a2eead56a4b2622c5ad19ac92c7ceda3c57ec2	10002	other-producers	ok	-	-	-	MIT	LibreOffice	n	Examples/Data/Reporting engine template - Cross table.docx
+1a9d78d151382f7d7c00aa79fdf86a785c36fa3b8373e032e369f88c4a5df290	12040	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Data destination with nested elements.docx
+03a65ad9f4ea50c736586ba8e4adddb4b10faad26de9313f6a0cea8ea1dcc33d	13097	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Data table.docx
+38240a7f53afceca7a874d5e7c07d7c0559be538509beed4955131ed8171b2cb	525117	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Dynamic stretching.docx
+396c44e3c610c164921dc1a7f60af3dcdabaf250d909a91d28d513ef6d0422fd	10720	other-producers	ok	-	-	-	MIT	LibreOffice	n	Examples/Data/Reporting engine template - Extension methods.docx
+c13cafe96f53ecaf33424a9c6df9787952548a1c7b76213ab4e0ac7ca9ff15ca	14777	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Fields.docx
+5839ccdd474d4ad60121ca6dcef5886b6440e696a177a779bc5609d4dc0d43e1	13950	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Header variable.docx
+706aa0e5d6b47f5cc7397a74acf68a132d4e74fa13231704edc8f913210e0f16	12097	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - If greedy.docx
+21e2aa1824295762d24664da8f4464fb67917f34734bf9ae6407bc9755e7bd29	12153	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - If-else.docx
+af1b186ffb190773943f2ab6eaf3c3c65f8ba6315f311a04691e546044a85a62	15706	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Image exif orientation.docx
+048eaae0b8354e6e15440c00fc8eb737f4112d6f8ab785e9de762ba1c7e454d8	12331	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Index of.docx
+6a87b0f3be4daf64a8368972c712cbf9f5baed0f7e11a68e7668ce53867242ac	12029	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Inserting hyperlinks.docx
+c86f12c20516a426ff93b18e9407dc118f5af6d2a76dde7c16ca50d6d8aa1f18	12600	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - JSON data destination.docx
+e7e70684628c4e45fcd543a253c1eb607ce65a21c72fe1d01d679b7b37bdb279	14415	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - List numbering.docx
+49c1ac4073db13e9023d51fc07b21e8f3c96a9bd08a09ea2127175230119df45	16928	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Merging table cells dynamically.docx
+1f6ab1211ce410bf4b9f96a7a90af1816367b2216331aafa2293895600f7bb85	19018	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Multicolored numbered list.docx
+f945a75519156968acfffbdf645dff32e4ea37f55cd534582a88f127a5de314d	13199	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Nested data table.docx
+ac6cbdd4a4dbb5f79cf1ee1393119d88addd551e8780a00d55834a5e477f62f3	18565	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Numbered list.docx
+fe113f74ddebf456d9839f8c7ce5d5eb3c5da6efc0ef65d5ac41a2deeed2699d	13427	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Operators.docx
+53d9bbf7994ad2d8b236c407dc410661212bd23090c9631654ab8462778cd720	22593	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Pie chart.docx
+317104a145ff1caf654cb602bc7852e24aff3e0edb5e74e4ea0251744467ab1a	65518	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Point color.docx
+42649b3441135435a7804689cd9e64c366d53316493e9441cd40e9df562aa313	11971	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Remove empty paragraphs.docx
+472543639ee81fb54d2e18c2fb25ded48ede3763698804ac737d9654b4954632	24070	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Scatter chart.docx
+e873b721f1b4a10d34c326db5543c20bada554c54b0da16fa339bf7f0cc18ffe	15228	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Selective remove paragraphs.docx
+e7d3a1d995949de531e8ae3aa1578fe75944babe61e895f95f5b862d9cd62ffa	12557	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Table row conditional blocks.docx
+39192c7496635d7de285f89fec080d0b156cb17fcd910affe5bfd0bc57e45adc	12223	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Table row greedy.docx
+b83ce29b2c56f266bad1717e17e839fa124c7503ee0a09e18a693ab4eccdac38	12284	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Table row.docx
+999c840996dd8fa5cfa76755517c9cbcac9b19ad31b35cc1526ecd047def288a	17582	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Table with filtering.docx
+b536351c40eb10e900aebfea8a482243965b62f2fe51b7149e99e3a958cab269	15994	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Text color.docx
+f2ea698fca90337a8abd4a776d46639a886333d62573d340eb70159aeee89b5a	12858	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Total.docx
+4f68e55946357bc8003fdf4e6a442ab478fd2b81fe34e3a37a07e06ac8f0d759	564595	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - Word 2016 Charts.docx
+1fad4e08156971c2e5ab72b38c0219f4a60c96a09fd564628a1fc6392ac6e428	12619	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Reporting engine template - XML data destination.docx
+d103c52b437afe2975cc34f8751b4f1d0c35c9452fa160a9b8fc46235f108851	20484	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Revision footnotes.docx
+db400d3baf2e5cb6452bd8a1f6f343cefce84cb5265d4edfaa2ae5557b63e9cb	16178	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Revision runs.docx
+897b49786def7245b27e85f272fadfa5de5bb0097ac55862c95b4014194395f0	20779	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Revision shape.docx
+31d3d030a989fe8d7d6ba77d84b3e933d4b183447ed094cec21b9a20cbf9ed99	20751	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Revisions at list levels.docx
+51bdc8726def9e67b702d3e8a03e2f78ba23ad8f763dcf8daa8ebb7319568118	24536	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Revisions.docx
+ea7ce837b03b5e2bc76dc016f2e74f562eee5859fbc1e47da108effda8f41932	18791	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Rotated cell text.docx
+a7ad79763b58f8d1427a0834c660029a23a559b7c06e6ef56ba3c25e86deaa12	15354	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Rounded rectangle shape.docx
+475611e5335ad79dbea7cd21050a5c1efddf1395018c867fab58c12aff9006ef	14745	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Section breaks with numbering.docx
+acd2646e138219d7c820a6e9b840e93ae514bbad4c70e522a4d4d34e80b027c9	15840	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Shadow color.docx
+a7c9129ccf81bf5d9b361ad8c9986f7cc4d3da35295f6b7bc71d6eeb19f1ef67	13301	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Shape high dpi.docx
+130aeb75bebe47b0748b6805258bb58787d1f67ee4e78de32f0a240208f12515	19165	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Shape shadow effect.docx
+1921f7450596ca9af5f61a7e20d05cbb46782fd14de4cfe82eee3fca9a937cc8	18440	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Shape stroke pattern border.docx
+9ddb37e5f342ebce76af92e9b5c2f02926482f240ced2b73ae21d447dd1b4337	16040	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Shape with linked chart.docx
+992dbe69ab3bf36700a27eefe4a1130bcc4553adcf8be4d551759e691e69a8b7	6470	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Signature line.docx
+00da6363f02a0ae724078a51b78927f7ca8c552c6fae79132bdf2422358fe523	39227	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/SmartArt.docx
+c2b047d22c273115297b0e1664f48748cf194d13ec709e07a7efcf508445f488	31851	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Special symbol.docx
+02072ee106fe8d46a5bedb73d4745cbe3974661f40e24a76c50ab2118ee07e21	11510	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Stroke gradient outline.docx
+17e095cb06a45f828b62d4af56d5882c59ed255a04daa59524265fcbe948a304	26822	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Structured document tag with HTML content.docx
+8b9bd35d544d0cb08cb6dfe97c8757e4809c4325f6067343f6e1206b7a76fcee	21904	edge	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Structured document tags by id.docx
+a702586b83a72e2b1e4f798e8eb8f755c87e4223d61340e94c79fe36e18166f0	26547	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Structured document tags with building blocks.docx
+1533d704384011939dc138f590e8ac2ef568d86a2e6866526ded52db9a255045	31501	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Structured document tags.docx
+27859e27e550dfb76563acfb9543e53b348f220f9c98ba84903d8341eaced7a9	18313	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Style with alias.docx
+0be29ae93cbf7abb8b8d93b65b97462b35bce012b7d26672fce7d5eaab3cf965	12495	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Styles destination.docx
+6ddf70a303fbce092e8488cbb25692847e60590b1f3bec77930f64bc52f79efd	12608	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Styles source.docx
+278891632c91f349bb2b36f98921db61ba3be61a9dcefdd4836291729e07b321	12567	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Styles.docx
+c20e7314a70ac0642e5dfceef6188113c2941523a5cd17e87237cf79c66c6b1f	15017	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Subdocument.docx
+f88c93f28692437c49798740792855c81023197950bae66dbab9637f666886a8	12366	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table column bookmarks.docx
+69cdbc7c872d66a5f9e825492b298ac990f970ec90fc40854a2aaa0059a733aa	12102	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table of content template.docx
+384f239783f42c17e686a81112a50b32600728785a3bb36783d38860482a1adc	18757	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table of contents.docx
+b6b627969e01fcd8f84f71d4ba059bbc6cd36e03e828fcee32382b4baaf49513	21021	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table spanning two pages.docx
+c726d4596140bd9cf5291d16da335f6f467e7a9f5e3cf6a23489a853a6d05ebf	12332	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table with fields.docx
+ae097089d892c832d246d4e3b60d4c86de875b4d83eafbcb4a7ed7b87e017f9e	18375	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table with merged cells.docx
+4a32a13d01a0c9a57ec4739622cf753e5eb829b2cb46977b47a38cfa3d1278be	19190	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Table wrapped by text.docx
+00373b3e44a8f717604e20df20ad86010db0be0e31cbe2278e313e67e7a0451c	21523	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Tables.docx
+5e4d10b14a7fd09c4b3fee8885fdeef633c291c949694b4606365a1698c68dad	45566	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/TestShapesUnsupportedBevel.docx
+a07828eb96364a5caf980ab621379e8dc4e17d1024125bb7e8c62780bcebe9b8	22438	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/TestWarningsForBevels.docx
+1d6bc8359e35534b6137011b9478ecb7b49cf9221f9baf541c2741d3e92613d6	28292	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/TestWarningsForLighting.docx
+0eb90165a14ad29680943537ae6787ef336ee1b570a48014934a6194ca8a86ba	25140	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/TestWarningsForMaterial.docx
+bf7a29ea8bfab38427d6d3aacd3fb0d24ce3e506311e4ddca564dd26ac28870d	22064	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Text positioning operators.docx
+d62aba091ac61d9a66a646279b8d0b58d19c778e624d0550b83e09c558a3617d	24991	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/TextBoxes.docx
+96a09df5ab782b0ca3cccd0b4d5b5e2925317db4ae5ce8be686ee5a3d4e92802	17481	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Textbox control.docm
+14d3d88f1d710bbf35f8b5e790f96e72bc87f16cc22a6c6ec0eb9dedd0b022c8	19222	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Textboxes in drawing canvas.docx
+7b3ca8e493e34567bc1605015e9d48aaa7dbe42bad4d82eecdd9a495079890a3	15217	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Theme colors.docx
+15e55ab6581e17200fa60382e22051f75565ebac9f39f67064611a85bc76a3b1	11953	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Two color gradient.docx
+b09ab2ef4d10d78175c2982693f4c70bb7c47fd29f9ccfb4716ecd497b5139d9	18512	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Unoptimized document.docx
+a881c1d52c75bad48f94283bb658850c145202a70d988b3f974d8acde5b9486d	8224	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Unused styles.docx
+2ed394f00dfcd0d690486b401ffd55c998a12cebac7c0d09c79060401704704a	28838	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/VBA project.docm
+6f94772eaf2c19934806f14505673f52724b51032ac2890f0c6c654a26764652	18823	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Various fields.docx
+1ad302efb7f7c7311af1f8c8f146d36d23b1d0a97ca8899209c33bc321158363	50247	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Various shapes.docx
+e7ba64af008fb6215f5722bb987210526967b5d4e9f54fda510a2a54e29af49b	16415	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Vba protected.docm
+9084e24a100a6bd86a171e9aeb26f2f9d770a8d6d124e1efbd8a60293bccc485	30466	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/WMF with image.docx
+8d15c482f14cdfd25bfb6ee624ba259acfe21f5b0fe4ba521da5569e5b710ab3	25092	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/WMF with text.docx
+d3fc725b82f79e146d873579888565e22f898c2d2884b21b4a31e77fa99a1b93	15844	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Web extension.docx
+ee2f5516c5aa2d8efb2f67190930419bed61a93b8fc6ecb889a978e2258ce43a	12425	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Examples/Data/Xlsx DateTime.docx
+6df110ee2e2083b0d023b44f1482bec2763c5d46999f1a4fc5b3ff65a050f697	11849	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.Words Vs VSTO Word/Sample Files/MyDocument.docx
+b8310ff4715ed3d73a3aebb8fe7804602d132da499667ec6cbbec3cd0b7c5893	12611	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.Words Vs VSTO Word/Sample Files/Tables.docx
+e6682781beb0be7b507481bc24cf9d0e173bd811375e8741ebc57944af8cf0ef	14336	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Bookmark.docx
+610fa69d965b243accc5f42ab716a6e1c1b0b51dfd1af64c67b29d19ccc54eed	25134	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Comments.docx
+957a301950fa8bd2fd0b849d2d0760b988b79e9ce902acc33c169f462e9f3856	11585	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Docm to Docx conversion.docm
+332db2fa6f2e64210fbdb1262923b96d30abe96945593e6ec1a2be848f60bb07	20877	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Extract image.docx
+50ed07ecf47a2825e62883d1071a246681479e1dd9142507d0adefa8b953374c	12211	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Find and replace text.docx
+84d7c5b6646f63216ed5653cd6b1d3bd56f2a589c526a6e66b61a19e38d1d37e	11623	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Joining mutiple documents 1.docx
+eda07a9377884e5d3358d357bda8a983b26bd53843689d294edc17d07943909e	11732	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Mail merge.docx
+573300a62fab388dba511c88f4bb6c1681ecc1f6f0caf813c39bb9f10e2c0fe7	18641	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Obtaining form fields.docx
+a123a546615e2b3df06064a656cffc155a0e7a17ff589981e302c49ce2ea2c5c	18944	hostile	unsupported	open	-	zip.not_zip.ole_cfb	MIT	unknown (no docProps)	?	Plugins/Aspose.WordsVsOpenXml/Data/Open readonly access.docx
+826e0a2a37f9f31d5b218d959b0ed22abf1e723363afa4f96f3e4791ff381259	12285	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Remove hidden text.docx
+d6945d862d4173c12bf4fd9147bedac1fc73c14190973553fa4a8b981c5e0d67	12322	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Remove page breaks.docx
+09d448ec2b6c1ef696c6ba583a8b932d1fbc0374d921f7ac7dbeb3348cdbb2c0	13046	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Remove section breaks.docx
+8bea329db9dd35d8ee0948bdf85fb11fc00ca866e180fa311cce7c2deceef1bf	12833	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Replace text.docx
+b2221473358ca0b99ad6e87f75b0f7882adf1d64c57f2d72e661fe2659b08491	12008	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Plugins/Aspose.WordsVsOpenXml/Data/Tables.docx
+4c3cdff34e279899d0307bf14936f0b1ac9fa8f9a267ae57adfb9dfb762ce721	5713	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Plugins/DotNetNuke/Aspose.DNN.ExportUsersAndRolesToWord/AsposeOutput/08feaae2-1321-44de-9063-51de08cf0da6.docx
+6e155e36f6d7582051bb35a24073d7913cd1be9afd4d942b48e149c84bd074a3	5721	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Plugins/DotNetNuke/Aspose.DNN.ExportUsersAndRolesToWord/AsposeOutput/Users.docm
+383263f4f04a05e25b75f8fc4186e3c2fda3d03e20530333e7973dc3c6688371	5713	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Plugins/DotNetNuke/Aspose.DNN.ExportUsersAndRolesToWord/AsposeOutput/Users.docx
+9d860b4a934c3bd631857cc02d2c9b1aa8b70f8504e0f95dd508465c9889018e	5727	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Plugins/DotNetNuke/Aspose.DNN.ExportUsersAndRolesToWord/AsposeOutput/Users.dotm
+f670f0976066cf195aa1f04f0d8b1011a7a598a5a1b51705504710ec60dfb7db	5716	word-authored	ok	-	-	-	MIT	Microsoft Word	n	Plugins/DotNetNuke/Aspose.DNN.ExportUsersAndRolesToWord/AsposeOutput/Users.dotx
+8b8facbd0f7255549f20d61bbbfeec1685cb349f8e69d784bdd19199267ca343	12935	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Mix Formatting1.docx
+5b07d0acbfd21d8a678a13713f2778640503d6d8d065c2e5eabb9ea7efe9029e	12961	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Mix Formatting2.docx
+28e6e22aa8472b59c1f0394e8125da3c3c3ce45998692924e914991345c6f14d	116453	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Newsletter 1.docx
+0e4ed83f089d33118a603aff392656a6882e6f5ff6e455231f5f3db559234dc4	115430	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Newsletter 2.docx
+2cf25da9c94bc620bf941ab52517b27be29179edc5acebc9000f33a886b1dd02	208819	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Paris Trip1 Compared to Paris Trip2.docx
+185eae0c35b05aecf69237abb15dc6bca5a3c344a8a545bf47ef2ccf7314b1b5	213865	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Paris Trip1.docx
+d089b6235c9c616ce8cf9f0d3240f49e9c6a3e6d41bb68972176a30b436de855	216038	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/ConsoleApp/UserFiles/Paris Trip2.docx
+196fce8b65b7cb92708d915ba513bf301398695086761592c4c56933b0e6f3ce	55052	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/DocumentComparison/UserFiles/Invoice 1.docx
+86e6040ffe56131cf5a7a4cc2feab167b40d378a0c75e8c06ad701a055dac525	157270	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/DocumentComparison/UserFiles/Invoice 2.docx
+6456891c87eba352ecc33cb7e68324bec7e9a66f28d291b7ac40d7605b23af79	215728	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/DocumentComparison/UserFiles/Paris Trip1.docx
+2cff50a1a8a027d83e88c6e9662a162d6dd8c8e52ff9107c9efa48467b946370	131364	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/DocumentComparison/UserFiles/Resume - julia allio 1.docx
+8a78ed1d11c687d6ec453974af8c45d8851200221d7d7747e5277cbf815d0a28	469911	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Document_Comparison_by_Aspose_Words_for_NET/DocumentComparison/UserFiles/Resume - julia allio 2.docx
+b88918e2ad6a14061c330f3d04b0111138bbb3ab73a9b63af8e580e3acb121fc	17642	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Showcases/Multipage_Print_Document_by_Aspose_Words_for_NET/MultipagePrintDocumentExample/Data/TestFile.docx

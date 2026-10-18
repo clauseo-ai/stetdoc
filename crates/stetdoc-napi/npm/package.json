@@ -1,0 +1,48 @@
+{
+  "name": "@stetdoc/node",
+  "version": "1.0.0-dev",
+  "description": "Turn a .docx into an agent-editable working copy and back, with real Word tracked changes",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "crates/stetdoc-napi/npm"
+  },
+  "homepage": "https://github.com/clauseo-ai/stetdoc#readme",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "private": true,
+  "main": "index.js",
+  "types": "index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./index.d.ts",
+      "default": "./index.js"
+    }
+  },
+  "files": [
+    "index.js",
+    "index.d.ts",
+    "types.d.ts",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22.18",
+    "bun": ">=1.3.13"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "smoke": "node test/smoke.mts"
+  },
+  "optionalDependencies": {
+    "@stetdoc/node-linux-x64-gnu": "1.0.0-dev",
+    "@stetdoc/node-linux-arm64-gnu": "1.0.0-dev",
+    "@stetdoc/node-linux-x64-musl": "1.0.0-dev",
+    "@stetdoc/node-linux-arm64-musl": "1.0.0-dev",
+    "@stetdoc/node-darwin-x64": "1.0.0-dev",
+    "@stetdoc/node-darwin-arm64": "1.0.0-dev",
+    "@stetdoc/node-win32-x64-msvc": "1.0.0-dev"
+  }
+}

@@ -1,0 +1,5 @@
+be3f13ee1d36af861281fe10d47cf420da7b84629965ca3c9ed157e16c50e550	36563	other-producers	ok	-	-	-	Apache-2.0 OR MIT	python-docx (default template)	n	src/api/templates/blank.docx
+b170b9e88895e6f8968387090d09d4ecde7da6d9a8b76b0a788f1f4ca34a8e70	38157	other-producers	ok	-	-	-	Apache-2.0 OR MIT	python-docx (default template)	n	tests/fixtures/basic.docx
+47771c9ca53214a2e84f797ea7fa27ae8a2eb50d432e13f0bd9bc4feddad8b03	37254	other-producers	ok	-	-	-	Apache-2.0 OR MIT	python-docx (default template)	n	tests/fixtures/hyperlinks_images.docx
+15da0e98283f094d054a023219ca462d042ce2d974f10776bd02819b21c97106	37501	other-producers	ok	-	-	-	Apache-2.0 OR MIT	python-docx (default template)	n	tests/fixtures/styles_toc.docx
+bd5b462f09c6cb987d35ac7c7a7f20755af1f83d2a761bb33f2c6c8719fcb0a1	37084	other-producers	ok	-	-	-	Apache-2.0 OR MIT	python-docx (default template)	n	tests/fixtures/tables_merged.docx

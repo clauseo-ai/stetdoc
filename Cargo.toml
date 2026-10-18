@@ -1,0 +1,90 @@
+[workspace]
+resolver = "3"
+members = ["crates/*", "xtask"]
+
+[workspace.package]
+version = "1.0.0-dev"
+edition = "2024"
+rust-version = "1.92"
+license = "MIT OR Apache-2.0"
+authors = ["Clauseo"]
+repository = "https://github.com/clauseo-ai/stetdoc"
+homepage = "https://github.com/clauseo-ai/stetdoc"
+publish = false
+
+[workspace.dependencies]
+stetdoc-core = { path = "crates/stetdoc-core", version = "1.0.0-dev" }
+stetdoc-editor = { path = "crates/stetdoc-editor" }
+stetdoc-testkit = { path = "crates/stetdoc-testkit" }
+
+# The package container: deflate for reading and writing `.docx` packages.
+miniz_oxide = { version = "0.9", default-features = false, features = ["with-alloc"] }
+memchr = "2"
+
+# Snapshot tests.
+insta = "1"
+# Markdown link checks and Rust source scans in `xtask`.
+pulldown-cmark = { version = "0.13", default-features = false }
+proc-macro2 = { version = "1", features = ["span-locations"] }
+syn = { version = "2", features = ["full", "visit"] }
+serde_json = "1"
+tempfile = "3"
+# Tests only. `roxmltree` is the independent parser the xml tests compare the span tree with; `zip`
+# reads the packages of the corpus runs in schema, which may not depend on `package`.
+roxmltree = "0.20"
+zip = { version = "2", default-features = false, features = ["deflate"] }
+
+# The public data types derive serde and schemars, so the napi types, `--json` and the JSON Schema
+# come from one source, and batches are read from JSON.
+serde = { version = "1", features = ["derive"] }
+schemars = "1"
+
+# The command line, the local clock for stamps, and executed CLI examples.
+clap = { version = "4", features = ["derive", "wrap_help"] }
+# The bundled time zone database is the fallback for a slim image with no /usr/share/zoneinfo, so `TZ` always works.
+jiff = { version = "0.2", default-features = false, features = ["std", "tz-system", "tzdb-zoneinfo", "tzdb-bundle-always"] }
+trycmd = "0.15"
+
+# SHA-256 for corpus fetch, deflate and CRC-32 for the fixture builder.
+sha2 = "0.10"
+# Canonical paths without the \\?\ prefix on Windows, so `stetdoc mcp --root` can join forward-slash paths to them.
+dunce = "1.0.5"
+flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
+# The benchmarks measure peak memory with a counting global allocator. The workspace
+# forbids `unsafe`, which writing one takes, so this small crate with no dependencies does it.
+stats_alloc = "0.1"
+
+# The Node-API addon. The default features load Node-API's symbols at run time, so the addon loads in Node and
+# Bun alike and its crate links without a JavaScript runtime.
+napi = "3"
+napi-derive = "3"
+napi-build = "2"
+
+# Lints for every crate except stetdoc-napi, which carries a copy of this table
+# with `unsafe_code` allowed (a forbid cannot be overridden per crate). Keep the two
+# tables identical apart from that line.
+[workspace.lints.rust]
+unsafe_code = "forbid"
+
+[workspace.lints.clippy]
+# Library code never panics on input. Tests may (see clippy.toml).
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+# Hashing the corpus with an unoptimised SHA-256 is slow enough to notice: a warm
+# `cargo xtask corpus fetch` takes 0.3 s with this and took 1.6 s without it.
+[profile.dev.package.sha2]
+opt-level = 3
+
+# napi-rs debug-asserts that a class's reference is deleted in its finalizer. Bun runs finalizers of a terminated worker
+# with the termination still pending, so the delete fails and the assertion aborts the process. A release build compiles the
+# assertion out and only leaks the reference; this makes a development build behave the same, so the worker smoke test
+# passes in both.
+[profile.dev.package.napi]
+debug-assertions = false
+
+# The schema generator builds an NFA and a DFA for about 800 declarations. Unoptimised it takes
+# half a minute; optimised, two seconds. The xtask check and tests run it.
+[profile.dev.package.xtask]
+opt-level = 3

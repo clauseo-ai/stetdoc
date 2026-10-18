@@ -1,0 +1,73 @@
+66f9379a3f530c34f330c5bd9232c0798f54048762793f618869b2c82fbe0343	11913	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/after_lines/after_lines.docx
+01f47ffa925eac40ba32bcc16c375cb2235762449d24fca16cdc62f8eaf03630	11377	edge	ok	-	-	-	MIT	Microsoft Word	n	fixtures/bom/bom.docx
+492182f65a3cd27e9881f40f47cd5f0725feb472368981a58feaac8f9613e362	4205	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/bookmark/bookmark.docx
+02d48943dad7ef0cf301f0e5cd715748b45df0392ab4606606aeffe4016b4bf9	5203	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/comment/comment.docx
+f0d8f755fe72e2415ef30792bd334a32576089cd1f85e3bcb7700faf7e3c2c90	17622	edge	ok	-	-	-	MIT	Microsoft Word	y	fixtures/comment_in_delete_in_insert/comment_in_delete_in_insert.docx
+e5f00350032d66cd40abd1710afdd181c2953e4f08a9624a7acb3b39c8da5d8d	17101	edge	ok	-	-	-	MIT	docx-rs	n	fixtures/custom/custom.docx
+6e6e9d0be52fee69d9cc5e524107abb2e87b1bcc1c29943408a978a16ff72a11	4349	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/decoration/decoration.docx
+3df333bf5b47b9eeea8e90e8462a9c6d1b747708d179655ff2f56741826283b4	15776	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/default_line_spacing/default_line_spacing.docx
+1f0f1b993f51b06bed2e0bbe587ed31221c765c6aed95fcd92a29484c8bbc5cd	15167	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/del_in_ins/del_in_ins.docx
+04c134567b12f2498b6f0d4292388481d68271672e1da804d98bcebe583312ba	14160	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/div/div.docx
+63ebbf0a5df54376ea8f8019e30c461145f1987ab7113b3350c39c1a71278d83	13671	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/dstrike/dstrike.docx
+577537f6cd033a2854eed0f21862c506924fa93ca929560af8801755910f7142	7644	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/extended_comments/extended_comments.docx
+2e3a8374e26a5ffdd65434a313796a2df6598a38487e6b570288637efa869ddd	17633	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/first_even_header/first_even_header.docx
+0c89db3e1b74bb7df92ea7010f6bde0fdc827f1e5424e9f87484d95371b16b3d	12922	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/font/font.docx
+7f18966834b36d3d708c32da5ba0b6e81a8e3d8029bdce91e4b33fd8fbd3a2bc	18456	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/footer/footer.docx
+4983e5af9025a88f334897850a38e2a01e9d965beb4c259acb49426d983283c7	18804	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/footnotes/footnotes.docx
+70805d45e10419aad6fb3da6678ef2f0303de089b61c89b4094f1650b0098dcc	5600	other-producers	ok	-	-	-	MIT	LibreOffice (dev build)	n	fixtures/from_doc/from_doc.docx
+92e63efc87c2c939f734bf4dd56821cd23d7e7eabffa8be52948f31a74cdc360	12879	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/grid_after/grid_after.docx
+823bb7603a91e7a905592862578aa3bbf323188a5c3b1d69858763be96cfbe87	5357	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/header_footer/header_footer.docx
+100d7371795da9b128d412599492a4c994eda4a0d7e7de2f84d1d0410f80f537	4132	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/hello_libre_office/hello.docx
+f1a0e50a252d2ad662358208b6f98706e67477ef53e6c6251da98097dcffd6fa	19663	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/hello_world/hello_world.docx
+a4266da032fa42465a82ca31ebb0bb0098bdc3fd62d16fceb1047b7e15f87598	4175	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/hidden/hidden.docx
+4c70c287258cad8a8c23e48f87eb1575b8db0d96ba95d7de6780a69a704b7205	4215	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/highlight_and_underline/highlight_and_underline.docx
+db7a69d7a4805b44062be34f75b753aa64b142692d4928748acdaf8f8b057078	4369	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/history_libre_office/history.docx
+ba410b6cd9303b096e5ab47d08feb1a66d6cef72d8ca9031161d97462853c779	134020	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/image/image.docx
+5937bd80aa26a8233efa448a89053d41cf8069ce31389f75eccef8c0a1d0ea3e	26165	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/image_in_textbox/image_in_textbox.docx
+d335f75cb863cc38004c5b191de5798076f9bc9bde180f0da3bd90148de25991	120723	edge	ok	-	-	-	MIT	Microsoft Word	y	fixtures/image_inline_and_anchor/image_inline_and_anchor.docx
+6e0204862c71566b4691a9f08d153904c3bc535b999c771ab6075e2c2fc3cd1d	145513	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/image_node_docx/image.docx
+d9bc4787e62d5206e2e81e528c50570d084408e19057de40e407c3e860b780ce	145626	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/image_node_docx_floating/image.docx
+9b6e0a433505031ef436bd2ba8094666c8d939deb311f72931e077249f4d3181	145622	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/image_node_docx_relative/image.docx
+e5438ce9d1df0f6ba0b750cd9ba15db9252ae6c3c18e9381c9e6f75331b9841b	634777	edge	ok	-	-	-	MIT	docx-rs	n	fixtures/image_output/image.docx
+a25dbfbf103e45f7b9a1a14ae6f242b3814eb3ea4a8dd7d583665e80b96aaaed	633956	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/image_output_resized/image.docx
+e752bf9c8ac2520c0555ac819df5be17a4c1acaf8f5d56c34d61b327de4ffefb	11704	edge	ok	-	-	-	MIT	Microsoft Word	n	fixtures/indent_word_online/indent.docx
+ba892dd093cdeb64fd74c6146a45dd1fb5f226c8fe6e6fc269e7d2a936ad8c52	4834	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/insert_table/insert_table.docx
+71e97134133a7939f62cd58c94a4ca507ad1ce440a56b3864395c5b6f3849b90	15057	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/instr_links/instr_links.docx
+45c3faad5c88f3bfddbe220c8c84a48d89a68d1f04313704070cc61474708d05	9309	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/issue554/issue554.docx
+f6485de0b10b18586b5c80c42e7228f8df0b5f9f033f4d0fd25927b17b9d367d	17739	edge	ok	-	-	-	MIT	docx-rs	n	fixtures/line_spacing/line_spacing.docx
+67f4965de26728ec604a7202273b6076a5a3f5a3fb4b52bfc21cd163b0aaf498	11748	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/link/link.docx
+65fb05fcf08595a83cf4f56e469b413bddceed325eabf333936d4ec3eb542638	13002	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/lvl_override/override.docx
+51d845abf20c4acfab94bd5ba5851ac37e1c79d84e28488b9a863ff9802f6437	20331	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/multi_paragraph_comment/multi_paragraph_comment.docx
+55d9ca9eb5e825de6b7de916da0b5bdcf7727d31c69b30bb70575bc8528f9dea	16034	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/nested_comments/nested_comments.docx
+cb3b3a9cf368d3d24439f4ce43c6a2554de249624e90a4a4b89241bc5d61f5de	11934	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/nested_table/nested_table.docx
+ca57e7b9d12bec4da1d3e2425bddd97bc17a6e22ac0bcebe229eac15493d15ba	5121	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/numbering/numbering.docx
+0c6090cafe83700de673d37b51956b85bc4af4e81f0b1bbd21810d7ad24ae094	15453	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/outline_lvl/outline_lvl.docx
+5ee08a79bdd751f667d6d8652c7efc10d600f09088c2ce2a81f17efdb0c0d5c3	19820	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/page_num_in_header/page_num_in_header.docx
+3e4df52f926f2479357fcb1b6f93575f645060e16a2c50cd9271f4fa8530c873	5130	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/paragraph/paragraph.docx
+b0a7b086021a072a5c3c2a515c1854995fc5d7e4ac46407041dc602979271ac3	13627	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/paragraph_property_change/paragraph_property_change.docx
+9e87524760c95f28e0954d886de555ed0f8ee3f2867e092b18d78421792f07b3	18350	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/ptab/ptab.docx
+b12110ed268dbd8c418ade8125f32c15fda685a67e0f1c17d25e721c1e95b058	11432	edge	ok	-	-	-	MIT	docx-rs	n	fixtures/read_hang/read_hang.docx
+88b4cfd7a62dd7738ab1abc653b545ee3d5aa94b8e0b6eefb966de56dadf04be	13973	edge	ok	-	-	-	MIT	Microsoft Word	y	fixtures/run_property_change/ignore.docx
+913e7adf19b27ed8b853943a3a5dccc56f194366f6df92b782540355e4368aff	4392	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/run_props/run_props.docx
+3d67d904e6bbfd2b72c59aee2232ae954b8bcbb9def9285329f9d10cdd5944db	74744	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/section_property_in_ppr/section_property_in_ppr.docx
+39096d83c9a23945e546f70ae62c4c32e6b854c402cee4aab0926100f2fef954	30005	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/shape/shape.docx
+15894c9a7904bbd1cdb2193b5a32d4f6f67fefbbfe95cabd66a4300885b65800	45394	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/spec_vanish/spec_vanish.docx
+7f9a7c340a26b0599684a6cfa55dd0c11e6e9f9fab621a6b78e058fe2b6c7e95	12526	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/strike/strike.docx
+f7503e0a717131c93569e81096db16237cf667b7a62216a4610ea5745768123c	4176	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/tab_and_break/tab_and_break.docx
+a7cbf2df589a003347dfdc893f21f600aae09de95b5c8e52a99884f9c44daf6f	12308	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/table_border/table_border.docx
+b0b47eb8641406ae6854ca39741e88f11ec9b555a84e0d506a67c6d3290836d9	6529	other-producers	ok	-	-	-	MIT	docx-rs	n	fixtures/table_docx/table.docx
+b081a549e266f1257047dfa88feb962ad47bc061f274b0954b2fb54203c18e2c	29399	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/table_indent/table_indent.docx
+00e69550da8e65c1726d534268a642e24af2a25d7ee617407a89732e358276b6	4523	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/table_libre_office/table.docx
+540e1cb8228826455f93f42f232e42b640d42d090fe1639f685b35b8baa326e5	4496	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/table_merged_libre_office/table_merged.docx
+7791bcb00d10d484450abcd7db80f16a25a494ea271d2be0263187a6e8a7d3b5	11900	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/table_style/table_style.docx
+c64f5de66d265fb6558b4461a9ef357dfbb7e8376c02ddf540164b9a255c01af	4691	other-producers	ok	-	-	-	MIT	LibreOffice	n	fixtures/table_valign/table_valign.docx
+8f4b20bf716e28bb2ae084efe19acf64eb8682c3ea7d73016c9c9e0d6a4ee0e1	11807	edge	ok	-	-	-	MIT	Microsoft Word	n	fixtures/table_word_online/table.docx
+c1db2b43869e561c1a0832f8e5237ee861cfd98469903da1ab690ff56cfa3df8	16229	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/textbox/textbox.docx
+3d51ec1da591dac11f4286899f1e5f46f15f6cf65103733f55fba91104c3f91c	14505	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/toc0/toc0.docx
+3bf50cf80ec0d6cd9b997f70e220a7b9f87cc32a378255e64ad256aab45148e3	16870	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/toc1/toc1.docx
+6a97a2b61335cec0ae7deb9ccacb008a6f292caea35f9c0bed691ae972a8e0fb	12578	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/tr2bl/tr2bl.docx
+296890747059a022166f4b7bfb04687e2379c5660a975e77cbb17a3cfc443db6	11536	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/vert_align/vert_align.docx
+130973a90a57ee0858c1cfa19b30c3edef1b246fd1d0c23f41a706d23250ca5b	30786	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/without_numid/without_numid.docx
+a0a2e20dbc71598e933cd1a1a4a98de94da5fa7be1171c55ed1f25ce537d1a65	13149	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/word_default/word_default.docx
+68cf49cb21e7093dc4e380b0d1aecfa509e8be227778a537985f35f38ca16fd8	15752	edge	ok	-	-	-	MIT	docx-rs	n	hello.docx
+ec9568e0fb2a18f6e4b5f459914d828bc07a5904d517046e86706da722156f14	121454	edge	ok	-	-	-	MIT	Microsoft Word	y	image.docx

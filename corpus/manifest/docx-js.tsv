@@ -1,0 +1,138 @@
+f6ae249509ced73fddceca57442654a5841a7183a32cdacbdede49bc6e6db028	25543	other-producers	ok	-	-	-	MIT	LibreOffice	n	demo/assets/field-trip.docx
+dcbf70e95ef74974075506c4850bce1bc16aefc14668b1b067729b7bc895d723	6684	other-producers	ok	-	-	-	MIT	docx.js	n	demo/assets/generated-template.docx
+4a73d1507fcc201111b97cc6a4003ff25efb29557943bb7da457923abb8365c4	14561	word-authored	ok	-	-	-	MIT	Microsoft Word	y	demo/assets/simple-template-2.docx
+0e4a1a9ecba822a6b9953ced8592e11fe62145b2bf6747d63131d49d83c21659	16818	word-authored	ok	-	-	-	MIT	Microsoft Word	y	demo/assets/simple-template-3.docx
+2a5667427e4e8b62444b352f02f6aeefb8d95b6b7c7817c179ab8e23033b8d57	15783	word-authored	ok	-	-	-	MIT	Microsoft Word	n	demo/assets/simple-template-4.docx
+ce082088d86a360468e00615d507a589e1a8226372d490c4173d3cef0190611c	16565	word-authored	ok	-	-	-	MIT	Microsoft Word	y	demo/assets/simple-template.docx
+4637cbb642ee95e564b472610bb3007907cb18e9ddee79bc06be27544614062c	59016	word-authored	ok	-	-	-	MIT	Microsoft Word	y	demo/assets/template.dotx
+8c80ef98e5f4b66778be7368bfcc14e8deb8f634777a832e3334ce130a3c9bec	22248	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/footnotes-and-endnotes.word.docx
+59ca6aa9fa532bd7be37f9ddb3de81bb1c6f8fa82f4edff5a274db8b0c51955c	16710	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/keeping-text-together.word.docx
+f16428d80e6de1d3ba69e6355c3a616e5194087acbc391609795c4e60711982c	22034	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/sections-headers-and-footers.word.docx
+e63c3da017daecc37156d52349b8a12ea781bdeb3b8a4dd2bbdf634373f51cc9	27007	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/stops2/word-stops-drawings.docx
+ab0924aca153d67aa0d6b2472e50f3eba418f10918722fa07be2a66663a3e853	18628	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/stops2/word-stops-floats.docx
+2ddf0717dc223a0a33b2b6e6cbf3aad51570a59b89ef70761f75dc996360aa7a	12085	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/stops2/word-stops-tabs.docx
+bff1c6729acc5c50f8a428325e32e3b4686a6e0dc0fbf9510e50df921cd12db0	13670	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/stops2/word-stops-text.docx
+66bd7e23eb811428887d4afcdcee2350e327f79e9f13a484801c2cfec7750fe9	12246	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/stops2/word-stops-vertical-cells.docx
+1bf75c15f2129d328c95cb41189834cb421a30e03c545b75593ecdbf44024d3a	19691	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/table-formatting.word.docx
+b5e2b0e29f5bd3643050b7c6423cf41fc87f974590ce028a38118dca96d515df	15218	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/table-of-contents-page-numbers.word.docx
+1c542b2f6e14a58edc2fc337560461b5a01ec2e51673903180c290286ea67027	20715	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/tables-across-pages.word.docx
+62f1eaef5a3dd4921dd4660a3308f53c446e720ae95d73a5f46af2edeee3d18e	186110	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/tables-lists-and-pictures.word.docx
+12c30c86925b84191df433554ea108e0cc9663d74492a3a4e5d81061e52e8d0d	17231	word-authored	ok	-	-	-	MIT	Microsoft Word	y	scripts/layout-probes/text-and-spacing.word.docx
+c174fa2701347b8ff58b6b682285b875dbde7befe4f99f274231fae0be2fd509	10488	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-autofit.docx
+df936d113c89e7297289281643c49627b4b65cf2e40c158863ec542cbcf75914	11540	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-balance.docx
+370a6e57fa7248ae49777e5490f23befd98a272eaf760b23bd493bd08ea782b5	10374	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-balance2.docx
+eb7f03f4fe01ca942e8f3b3f27895bee10b795475490e69a0a045c1988cfcac2	11175	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-breaks-and-tabs.docx
+6ad8dfae485cc87d20229dd81b6f05ecd8b4ee4618c634de05d4092b8b17d528	158935	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-character-widths.docx
+a263a25127342d00f0a7350c8bbc36f7bad404afbb26ffd2c6caab70fa8c7a66	11282	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-column-stops.docx
+82e20c47fb8a051135103e3967e7480379680a6c56e94eec9e34917fcf8ddb79	11206	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-column-widths.docx
+d422bace93755efe31f377c3333aa93a5b92bd87ba9c64f78b6376a3a300ee24	11347	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-off.docx
+16c7e408b1d7280d8daf2d6338354ab5a1aef4b8f901b94bf52a6775b18ebfe0	11466	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-on.docx
+9776508d1ff4b6dbed883468adba011ad9108d7c3b0480bd20a2b7c4c535cd35	12312	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-columns.docx
+7e68ac6fd725201d35dd7763f47d2b06ca96507cd74931a5ec78f3d4ad79683e	12425	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-east-asian.docx
+8f1703b950b94e59050b0abb69dd4dcbe35d7daa3d508705c69f5253276bbb51	12383	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-heights.docx
+333553640bbc8ba69de5f7acd87377f7a542499c077717c4d17a40e1328d7e21	12360	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-latin.docx
+aab66635e6387b220f325c97aeb7c6b3e367b63eda781d5ce831f11b9c8aac7f	12428	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-other.docx
+46bc48512f991e6054146c0ae11658687368a5969c32f262d1345cafc39d244e	12341	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-pages.docx
+35fcd1249135ff24f958cee964ae1b56c74f865f87cef8c802acab4dfe4f14a0	12410	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-paragraphs.docx
+b5656ae810121d20cb9c3e2cf3b526e06161c53a3223f812717680fc429829de	12439	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings-tables.docx
+992fc2445dd7923d9d34ecb0e885a581006ac03b89fb4f1df6dd35853c9903b0	12275	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings.docx
+3fbb4c11e5d6f2094a5b49fa6ce9525e8e8f6033308e32dfc0bf78aabb17b9b1	12305	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-applyBreakingRules.docx
+f32aa559a79ad53685961d7939f04891a92b58b4bb3c4b8e26a5e21a89d9c6d4	12306	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-autoSpaceLikeWord95.docx
+51bebc4071090463f673140eaf10ec7582fb197d49028b66b6480646c8e4f476	12313	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-balanceSingleByteDoubleByteWidth.docx
+c0e8f6a6e532c53b13b396105f67adce99c26e049b1acd293b6044453577253a	12305	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-displayHangulFixedWidth.docx
+a87fa68cff311ceaf7a45ea23035ebbe1f1d1943073950504fd591f7e318eefe	12308	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-doNotLeaveBackslashAlone.docx
+4ea713ed13964ca447afa71299dc30b200333cdbcdc3e6b12f2989758a75cde0	12311	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-doNotUseEastAsianBreakRules.docx
+54a3d6e327bae9427d8fa3c256c1f7fcf760778119d2dc21f2e98d7e453823ba	12310	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-doNotWrapTextWithPunct.docx
+3e5af46a88451f7e5b44ee4e21bed2b7d53e0d78ed1867473d528495560121b6	12306	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-lineWrapLikeWord6.docx
+65f95849405201ff5339340427ce248d4979d13822e8b7aaddbc3ae96f0935ff	12309	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-splitPgBreakAndParaMark.docx
+d350f8c028dd4ea0969fbfdda798695b0646c45d9b9357e24826e47dee4f8bc6	12306	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-suppressBottomSpacing.docx
+5c013902b7d9d757a4649cf5186ef83109618865ed6c4d42fd8c84ae4406d1ef	12309	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-suppressSpBfAfterPgBrk.docx
+69a87cfdaed47364b8902098305e03b8f35381ae0faeab1fa6f1590fdd0e9760	12309	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-suppressSpacingAtTopOfPage.docx
+71201c4175d9f5ca72ed83273c1088a7a8a3ee074000f226620dc75f08fdb6f7	12305	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-suppressTopSpacing.docx
+bcd809948cdcc2ecef8726f7f22f3332f4bc885ec5983e7d73f8ea4376065d43	12307	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-suppressTopSpacingWP.docx
+a3f77cda5b18f536f78acd4e27bdd9d2de3d04190a693764ea5c8d8d5df7611f	13056	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-together.docx
+6ab5c9bb00fff45cf042f7226d9ab718d6437e5cd4d9010e6dac0c3f6f1a964f	12312	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-useAltKinsokuLineBreakRules.docx
+72443e130bd7cf62525c5857dfcd751020f14080ffa70377fd835b4f5f340b26	12301	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-useFELayout.docx
+bae6591dd16e580c7930fd58bec01ef41053a82035bb6c03cb10896239fa1e42	12311	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2-useWord97LineBreakRules.docx
+7e3c20a9232281d2efa9b69e565a160b9beecf6fa0a0b30f3df28bc409adc257	12290	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-compat-settings2.docx
+7a93a9c598d6970f65ba8ea3947027565296000095a6b554c07c9b6e1e159703	9800	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-contextual-adding.docx
+144d058189c3e3b17425f3efdc5404817235acd6a059c45c0632b31489ea3b3c	9779	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-contextual.docx
+53e3630370141efe14c7f939adbb027425013953cfc3d4716ee17e4998033c78	10179	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-continued-endnotes1.docx
+ac04156f4c4070bbf846b7e3917c8b5c1e0d426d5390fd0ceb57ed482aa7f4a9	10366	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-continued-endnotes2.docx
+f6937a88ee61577fd51cd271a2ff1b271f5961982881b7b59ffb75ecd6c29a3a	10469	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-continued-endnotes3.docx
+fb0c94747c76b9a858164b5f3f4f3dd150145e8de9c4292f000a05f0ae0ac95d	10459	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-continued-endnotes4.docx
+7c776905984c143fd833acb31f097e55eb70f7205d93ba47cedd7448fb8b2440	10297	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-continued-endnotes5.docx
+e95bc9f9325ba1177e1918257a265d8095362a07179abd8fb41cea8849dfd7fb	45053	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-equations.docx
+f1d133606c50a839e3709f0f44ab754eb7f2a52ca1aa98e7bc9669e691a5448d	58829	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-equations2.docx
+0fdd084289ff7318a266b3947bc8831cfd4106ff536caaa9a054456035efb03f	244600	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-floats.docx
+52c89d55ac1fe954e8ed9fdaee6cb34f9e5eed053eba37ddbb1f20c744810f92	14265	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-floats2.docx
+e924e1819d873d8c7f39200e3d604b85d7ef94d546e53ebdc8707b33916c6f70	10964	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-floats3.docx
+15e0e5fac73545c3da78f0367eb0aba5bce2c6f387ea48af6ba26143214f8075	10199	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-fonts.docx
+477b60860979a11843fafa4a05132dc311790d8077f251a0de0c4172cb58995d	14437	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-footnotes-in-columns.docx
+0c6b7d405155a81e4383cdcbfc1c4180a5820bf36e82ac6fd6cdadbeff1d77b9	170446	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-frames.docx
+ab94b38c8cd6e7f99428f13b7d4a4e15dbce079e8d919d45fc0c4089b99ae5d5	22772	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-grid.docx
+1abe1aca2f243b62b318d86a15feea63a3bae556cf582d2fc18e31d20ba9a55e	9825	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-grid2.docx
+8b9a6700af51f0216ca2b32e0de6d925aab2a4b3b5e9d0a9f7f450f9b6d06b68	16425	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-grid3.docx
+d89354f071be1981b3243dbe37d29d3a2f6231b93ee5e89f371a2a7a16a72a14	11648	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-header-columns.docx
+ff43b49690cb9e4841115d5434d533b3ae55c24818c5a0c972daa4a8a0af71d2	11960	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-hidden-paragraphs.docx
+4682d7585572999a2456263b6ba7e52ea03cfd172e1eee0f74197a6e0c077db8	11515	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-hyphenation-limit.docx
+58062da497b79bb794020cfeb13341e304f8b67b8a759b37070ce2e8de961a7a	11507	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-hyphenation-manual.docx
+6d308c444beca93861fece2689213df80df99ab8c71bbbf05af9ed06b531a992	11501	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-hyphenation-zone.docx
+0b7b09aacf1b2dfde66669e75d9ad5878cf46e6333bb42cacc5fb98def4510fa	11491	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-hyphenation.docx
+e49f155cf41d5dd1767a43ad80e268ed813344a54c58e23d7cce411ee2d82b4e	17799	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-imported-bookmarks.docx
+481e2ad05c8d5b051c6c2c46f9b668ca165eb757ff5652972b11f9cecc35cfac	196129	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-imported-documents.docx
+e2b6acc287b8262513d879da99850c2ffc8265cea49d64d87a5342aaa2040244	26970	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-imported-ends.docx
+4602b1bc8e2260abc287db6723e2a9e06c1e31742c32619ab21101698d637de2	42172	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-imported-parts.docx
+b5654f091dfc7bfe76b7b1b0547492f60dba30f86ecfeba1882381594bc8fd24	81239	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-imported-styles.docx
+c6b107018bf57005769a48811e210f788f0a40f8fc40a90d0d9031f03d4a05f3	9930	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-imported-text.docx
+414be55a63e8d095d266eaed8ca2f7c56dc9c171dd944c52190efc12c9f4fe85	161200	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-italic-widths.docx
+420c7079755cb549c4ed73d2efc56f77b852a98f22a7330b86b982bd10ed87c8	16925	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-justify.docx
+e7a740a6b28cb1140252904b5318a5c2dfe2629b5b64ad1c03f567a72e69828b	15541	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-justify2.docx
+93ea2381c75a9cb0c03c9086b30b3e5d79d102685c5220345aa770eba5b2c55b	11961	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-keep-together.docx
+176b21d4621760434378e651c1ad7a8bb6ca84e805c2c6f4cd82845b0e89c556	1146312	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-kerning.docx
+77db5f12a7840194c3b4c0588240651076de96e2208abc18d29dc51ac1fd6e96	16730	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-line-heights.docx
+1900bdccafeb2d8d980b212fb12e35451395f1f4f0b62a864cd7801a2230f3c1	11309	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-lists.docx
+4c3f42b622e9194d03cfab0f2676797b49b85eae9aed3d66d51607fa5fa29fba	10276	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-long-words.docx
+4270b1ce65a05704ee247bcba6098bbf995af3ad2e1f34594e71cd2a090368ab	29574	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-mixed-heights.docx
+428133c8ef259ffe10f8a3f60fb25d4213719b290cf2bb87766ba9477d442d8f	12550	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-nested-tables.docx
+7af5ee188ac62cbeb9aeb294678475e0c26a5762f5f523cf6c260ee306b41118	9977	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-next-column.docx
+9297313c647d50dadbb7995003e9f86dc4416effd8fcd60859d60fa00e13565f	13416	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-no-prompt.docx
+a2dee003566cf043f93c2b4cbc71ed26cde03c0f23e712c93bc2c790187aec4a	11860	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-page-fields.docx
+92722057f7eccc95789e79ba202dac9dbb04be2ba247ded41ad83f3146bbbca3	77513	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-page-number-formats.docx
+b6c1facd666cf6d2955f0d0e3137237e88e127e89dbb6ec212896e71939cf475	19957	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-page-number-formats2.docx
+e34828d0918842c85e2072b040433562aac6893844bc90e85fb4141bca9ee9d3	14652	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-paragraph-formats.docx
+5eb7873a377f2d03e59a4bcba41b55e009c1db9c45ec6418de7e4276de363731	27652	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-positions.docx
+9cabeab63c8ca7e713839c4c8c9a7f7c58148aa77453cc9e46787ed2ba164a88	29588	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-probes.docx
+557facf5d25099658e5c61ac5e32c8b0831c58c3fea97fef7b66f28cf09bc6a6	33343	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-rules.docx
+156ed0faf1a0314be91d91c60f4229ccc66a7aafb33b72114752202391a6740d	12358	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-rules2.docx
+00ca9414c90ae9ebd78a636362b02c27d74b7fa5a13be7b10900fc66857d4182	15018	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-run-formatting.docx
+fd53e9beb7014e77512e13175d0d00a1febeabd37a3e8d9137659caedcccf80d	11609	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-run-formatting2.docx
+e7c3ae51237d2eb188df5415d2c5900ed8d22f8664ad6658b1d3ce4e3950db8d	13282	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-seq-clean.docx
+483a137d9929d00be8188160904cf8e969b3614d3f47c695a9e4d7d4317257bb	13124	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-seq.docx
+c823b74ea102305abc0078539a1ff64cf3793abb1380d2d515808d6bafadb1f9	17089	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-table-formats.docx
+2ae719553081b4a54eb76940abe648aebfdd827d6da2a3f1673e552610a8c93e	14261	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-table-formats2.docx
+ed38f5fdf8e8527119d906576c4077449ccaea36e43e0ddf96c5c1655489d5d8	10808	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-table-widths.docx
+5b49492d5fd302e995e4b8c11d95a83d4aaab3867843b6eb18bea621133d1675	10506	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-tables.docx
+28c21e65fd09205868d023d4f8c3dcf6a9cabeeb15407c3431ebd236a94c856e	12327	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-tracked-changes.docx
+fd3002a363763ebc6104d04ee4ccc9cb06ecdb3ee9dfb9bb0fe60b56dd3411e8	10535	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-tracked-tables.docx
+fc362bee87ce8c05b5dc47d22e6d3f617f32901c8af20699690b4178a31e1b75	9863	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-tracked-view-insdel.docx
+c2c82bb200a092e8cd50a51399f2f8b389aa18e10e03a46bb23881d87e2b127b	9861	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-tracked-view-markup.docx
+5dc87fc787b2f8216fee2c3e432c42143148211801db08a5e6fb4e7fd0c3cc29	216854	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-unicode.docx
+eea43b947e6c0a6b6c3f73b2793d323b3160b419266f97315d54de9afb64d9b2	647829	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-unicode2.docx
+d60f35924fac0d2b8098dcad6d8fe66968faf363aa2449d71e5e3b6319ed9e05	15826	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-units.docx
+5bf07910671a8679dd4f5ca8215851fdca8a02e0d435e901b7ab52a7dad2fb14	10356	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-units2.docx
+b8014dcd72ef8f9fc6c466df99e76c490cf75ff19d997833597ad4df03376f35	14407	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-vertical.docx
+416c0b2b86a009ba7abf8414382d172bfecb82ba40ee4d454854f76d7090c842	94419	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-vml.docx
+28be2513658d8773957b7ead5f22b632ec75f6d280ddc76950b752798e29a5dc	10413	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-endnotes1.docx
+3ef014cac7599f9bb024516b648fb773b9342909b2c83d1aef3e3179c9be6691	10416	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-endnotes2.docx
+7437b37769e77c4c47be377a08be93cac5afa1589bafa1e1f9076bf70a96d773	10417	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-endnotes3.docx
+3d3e5409811d0fe6470e79c45655b130884e16a09a3de6a85af46aedd4642c06	11660	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-fields.docx
+42f88432ffee83ed9e86abdc4ef0cd72b6022c18f90159e04ce9c6497d29dbc6	11186	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-markup.docx
+9ae0238664dab426bd732d5ae4e83f35e7da4e24fa050d5d9ce63124c1334640	15010	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-notes.docx
+1533f185a51d8a0f7183efe74b7686b55c4338fa8796340ae0c79e4e9c01c34e	19141	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-pages.docx
+fbee2f2c9dbe14e7d84caaafdaf8cd79e289fc588b49db0da92e3487b392db62	24568	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-sections.docx
+f7fb023097749210c24eec4887650e68e1b2c581853c76d1b13a895e850489cc	9899	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-sections2.docx
+e481275497acd8810be6ced8000edebf59878910a9c188115e8c7f988c800122	10720	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-settings.docx
+aa8e37113ba97d812cd8412d587c4f2a177001a34f723951235e10fff4dceef3	16560	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-stops.docx
+04b390ea7b03163d7c2bc6f179c450099d35f70bd50a0c5c7e4e953c24dac8ee	12872	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-tables.docx
+76b77ecb5b65196128665e021e709d044d4c1c47f81101597519d5a33fb20acf	28349	other-producers	ok	-	-	-	MIT	docx.js	n	scripts/layout-probes/word-watertight-text.docx

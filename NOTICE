@@ -1,0 +1,30 @@
+stetdoc
+Copyright (c) 2026 Clauseo
+
+This product is licensed under either of the Apache License, Version 2.0 (LICENSE-APACHE)
+or the MIT licence (LICENSE-MIT), at your option.
+
+This file lists notices that the licences of third-party material require us to keep. Test
+documents are recorded in corpus/SOURCES.md, with their licences, before they are added.
+
+Open XML SDK schema data
+------------------------
+
+xtask/codegen/input/ holds files copied unchanged from the data/ directory of
+https://github.com/dotnet/Open-XML-SDK at commit 431ab05cf160248cc3885a4a766026d4f8243792.
+cargo xtask codegen reads them to generate the tables under
+crates/stetdoc-core/src/schema/generated/. The licence text is in
+xtask/codegen/input/LICENSE-Open-XML-SDK.
+
+MIT License. Copyright (c) .NET Foundation and Contributors.
+
+Open-Xml-PowerTools revision processing
+---------------------------------------
+
+The semantics of accepting and rejecting tracked changes in crates/stetdoc-core/src/revisions/ follow the
+RevisionProcessor of https://github.com/OfficeDev/Open-Xml-PowerTools, and the algorithms are written again
+in Rust. docs/design/revisions.md, section 6.4, lists where stetdoc differs from it. Its test documents
+(the RP series, with the output that it made for them) are used by the differential test in
+crates/stetdoc-core/src/revisions/tests_oxpt.rs and are recorded in corpus/SOURCES.md.
+
+MIT License. Copyright (c) Microsoft Corporation, and Eric White.

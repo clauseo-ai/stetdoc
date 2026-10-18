@@ -1,0 +1,142 @@
+e42406910e1a87959c5782bec05405973a8793ac616f00d8ed25bae39828d2f5	15903	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/Bookmark_crossrefs.docx
+016a83aed42cac85a323b303e6271b53ed2113e2bfea885bcf7a7f05d5e19120	185129	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docs/Creating SmartArt with docx4j.docx
+e8faa6b6d556edb36e687b7ac7d4e8963ffb2f80f294d170af30d3f65f9bc706	490207	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/Docx4j_GettingStarted.docx
+9a772bc914fea3ec2e2837a63797a1bf56e014949dc8dc05e0fb2d852300ec68	37616	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docs/OpenDoPE Specification v3 WD 2026 09 18.docx
+a527adfd5e5f495a07e69e9194cc86aa39c1a0fee15f60b831235c12b9cbd051	43030	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/Convert_Out.docx
+eef8571d73be3f628429dfd1e8c6e971c4a63631d2a2d5b7e9a7e6d099870d82	37012	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/Eastern Arabic numbering.docx
+de8d73569771b4ff0c872629462ce839a8925f4af82290f760da783c460c472f	31610	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/Locale-Styles.docx
+bcbf6b7f1c807f85850253f512c603c04d16976f044386ca4dbd75c5840b8072	89858	edge	ok	-	-	-	Apache-2.0	ONLYOFFICE	n	docs/developer/OpenDoPE boolean semantics.docx
+25ae8622baf433f6165cb2638b727cbb2ad127b69a7682b3b29fb1fbf75d7cb8	33733	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/PDF list items.docx
+1a3a601569043457589da0f617a302f0520fcab201865589954e2402d01f0a5f	133635	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/compatSetting.docx
+d3a9fd32e4766ef88bb0276baffa6a4c4bab97a115a06e9c631550bc9a114203	96416	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/rFonts.docx
+0926dc45f45b7c427b8be7f7eb08956e1b9c793b394a4730f340f2bcdcb91bdd	26839	other-producers	ok	-	-	-	Apache-2.0	docx4j	n	docs/developer/themeFontLang.docx
+ee6a1d531fd2b9239d4aa9c7ecb97a61b8efdda070030c6fdfc25b010ed5199f	303993	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/developer/w15RepeatingSection_cf_OpenDoPE.docx
+621014619dbaebb287543f123d448059e6a1675a288c20a9ce82af12cbe9a607	406287	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docs/headers_footers.docx
+9c00a0d4ed2ef8723a085bb8551b73c6761ad89227e75bf0b1de1c67e8026774	20645	other-producers	ok	-	-	-	Apache-2.0	docx4j	n	docx4j-core-tests/src/test/java/org/docx4j/model/listnumbering/NumberingIndents-OUT.docx
+4da1cb8eb18e1855f9e019f4c59cd226857e551955b15a94561158c804950879	20658	other-producers	ok	-	-	-	Apache-2.0	docx4j	n	docx4j-core-tests/src/test/java/org/docx4j/model/listnumbering/NumberingIndents.docx
+8c9ee4b2eeebd9c2c2cfc39e101eda96f7a9ef763a538bb6fcb8add70974c49f	14495	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/java/org/docx4j/model/listnumbering/article-section-NotIsLgl.docx
+7bdf5d99badb2aaa29179ce2d4e4ab8fd015f0e4f2ac5c3df6151142df803dc7	14383	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/java/org/docx4j/model/listnumbering/article-section-isLgl.docx
+44fff250b0bcf8da7fb9176e8544e43e2cf2108ce1d8074604c73d04cf7a5f71	16455	edge	ok	-	-	-	Apache-2.0	unknown (no Application)	n	docx4j-core-tests/src/test/java/org/docx4j/model/listnumbering/numbering-stories.docx
+c667a4b291adbfe1868d38b0a43c9d127a7fd4aea020afa89a4835af595942b0	14376	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/java/org/docx4j/model/listnumbering/startOverride.docx
+205634d8c232f8660754cc258c37f15b22db6d5d7e4a525771e74d84db594ced	8378	other-producers	ok	-	-	-	Apache-2.0	docx4j	n	docx4j-core-tests/src/test/resources/2010/2010-glow-then-AlternateContent.docx
+a7c23b97f79fd58b20542da3ac73bc079ec5566272bb1afde15ff1ec4c470e0d	8256	other-producers	ok	-	-	-	Apache-2.0	docx4j	n	docx4j-core-tests/src/test/resources/2010/2010-mcAlternateContent-MDP.docx
+8153ad9348f89f0adc28d3613cd1f3fd404625663a847e8d707f34235e1c643e	22550	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/2010/2010-mcAlternateContent-in-header.docx
+0f91c3125d9a9c7a88e58ebb8ae22aee7245d5daccd12acdbaa20ca6f2b27c90	14501	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/2010/2010-mcAlternateContent.docx
+8f703c651f33ea312fa20e25d6895b530c5619c6d9742e34188de3f91e1dc565	13502	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/2010/2010-sample1.docx
+8ae530b3462293b62bebb9435547cb552e6ee06e482c36bb6d9ac0a0b5740bf1	32032	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/2010/DrawingML_GraphicData_wps.docx
+a30030976d5f1dc00e524be24f98b0759fa0a5e8835d82b1d7647212cb396042	16530	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/2010/w14_mcIgnorable-in-other-parts.docx
+61892c44d892a47dcb893338c3cfd3a651d9a8426497fe2768bd4e4f63379c04	20348	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/2010/w14_texteffects.docx
+2c60ca60ac65fd746de4915edc41ce7412cae1852efb7909884fffbbe8a552b8	4548	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/comments-one.docx
+08d1190c4eb81bdec3a3fcce0cfbf29ac1d9d5798f22594eb212420fb85a7699	4589	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/comments-two.docx
+0e193ff4244d2acdae2c6fcd2aa170e6b60286b08ff984b4137daf9d721bb0e9	6275	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/header-section2.docx
+14d09dab85752b60cbcb85bfea2b3ce6d9aa5c0e44ca997234e7adf12859222a	19762	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/header-simple-plus-image.docx
+299d0b5404ccda9637ab61fcbd417980303685535fca0fee5c84cdf3005919a7	8402	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/header-simple.docx
+eeac378f86fffbf749a686aae7d26f5fa9a472599dde3e35c1ef8d07163c14c0	3739	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/hyperlink.docx
+c9f60c09727e2f8e6ac6375f3c0290899a7767e411a2829808169bde2c04b22d	10190	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/image-png1-scaled.docx
+3358be3525f6b089105c269d6aad5f2fdb045ef88e0719534dbd4756da4afe91	10178	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/image-png1.docx
+cb15c507296c5102e0b367c0692ed1e1f35943cb7ea063208b02f7d86cd64bc9	14778	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/image-png2.docx
+44fb67bedafd07615921ca8a2185db499e1016c61a75423b1c22ff3a7478c6e2	17213	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/images-jpg then png2.docx
+a33c1b486c4f9558ff7ee4b7043a640092fbc9196a75af68f6faae75026dd6db	17214	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/images-png2 then jpg.docx
+e8bf2a3cc57961579f11aeea49f51fcc7fb758940533be495776a39319055215	3555	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/paragraph-single.docx
+184d534082a0e1ab4d661f0caa693182526f6a54734ae62f5ee53ec83ac6d502	3563	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-core-tests/src/test/resources/AlteredParts/paragraph-two.docx
+99d247b6c7b07c501ba2182d5db764fe3cc2f88447d622468bbcf3fe55dccee3	11024	edge	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/HelloWordOnline.docx
+d482ac9efc23413eebd4b3b5e2f3ee2328de90aed7f9f405584495525b8a5eb7	27274	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/LegacyForms.docx
+69f9310075473af803aead55e68a78032f8cb2a70e6afe16fe9fb8691c4749b5	12982	edge	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/MERGEFIELD.docx
+82ee2b910c6aa2c32626cd0e9e16b75209ec5e59ada3239aae404dc7833cb717	22011	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/Mac_OSX_Fonts.docx
+bacc7e588563ef49f0f5ba6c602901e64d9dae6ff0bf043d9ab4acbe94b59891	26135	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/NumberingImplicitNumId.docx
+49bbd8995906644b629a1161c3299aeea7e644a0240b5953a26a968ab43b1aa0	18568	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OLE/create new bitmap.docx
+2559c059aadfba40786087f268abbba223d2a268f9b67d81542711e4d829e1e8	46221	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OLE/create new pdf.docx
+e190fde81df7eced15c549d2cec4b66d1d75d91556e4a4f5bb5248ed55b86e89	46068	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OLE/dragged pdf.docx
+811110eb63b7f62ae0c0c79147ce901fd0b36d279f372b1f3755f0b59de0b99a	17352	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OLE/dragged txt.docx
+6d6953c9a895933a3f587d4a1c95450760cc3eb217841077c64c0c24977c6f62	23772	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OLE/inserted doc.docx
+641832f6803d066df971e8f5857a9434e297bc0091c607fc8e3c91ffe3cdb188	30272	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OpenDoPE/RptPosCon-issue690.docx
+8abeada1e261a0fb09ff03fd36622eb84276ee8635e0032a7c4026910ba8ed70	26254	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OpenDoPE/duplicate-repeat-diverged-binding.docx
+fbf2d5b320d11b434aadc4ab5388af5877c9a5a74a1a65711f6adf0eb41d609e	20639	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/OpenDoPE/hyperlinks.docx
+37d38fc35e7df3a73688587369b01a8c5005df3e64cdf69b6e40503715d328c2	22964	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/OpenDoPE/invoice.docx
+395ebe2acd6df1543cf66c958a5822846576b3136825d840403dea4163983564	26418	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OpenDoPE/nested-condition-rptposcon.docx
+e7d57d8672def193af66515fd2e423ec80ce40e2fb4aede1141b61b504dc47a0	26237	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/OpenDoPE/ranks-last-binding.docx
+ac0135374b08683f7fd3951287b968dbbe9200876d61899c5353d5e36e6936e9	22377	edge	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/OpenDoPE/repeat-containing-JAXBElement.docx
+553f2ad4f7d797063b3719ebe59983701ef7c32c9890d252b656bd0577e56fff	27631	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/OpenDoPE/text-bind-parity.docx
+85ba6d56dc8484a0f98242ce099b20ba4563217d5888da244fe9959294cd49fd	24067	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/anon/chart.docx
+49a83990f5aa7ce7b1533d6ccba242b9161d50c3a08c5d2893cc09ba5e737384	35105	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/anon/embedded-fonts.docx
+84dfbb765e6fbe6f1b81bdb96761863beaf6f9feb15db3208585aff07a87927e	17387	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/empty_p.docx
+162eded65dd1863a4cd6878e2154fe4bd6644ce6d5ae8874f92f3d2ca0e84258	14254	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/fields/separator_missing.docx
+c5763a90ceb7fff40387ee8b0af5c1f52b829fbaf252eadd4e28c4cd607d6be6	12760	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/header-no-rels.docx
+6a98e04e00c63381c066d821c03652d9e72d00332956bf32f3cf73d4d08e212b	19659	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/different_first_page.docx
+ae1f4ec515269e8a738fa8bb7940dbbafc062e106eb3e1f65975813cf2b937e6	18548	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/odd_even.docx
+a79ad8e70c80f6ae790d35fcb0f502dd24909b50aa8b9aacdc6390b2693e6c46	19029	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/odd_even_different_first_page.docx
+1e349e20294885bfc8b460649f7ab97e160bc7f35ce2512b5fb7d0dc6da9a6f8	36390	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/same_as_previous_numbering.docx
+e013190a084877201988dcdc3eac953e24fc97cb1efed1a0bef7891cac21034e	20525	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/sections_multiple.docx
+9123507c5650fcbe66046d79158ec95299d65595e7b4e58a0f6fae6236b6414f	17510	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/simple_hf.docx
+73e9253544f5e04b1dc785599a8a1b36f58f116a3e7904b6dc6d286124da9f94	20383	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/simple_hf_long.docx
+c693e100265f201235ea821f6172bef460cadc14f1cb244528b18e25d4abc069	17807	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/simple_hf_margin.docx
+aad6d28f67a7a4073b6bda666fdcd2cd836c679d6cb53e3a47891b2771ab4b3a	17685	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/simple_hf_negative.docx
+6a8e42ab36b1bd0f764dba4054b5ce058963fbaf5589c8ab89805d466f14a3a0	13734	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/headers_footers/simple_hf_none.docx
+59cc8d4415c125c9fa1a9dc4d0535c903c5dc1db357a3ff3e142840e7c8c2978	12523	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/hyperlink_dupe.docx
+513c4f729e36131664c8287fa5dfd07a7347564a297909486b5c84e19ec28f46	19471	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/indentation_firstline.docx
+9a051c88eab5f6b985f2d07ab5c856396f766f7ae3a31f28e35089a7e165b249	18206	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/indentation_hanging.docx
+02e1339660363c991a5af92a5b1601e7f67bfc263609d588434e2f65c6632f82	1111267	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word (via Outlook editor)	y	docx4j-core-tests/src/test/resources/jaxb-binder-issue.docx
+122f53311702e32affbc0ec99ced129990e6728a9b4b6df30f5684f73a20247f	55625	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/loadAndSave.docx
+12cb74f1cff831562f4f435142588ddfe45671479d1442294878d72bed064795	97667	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/metafiles/docs/EMF.docx
+dd853ca539219f489369261c31d297f6310a46e3ccc20ac90a9916765c75494f	174583	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/metafiles/docs/WMF.docx
+198f98953c82f1be499c98dd39e1ad0b27cb8c9ec64bafdcda65d4198201e516	31832	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/multilingual/arabic/arabic_align.docx
+15d77d6eec68ee3f6e40ba37cfee73ea517d775a1a83b3bed2dfeb236847d65d	16976	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/multilingual/arabic/arabic_numbering.docx
+599533082406a29a6238b5a1799c5395d884a8506feafd455fe91d4554218b62	20434	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/numPicBullet-word2019-pict.docx
+5789459f7a919931d64b0427edcfecf926c0b0944c3928ad136b3505efa8cbbd	29898	other-producers	ok	-	-	-	Apache-2.0	unknown (no Application)	n	docx4j-core-tests/src/test/resources/numPicBullet-word365-AlternateContent.docx
+22ccfcaf4d6db90b10b6276ac2b9e0a30d4e4239b6f54638df87dadacdbf3c0a	18923	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/numbering_indentation.docx
+7a2307943052016271a1397853156123fa82c7ed2410dbfcfa984dcdd0c6f697	20259	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/numbering_indentation_firstline.docx
+5e25609a5a5dbf83981ac3ad2549121f51aa8448a5b26be21dd3904a1c9c8132	36691	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/strict/strict-chart.docx
+ab7b91701cfb3b069b287d2ad1c47493b4c0f94820fe79559606d7c555586f35	13754	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/strict/strict-math.docx
+b54ddf707f00656da0f6816ac62f40efd18554a601f818bf0cb395f8a5d82249	143069	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/strict/strict-sample-docx.docx
+773cfbd03e80502ac25a1273522f61f15f5508163151a2286f26781eeb7e2e7a	22416	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/strict/strict-smartart.docx
+bb9e7b6325ce5fa89fadb4b08b8849e05257c93d0d03a259c13a418f195e385b	17241	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/tracked-changes-equations.docx
+11e16acb10335f770bf0beb3596837c1df8cbbaa5ed5855bdf4132202f664569	58948	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-core-tests/src/test/resources/vml/textbox.docx
+c05804faa4bb343894e85902173eee5546188ff6cd6f49a239d8bd8b29d22a97	10201	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-core-tests/src/test/resources/xhtml/inheritance.docx
+fc5a4d709ae885e68b4a64072825d94237b3c3246e868ecff4cddd6d2e144ea2	19981	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-export-fo-tests/src/test/resources/tables/tblHeaderTestOne.docx
+768171fc2d7dfbb1aaacdf0c2203f2d8137052511727ddb36a757349f283ce20	21421	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-export-fo-tests/src/test/resources/tables/tblHeaderTestTwo.docx
+3f418838fa399e31d8a4d79d25f5c6520d074bd1d27d1de2f8864fe2a511cae9	15908	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-diffx/sample-docs/test.docx
+d439c0bac46039094913353f31fe3646b68c218f99078a35d26b55976106784f	15962	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-diffx/sample-docs/test2.docx
+1af0bba159668ec3ae60b7e4d5831084cf1e547f5efcc2160545d6354d1541e8	13666	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/Croscore fonts.docx
+22e4bfd36d0be2ed7f000c3ef9ef1dc751cde5c18069716ba46ac475c32e2578	13666	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/Crosextra fonts.docx
+4dd7e8cd2d620d8c406044a6161bed27abf10f48d97ddcfd0fc618515d405f84	1212630	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/FontEmbedded.docx
+00e76a5f41aec4c76133b89312337952016bc73ff12b37c29d5aa07026c35d51	13663	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/Liberation fonts.docx
+a94b4fd3b147f3a54f800ee42027d773ef756b99476318b3a486756aa8b76378	39617	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/Symbol Fonts Iteration.docx
+1e671e24826e833afb446ef2be4d21051fd36b91f8d0cdbf9ff149db305c0da1	76840	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/Symbols.docx
+7acb6260223ccb548bd374d02f9d7b80aa3fc37973cf42560a95c1fbadb15aeb	18697	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/Word2007-fonts.docx
+eb96d4f2fc4ad23af9aec0fd6860f7e07ce43387030bc3322624eb2f927e4feb	19852	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/carlito etc.docx
+e562f2a20d77e1c21b7c83717d876e24300b5a90b42d034b80fc71896f6c1f87	17320	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/embedded fonts/embedded_w.docx
+ecf2e0d863a7ffd486d28ca8420e005f52e0ae94d0104ec74c88ada176425417	142920	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/sample-docx.docx
+50ea2fd62761aedc66e307c30ca1191a4e6baf8fa9d8d849ba1d9c20eb5921f4	433587	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/tables.docx
+bdc80be35bfcd38eef6676c3b7bb08c290cf8fbfaa79709ede5b48d791f0408a	14830	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx-export-fo/sample-docs/word/textbox_alternates_contrived.docx
+28050a08ec79f88c78c3eacb697c616cd1eeed2278b374c1849f08b6540e2a40	450778	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/Docx4j_GettingStarted.docx
+bd2caf7d4002e976cffea07f75d065b83f0a0f5c92aaac567220cb0e125c87db	1106796	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word (via Outlook editor)	y	docx4j-samples-docx4j/sample-docs/2003/word2003-vml.docx
+9908aff8cfda65aa77bf963b2d129586424ff81b511e7172bb823d6b2474ce23	16940	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/2016/2016_image.docx
+820a2ae3118f9a2d05b32ee5dccdd0078165815dd715a2aeaf547f4cde5e611c	60991	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/2016/2016_image_with_text_effects.docx
+0115732f11677776fac8a1a20b7b0dd8badff306feae64e5ea0b39e3a188b1f4	25403	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/ArialUnicodeMS.docx
+4631e53aa06190f94193c66bd11a70356d3b2f2bf7d15f7202c405eb8c8f75ec	148128	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/DOCPROP_builtin.docx
+7bdaf60ef968ea43882309b48677229c7d194394ee032633a2252c3f4f8536f2	93161	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/Headers.docx
+612570a1ef38d8bdebbfda2c38498a9b904374e7e8fa324eb116861dc0ba8ea7	185779	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/Images.docx
+e71f89dbe9d082c0b692504ed42081db1e812d77b87fe5c147a49aa90a67ce31	13577	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/MergeWithNext.docx
+c8691809ca9d25f93e1b9eb5e5e34e2efb9435ce744f241174ef723e1ea0bdfa	18168	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/Normal.dotm
+d3c9c8fdfd47c643269a5eeb6cb2548af9e5f949a50ecc3440a654eac66bf8e9	13630	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/chunk.docx
+b3c44a4d03e9c6c008c2f28168bdf3856f97ffaf7470e262b5917d589fbbcb86	169322	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/databinding/WordAddIn_walkthrough.docx
+e656e6a889a9576a4ea408cc4d20ec8f390f93b8819332d849f845a6722aa326	22700	edge	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/databinding/binding-simple.docx
+6a4809417a5fb9544a5399cdbdd5a627c4b3713c83129d81a934b5efc663a901	21665	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/databinding/component-subdoc.docx
+a5863bfcc48b5abbb7738e3eb14078f4f2686b3ccdc7bdc8f1ded5546fc97d6c	35693	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/databinding/conventions.docx
+b194989f30d06bb21ba1cba09ee7c0f2f609bed2f6e4dee99af0ca5304fc3d30	20955	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/databinding/hyperlink-binding-test.docx
+7db84f21ed07484ce9fa95d795f78fdb6d1d60537832d1c5bd9e53d98fff6f32	49797	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/databinding/invoice2013.docx
+15f0349094c4d8e91bedc1df842a006d4b6e12a2cf3ee3dc4531f22ea8bc9bc4	29474	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/databinding/invoice_Saxon_XPath2.docx
+bb1002142e417153697f6dd295dce61e23950dc6e389028f5cc65008bfda37f5	20119	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/databinding/non-element-bind.docx
+bd2a781e05a5bd8c8fedb3fa435687e23d2ccd043edc0f1b1d5ac3efd3f54ebb	39415	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/databinding/picture.docx
+9ac66331cc12691a52c8a585455370c2e949f338f4cdec452354c35aebecc88f	22140	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	docx4j-samples-docx4j/sample-docs/decracdiscrim1.docx
+c915cf971f3376b033880fc42da45ac19b5a56855edafe5f254553948287b8b7	10780	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/docProps.docx
+93ab6b3ba56c92507f28c2aa92f5cbca376ae999387572ea7cc24afc2b4d9071	11945	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/fonts-modesOfApplication.docx
+e06670ede7135c32ef404ae63ee072bdf466476608002def811f6d2c0b66181e	13972	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/hyperlinks-internal.docx
+f527fe32f4bf9e152d86a8e7f1971033e7404929c624e3bdc26853c6a0cfa25e	142893	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/sample-docx.docx
+d0c53cbd31a1044fe7699814f26f035b44a21add9c0086757ba50b804bccfd13	142888	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/sample-docxv2.docx
+efab53d650524443de4c6e0203fa5f5e6042286ab679d1086299d08a91f5b3cc	16218	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/test-docs/field_numeric_formatting_switch.docx
+f1c2bab7ac6eb58e38e1ae4245d31fd306f75bc319c118385a11b8abbdfe8a49	34793	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/toc.docx
+d19e09dd6ce93d720914b0b23d481e12b5b9dcb619f6fc0c9657b2bd0a73cb42	16840	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	docx4j-samples-docx4j/sample-docs/unmarshallFromTemplateDirtyExample.docx
+292fc4be231bb5b240251f182605c3c31e15aea1ec59bf5521f4b9bdb02fa247	3135	other-producers	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	docx4j-samples-docx4j/sample-docs/unmarshallFromTemplateExample.docx
+5b1ddeb9ca7a500c72f499df77219b0dd6d0f1daf739221b10ddfb7613c13163	12249	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	legals/docx4j_IndividualContributor.docx
+d1847304dbe43e7b0b12c1e0762aa4e3fd2833182e671bead29d683de3487efd	11490	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	xsd/odrawxml/filenames.docx

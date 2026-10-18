@@ -1,0 +1,34 @@
+# cargo-deny policy, run by `cargo xtask check` and CI.
+# Dependencies are minimal and vetted: licences must be compatible with this project's
+# `MIT OR Apache-2.0`, advisories fail the build, and wildcard versions and unknown
+# sources are banned.
+
+[graph]
+all-features = true
+
+[advisories]
+yanked = "deny"
+
+[licenses]
+# Permissive licences only. Add a licence here only after checking that code under it
+# can be shipped in a binary that users may take under MIT or Apache-2.0.
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Unicode-3.0",
+    # ISC is MIT in fewer words (permission to use, copy, modify and distribute with the notice kept). `libloading`, which
+    # the napi addon uses to find Node-API's symbols at run time, is under it.
+    "ISC",
+]
+confidence-threshold = 0.93
+
+[bans]
+multiple-versions = "warn"
+wildcards = "deny"
+# Path dependencies between workspace crates carry no version.
+allow-wildcard-paths = true
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]

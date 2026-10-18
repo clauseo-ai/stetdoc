@@ -1,0 +1,127 @@
+{
+  "comment": "Pinned input of cargo xtask codegen. Files under input/ are byte-identical copies of the upstream paths (data/<path>, LICENSE) at the commit below; git_blob is the upstream git blob id.",
+  "commit": "431ab05cf160248cc3885a4a766026d4f8243792",
+  "commit_date": "2026-08-18",
+  "data_last_changed": "6fc8e1a90c0ed1a1eaeed42002e5bf946032d40e (Schema update FY26 Q3, 2026-03-13)",
+  "data_tree": "d6ffbbfa1d748bc16d1d1aa70d6ff709103f16a5",
+  "files": {
+    "LICENSE-Open-XML-SDK": {
+      "git_blob": "12bd8f3f79693e49ff70d4ce182ff8d2e7baa390",
+      "sha256": "ed03ba352313a4ba7019d5bed4bd3218ac17f3e44442a3bb1aaff54dcca9a2bc"
+    },
+    "namespaces.json": {
+      "git_blob": "93ea383b8c7f980d8877e63e3f40bf2accc116a6",
+      "sha256": "75fa0b8096f2f7702eb7b482c0885d1ab630aaad9907a2570625503febce5377"
+    },
+    "parts/DocumentSettingsPart.json": {
+      "git_blob": "e6e2e3e5a710f52203161386d11433bed4e25924",
+      "sha256": "eba1a496419270a740c9435c8e86cb9dcd73637dec934d41b299a072abf074c0"
+    },
+    "parts/EndnotesPart.json": {
+      "git_blob": "f96df1e4274a263db32daa8d0e78962cd9047557",
+      "sha256": "5751234c3de6c3db4c5c3c82db964375a0183341dbeb7f5772731f081c1fbb95"
+    },
+    "parts/FontTablePart.json": {
+      "git_blob": "1d2b2af28777d391bd8009ade5baee0625cfe4fa",
+      "sha256": "ab091662069b49b294253b648f53566c69c6d502547c75ba8bcf4e322906d508"
+    },
+    "parts/FooterPart.json": {
+      "git_blob": "efb99305f9c295cb2cdedf0aea3353ed86c0d7cb",
+      "sha256": "7249912d331d372478ebc57e38ef9b849db484b730dc3c7160966e182dc9453a"
+    },
+    "parts/FootnotesPart.json": {
+      "git_blob": "632b39d6ad3adae6631e0bdc38e491036e21e122",
+      "sha256": "679f15cf834de9710fd0c1a5a0d2bab38570fb4d0a7bf4732518b515bab3af8c"
+    },
+    "parts/GlossaryDocumentPart.json": {
+      "git_blob": "ec2fc3ae8745131ff07cc865b0bd547a7599a14f",
+      "sha256": "c34193291b96977ecedc60ea0f38d304c2ebfd03b5e549599a467c971d144d73"
+    },
+    "parts/HeaderPart.json": {
+      "git_blob": "151d549f8b7e95b82335600156047d564cf502cc",
+      "sha256": "ae6fe37724d43a9b0ba2f11047c5e918174021ef92d79772cc9a431d15540520"
+    },
+    "parts/MainDocumentPart.json": {
+      "git_blob": "026af5e1b130ae90987b31142fd89b4cbc3175ba",
+      "sha256": "e0b3c04daafdd8446e71dbf42aadf8990f416b85414a33f7f0028c06f642cc23"
+    },
+    "parts/NumberingDefinitionsPart.json": {
+      "git_blob": "b63386c376152bfc9fd3bbf894f7a5fb35d2c5b2",
+      "sha256": "38b3d37fe31cb09b026bc7e660aed831c61b1793a7a26c8b8e0453723b2b616f"
+    },
+    "parts/StyleDefinitionsPart.json": {
+      "git_blob": "2de5f4b3798cbf973237d8c11f409cd6c2824042",
+      "sha256": "4c5e7acd38479360f6a6e912b298fd6582a545cfd27dead8c4b9b1c31868e963"
+    },
+    "parts/StylesWithEffectsPart.json": {
+      "git_blob": "ecc30bc94d13852782c10a982d32fdb23a92cb07",
+      "sha256": "e34bfc42a0526d7ad829fcd2f1f820fed13ebb7edb0267a6d549f586df219bcc"
+    },
+    "parts/WebSettingsPart.json": {
+      "git_blob": "24c7dd12d3f2fa40e02035edc5dad9863996aaa6",
+      "sha256": "5b7e79d94dd5c97463ea4ebd41b147543f9e2fbd5b9b562bc09b2102c52afa60"
+    },
+    "parts/WordCommentsExtensiblePart.json": {
+      "git_blob": "f7b35c959525f48cc1b8095ccf305b3b5545ceb9",
+      "sha256": "a8212cd3e1eeed021c2159b760fc49e53344fe7f604c1460621e0e7954deb36e"
+    },
+    "parts/WordprocessingCommentsExPart.json": {
+      "git_blob": "6ad53aa9dfa4e165558b9b03fba26b0ac82120f0",
+      "sha256": "b0f4e18e694b7c5bd84748e5a14504211287283c7e4dfc4a931cd24efd8ed288"
+    },
+    "parts/WordprocessingCommentsIdsPart.json": {
+      "git_blob": "e5ffe24959133fc9f6f2defb00356752b8c20dff",
+      "sha256": "1712994519eb70585e44f64f46b4f7f3e8cb808bdce3082a1dc52de3da0f93ac"
+    },
+    "parts/WordprocessingCommentsPart.json": {
+      "git_blob": "c5d322b7938d5ab5d2218b0306021eeb5e743ddd",
+      "sha256": "8f96b20fe766d3bd69a9a40da8e2632a2d9e22ea1e070d6799ac21f4501781e2"
+    },
+    "parts/WordprocessingPeoplePart.json": {
+      "git_blob": "ebd30bb06429d5b4080208ee303e625aed428ee6",
+      "sha256": "3249aed36033ea3d87284cbe13b0c3e09fbd28be2d3c939249fed1586a935b1c"
+    },
+    "schemas/schemas_microsoft_com_office_word_2010_wordml.json": {
+      "git_blob": "5b74f431c1f354ccfbd835aa0318b0d8bcba56d6",
+      "sha256": "508522f9fabb9628396b838caa31eae2430745e292ed7b728cd9e1f342592542"
+    },
+    "schemas/schemas_microsoft_com_office_word_2012_wordml.json": {
+      "git_blob": "7c0150ba50b4c0a6b1c2ebf38d09c6327361e347",
+      "sha256": "59ddb5f19d9a0a0216db6447ba014e2fba63abf60e61c3e09cb4a6d5a43ad8bb"
+    },
+    "schemas/schemas_microsoft_com_office_word_2015_wordml_symex.json": {
+      "git_blob": "82b766c7b82591be3b36d7000cf4400c86de7853",
+      "sha256": "9530b391f35d65d803911863f4277c4ecd936a72b1d00751d32e5cf79d271f8d"
+    },
+    "schemas/schemas_microsoft_com_office_word_2016_wordml_cid.json": {
+      "git_blob": "c82d80a84529d2f08c08c6e9b498a5f300c9dbe7",
+      "sha256": "ed4d69aac6397ce5c87c130ead6c1242f272d9ea3c922c65b36711528b294b40"
+    },
+    "schemas/schemas_microsoft_com_office_word_2018_wordml.json": {
+      "git_blob": "0503a77be3f028592d712851f8a9bcf2f65345ba",
+      "sha256": "42ca349d6dd0a2cc0081d049640a95123f1c49bb0907c71c02e21772bbf67acf"
+    },
+    "schemas/schemas_microsoft_com_office_word_2018_wordml_cex.json": {
+      "git_blob": "bb81bcbf533ed0039041ad3740be2cf8717375a2",
+      "sha256": "dee54ee13a1a4e289e6de51a7ab55318d56b6904cc3ea07e0c11431eae4d83cc"
+    },
+    "schemas/schemas_microsoft_com_office_word_2020_wordml_sdtdatahash.json": {
+      "git_blob": "eb37a445862badffb8fd3dd84fdb1abcb562ffb3",
+      "sha256": "aaf609a055d2f80bc58157823fb5d7572ce0be3514178288cc886ce972b0bdbf"
+    },
+    "schemas/schemas_microsoft_com_office_word_2023_wordml_word16du.json": {
+      "git_blob": "309ec914905c5785084ac0cc85203a2e38c5c1fd",
+      "sha256": "f34ce7a9e9996ef61cfe5003ef10e071b29af84fdbdf1a8e3a87021c3726c4fd"
+    },
+    "schemas/schemas_microsoft_com_office_word_2024_wordml_sdtformatlock.json": {
+      "git_blob": "133f81a364b7179725e0d9807b5cd2a8496c10b1",
+      "sha256": "54aadcc6a8e1595da296b025443814932c5396c26a7706f7017fd99768857845"
+    },
+    "schemas/schemas_openxmlformats_org_wordprocessingml_2006_main.json": {
+      "git_blob": "c4194ee4b0bb2721210d394eabe8d932c75d5438",
+      "sha256": "b29e60a07afc3e0a4695eecca6c2a7a35070eb81f53a2f11033c6df6f946212b"
+    }
+  },
+  "license": "MIT (Copyright (c) .NET Foundation and Contributors); input/LICENSE-Open-XML-SDK",
+  "upstream": "https://github.com/dotnet/Open-XML-SDK"
+}

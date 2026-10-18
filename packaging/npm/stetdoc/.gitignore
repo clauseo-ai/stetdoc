@@ -1,0 +1,2 @@
+# The binaries that scripts/pack.mjs copies in, and the tarballs it writes.
+targets/*/bin/

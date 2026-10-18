@@ -1,0 +1,52 @@
+The loop on a working copy: unpack, view, edit with a batch, check, pack.
+
+```console
+$ stetdoc unpack contract.docx
+wrote contract.stet: document.md
+base 5737b772923cf8d3:0:5737b772923cf8d3
+next: stetdoc view contract.stet
+
+$ stetdoc view contract.stet --range p4..p5
+{stet 1 view=body base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p5}
+{summary: 1 section}
+p4 Payment is due within thirty days.
+p5 This Agreement is governed by English law.
+{position: p4..p5 of p4..p5 (2 of 2 blocks)}
+
+$ stetdoc edit contract.stet --author "Jane Doe" --ops batch.txt
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
+0 replace p4: deletion #0, insertion #1
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+checked 1 unit.
+
+$ stetdoc check contract.stet
+No pending edits.
+
+Revisions already in the document:
+  Jane Doe: 1 insertion, 1 deletion
+
+Validation: no violations in 1 part.
+
+$ stetdoc pack contract.stet --author "Jane Doe"
+No hand edits were pending, so the document is written as of its last edit.
+wrote contract.edited.docx
+working copy contract.stet is at base 5737b772923cf8d3:1:6a07baa2d488eeb5
+
+$ stetdoc view contract.edited.docx --range p4..p4
+{stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=redline common-style="Normal" range=p4..p4}
+{authors: JD "Jane Doe"}
+{summary: 2 tracked changes (JD 2) · 1 section}
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+{position: p4..p4 of p4..p4 (1 of 1 blocks)}
+
+```
+
+A batch names the base it was written against. p4 has changed since, so the same batch again is stale.
+
+```console
+$ stetdoc edit contract.stet --author "Jane Doe" --ops batch.txt
+? 4
+error[stale_ref]: p4 was changed in version 1, after version 0, which this batch was written for. View it again. (operation 0)
+next: View the block again, then rewrite the operation from what it shows.
+
+```

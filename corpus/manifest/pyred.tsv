@@ -1,0 +1,3 @@
+393c16bf489b459b28b1f247bff844302437ddace2f866ee4d075aaf465ebbfb	13779	word-authored	ok	-	-	-	MIT	Microsoft Word	n	tests/fixtures/expected_redline.docx
+34fd135480c87743a7972c1579e46896c6ac7b9310252bd9038be9a86c7017de	14715	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/modified.docx
+4c152fa3cd7592b5d67ef073a2a707e842f27d3fe9635169bdf993565b4f6f95	13357	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/original.docx

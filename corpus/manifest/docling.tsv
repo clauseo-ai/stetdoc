@@ -1,0 +1,35 @@
+52a3f5d4866150709ed8d73cc31c6133abb83f2db4c7e93fec8cf9ea7459903d	11932	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/Transitional.docx
+9f0020f2fa76c360293dff10a2f37484638ad6a86d1129ef94fe8a45b34dff99	37155	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/content_control_with_picture.docx
+eefaf5e8b4671cc7250d0b2d3c3f4b4c4f280439ef07910c55dac2e9d53e0969	16720	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/docx_checkboxes.docx
+2ced386b592d42aea2f640982f457d2284a50bdb882b6729e3026f1e2b79a731	37335	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_code_blocks.docx
+fba1ceb88fdb0b1353f5d97d94f0dbb45c8379adfb7c53d8199612ab13c05a3e	37399	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_comments.docx
+1fc5bec0903a6eb37975ba12fe6acd251e58bbe2b78e4abdb80fb928f0483af4	36989	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_external_image.docx
+705e2451324bc6de7ae813ce4de792cfc5c9bad0a380578336bad31ad458160a	207463	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/docx_grouped_images.docx
+91986a21ff396ae71ca2c9e3d249445f14ab4e81e5e141bde98374b064beb890	36756	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_list_blank_spacer.docx
+b0b6555348043d90c65fc3a013c75f944aedb517aa4bd8b97dad7436b21bb610	24379	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/docx_list_east_asian_num_fmt.docx
+f390cc9bf711352450a526e01b6ccbce5919cfc824142159f469d4105463498b	36894	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_list_resumed_after_table.docx
+22c86900945336c678b98171ef83cb2f5a7f4e6461cd2fa8fab7e5bf636f0c68	36761	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_list_resumed_numbering.docx
+ea76640deadd284a7a6c1b81c70403641e1e5ccab439f4d636873883b8b34b48	16639	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/docx_lists.docx
+6d57d76f9833de1aab9647b6229d2e693ba42ccced59210484255ae02655765a	38983	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_page_header_footer_first_page.docx
+502b76c002ff8beaa8fbaec5ec62d5cfe68e41da0bfbb4ca55d13ed7c69cac7e	25697	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/docx_rich_cells.docx
+d55d510f9652838200e29597929471490f554ad1dc9ccec4355b27af665c8ee0	3168894	other-producers	ok	-	-	-	MIT	Google Docs	y	tests/data/docx/sources/docx_rich_tables_01.docx
+388a46e167e39b9418fb3bd25e6c562ced36c5e97dcbee04356b1fd1440cfcd7	36909	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/docx_sdt_table_cells.docx
+c8255bcf478a2d88437e7b5fe1a3083d3c2cab1d7ff740d6556d771a1eb84953	28413	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/docx_vml_images.docx
+a05a45f3c30d490266f4406ab075050ab1e2fac9e9ee543cc891e03696869cc8	91205	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/drawingml.docx
+32933facc78a062cd504f91286521f7615c86895ebbad410c9a3bf586cbe36d8	18917	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/equations.docx
+7ce1528a7eedd06b8c46df910ecf0261a0df5224ec7347269fdc8c954f99e6e0	19732	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/list_after_num_headers.docx
+bd261907c984c475b789761d31e6199fa594df0f2f79b702c9ca9e9c99042978	14817	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/lorem_ipsum.docx
+7455441cd6d47d042934b9e2d12e56e4683471fcf02bef00bb0ccc4fb2af1df3	37050	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/omml_frac_superscript.docx
+bbe4e1f6fd5e1a9fc8cc12e075d0dabfaf4d20536f18aa8762740b2733416649	37007	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/omml_func_log.docx
+39d5f6c4aff8191dc3c371b612f6decd9399a41869c86fcaf32522d5e0ed803e	36838	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/omml_multi_equation_paragraph.docx
+7de179bd6f9f658054c4c3428c2a2d9acb55c7f5e93e00c44d513481d613bcc6	36922	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/data/docx/sources/omml_text_escapes_in_math.docx
+fe924e9bef7ab34a7785fcd4fd74c975142e2530ba6e5db75a9ad16421c942a8	14228	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/table_with_equations.docx
+4d08f40a2d3f29b03ea88ee1043ab0f3abf07ac7d1618b410f6e15b86af1232b	15180	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/tablecell.docx
+ad2dc1d08e904fc3ed8b8e7debe444a6a278d1e082fb0cb4f644a4c6db64e626	426097	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/test_emf_docx.docx
+06144c1b769752bae948df16ec0f4c80967b6aebed874ddaa2b3ffbc08a3094c	49206	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/textbox.docx
+23518f8c635264b038b3e1207292f99cb5d40be35dbcd85d56508d3226ad9a11	29578	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/unit_test_formatting.docx
+6ca962c5331a7c8381eef77322a0f8e7b4b61f174b663309d894de81d2e1440f	13903	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/unit_test_headers.docx
+81a617b51e111fdbb74a1844c5a0d6145af8f758620939ba22c19b976fa0e6bc	16388	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/unit_test_headers_numbered.docx
+5f41160551425b3f1df649e59ec81633752048d6a1ac7b7121b472b823a817f1	18560	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/word_image_anchors.docx
+ae4f3f6edd7ccd636b893ec8355d5eade6b0413fa779606452c561e334f390f7	103966	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/word_sample.docx
+0d69a7ef0e1ba2b3142394ed708227b95cf37de037ee71f434853d30e3ca5a55	14247	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/data/docx/sources/word_tables.docx

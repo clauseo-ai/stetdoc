@@ -1,0 +1,24 @@
+eaaca2bb01b4d6c5d436c424412253fbf64e87c93ec5d6558acaa2eb02a29251	36787	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	node/packages/mcp-server/tests/fixtures/gap1_deleted_row_repro.docx
+4e0b3c785cd00a1715b37b9c873bbcc8c3b69b2f954a4b3b93ca9c06716061d8	36645	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	node/packages/mcp-server/tests/fixtures/gap1_minimal_repro.docx
+c153998972f03a7bb07c04f48e82b93161e05ac2190e6864c539f35f62ac4701	36733	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	node/packages/mcp-server/tests/fixtures/gap2_minimal_repro.docx
+fd22b8f4bd1778787034b1507846afe2a84248bb174aa8894898441981472035	13546	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/conformance/fixtures/comments_threads.docx
+ac8999fe24244747b7686dfc1722c543add52d7cb1bf087d4b47df5de9da59d7	15804	word-authored	ok	-	-	-	MIT	Microsoft Word	n	shared/conformance/fixtures/dense_175.docx
+b15074e03d22e87b458aa21bf3099771c0c20db9112c8cda7dadde5531b7cdb4	13317	word-authored	ok	-	-	-	MIT	Microsoft Word	n	shared/conformance/fixtures/long_5pages.docx
+860b302cb904ebc9185ccfc990522aaed14cbc9cd12d108b28ae21b429ec4ce7	11750	word-authored	ok	-	-	-	MIT	Microsoft Word	n	shared/conformance/fixtures/multi_author.docx
+0bcb6a434d7a2d54751a8fb18693501d03168ace34e03cc4a1a65c432c804a56	11567	word-authored	ok	-	-	-	MIT	Microsoft Word	n	shared/conformance/fixtures/tables_cells.docx
+a11ff96013123296281f7fbec5f0c7debee3d1bf7370d035a82f881458e9881c	13245	word-authored	ok	-	-	-	MIT	Microsoft Word	n	shared/conformance/fixtures/unicode.docx
+fe65aad1e9b7cac03dd02f9aa91527c75e84d332ac06030afbc690150f6be11a	13346	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/cross_platform_tests/01_basic_text_modification/input.docx
+3924c756cba325854bf6d2bcad76f890543b979f213b00b0435327ba242617a3	36643	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	shared/cross_platform_tests/02_issue23_comment_on_fresh_doc/input.docx
+445d4dfd8b62a6b30ca50627eff5c6551246652304567fd256ad7830edae1eca	24252	other-producers	ok	-	-	-	MIT	LibreOffice (dev build)	n	shared/cross_platform_tests/03_libreoffice_review_comments/input.docx
+0b2c8f53db7e9714a6645f8791fb3702ee56770d816012de533ac85cc7a11fe4	30266	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/cross_platform_tests/04_word_mac_review_comments/input.docx
+2d7e9db2e476cb8fb577043cd5316a4a2553c49c09da914a2139a3cca3301cfa	29730	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/cross_platform_tests/05_word_windows_review_comments/input.docx
+05babc00844596b4614f5ed00de672e086260e78d3b0fcf8c0baaca9a6e2fb8f	37569	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	shared/cross_platform_tests/06_word_online_contract_edit/input.docx
+bbf0fb5a84dae1491a9a202198013e1e1d3481c0519e158ef4516e59ce71b09f	37600	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	shared/cross_platform_tests/07_word_online_table_edit/input.docx
+aea576d0c6df3fda5aabd55a6b8507a171593fa44db2d69b8184de1954a1105d	7031	other-producers	ok	-	-	-	MIT	Adeu corpus-builder	n	shared/cross_platform_tests/08_agent_nested_revisions/input.docx
+239bb9e0ce5629904bfc9ac2f13910ecf2bff07d3d179c439d530ae3cfb791ab	7536	edge	ok	-	-	-	MIT	Adeu corpus-builder	n	shared/cross_platform_tests/09_agent_rewrite_revisions/input.docx
+08dfdb78f9093526e2021376be992019935a0cb3cfee401505a8464754de6b9a	6952	other-producers	ok	-	-	-	MIT	Adeu corpus-builder	n	shared/cross_platform_tests/10_agent_counsel_accept_reject/input.docx
+8a75fb6e1297a8e9dd5e7d38faa361d17a62340bd608554e2662fb34ac37ad9a	7543	edge	ok	-	-	-	MIT	Adeu corpus-builder	n	shared/cross_platform_tests/11_agent_table_accept_reject/input.docx
+d5cfac16b4fbbe4ab5064e4a6c4d5bf240cae7f15a6455a952f7251591831afd	6925	other-producers	ok	-	-	-	MIT	Adeu corpus-builder	n	shared/fixtures/base.docx
+dba187d82fd599afd1787f2ac67f455d1021983a39214a678b9932b9e1117b80	19722	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/fixtures/dirty_sample.docx
+8c48111a783f9a52b1b1d6c8d8b590c16758f6f82e474734fa2cdbbe73008ba2	19355	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/fixtures/golden.docx
+2ba7927ab682ec7946501a2843c8703fdbc7d3d727c165026cc73bff48f8f485	19466	word-authored	ok	-	-	-	MIT	Microsoft Word	y	shared/fixtures/golden2.docx

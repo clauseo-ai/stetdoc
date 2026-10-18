@@ -1,0 +1,98 @@
+name: laws
+
+# The edit checks run every night on the full corpora: random edit batches made from each document's view, with L2 to L5 (and H14, output validity
+# and L4) checked on each, and random edits of the readable files. A pull request runs the same tests on the curated corpus
+# inside `cargo xtask check`, with 50 batches per document. Each run picks its own seed and prints it at the top of the log;
+# a failure names the document, the seed and the batch, and `STETDOC_SEED=<seed>` runs the same batches again:
+#
+#   STETDOC_CORPUS_SET=full STETDOC_SEED=<seed> cargo test --release -p stetdoc-testkit --test laws_random -- curated
+#
+# The full corpora are about 48,000 documents, so the run is split into shards by a hash of each document
+# (`STETDOC_SHARD=i/n`), and the corpus is fetched once and shared through the cache.
+on:
+  schedule:
+    - cron: "41 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  fetch:
+    name: fetch the full corpora
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      - name: Restore the corpus cache
+        id: corpus-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-full-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          restore-keys: corpus-full-${{ runner.os }}-
+
+      - name: Fetch the full corpora
+        run: cargo xtask corpus fetch --full
+
+      - name: Save the corpus cache
+        if: ${{ steps.corpus-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-full-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+
+  edits:
+    name: random edit batches, shard ${{ matrix.shard }} of 16
+    needs: fetch
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      - name: Restore the corpus cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-full-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          fail-on-cache-miss: true
+
+      # The fetch finds the cache warm and only builds the set again if it must.
+      - name: Make the full set available
+        run: cargo xtask corpus fetch --full
+
+      - name: L2 to L5 on random batches and random edits of files
+        run: cargo test --release --locked -p stetdoc-testkit --test laws_random -- curated --nocapture
+        env:
+          STETDOC_CORPUS_SET: full
+          STETDOC_SHARD: ${{ matrix.shard }}/16

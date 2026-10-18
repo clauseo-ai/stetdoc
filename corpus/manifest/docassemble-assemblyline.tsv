@@ -1,0 +1,9 @@
+5767876a6d8c20c23c3b63509aa3d4a5e674945a42000dbe7dbe6b5cc7ae89c8	7460	public	ok	-	-	-	MIT	unknown (no Application)	n	docassemble/AssemblyLine/data/sources/test_alexhibit_docx_1.docx
+9025b4a3fbdef0a67e99a021c38e049c0dc9211ec7704ce72948af253b0f6276	15670	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/al_basic_addendum.docx
+8a5a7ee0d209f268a61eef5e104f2ab27132ac02b3d74fc62770c01dbc078c41	11632	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/exhibit_cover_sheet.docx
+63ef0d6a0d8d879989fa8283945c0b30883e96bb5d1339382d82dde1fce33261	12020	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/exhibit_table_of_contents.docx
+764ed3aa75ddb39e870ff2d407f70ed95d05b07c1f66d5ac10d04140b78e4ed7	19354	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/general_cover_sheet.docx
+0cf03069b0d4d1125d286dd42ed3588cee8a7b2e1dd8e40bd3e2de9fea83aac3	12328	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/sample_word_template.docx
+7eb64aa9722825c697298a684a55a59af4ba1a539973f021f15e61a96b3d3349	7459	public	ok	-	-	-	MIT	unknown (no Application)	n	docassemble/AssemblyLine/data/templates/test_aldocument_docx_1.docx
+fffb6c0417548fc9942bbd30a3d05f7646563fe2353ba2d0494c828f58f02626	13627	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/test_catchall.docx
+02bc5e15d22d70c933746a9d04971809e7ac95aebaf8f80e524c0d40515e92e5	13382	public	ok	-	-	-	MIT	Microsoft Word	y	docassemble/AssemblyLine/data/templates/test_if_final.docx

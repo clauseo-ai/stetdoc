@@ -1,0 +1,112 @@
+name: bench
+
+# The speed and memory benchmarks run every night, with the budgets as written, so that a regression shows
+# up the next morning and not at the release. A failed run is the alert, and its log has the table.
+# A time that is slower than its baseline is only a warning, which shows as an annotation on the
+# run, until there is data on how much the time of a runner varies.
+#
+# Every run keeps its table and the rows it measured as an artifact (`bench-results`, with a note of
+# the runner), so that the rows of linux-x86_64 can be recorded from the runs of a fixed runner
+# class: take `bench-rows.tsv` of a run that was not under load, and commit its rows into
+# `crates/stetdoc-testkit/bench/baseline.tsv`. Until the baseline has them, the run says so.
+on:
+  schedule:
+    - cron: "23 3 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  bench:
+    name: benchmarks, with the budgets as written
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      - name: Restore the corpus cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          restore-keys: corpus-${{ runner.os }}-
+
+      - name: Benchmarks
+        run: cargo xtask bench --out bench-results
+
+      # Which runner the numbers are from: the image, the cores, and the commit.
+      - name: Note the runner
+        if: always()
+        run: |
+          mkdir -p bench-results
+          {
+            echo "commit ${GITHUB_SHA}"
+            echo "runner image ${ImageOS:-unknown} ${ImageVersion:-unknown}, ${RUNNER_OS:-?} ${RUNNER_ARCH:-?}"
+            echo "cpus $(getconf _NPROCESSORS_ONLN)"
+          } > bench-results/runner.txt
+
+      - name: Show the table in the summary of the run
+        if: always()
+        run: |
+          if [ -f bench-results/bench-table.txt ]; then
+            { echo '```'; cat bench-results/bench-table.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Keep the table and the rows
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: bench-results
+          path: bench-results
+          if-no-files-found: warn
+          retention-days: 90
+
+  # The compare checks run on every compare pair of corpus/pairs.tsv. A pull request runs the curated pairs inside
+  # `cargo xtask check`; this runs all of them, from the `pairs` set, with the laws and the noise gate.
+  pairs:
+    name: compare pairs, the full set
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      - name: Restore the corpus cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          restore-keys: corpus-${{ runner.os }}-
+
+      - name: Fetch the documents of every pair
+        run: cargo xtask corpus fetch --pairs
+
+      - name: The laws and the noise gate on every pair
+        run: cargo test --release --locked -p stetdoc-core --lib compare::tests_pairs -- --nocapture
+        env:
+          STETDOC_CORPUS_SET: pairs

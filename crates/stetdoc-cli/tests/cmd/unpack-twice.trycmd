@@ -1,0 +1,24 @@
+unpack writes a new working copy and never writes over one. --refresh renders one again.
+
+```console
+$ stetdoc unpack contract.docx -o work
+wrote work: document.md
+base 5737b772923cf8d3:0:5737b772923cf8d3
+next: stetdoc view work
+
+$ stetdoc unpack contract.docx -o work
+? 2
+error[invalid_payload]: work already exists and is not empty, and stetdoc unpack writes a new working copy.
+next: It is a working copy already: keep using it, choose another folder with -o, or run stetdoc unpack DIR --refresh to render it again.
+
+$ stetdoc unpack work
+? 2
+error[invalid_payload]: work is a folder, and stetdoc unpack reads a .docx.
+next: Name the .docx, or add --refresh to render this working copy again, discarding edits that were not packed.
+
+$ stetdoc unpack work --refresh
+rendered again work: document.md
+base 5737b772923cf8d3:0:5737b772923cf8d3
+next: stetdoc view work
+
+```

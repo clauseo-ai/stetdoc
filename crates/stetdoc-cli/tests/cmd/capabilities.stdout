@@ -1,0 +1,44 @@
+stetdoc 1.0.0-dev
+formats: stet/1 (.md)
+complement: 1.0
+
+operations:
+  replace         tracked    Replaces a text range, or the whole paragraph, with new text. The difference is made word by word.
+  insert          tracked    Inserts new paragraphs before or after a paragraph or a table, in order.
+  delete          tracked    Deletes a whole paragraph or table, a text range, or the blocks from one paragraph through another.
+  split           tracked    Cuts a paragraph in two, at an offset or before or after some text.
+  merge           tracked    Joins a paragraph and the one after it.
+  format          tracked    Changes the formatting of the runs in a range, or of the whole paragraph.
+  paragraph       tracked    Changes the formatting of a paragraph. Values take units such as 0.5in, 6pt and 1.5cm.
+  style           tracked    Sets the paragraph style.
+  list            tracked    Changes the level of a list item, restarts its numbering at a number, or takes it out of the list.
+  set             tracked    Sets any schema property of a paragraph, run, paragraph mark, section, table, row or cell.
+  row             tracked    Inserts a table row, or deletes one.
+  comment         untracked  Adds a comment anchored to a range, or to the whole paragraph.
+  reply           untracked  Replies to a comment thread.
+  resolve         untracked  Resolves a comment thread, or reopens it.
+  edit-comment    untracked  Replaces the text of one of the author's own comments.
+  delete-comment  untracked  Deletes one of the author's own comments, with its replies.
+  delete-note     tracked    Deletes a footnote or endnote, with its reference.
+  accept          untracked  Accepts revisions: applies them.
+  reject          untracked  Rejects revisions: undoes them.
+
+error codes:
+  unsupported          exit 1
+  cross_block          exit 1
+  readonly_region      exit 1
+  scope_violation      exit 1
+  io_error             exit 1
+  invalid_payload      exit 2
+  not_found            exit 3
+  ambiguous_match      exit 3
+  stale_ref            exit 4
+  stale_files          exit 4
+  pending_edits        exit 4
+  stale_target         exit 4
+  validation_failed    exit 5
+  malformed_input      exit 6
+  limit_exceeded       exit 6
+  corrupt_complement   exit 6
+  unsupported_version  exit 6
+  internal             exit 7

@@ -1,0 +1,128 @@
+The skill is embedded in the binary. core is the default; operations and errors are its references.
+
+```console
+$ stetdoc skills get errors
+# stetdoc errors
+
+Every failure of stetdoc 1.0.0-dev has a stable code, a message, and a `next` hint that says what to do. The exit status is
+the code's class. Codes never change meaning.
+
+## `unsupported` (exit 1)
+
+The request is well formed but asks for something this release does not do, such as reordering refs in a readable file or creating a file in the editor.
+
+Next: Use a supported operation (the capabilities list names them), or leave this content untouched.
+
+## `cross_block` (exit 1)
+
+A text range or find match spans more than one block. Operations address one block at a time.
+
+Next: Split the edit into one operation per block, or merge the blocks first.
+
+## `readonly_region` (exit 1)
+
+The edit changes read-only content: a clause number, a field result, a placeholder or someone else's deletion.
+
+Next: Edit the surrounding text instead and leave the read-only region as it is.
+
+## `scope_violation` (exit 1)
+
+The batch would change a block outside the refs named by the scope guard. Nothing was applied.
+
+Next: Add the block's ref to the scope, or remove the operation that reaches outside it.
+
+## `io_error` (exit 1)
+
+The file system refused a read or a write that the request needs: a folder that is not writable, a full disk, or a working copy that another process holds. Only surfaces that do file I/O raise it; the core never does.
+
+Next: Fix the cause the message names (permissions, space, another process), then run the same command again.
+
+## `invalid_payload` (exit 2)
+
+An operation batch or readable file could not be parsed or is internally inconsistent: an unknown operation, a missing field, a bad value or a duplicated ref.
+
+Next: Fix the payload and retry. The capabilities list names the valid operations and their fields.
+
+## `not_found` (exit 3)
+
+A ref, revision id, comment id or find text matches nothing.
+
+Next: View the document to list the current refs, then retry with one that exists.
+
+## `ambiguous_match` (exit 3)
+
+A find text or string matches more than one place, so the target is not unique.
+
+Next: Add surrounding text to make the match unique, or target one block by its ref.
+
+## `stale_ref` (exit 4)
+
+A ref names a block that was deleted, or belongs to a different ref namespace than the document, for example after reopening saved bytes.
+
+Next: View the document again to get fresh refs, then rewrite the batch.
+
+## `stale_files` (exit 4)
+
+Readable files were rendered from an older state version, or from a different ref namespace, than the document now has.
+
+Next: Export the working copy again to render fresh readable files, then redo the hand edits on them.
+
+## `pending_edits` (exit 4)
+
+The working copy has hand edits to readable files that have not been packed, so applying operations would lose or mix them.
+
+Next: Apply the pending hand edits as a files edit, or discard them, then retry the operation.
+
+## `stale_target` (exit 4)
+
+The file a working copy would be packed into exists and is neither the document the working copy came from nor one it packed, so writing it could overwrite a newer version. Only surfaces that write files raise it.
+
+Next: Unpack the file at that path again and redo the edits on it, pack to another path, or pass --force to overwrite it.
+
+## `validation_failed` (exit 5)
+
+The edit would add schema or Word-rule violations. Nothing was applied. Problems already present in the input are reported by check, not blocked.
+
+Next: Change the edit so it does not add the violation the message describes, then retry. A check of the document lists problems that were already there.
+
+## `malformed_input` (exit 6)
+
+The input is not a readable .docx package: a bad ZIP structure, missing required parts, or XML that does not parse.
+
+Next: Check that the input is a valid .docx. Opening and re-saving it in Word or LibreOffice often repairs it.
+
+## `limit_exceeded` (exit 6)
+
+The input or the request exceeds a configured limit, such as entry count, size, compression ratio, nesting depth or batch size.
+
+Next: Use a smaller input, or raise the limit in the open options if the source is trusted.
+
+## `corrupt_complement` (exit 6)
+
+The complement of a working copy failed verification: its content hashes, ref map or format did not match.
+
+Next: Do not edit the complement. Restore the working copy, or start again from the original .docx.
+
+## `unsupported_version` (exit 6)
+
+The complement was written by a newer major version of stetdoc, or in a format version this release cannot read.
+
+Next: Upgrade stetdoc to a version that reads this complement.
+
+## `internal` (exit 7)
+
+A bug in stetdoc: an internal consistency check failed, so the request was refused and the document was not changed. The content of the request never causes this.
+
+Next: Report this as a bug in stetdoc, with the input and the request that caused it. Do not try a different edit to get around it.
+
+$ stetdoc skills get nothing
+? 3
+error[not_found]: There is no skill named nothing.
+next: Name one of: core, operations, errors.
+
+$ stetdoc skills get core --full
+? 2
+error[invalid_payload]: --full prints every part of the skill, so it takes no name.
+next: Run stetdoc skills get --full, or stetdoc skills get NAME.
+
+```

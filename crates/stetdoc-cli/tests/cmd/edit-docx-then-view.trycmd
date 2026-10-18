@@ -1,0 +1,24 @@
+An edited .docx carries the change as a tracked revision by its author.
+
+```console
+$ stetdoc edit contract.docx -o edited.docx --author "Jane Doe" --ops batch.txt
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
+0 replace p4: deletion #0, insertion #1
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+checked 1 unit.
+wrote edited.docx
+
+$ stetdoc view edited.docx --range p4..p4
+{stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=redline common-style="Normal" range=p4..p4}
+{authors: JD "Jane Doe"}
+{summary: 2 tracked changes (JD 2) · 1 section}
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+{position: p4..p4 of p4..p4 (1 of 1 blocks)}
+
+$ stetdoc view edited.docx --range p4..p4 --mode final
+{stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=final common-style="Normal" range=p4..p4}
+{summary: 2 tracked changes (JD 2) · 1 section}
+p4 Payment is due within sixty days.
+{position: p4..p4 of p4..p4 (1 of 1 blocks)}
+
+```

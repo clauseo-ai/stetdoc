@@ -1,0 +1,2 @@
+5c936bebdb697e4f655afa37e5ac6461a8f116e6670d4441074f7152868f78c4	7783	edge	ok	-	-	-	Apache-2.0 OR MIT	other:Scriptor test fixture generator	n	crates/scriptor-crdt/tests/fixtures/rich.docx
+cb81d7bd226f7e0b96a0eab2310588f9bd660fe4979cd492f28558f58c8001e7	1352	other-producers	ok	-	-	-	Apache-2.0 OR MIT	unknown (no docProps)	n	crates/scriptor-crdt/tests/fixtures/sample.docx

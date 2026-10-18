@@ -1,0 +1,18 @@
+41ea39caf9f7dfa7a361e2a506f285a0c7a3332b603f0ee57c35d34923be21e8	12001	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/comma after bold.docx
+3cc9f869efbbe75fa7a9f5a72d0aefdf3eea8acc7bdef31ef5daa7705e33cba9	22076	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/em.docx
+45f1832f99ccc4b3eb6f3d0b9e00c61135eff5113ebacf52f273fb6f78ebfd03	22211	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/file with space.docx
+fcf3d49991de46764236e8578f88ee9207bf87551ab217441244fcc0191f7386	24486	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/h1.docx
+d6a53f31e8fda2b74bdee4ca7eeb6f0d17e6ced86b0a4435ce754dd6eb27eb7d	24240	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/h2.docx
+a77745a7fc865042c2fa008185d2a899893b6d86d1b3227a82300011237d0a13	60	hostile	malformed_input	open	-	zip.not_zip.other;zip.no_eocd	MIT	unknown (no docProps)	?	test/fixtures/html.docx
+0ddcdc05138f63e51481e91da032d01bbb65db321fc60d39416008ecd2970b35	25173	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/javascript-link.docx
+5afc29c685fe63d0b8d276820fadefc36cbf74d3dbeda57a37903034e33d88c8	28582	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/list-with-links.docx
+f7567225173e8249fd96e5ff7cc8fa508658a69b143d0ac7d3e898e5df886f99	25793	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/multiple-headings.docx
+5dcbb12669e1a529f205601c2bb0760c9bf64c3a2d0c33836f982ead75f2024e	27978	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/nested-ol.docx
+2205f87afdea3b3bf23527ce5eaa66656571b87011c57377d0121cf7a0c2f1c8	26249	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/nested-ul.docx
+e3208ee97d015fbc1d01f1ea938b41ccd7682b5c5e3b8aa5709ae07aca6ab52b	23741	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/ol.docx
+c020b0c56570ec3708be0a32277e88240146a9131b6f96d1706f5abe347861f0	33621	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/small-medium-large.docx
+5ba938993a233506845c2405d1b0e1c94eeb1c6237fb62d0a7ff81ad50488397	22093	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/strong.docx
+5a82949b180e00464a71b4e7739a42e0d1ea3f8a518bfd1fd9822cf5f591831b	5392	edge	ok	-	-	-	MIT	other:Google docs	n	test/fixtures/table.docx
+32042ca7b617ffa544787b258ec5e58cb7185c2d932ad3abed9fb1366300b3e0	12465	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/text after bold.docx
+de7ea711a2cd4a49380d893f44dc0dd64cb54bcf926681047c5208214a91452c	23956	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/ul.docx
+06ef5c7d705cc72aac0d3ab92c37e5db320a5bc4be729433904cc99df6f6f5b4	277	hostile	malformed_input	document	-	zip.missing_content_types;opc.missing_root_rels	MIT	unknown (no docProps)	?	test/fixtures/zip.docx

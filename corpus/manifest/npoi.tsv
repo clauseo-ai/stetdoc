@@ -1,0 +1,9 @@
+a8741d200bfae07e45b459d66613240c39c5e0cfff9f1adc3af0bebe6a0d300c	17582	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/NPOI-bug-1481.docx
+1b73517459e7b1582f07d32f9a5b98cde40855a426604b061ce2abc023e75120	19172	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/TestHyperlinkInFooterDocument.docx
+8b1e23ce3b469f013a70f2c2b51c8d538ad27820cfefa516beb2ec8b1205f020	16187	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/TestHyperlinkInFootnotes.docx
+9e9792234110c4e5e23bbf6188ebccfb758464f2b3cb8459daa972a600f36e28	13880	other-producers	ok	-	-	-	Apache-2.0	unknown (no Application)	n	testcases/test-data/document/WordFindAndReplaceTextInParagraph.docx
+91cf72374aeb22c96b2ceb76fe8c1b2607932e1f03817f37955862989ec04394	13666	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/WordReplaceCRLF.docx
+43036c4c4199b236fc2b9b0a269b14954d21e23076951f3d4c9a105198fdc61b	12310	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/docVars.docx
+355ca55650b055c7fd52766c484f68630907b9fc0f23da033be52d51b56bd3ab	41759	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/issue1353from.docx
+b77e67b2ca8354f0051eee3f108d420d8f4cf9be6d49f1e453bc2c77ab10d122	39582	edge	ok	-	-	-	Apache-2.0	ONLYOFFICE	n	testcases/test-data/document/smallFracOnlyOffice.docx
+88f983e4b7280fc191dca127ad793acc564552483b9f2dde2982dee0a3ff3cae	12421	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	testcases/test-data/document/table_properties.docx

@@ -1,0 +1,2 @@
+error[invalid_payload]: No author: every revision carries one, and stetdoc never picks one for you.
+next: Run stetdoc init to save your name, or set STETDOC_AUTHOR, or pass --author "Your Name".

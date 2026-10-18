@@ -1,0 +1,16 @@
+# The noise baseline of N9 (docs/design/compare.md, 9.4), first taken 2026-10-06 on the pairs of corpus/pairs.tsv. The
+# figures are counts of characters and changes, so they do not depend on the machine. One row per set and class: the set
+# (curated: the pairs of every pull request; full: every pair), the class, the pairs, the characters of the minimal diffs and
+# of the redlines, the formatting changes, the pairs with exclusions, the p99 of red_chars / min_chars over the pairs whose
+# minimal diff has 40 characters or more, and C, that p99 times 1.10 rounded up. The per-pair gate is
+# red_chars <= C * min_chars + 40 and red_spans <= min_spans + 2, with C from the full row of the class (a curated row has
+# the p99 and C of its own pairs, for information). A test never writes this file: the pair test prints the rows a run
+# would make, and a change to the cleaning constants or the alignment floor re-takes them in the same commit.
+# set	class	pairs	min_chars	red_chars	fmt_spans	excluded	p99	C
+curated	lab	40	563372	687782	1483	0	2.149	2.37
+curated	oxpt	181	8716	11874	1	17	2.659	2.93
+curated	dcb	20	0	0	1	0	1.000	1.10
+full	lab	354	6071900	7297358	17761	0	1.561	1.72
+full	oxpt	184	8734	11892	1	17	2.659	2.93
+full	dox	200	156605	185388	182	0	4.130	4.55
+full	dcb	41	0	0	1	2	1.000	1.10

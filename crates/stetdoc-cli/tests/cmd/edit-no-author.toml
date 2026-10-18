@@ -1,0 +1,14 @@
+# There is never a silent default author.
+bin.name = "stetdoc"
+args = ["edit", "contract.docx", "-o", "edited.docx"]
+env.remove = ["STETDOC_AUTHOR"]
+stdin = """
+base: 5737b772923cf8d3:0:5737b772923cf8d3
+---
+@replace
+ref: p4
+find: thirty
+with: sixty
+"""
+status.code = 2
+fs.sandbox = true

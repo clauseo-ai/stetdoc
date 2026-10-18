@@ -1,0 +1,77 @@
+A tracked change is one line of the ledger: its id, its kind, its author, its day, its block and its text. The filters
+keep one author or one kind, and a page continues after the change its cursor names.
+
+```console
+$ stetdoc view tracked.docx --revisions
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:1..change:4}
+{authors: JD "Jane Doe" · EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 4 changes}
+#1 insert JD 2026-01-02 p1 "shall pay"
+#2 delete EW 2026-01-03 p2 "gross"
+#3 format JD 2026-01-04 p3
+#4 insert EW 2026-01-05 p4 "English law"
+{position: change:1..change:4 of changes (4 of 4 changes)}
+
+$ stetdoc view tracked.docx --revisions --author EW
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:2..change:4}
+{authors: EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 2 changes}
+#2 delete EW 2026-01-03 p2 "gross"
+#4 insert EW 2026-01-05 p4 "English law"
+{position: change:2..change:4 of changes by EW (2 of 2 changes)}
+
+$ stetdoc view tracked.docx --revisions --kind insert --author JD
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:1..change:1}
+{authors: JD "Jane Doe"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 1 change}
+#1 insert JD 2026-01-02 p1 "shall pay"
+{position: change:1..change:1 of changes by JD of kind insert (1 of 1 changes)}
+
+$ stetdoc view contract.docx --revisions
+{stet 1 view=ledger base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal"}
+{summary: 1 section}
+{changes: 0 changes}
+{position: nothing of changes (0 of 0 changes)}
+
+$ stetdoc unpack tracked.docx
+wrote tracked.stet: document.md
+base 676e65f4e88a38bd:0:676e65f4e88a38bd
+next: stetdoc view tracked.stet
+
+$ stetdoc view tracked.stet --revisions --kind format
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:3..change:3}
+{authors: JD "Jane Doe"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 1 change}
+#3 format JD 2026-01-04 p3
+{position: change:3..change:3 of changes of kind format (1 of 1 changes)}
+
+$ stetdoc view tracked.docx --revisions --budget 1
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:1..change:1}
+{authors: JD "Jane Doe"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 1 of 4 changes}
+#1 insert JD 2026-01-02 p1 "shall pay"
+{position: change:1..change:1 of changes (1 of 4 changes) · next: --after change:1 · about 41 tokens remain}
+
+-- more: stetdoc view tracked.docx --revisions --budget 1 --after change:1
+
+$ stetdoc view tracked.docx --revisions --budget 1 --after change:1
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:2..change:2}
+{authors: EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 1 of 4 changes}
+#2 delete EW 2026-01-03 p2 "gross"
+{position: change:2..change:2 of changes (1 of 4 changes) · next: --after change:2 · about 27 tokens remain}
+
+-- more: stetdoc view tracked.docx --revisions --budget 1 --after change:2
+
+$ stetdoc view tracked.docx --revisions --kind bogus
+? 2
+error[invalid_payload]: the kind of a change is `insert`, `delete`, `move` or `format`, not `bogus`.
+next: Give one of those four words, or leave out the kind.
+
+```

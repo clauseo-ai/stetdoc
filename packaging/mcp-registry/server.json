@@ -1,0 +1,23 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.clauseo-ai/stetdoc",
+  "title": "stetdoc",
+  "description": "Read, redline and compare Word .docx files with real tracked changes",
+  "version": "1.0.0-dev",
+  "repository": {
+    "url": "https://github.com/clauseo-ai/stetdoc",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "stetdoc",
+      "version": "1.0.0-dev",
+      "runtimeHint": "npx",
+      "packageArguments": [
+        { "type": "positional", "value": "mcp" }
+      ],
+      "transport": { "type": "stdio" }
+    }
+  ]
+}

@@ -1,0 +1,36 @@
+[package]
+name = "stetdoc-core"
+description = "The stetdoc engine: projects a .docx into an agent-editable working copy and back"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+publish = true
+repository.workspace = true
+homepage.workspace = true
+readme = "../../README.md"
+keywords = ["docx", "word", "tracked-changes", "redline", "ai-agents"]
+categories = ["text-processing", "parser-implementations"]
+
+[dependencies]
+memchr.workspace = true
+miniz_oxide.workspace = true
+schemars.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+
+# `fuzzing` makes the `fuzz` module public, for the targets in `fuzz/`. It is off by default and
+# adds no dependency: a build without it has exactly the public interface in `lib.rs`.
+[features]
+fuzzing = []
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+roxmltree.workspace = true
+stats_alloc.workspace = true
+stetdoc-testkit.workspace = true
+zip.workspace = true

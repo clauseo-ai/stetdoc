@@ -1,0 +1,13 @@
+# Test code in the core that may use std I/O. One per line: `path | reason`.
+# The core does no file, network, process, environment or clock access, so keep this list
+# short. An entry is for a test that must read files, such as the L1 corpus harness, and
+# never covers library code. An entry that no test code uses any more fails the check.
+crates/stetdoc-core/src/schema/sim/corpus.rs | the edit simulation and the validator read the documents named by STETDOC_CORPUS_LIST or STETDOC_CORPUS_DIR: the runs over a whole corpus are #[ignore] and on demand, and one run over a sample of the curated set is part of cargo xtask check
+crates/stetdoc-core/src/schema/tests/scale.rs | the time bounds on reorder, insert_in_order and the validator over thousands of children read the clock; they are the check that a quadratic rewrite does not come back
+crates/stetdoc-core/src/package/corpus_laws.rs | the container laws (L1 and one-edit L2) read the fetched corpus named by STETDOC_CORPUS_DIR
+crates/stetdoc-core/src/xml/corpus_laws.rs | the span tree laws read the XML parts of the fetched corpus named by STETDOC_CORPUS_DIR
+crates/stetdoc-core/src/package/corpus_laws/gating.rs | tests of the corpus gates build small corpora in a temporary directory
+crates/stetdoc-core/src/xml/corpus_laws/gating.rs | tests of the span tree law's gates build a small corpus in a temporary directory
+crates/stetdoc-core/src/wordml/tests_corpus.rs | the wordml story and text model laws read the fetched corpus named by STETDOC_CORPUS_DIR
+crates/stetdoc-core/src/check/tests_corpus.rs | the laws of check::document read the fetched corpus named by STETDOC_CORPUS_DIR and the set named by STETDOC_CORPUS_SET
+crates/stetdoc-core/src/compare/tests_pairs.rs | The compare laws on the compare pairs of corpus/pairs.tsv in the fetched corpus named by STETDOC_CORPUS_DIR and STETDOC_CORPUS_SET, with the verdicts written to STETDOC_N_OUT when it is set

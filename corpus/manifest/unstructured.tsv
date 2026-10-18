@@ -1,0 +1,21 @@
+e86f8e34faee194158a961d44622b96bd1eead71bcdee309824442b51f948e97	11220	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	example-docs/category-level.docx
+d8204dbb7b69f53ea53dee21cc69bf896819bee5291b1a181158952589008b7f	95087	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/contains-pictures.docx
+ca8463d30948f4ddd6bf2fac001b11b6b21657107d82279ebd910e3ca8310dda	21106	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/docx-hdrftr.docx
+536efe9ff61931073d90adf5e234162bbf5374adea4ad1c03e07985ae01956a7	5950	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	example-docs/docx-shapes.docx
+b628ecaaf605423654b0b857e43c1cfe015082d5d589575095b4c36849ae392b	12725	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/docx-tables.docx
+ee120fd4c5f943a6c96e995b54a8dcd16cc9b0abc5b7f050e67acac5e5f46d80	36653	other-producers	ok	-	-	-	Apache-2.0	python-docx (default template)	n	example-docs/duplicate-paragraphs.docx
+250ff8aa147c1b8effd40bea8e6157d848c7ec5f309cc417ddb1e1e23b4b906d	18793	other-producers	ok	-	-	-	Apache-2.0	Google Docs	y	example-docs/example-list-items-multiple.docx
+20ef1d2d0aa3503bda04899fbe9087c0db47be02dbd42fc5b4dffdbd9e6dfceb	13063	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/fake-doc-emphasized-text.docx
+690b185fb657a76dfe5d304911e720f8998b328edb6677cbf2c846152284dfb3	36602	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word for Mac	n	example-docs/fake.docx
+07a5a5e63424b56e7a92f758607081f3bce249dae4aa9b9f15270ac0bf89333c	12392	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/fake_table.docx
+20685912669907fe34b7707723846a188d0393ed788669a59e3bd58b5d48bf8b	828943	other-producers	ok	-	-	-	Apache-2.0	python-docx (default template)	n	example-docs/grid_offset_error.docx
+b70ec38449e52bf312c05c8ecbb09109834cdf615d31fb93ec33505599255751	10182	edge	ok	-	-	-	Apache-2.0	Google Docs	n	example-docs/handbook-1p-no-rendered-page-breaks.docx
+5b80c3b2441655211a30d66cf364dd48cd309eeb95d06010ad3e0c4902cdc4eb	10203	edge	ok	-	-	-	Apache-2.0	Google Docs	n	example-docs/handbook-1p.docx
+bd2f039298407b1a2aa06a44ef1b4bfc3461bd909c965f20286d1640763ae7cb	482883	edge	ok	-	-	-	Apache-2.0	Google Docs	n	example-docs/handbook-872p.docx
+6d2324ef27ac5f2a16f5f523845786d92e2242b905b2ae253442119a321f7dd6	12080	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/hlink-meta.docx
+0458e96a206cc2c2e6c7d334caaad6cad5971762240647391b44a1f7e95b1315	6424	edge	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	example-docs/language-docs/eng_spa_mult.docx
+dfb55d5c6bd3ca8bbf494ddf988be96d2b1ea4ada36db0554c24331fbdd54930	14584	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	example-docs/page-breaks.docx
+f200fefce41c3068b35685d33f249048fd7e8a07f51baf4dcfb935ab1001aaaf	36775	other-producers	ok	-	-	-	Apache-2.0	python-docx (default template)	n	example-docs/simple.docx
+ce9765fa393eea92c019293fcf2ca2a29d140dcd94462e3e1167b93511009a79	17044	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	n	example-docs/tables-with-incomplete-rows.docx
+6ace72355b8548a34f165b087d2288374eb3314f1d2463f51574269a01e6780f	1359	other-producers	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	example-docs/teams_chat.docx
+fc47c70a0101333fa00338cdc4c3727fc8d9dfb49a931c6cde2f47c8ff25ed6f	18752	edge	ok	-	-	-	Apache-2.0	Microsoft Word	n	test_unstructured/testfiles/file_type/test_document_from_office365.docx

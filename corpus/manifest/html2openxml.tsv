@@ -1,0 +1,6 @@
+9bbd57cc961325246bb68cacf21df539978c384b2d1a8426523103f2d3cfe068	14084	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/Demo/Resources/template.docx
+069d14a4b95792e6ff81942f3914d160d6e1e4ab6e0e64fb54198e2cf34c1a6c	12968	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/HtmlToOpenXml.Tests/Resources/DocWithCustomStyle.docx
+3eb381be067c53d21fabc209bfcc33337d7e69f458c4d3bd48f08847d80443fa	56439	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/HtmlToOpenXml.Tests/Resources/DocWithImgHeaderFooter.docx
+e07aa2a39db86aaa4b161579480ac525fe142844b7476a7e46cdcecf3eec2a24	15248	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/HtmlToOpenXml.Tests/Resources/DocWithLandscape.docx
+5f3cd22ec97c5d629473c2fd23f6725d7e06a7d95528b465baf1dd3e77c3c6ec	17637	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/HtmlToOpenXml.Tests/Resources/DocWithNotes.docx
+c9867428e8a986df37e0c087033c41d99fc34f4d7eb2692d6a46682ec5a42a9b	8221	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	test/HtmlToOpenXml.Tests/Resources/DocWithNumbering.docx

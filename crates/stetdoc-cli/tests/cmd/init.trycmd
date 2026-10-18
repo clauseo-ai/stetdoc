@@ -1,0 +1,44 @@
+init installs the skill stub for the agents you pick. With --project it installs into the project and points AGENTS.md at
+the skill. A second run changes nothing.
+
+```console
+$ stetdoc init --project --agent codex,cursor,cmx2 --dry-run
+note: no author is saved, and every revision needs one. Run stetdoc init --author "Your Name", or set STETDOC_AUTHOR, before you edit.
+would write .agents/skills/stetdoc/SKILL.md (Codex, Cursor)
+would write .cmx2/skills/stetdoc/SKILL.md (cmx2)
+would write AGENTS.md
+
+$ stetdoc init --project --agent codex,cursor,cmx2
+note: no author is saved, and every revision needs one. Run stetdoc init --author "Your Name", or set STETDOC_AUTHOR, before you edit.
+wrote .agents/skills/stetdoc/SKILL.md (Codex, Cursor)
+wrote .cmx2/skills/stetdoc/SKILL.md (cmx2)
+wrote AGENTS.md
+
+$ stetdoc init --project --agent codex,cursor,cmx2
+note: no author is saved, and every revision needs one. Run stetdoc init --author "Your Name", or set STETDOC_AUTHOR, before you edit.
+unchanged .agents/skills/stetdoc/SKILL.md (Codex, Cursor)
+unchanged .cmx2/skills/stetdoc/SKILL.md (cmx2)
+unchanged AGENTS.md
+
+$ stetdoc init --project --agent claude-code --mcp
+note: no author is saved, and every revision needs one. Run stetdoc init --author "Your Name", or set STETDOC_AUTHOR, before you edit.
+wrote .claude/skills/stetdoc/SKILL.md (Claude Code)
+unchanged AGENTS.md
+
+To use stetdoc as an MCP server as well, register `stetdoc mcp` with each agent (init edits no agent's config):
+  Claude Code: claude mcp add --scope project stetdoc -- stetdoc mcp
+
+$ stetdoc init --project --remove --agent cursor
+removed .agents/skills/stetdoc
+
+$ stetdoc init --project --remove
+removed .claude/skills/stetdoc
+removed .cmx2/skills/stetdoc
+removed the stetdoc block from AGENTS.md
+
+$ stetdoc init --agent nobody
+? 2
+error[invalid_payload]: nobody is not an agent stetdoc installs for.
+next: Name one or more of: claude-code, codex, cursor, opencode, openclaw, gemini, copilot, amp, hermes, grok, cmx2, factory, or all.
+
+```

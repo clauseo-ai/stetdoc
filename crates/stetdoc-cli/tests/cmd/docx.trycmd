@@ -1,0 +1,44 @@
+Every command that reads works on a .docx directly.
+
+```console
+$ stetdoc view contract.docx
+{stet 1 view=body base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p1..p10}
+{summary: 1 section}
+p1 The Supplier shall indemnify the Customer, and shall pay on demand.
+p2 “Losses” means any loss, and the Supplier’s liability.
+p3 Emoji 😀 then a tab/tand the end.
+p4 Payment is due within thirty days.
+p5 This Agreement is governed by English law.
+t1 {table cols=2}
+r1 {row}
+p6 a1
+p7 b1
+r2 {row}
+p8 a2
+p9 b2
+{/table}
+p10 After the table.
+{position: p1..p10 of p1..p10 (7 of 7 blocks)}
+
+$ stetdoc view contract.docx --find thirty --context 0
+{stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p4}
+{summary: 1 section}
+p4 Payment is due within thirty days.
+{~ 1 match}
+{position: p4..p4 of find "thirty" (1 of 1 blocks)}
+
+$ stetdoc inspect contract.docx p1
+block: p1 is a paragraph in the body story
+characters 0..67: plain
+
+$ stetdoc lookup contract.docx Losses
+{stet 1 view=lookup base=5737b772923cf8d3:0:5737b772923cf8d3 query="Losses"}
+{term "Losses" · exact · 1 definition · 0 uses}
+  defined p2 (definition): “Losses” means any loss, and the Supplier’s liability.
+
+$ stetdoc check contract.docx
+No pending edits.
+
+Validation: no violations in 1 part.
+
+```

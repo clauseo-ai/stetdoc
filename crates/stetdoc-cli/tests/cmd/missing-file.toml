@@ -1,0 +1,5 @@
+# A path that does not exist: exit 3.
+bin.name = "stetdoc"
+args = ["view", "nowhere.docx"]
+status.code = 3
+fs.sandbox = true

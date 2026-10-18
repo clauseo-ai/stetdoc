@@ -1,0 +1,8 @@
+# Panic lints are denied workspace-wide for library code, and the core also denies
+# indexing, printing and dbg!. Tests may use all of them.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true
+allow-indexing-slicing-in-tests = true
+allow-print-in-tests = true
+allow-dbg-in-tests = true

@@ -1,0 +1,7 @@
+{
+  "error": {
+    "code": "invalid_payload",
+    "message": "unexpected argument '--bogus' found",
+    "next": "Run stetdoc --help, or stetdoc COMMAND --help, for the arguments."
+  }
+}

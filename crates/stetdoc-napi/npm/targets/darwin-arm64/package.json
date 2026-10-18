@@ -1,0 +1,26 @@
+{
+  "name": "@stetdoc/node-darwin-arm64",
+  "version": "1.0.0-dev",
+  "description": "The stetdoc native addon for darwin-arm64. Install `stetdoc`, which depends on it.",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "crates/stetdoc-napi/npm/targets/darwin-arm64"
+  },
+  "homepage": "https://github.com/clauseo-ai/stetdoc#readme",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "main": "stetdoc.darwin-arm64.node",
+  "files": [
+    "stetdoc.darwin-arm64.node"
+  ],
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ]
+}

@@ -1,0 +1,15 @@
+b8d9740adbc0dfbed39d833c68979c02d81b5c8b686f8d4f95bc8b2aaabb83c3	32328	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	tests/extended-props-test/document.docx
+d3120f589b9e7db077e826e5ec4a76c1595cddf897a329e017fb549fc43721ce	13808	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	tests/render-test/equation/document.docx
+f1595723eea1b5109a6555ea8f6b4bd15b58ed41238d43cd072c64aa69700064	5259	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/footnote/document.docx
+5dc632e266125e377903cae02f3fed86c2b60c4c3d2d19bd06f49183a9443da0	2262	other-producers	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	tests/render-test/header-footer-even-odd-off/document.docx
+8dbb6833241ad7e6261312033d96aeeff1594c24fa65cc0c544fb1007a2ebab1	19086	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	tests/render-test/header-footer/document.docx
+aba5b4ae60a61c33167d0bf29a2f483b0f21b0a41ab70ef100fbef4ce47f7d60	4544	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/line-spacing/document.docx
+5f83d21624c27f248f95c5ffcaebbcf176d37179809e53e74fac92a6752cff3e	7600	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/numbering/document.docx
+7606d4f52f8596d4d4f10ad85e4d83b12f4f46adbad008486bfce16231121406	1045	other-producers	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	tests/render-test/page-break-before/document.docx
+3cbfde098e4189b35e731157cae74883b75b03e93b272daa1ffd294520162ea2	4255	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/page-layout/document.docx
+d821b345b4979f8f41647a36e96270bada74d98c6a5d740e116e3128701384ce	5044	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/revision/document.docx
+7cb203433e01f90128d50c1c557669dff7181ac005e1563b169cafa2d3a4cf3f	5023	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/table-spans/document.docx
+ea70d7b95f297386fb610c34fe7dd00e56a5d48ff911ba83b4a39606bf234c43	4560	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/table/document.docx
+0feee9ab97af7c4bab959deff16948cacf163cc7422e2b240f09171a94de2c56	4538	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/text-break/document.docx
+e796bd2022a176d37c82bec46cd224bcb1919ed7046ba46994770326cbd27c7c	9415	other-producers	ok	-	-	-	Apache-2.0	LibreOffice	n	tests/render-test/text/document.docx
+a434f5b6d3ecdc07b927475229916a1a1ef65f9dfc512421f67a2addf032c069	12951	word-authored	ok	-	-	-	Apache-2.0	Microsoft Word	y	tests/render-test/underlines/document.docx

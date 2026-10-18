@@ -1,0 +1,13 @@
+# A batch written against another base is stale: exit 4.
+bin.name = "stetdoc"
+args = ["edit", "contract.docx", "-o", "edited.docx", "--author", "Jane Doe"]
+stdin = """
+base: 0000000000000000:0:0000000000000000
+---
+@replace
+ref: p4
+find: thirty
+with: sixty
+"""
+status.code = 4
+fs.sandbox = true

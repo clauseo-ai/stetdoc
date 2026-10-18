@@ -1,0 +1,48 @@
+{
+  "name": "stetdoc",
+  "version": "1.0.0-dev",
+  "description": "The stetdoc command-line tool: turn a .docx into an agent-editable working copy and back, with real Word tracked changes, and run its MCP server with `stetdoc mcp`",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "packaging/npm/stetdoc"
+  },
+  "homepage": "https://github.com/clauseo-ai/stetdoc#readme",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "mcpName": "io.github.clauseo-ai/stetdoc",
+  "keywords": [
+    "docx",
+    "word",
+    "tracked-changes",
+    "redline",
+    "mcp",
+    "agents"
+  ],
+  "bin": {
+    "stetdoc": "bin/stetdoc.js"
+  },
+  "main": "bin/stetdoc.js",
+  "files": [
+    "bin/",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "pack": "node scripts/pack.mjs"
+  },
+  "optionalDependencies": {
+    "@stetdoc/cli-linux-x64-gnu": "1.0.0-dev",
+    "@stetdoc/cli-linux-arm64-gnu": "1.0.0-dev",
+    "@stetdoc/cli-linux-x64-musl": "1.0.0-dev",
+    "@stetdoc/cli-linux-arm64-musl": "1.0.0-dev",
+    "@stetdoc/cli-darwin-x64": "1.0.0-dev",
+    "@stetdoc/cli-darwin-arm64": "1.0.0-dev",
+    "@stetdoc/cli-win32-x64-msvc": "1.0.0-dev"
+  }
+}

@@ -1,0 +1,240 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least privilege: the job only reads the repository.
+permissions:
+  contents: read
+
+# A new push to the same branch or pull request cancels the run in progress.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: "0"
+  RUST_BACKTRACE: "1"
+
+jobs:
+  check:
+    name: check (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      # Actions are pinned by commit SHA, with the release tag in a comment. Update both
+      # together.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # rust-toolchain.toml pins the toolchain. This installs exactly that version,
+      # with rustfmt and clippy.
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      # The corpus is fetched by pinned hash and cached. The path is set once for the whole
+      # job, so the cache step and `cargo xtask check` agree on it whatever XDG_CACHE_HOME is.
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      # The key follows the manifest, and the restore key reuses an older cache, so only
+      # documents that changed are downloaded.
+      - name: Restore the corpus cache
+        id: corpus-cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          restore-keys: corpus-${{ runner.os }}-
+
+      # The fetch is a step of its own, so the cache is saved only when the whole corpus is
+      # there. A cache saved after a failed or cancelled fetch would hold part of it, and a
+      # cache key can never be saved again once it exists. A failed fetch does not stop the
+      # job, so the format, clippy and test results below still show, and the check's own
+      # corpus step fails it. `outcome` is `failure` after a failed fetch even with
+      # `continue-on-error`, so the save step still skips.
+      - name: Fetch the corpus
+        id: corpus-fetch
+        continue-on-error: true
+        run: cargo xtask corpus fetch
+
+      - name: Save the corpus cache
+        if: ${{ !cancelled() && steps.corpus-fetch.outcome == 'success' && steps.corpus-cache.outputs.cache-hit != 'true' }}
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+
+      # The version must equal DENY_VERSION in xtask/src/tools.rs; a test checks.
+      - name: Install cargo-deny
+        uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
+        with:
+          tool: cargo-deny@0.20.2
+
+      # The one command that runs everything: format, clippy, rustdoc, tests and snapshots,
+      # the dependency table, file size, docs links, drift checks and cargo deny. Its corpus
+      # step finds the cache warm.
+      - name: cargo xtask check
+        run: cargo xtask check
+
+  # A short run of each fuzz target, which catches the panic, the hang or the broken law that a
+  # change brings in. It is not the 24 CPU-hours per target that the release gate asks for: those
+  # are long runs of the same `cargo xtask fuzz`, with `--time`.
+  fuzz:
+    name: fuzz ${{ matrix.target }} for 60 seconds
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - package
+          - xml
+          - batch
+          - files
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # `cargo xtask` is built with the toolchain in rust-toolchain.toml. Fuzzing builds with the
+      # nightly below, which nothing else uses. Its version is `TOOLCHAIN` in xtask/src/fuzz.rs,
+      # and a test checks that the two agree.
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - name: Install the nightly toolchain for fuzzing
+        run: rustup toolchain install nightly-2026-09-28 --profile minimal
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          workspaces: |
+            . -> target
+            fuzz -> target
+
+      # The seeds come from the curated corpus and the fixtures. The check job saves the corpus
+      # cache, and this job only restores it, so a miss fetches the corpus again.
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      - name: Restore the corpus cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          restore-keys: corpus-${{ runner.os }}-
+
+      # The version must equal CARGO_FUZZ_VERSION in xtask/src/fuzz.rs; a test checks.
+      - name: Install cargo-fuzz
+        run: cargo install cargo-fuzz --locked --version 0.13.2
+
+      - name: Fuzz ${{ matrix.target }}
+        run: cargo xtask fuzz ${{ matrix.target }} --time 60
+
+      # libFuzzer prints a failing input as text only when it is 256 bytes or shorter, so the file
+      # is kept. Run `cargo xtask fuzz <target> --repro <file>` on it to see the failure again.
+      - name: Keep the failing input
+        if: failure()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: fuzz-${{ matrix.target }}-failing-input
+          path: fuzz/artifacts/${{ matrix.target }}
+          if-no-files-found: ignore
+          retention-days: 30
+
+  # The speed and memory benchmarks with the margins of a shared runner: twice the time budgets and a
+  # quarter more memory than a baseline. A time more than three times its baseline (where there is
+  # one for linux-x86_64) is only a warning, as it is at night, until there is data on how much a
+  # runner varies. The memory budget is the same as at night, because the memory is a count that
+  # does not depend on the machine. The nightly workflow runs the same command with the budgets as
+  # written, and keeps its table.
+  bench:
+    name: benchmarks, with generous margins
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      # The 300-page contract is a document of the curated corpus. The check job saves the cache
+      # and this job only restores it, so a miss fetches the corpus again.
+      - name: Choose the corpus cache directory
+        run: echo "STETDOC_CORPUS_DIR=$HOME/.cache/stetdoc/corpora" >> "$GITHUB_ENV"
+
+      - name: Restore the corpus cache
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ env.STETDOC_CORPUS_DIR }}
+          key: corpus-${{ runner.os }}-${{ hashFiles('corpus/**/*.tsv') }}
+          restore-keys: corpus-${{ runner.os }}-
+
+      - name: Benchmarks
+        run: cargo xtask bench --ci
+
+  # The library on the runtimes the project supports: a debug build of the addon, the smoke test on Bun 1.3.13 and 1.3.14
+  # and Node 24 (the LTS) on linux-x64-gnu and on Node 24 on macOS, and a type check of the TypeScript surface. The release
+  # workflow runs the same smoke test on release builds of every target.
+  napi:
+    name: napi ${{ matrix.case.os }} ${{ matrix.case.runtime }} ${{ matrix.case.version }}
+    runs-on: ${{ matrix.case.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        case:
+          - { os: ubuntu-24.04, runtime: bun, version: 1.3.13 }
+          - { os: ubuntu-24.04, runtime: bun, version: 1.3.14 }
+          - { os: ubuntu-24.04, runtime: node, version: 24, typecheck: true }
+          - { os: macos-15, runtime: node, version: 24 }
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: ${{ matrix.case.runtime == 'node' && matrix.case.version || 24 }}
+
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        if: ${{ matrix.case.runtime == 'bun' }}
+        with:
+          bun-version: ${{ matrix.case.version }}
+
+      - name: Build the addon
+        working-directory: crates/stetdoc-napi/npm
+        run: node scripts/build.mjs
+
+      - name: Smoke test
+        working-directory: crates/stetdoc-napi/npm
+        run: ${{ matrix.case.runtime }} test/smoke.mts
+
+      # The versions are pinned so that a new TypeScript release cannot fail an unrelated change.
+      - name: Type check
+        if: ${{ matrix.case.typecheck }}
+        working-directory: crates/stetdoc-napi/npm
+        run: |
+          npm install --no-save --no-package-lock --prefix "$RUNNER_TEMP/tsc" typescript@5.7.3 @types/node@24.19.1
+          "$RUNNER_TEMP/tsc/node_modules/.bin/tsc" --noEmit --strict --skipLibCheck --module nodenext \
+            --moduleResolution nodenext --target es2022 --typeRoots "$RUNNER_TEMP/tsc/node_modules/@types" --types node \
+            test/smoke.mts index.d.ts

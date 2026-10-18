@@ -1,0 +1,4 @@
+94d1e6bc3fcef399e69d49543fcabbf62ee9dad4873c1c0958a5d46cdf6654ea	67970	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/fixtures/real_contract.docx
+19581575df58985c66914f6c4ad8b1ccfe0899f94ccb03c1b9aa4798d6185c24	100340	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/real_hyperlinks_footnotes.docx
+56d880c6099dbf982d8a4ad1da71e482440171cb8a456a804bfa3c0010001076	39134	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	tests/fixtures/real_tracked_changes.docx
+518939687b68298c0284ede17356dde08c1fe255c2027d3d9ee0dcb1018ab053	4917	edge	ok	-	-	-	MIT	unknown (no Application)	n	tests/fuzz/corpus/minimal.docx

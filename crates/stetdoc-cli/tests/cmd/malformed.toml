@@ -1,0 +1,5 @@
+# A file that is not a package: exit 6.
+bin.name = "stetdoc"
+args = ["view", "notes.txt"]
+status.code = 6
+fs.sandbox = true

@@ -1,0 +1,37 @@
+[package]
+name = "stetdoc-napi"
+description = "Node-API bindings for stetdoc"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+publish.workspace = true
+
+# The only crate allowed to use `unsafe`, because Node-API is a C interface.
+# This is a copy of the workspace lint tables with `unsafe_code` allowed. Keep it in
+# step with `[workspace.lints]` in the root Cargo.toml.
+[lints.rust]
+unsafe_code = "allow"
+
+[lints.clippy]
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+
+[lib]
+crate-type = ["cdylib"]
+# The addon is tested through its package's smoke test (npm/test/smoke.mts), which loads it into Node and Bun.
+test = false
+doctest = false
+
+[dependencies]
+stetdoc-core.workspace = true
+stetdoc-editor.workspace = true
+napi.workspace = true
+napi-derive.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+
+[build-dependencies]
+napi-build.workspace = true

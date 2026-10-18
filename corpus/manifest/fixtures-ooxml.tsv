@@ -1,0 +1,30 @@
+2029abbda3bdacb270137f6210791ba2ee3f8be62affb8cc3181f3ac72a7c35a	36799	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	fixtures/docx/comments/comments-2029abbda3bd.docx
+ccdfb41723d543a8baf3444b16c3f8fa7d8473aead590e13825042ba6119da62	31618	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/docx/comments/comments-ccdfb41723d5.docx
+368fe96cb3ae55a0cc5fecbb599eda1d1058596d4914992f596083f291071ae4	2317	edge	ok	-	-	-	MIT	unknown (no docProps)	n	fixtures/docx/content-controls/sdt-content-controls-368fe96cb3ae.docx
+e4f051ec2eb5f48b9b8299e931abb2bca1fa86ca5007865b3b2f9b83ba16676f	36894	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/content-controls/sdt-content-controls-e4f051ec2eb5.docx
+b051c0c2ff43f2ab9213e19a52ccbc51217537cf3b336d54a68a91beb6670f9a	26693	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/creation/default-b051c0c2ff43.docx
+d9d6a313182a71a73d75a26a0ff3b7826dbd2e300e1d202114ec9f8fb018fda5	36563	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/creation/default-d9d6a313182a.docx
+291ea45fd599555956c86a7dd98c96c06ded43c5d03a57888422f6e34ea1203c	26722	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/creation/minimal-291ea45fd599.docx
+2d32cedb722efc62866a97e6d9f335d68977fcb270d0d241e60f0fc84bd55fd2	23472	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/direct-formatting/direct-formatting-2d32cedb722e.docx
+12183fb28e49ea1c1ac63de2252b011580c4cfed0a7cfd35efc1ffb20c94653e	26950	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/formatting/formatted-text-12183fb28e49.docx
+9a92eba3dc84f293a82de9496e571c780fd258cc3bf276b74464faaef5835dbc	36756	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/formatting/formatted-text-9a92eba3dc84.docx
+3bafa155242222dbd3529b56af6b8f1939cbd2e954de5b80afeadbbd53a432aa	38462	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/headers-footers/headers-footers-3bafa1552422.docx
+a99df5aa88c56707c994eabc15ccec7f811d5bd2b540b8cb77c90ebeecaa6933	31302	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/headers-footers/headers-footers-a99df5aa88c5.docx
+535910216e3531e4f70959cccf83038f1c51febbf4a149f9f46abfbfa8667d90	377049	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/mutation-safety/present-placeholder.docx
+cb2c2610f99f786484b1941f25d068f6347cd0cd95213a57db849842d9d4a64b	36788	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/numbering/bullet-list-cb2c2610f99f.docx
+fad9dd22fb2d0ef888452d678a5b1bce2b15202af16fc4ed799acb230b33798d	27015	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/numbering/bullet-list-fad9dd22fb2d.docx
+37d3c408403dbecf4310f0a0b1313dc0c3756302e1778cc32d975823988ea3b2	36782	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/numbering/numbered-list-37d3c408403d.docx
+feaa592c7914153be8cb0ebe30b1a1b3d82fcb15d0b05aeca74f89bb3bbeee12	26992	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/numbering/numbered-list-feaa592c7914.docx
+2e1022f7358f0deeaeb542a6dd10005f455c433a66f1b9b7e8964a48c7f0fb2a	36766	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	fixtures/docx/revisions/track-changes-2e1022f7358f.docx
+e3c5159fbf254f4d5423354773ae83a5535cb3cef8f603f1adca6d18adab11f2	28249	word-authored	ok	-	-	-	MIT	Microsoft Word	y	fixtures/docx/revisions/track-changes-e3c5159fbf25.docx
+0e3d6fb95187c7e0d5d5b1bf19451b58b617411ed8433911d8c95eab15f09f01	27236	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/styles/headings-0e3d6fb95187.docx
+8513f05370714f5e288ec1ca2fb76fe21b74b458636f325666b20b100c9b021a	36857	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/styles/headings-8513f0537071.docx
+9548a1ce68caae9df12bc85732f1c19a098658c5dce3d79488814e4145299e5e	26993	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/styles/styles-9548a1ce68ca.docx
+d35e32ab35d4c95e81c15c5baac18b842696adcea960664e329a5a9a699ab7a1	36800	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/styles/styles-d35e32ab35d4.docx
+ea4dfb625197cf2ca259472419933c5c164ca733ccd765c48410d5547e0ab14f	23761	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/table-properties/table-properties-ea4dfb625197.docx
+10737b881f1643cd13c3e6b664d3116da96c5cfdc9f9fb76548ff2dd852181f3	27429	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/tables/complex-table-10737b881f16.docx
+28da984e3fc4c6079579c0e8b3b9a901a46ed3f9081f3a074e0fb7333b984695	37015	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/tables/complex-table-28da984e3fc4.docx
+8192955ef935f09eb61a9fe6805d4996c811efcf54c0c966f52d983e38e0a79c	27221	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/tables/simple-table-8192955ef935.docx
+87e3c67cb73bdbf5c8389791fd2bb459ba0eaac862149af6fd7c5b641dafd56b	36859	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/tables/simple-table-87e3c67cb73b.docx
+395b75b992c6662e2bf44c72401020efccc212b41a345e082cb09abee450d97f	36637	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	fixtures/docx/text/single-paragraph-395b75b992c6.docx
+dfca453a4b60629ec859b7e224040148b1e2fb92aa3a32b28a6ad9c6f4cc3526	26794	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	fixtures/docx/text/single-paragraph-dfca453a4b60.docx

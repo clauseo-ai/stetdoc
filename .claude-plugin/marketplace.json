@@ -1,0 +1,14 @@
+{
+  "name": "stetdoc",
+  "description": "Word .docx editing for agents, with real tracked changes",
+  "owner": {
+    "name": "Clauseo"
+  },
+  "plugins": [
+    {
+      "name": "stetdoc",
+      "source": "./plugins/claude",
+      "description": "Read, redline and compare Word .docx files with real tracked changes. Agents edit a .docx as a working copy, and every edit becomes a Word revision with an author."
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+# A package is never edited in place: -o is required.
+bin.name = "stetdoc"
+args = ["edit", "contract.docx", "--author", "Jane Doe"]
+stdin = """
+base: 5737b772923cf8d3:0:5737b772923cf8d3
+---
+@replace
+ref: p4
+find: thirty
+with: sixty
+"""
+status.code = 2
+fs.sandbox = true

@@ -1,0 +1,18 @@
+905db7e1a5a8bfae973e60cf22029ab7eb505751f0c7e9aaf072af6257a1cd58	14436	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/conditionals_sample.docx
+abf461f0b7e4913b4243d4bcfdfa2d53c53104b909d94a856a1f050bc7743db7	18555	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/conditionals_template.docx
+29b70c9885e6ff1b157411e938247adb0629d91774e791d10a2233df05340434	10524	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/custom_field_handlers_sample.docx
+e817196779594c40224bb1cee47349c3404b2b5e0180835213a5ba0aa4de1293	12744	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/custom_field_handlers_template.docx
+ddfd91eb81ed07926fc829cfee7fc132d730720e0e35643210a57c9da7e88f32	33855	edge	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/cv_sample.docx
+4c6262d5d1481efe62e1f007994f48c677d3b74168f133b5e84041ecbde118c7	46800	edge	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/cv_template.docx
+6d662ef8e31f60a79ec37f0fe69cc235ea6fef0050e06c823b43717d2692c121	15821	edge	ok	-	-	-	MIT	Microsoft Word	n	test/fixtures/html_sample.docx
+94e8b87dfaadf124b08485ec1e900d7994f47bd624ce21c432ead579a138d0af	882807	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/images_sample.docx
+74483187353887d5f8ad8ae214599efdf92693f94296f59c4f8aa263eb1bce1e	31925	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/images_template.docx
+ad984f3060cc5d54d821fdc1885a11731ca308a04a3558b35f35693401bc7bc1	15156	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/insertion_template.docx
+6154257d1155aec26dd73aee083f5e4b1386abdc6991399e70240aff5da36d26	24631	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/insertion_template_no_styles.docx
+65b206467fd24704d7b1bcb444966bf18f3ad052082e534bb9c0d297580e6bb3	739283	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/loops_sample.docx
+b1ebcb24ddbfe9d8b5d8a840f945e94e15df448e9c962d342821c29c15a4ff95	2778249	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/loops_template.docx
+f29f32c05247896dd5dbd5d47663a417393576157b73c43086c0e95138dfc58b	23492	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	n	test/fixtures/markdown_sample.docx
+1a94477003136c31298f49e5401e58fb55905a000b4e9f53f7a8c50faf04441f	42468	edge	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/recipe_sample.docx
+e81f6bffa60430c0580f8c8d56d25ab1d9b048aa606df4a2b834aa27d3061bcc	54084	edge	ok	-	-	-	MIT	Microsoft Word for Mac	y	test/fixtures/recipe_template.docx
+119031de0d8143c0c3818da086d797b103ea6af4865ad776ff902cc51e251b82	18676	edge	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/svg_images_sample.docx
+2063d941c5fe42036a142d3d8a504ec812d7de3b08eac18799ba781d047393e5	20908	word-authored	ok	-	-	-	MIT	Microsoft Word	y	test/fixtures/svg_images_template.docx

@@ -1,0 +1,174 @@
+53eb1bede371d7bb5128b9790c4ee3aa4f92757fe0add4115417cdcaa348f361	17704	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/angular-example.docx
+0fce4d88995b35cbea5f6d5289b764354d483cc7c65511d2716ffc83039d6277	11599	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/assignment.docx
+5bc08f755019c536cb7c32cf5b21966e2aa6e945a7d207c56c5125b66452bd78	19885	edge	ok	-	-	-	MIT	WPS Office	n	examples/bug-closing-placeholder-orphan.docx
+0ff99f58bd9228578c49847b50148102a1a6443a54d33ad0b9eeae1559d33179	9198	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/comment-with-loop.docx
+b703396494330405faa3b728f64849cbde1612d7483bca5c9bfd5d4c4bd435d7	7394	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/cond-image-no-innertext-before.docx
+2d5b08e2dcf511400a546625f0ba036100ec91d15c1223e5a91b1b9e729a727d	6114	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/cond-image-no-innertext.docx
+9b90bf5efa65998f377db2089203258ef3d03cf73e2b4c0d22ca69e56eb4258a	7390	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/cond-image.docx
+22b94f4b6ebefb4031b9afb7c965925a8bb3f82ba445330be3d44cc9f045b5fb	18095	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/core-xml-missing-close-tag.docx
+cb5fe31daff402bd23e5b317efc48de48d8f98a258b7086477b0c16f8634cfd9	70202	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/cover-page-data.docx
+e748c9e59aa7822d56ed14b3dd1bfca3daa9a84ce2e5ea52447090d0dd9af629	12464	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/cyrillic.docx
+8bfaaf62f09e84461a7f0846de7c45c02f9520f30b784c71016b3675acaabe2b	5138	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/delimiter-gt.docx
+e850ec3f20fe35c0842d3d72537fbb59d6aa87ae8629e0151f329addaccffac6	5216	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/delimiter-pct.docx
+a432f7c0ebbc42acd9c206c118c2e1611a260b95d504de0c73a983e4da41b304	12015	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/empty-loop-regression.docx
+c4e716d01198f8cbf34e7f925ac95918be2e143c4caa9cddb156119736691725	9404	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/error-table-tags.docx
+144c2e21b6cdf23c7751620a6c8337d8ca84e60f4d3ac01dc577fcdb5c9c976f	20141	edge	ok	-	-	-	MIT	WPS Office	n	examples/errors-footer-and-header.docx
+010c18a3db2bb3fd58de84b47d6b8c017fa056b9bdc7c52101b6cf3f76f6b426	10642	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-assignment.docx
+489cadd8bd10fec23c20b1bad7f3ce7438b03c8dd41a320af6e9789841e28136	19328	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-bug-closing-placeholder-orphan.docx
+97fff69ea53e9d8c83304eeca56c57e565ee3de3d43756be0f71502f7c47b98f	8272	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-comment-example.docx
+b62025b3c6f1d48e3b741ab012a59e126ddd0472ed3ebc06bff3b2551166aa63	11601	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-comments.docx
+d2b339a18bdc43b19dd3b7a4da865a12965f41ded6aa8e257e75a325e6363961	6546	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-cond-image-no-innertext-before.docx
+bda00ba708f7322b8b1617db763eb5ccd1f18f4fad31ec6153a3b1ef6b5b6758	6093	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-cond-image-no-innertext.docx
+aa71d0cce4680cf407135a2daef25c741de600c57e5f2544ec0f5629eca03c68	6564	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-cond-image.docx
+a8de4c95b3f41ae5e66a1a79560f600dc09c6aa888582dfbe91c9c18f11a1480	17038	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-core-xml.docx
+d2b6d368467cbcc6b6b44a3733aaad97b4ba458ba9aeacaff7c2b6b6abe1f7c8	67208	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-cover-page-data.docx
+5eb45d4a91bef755dc4b0751b48c470ce6b65d4c1c252e5adc1386ceb8e471bb	16414	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-docm.docm
+e6a7cf20090ef3961867b97cba49d8a0e78b8d2ac307984299fb0e07386267b6	10997	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-dotm.dotm
+349fe6e11903e577a1428e0f219ae00b21648335a11768a0cb74d8cc53de7006	4435	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-dotx.dotx
+6ad614a10c3f77998bbc3f10b6a05ad9fc8530265ca635fd7d0953d7be21d15e	4792	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-empty-table.docx
+7ba93d0d7bc8dd934099d3491ea4bfdc311b0ec59d533f5a921d6be6b80234b3	11304	edge	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-header-without-digit.docx
+52ff2344ed2f115e3c04a2d2f0fac75864943dbc07c5efb19b4b4546bab856af	17313	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-john-doe.docx
+aa2f46c48966357b635b9f7add0c9842a869d0f870c94803fc253eea6f5ad27e	10219	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-john.docx
+f32cb537e0f3ef6a3f9bfac1a9a3d0dc79ef8ea44ae98a1968b0b8800fd1ede4	19164	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-loop-hebrew.docx
+a523b1054a10632c64c5a906cc332f3a31a10e51d6d7e2ce246280252d7750b8	12449	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-loop-images-footer.docx
+6ac130d8c4fcb5772240d9a12175cb331fdf0dcd1c5575d8d4624b4113549c20	5725	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-loop-images.docx
+ba0997cbf151daedd2ef9314f79ee06dd3514f470f3fb43a07ab2b3c04966dbb	5141	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-loop-raw-xml.docx
+f5625ade2af4187ff5c0c467fa2accec4f7d08fff4c781e676ba5e9cf3650c8a	11117	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/expected-loop-regression.docx
+579246ad759d59ce19b0724fbb41db7049c7349446e7b55b5fef8e443abe7936	5590	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-loop-valid.docx
+9d0cf0d8ebb5cd29b36f71524d7f8ce210a5706fd692e082d68ee9405363449e	11078	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-loop-with-continuous-section-break-2.docx
+e288ee9b24447d0b3993f9bfd7b1017468222559c6cbf833afbbc46dfad469a8	11020	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-loop-with-continuous-section-break.docx
+3d88181fe4d1c27974a5d6847524b863d5e7b4fbd2dd1543b09ca5353a87902b	41633	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-loop-with-field-and-nofield.docx
+bcd925d7bb468dd5ece57ce999d80ad7571a85ced56194cb2f5e8f8ee5b7a9d0	20334	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-loop-with-section-break-after.docx
+fd9a05036e788abd51ff9b58d0948dca0c5c6c157c6f1cc14f6ba81c3828cf8c	17515	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-module-change-rels.docx
+ab2e50db4351d920c96340baf07b033fd42234db6de848bf840b22f72536e495	4497	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-multi-loop.docx
+8da614b8f9f359a02af74bc5565dd602405e6c93c7bc3b2e3f469b781d3f734e	10401	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-multi-section.docx
+1b2f0a88455da165d1de265b8bb906d49ddb6dfb8ce17938c315231ea58d86a3	4294	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-multiline-indent.docx
+e07e3c2fe82c546962ac3a508dc95b386fc46a67f63543f5277add02237d4776	4269	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-multiline.docx
+33bd96a44fc4f9b344869fad0076a8805cc68f3032753cf9b48ee0a6cf4cb96a	5990	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-nextpage-section-break.docx
+4a8ec7bb063777c6199e2aa00455f0225c89ba185c11f7ead95a88b119e025fa	11982	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-no-multiline.docx
+d3e3daff977acaa348ae05fde93a48790a81b6b8f180f2f3bba229b216411168	19706	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-no-proofstate.docx
+e50aee1bd4e2304bd0f89e55d6916fccd86294c0c41368940d024122ec7d5170	4273	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-noparagraph-loop-with-pagebreak.docx
+f15c5df28d43d36992277c455bfb0b53505315678475677178904536b39c6032	10486	edge	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-office365.docx
+f6cd986bac0c21b47fcece0d77bff2bc919d4e48390c18b4d8335918e8cb372c	271459	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-page-break-3-els-std-loop.docx
+b8e43a7df2d37d4b4c8f6f8f79e45b3b6024fb47a0cd573cf10c09699608f17d	271279	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-page-break-falsy-std-loop.docx
+b7fa224764e2db7b54127f50a9de2ff5e5c0535df1721400f333030be1456555	271409	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-page-break-truthy-std-loop.docx
+7c68075bd5f585a5e0a6065fdbd1c84d86adc35a2e0beadc12c430c60a743743	14214	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-page-section-break.docx
+01bfb327bc3883743aaa203ef6818cd32b5cddfc7f1ee0c86e305a24126ba44f	4611	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-pagebreak-table-loop.docx
+d44c38246c28760b01556f8576043a93e3678c2356b3ca79f0a13ed219eab0f1	4226	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-paragraph-loop-empty-with-pagebreak.docx
+972668353555144052f787d242e3d630eb7b1e11a5e23b531c8c015938f60f5d	20292	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-paragraph-loop-kept-section.docx
+aa53925d862879a73b7eff51bdfbf4376f4aa607c8e01ca748f23106180e3c0f	4256	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-paragraph-loop-with-pagebreak.docx
+fc2c91c2493f99174e697ccea189c36b3cc314e0279114e37559393383274410	20294	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-paragraph-loop-with-section-break-after.docx
+d5785b85e04a7295cf729a17492c7a37ad49129866b9b32df9de42b858474a0b	5407	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-paragraph-loop.docx
+60dcc347b2b82493e0dbd54827cb141757d35a05996d705254db95b5fceee94c	15929	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-proofstate-removed.docx
+db8b3efb553ed9d55edf649670b2a18ba438f69c9efeed6947e85cfb69a94aa4	10699	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-quotes-in-tag.docx
+e6abf40cfd6866fb445327f8a5c7e204e918306a2d4dbca538b05965b41915d9	4495	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-raw-xml-after-table.docx
+15cb5b1b4eb1e9fd8e6ee5a2f5f01bc530833355eb549df4913315cd79c8e442	4761	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-raw-xml-null.docx
+7c5e175d9cb9a8bd72f3120eae21f117f92abd1ea1af2505f389f4dd3c807b88	4722	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-raw-xml.docx
+5c81d590687f47f2a6a9dfe6380c2f4e055ff46e8e567775b94623c3f130c3e7	12829	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/expected-regression-complex-loops.docx
+0216f1e87f1e46fa4c77a165909a676d1a5a86ac1b2d18f755d0d909d82542e4	10405	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/expected-regression-loops-resolve-long.docx
+38d13f3971e37d420e7025e1ed769a2b3904702a4776f138b5074d16822e25a5	9704	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/expected-regression-loops-resolve.docx
+1dbf05f310b8c1dbd2f2b2e65bb22ad26555a332a81cfc3149e41786b55aa216	4837	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/expected-rendered-hello.docx
+968b06d08846a266c69a5ff5b22b894efccd099ee124a140fdfe32cb99541145	27732	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-rendered-par-in-par.docx
+4eaba1142660c8ae2d8f381b80f007ea73e29732fcbfaac77b50a5b42bb85850	17307	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-result-normal.docx
+3cf28d7b3f6d3a1b792b5edb91dc64e2476bd09a8bfe6c3c4158dc4ca5ff543c	21301	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/expected-sdt-content.docx
+b652f00a950f4564cdad3dab7eed2fe5cd0c4010b55d7a23d1daa8755c1c0f35	21479	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-sdtcontent-valid.docx
+0416862a99448a61c022b62e31f8d5fac6bfb18900a9f5baa7287156f902dac0	17104	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-self-closing-w-sdtcontent.docx
+792dc43b524c08fb912ca18843d67de0702db8c38edd658776d4a9ac68cfea37	19682	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-smart-art.docx
+2447c5e07abfbe77b63c851aba4eaad9a27f417c2d767eb70e0e841d3af366ff	4529	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-spacing-end.docx
+0c69dd3e08eb95d96bc4e34915a10e073697c8f0e2b92d11c3dd05952dffb7cd	10065	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-table-empty.docx
+98f6e53fc7f986b1ed7af4ac3c7a5a65d798f12199b6fb5652a38a4480ff8c3e	16606	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/expected-table-in-table-corruption.docx
+b0a46259c71481199757e2f60973a7f6c57bd4da4b4b91ac7f26c102b02b6769	6227	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-table-unbalanced-loop-2.docx
+86b1d1805b71e18123ec0c7fb57931d9e017d9579ffcfa27db5f6ac0857c0770	7184	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-table-unbalanced-loop.docx
+ba436de181c01f0488f44d01eaa64d083e14e155e0f2cb21a2757a6eb46420f5	10753	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-tag-docprops-in-doc.docx
+510a09a708050cd39cba9e9b7d23dac8f60d3867649b867420997d722962deb7	17068	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-tag-docprops.docx
+3273814a8fef4f9962fb00a3e5133d7c3f63f0b4bae3fb0e59d6025dc1e916eb	17338	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-tag-example.docx
+994ff8944a88196d6184694b9bf8def4ec68a33400207f0fcf316ec868c02799	20841	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-tag-intelligent-loop-table.docx
+a4831b50fcc42684efdbf4af5493bae974d8cff738e33c998a076c8122ad19df	10404	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-tag-justified.docx
+a4b054aecc4b5a33a8ce10a5903af18798b9af216f0acda359772cf4c9eb7cb9	19831	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/expected-tag-product.docx
+e8230815e07c9096f725e815b99eada32af7da02e9ccdb02a6e598251a07cd8e	9681	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-tag-spanning-multiline.docx
+2c62d363e93c5b92b0d60573e71ecd2dd2269cc90f0b330c6797aeec41a9a3d3	22223	other-producers	ok	-	-	-	MIT	Google Docs	y	examples/expected-tag-with-comment.docx
+fdb5e024892985d9bb299d80a135f33e3ddbdf61baf192ba5a4db968a56bb5be	7096535	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-tbl-without-sibling.docx
+aef380636e06a14af466e38339f79b667ea62f35d26ab59168b471f64183b2f6	10593	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-two-multiline.docx
+b6779513a400a6169101e1aeac1b8b8f80b4040a3462c743e86949ef35b6488b	4196	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/expected-users.docx
+25c8eeddb3ccdc54c9a2248fe45eb25f145d3e2002498087a90ce236aa51228b	17099	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/expected-with-default-contenttype.docx
+59384e4f06345c5e7df297a0bb5c13524e8de51da2f1bb8d8dced80a8dc1a1c1	271260	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-with-page-break-3-els.docx
+480cc741a18dfb2ac403a053ed8f07d968f0a33b00aec7205173fd4aae6338f4	271295	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-with-page-break-falsy-without-paragraph-loop.docx
+11aa95b5bb26aebc2c1ade04b39500f5fa37344144e31377e1c65e8de670bb6e	270880	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-with-page-break-falsy.docx
+28915e6939e024857c8b7e09ff70b7ae734546868012fa2a8146eadba47b2a52	270955	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/expected-with-page-break-truthy.docx
+6450132819eb06cdd257eb64391820fed9075e48c9e83e6ed1d74454fee1b169	5522	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/gt-delimiters.docx
+8c85db3187d6004f0f9c2bbb506e370afbd98e5f8d1a487da09cf58a6a685184	12276	edge	ok	-	-	-	MIT	Microsoft Word	n	examples/header-without-digit.docx
+50571a11cab1ddad02f6e995a45334f9c50c3852bdba6a04c31dc79864993edc	17531	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/input.docm
+82e12cc77616e846ed8ea1d241c6a46bfbf90a20dff69d9aef81dc13285d298f	11095	edge	ok	-	-	-	MIT	WPS Office	n	examples/input.dotm
+248f9aa8d9a5bff17ce957834ed9e70ed609306057676f1dd6c913c791c2a9e3	4389	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/input.dotx
+55558a5b5845bef8ab0029fab46cb1adefa17c7d84a3e67fcc5d3c72f36fd985	10193	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/justify.docx
+7010e89c9e4f50efa715b41b6ca945e804c5ec82a558d071672b4715b2cb2337	19985	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/loop-hebrew.docx
+28f3b69c95771baaf4726dce01b9f9e71c88dc102002e89e6151f9b2f31d658b	13426	edge	ok	-	-	-	MIT	WPS Office	n	examples/loop-image-footer.docx
+0b5bc68443cd4022030b0903c2b83dfd5839113f7627f88ae9904ea75b8794fc	5656	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/loop-image.docx
+ec391209236e7791c9a3be7829bbe913d342b75f1491d82e35148856a3fb1638	6202	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/loop-valid.docx
+5c686659ed367c25f580129a5464a188a781b578f9d6fe3749410288e4df5c82	12109	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/loop-with-continuous-section-break.docx
+453c505096e8b6e3463b717aef47a2a2e6424a05894e3bd942b8e14f0480c1a2	43629	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/loop-with-field-and-nofield.docx
+38adbae73da24be9c9c09584a394cb8dac8c9db2d25e40f83e97e3585770e6e5	14430	edge	ok	-	-	-	MIT	WPS Office	n	examples/loop-with-page-section-break.docx
+c5be7129f387873d945a7b26f3ce29741c01cc079554f9d39c8621194a5c523c	21890	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/loop-with-section-break-after.docx
+2a0109ef1a700b475e3c7cf459c62a9827e0e9563baa658706d4140c7661bcde	10423	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/loop-with-section.docx
+58dde606ba24392dbca1fd1135d04c791c6abdcfce6c15c8043e07c6bab0a055	5823	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/loops-with-table-raw-xml.docx
+d8b96f16ac7fe94517ee3fb756097b9fb5d99195a932661e4f626b9f063963e6	5449	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/memory-stress.docx
+3406e43d59cf1be0146ba54c59bb4129a731bee3454a42959c8ef78bff4d026b	10697	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/multi-errors.docx
+7e103ce0b75d0679263ea2e61b66d6da523929516c91684121e90f4968cb2926	4225	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/multi-level.docx
+911d5d86d30137b0a8de8ac33665ed340ce4aeec60adbd6fe10c3ff1a04a609a	4445	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/multi-loop.docx
+38492f0004f41259dd601ad75769a5b8eca64dd09b6eff974f81d77fa87b2b5d	11384	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/multi-tags.docx
+e936a531d8dad5f63e84994fc5443a00ff9fcdda91ef8ff774e71c4cb89faf28	20377	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/multiple-unclosed.docx
+feae4b90326cb6ef4e8fa1f2a5e175bd0b86a64b7f74b20c231341359ec3a904	6743	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/nextpage-section-break.docx
+7d64807dc427321841aaf56046ab5e56746a2a91bb9d07b58e3995541a86a8d9	11370	edge	ok	-	-	-	MIT	Microsoft Word	n	examples/office365.docx
+773d815945d5865ef3cd95bb7d283b11a58f852e55910661ad20953425898ffd	22423	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/one-raw-xml-tag.docx
+866030d6518a4b3732695ce90c62ad461bf0a07ad4961f8ec526f7cdb3177c83	20387	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/one-unclosed.docx
+4f5de255d7a1d6fb54d44dfed25227d504100817f66ba492db1e26ae98ef63e4	16654	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/one-unopened.docx
+0a21eae3b331eae3844d045b2867f584531e41a4f8acbf85ef869c5398e32367	273594	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/page-break-inside-condition.docx
+b0b7435f77702d5afd4ceff878febec4d5d6d64ade795f410a646068da4138c7	4515	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/pagebreak-table-loop.docx
+2ada51f175bbc8c03359340898325e036b67abc41a15de59d8e31c9324bcd8ba	4110	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/paragraph-loop-error.docx
+fc08be966b7f0c57661ecab85031aed4dfaec02d787ca35be61273b8525de183	4217	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/paragraph-loop-with-pagebreak.docx
+f09fba6524bde7515a92434613e4287b22ad26a84a8cbf1b5aa6abc84dcf42ca	21902	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/paragraph-loop-with-section-break-after.docx
+d5bd8291d03d3ba45a4dfbed7ed3ed509ea45de064157d2ea8b395afa27440a4	5383	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/paragraph-loops.docx
+bb28b8a1f74ba8a5e8b1fc20b89a3632183a72f731af38fac76244a1a33bc614	11464	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/properties.docx
+83e76a8a62ac4ff76a62e38fdbfc782e77f078c0a54439c0a7f02419203406cc	10900	edge	ok	-	-	-	MIT	WPS Office	n	examples/quotes-in-tag.docx
+76d2bc6640a09a293974a5908a5a8a7b512349ebdb87b93f7de14b9d48c45cfb	4480	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/raw-xml-after-table.docx
+b7154a23fd2b32742b46ea37dfc592929a1cc46a554eaac6f69b6c9b3ed22aba	13996	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/regression-complex-loops.docx
+71ae5cf6bb83d3e9d5d6a30a4e37406b12ab60d931e8f92bd69dc35f0a131b04	10688	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/regression-loops-resolve.docx
+f758a8e2e16bae20fb763460cc4782be0c80efea5d89459c18231f7488cc7408	29839	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/regression-par-in-par.docx
+2d02952ecb13b6c85ade31b1a255ead331529f22d504548339ba31b887655fd5	23062	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	y	examples/regression-sdtcontent-paragraph.docx
+7fe0088f03a272a4c6b15b8abace08f73997ac974804caea46e071304e4d56af	22382	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/sdt-content.docx
+2cf0e052ce9157cd67b60b83247a8133e8964e8af1f53aecf3e5e9f3df3c91cf	18203	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/self-closing-w-sdtcontent.docx
+f65a5714341ab4498022e057d65c31df8b437c4b7d6e3ca42f6d1e587ce287b8	20335	edge	ok	-	-	-	MIT	WPS Office	n	examples/smart-art.docx
+50d5dfb5b68c3543ef697d9f61790f1940882101b0baf0d1cedb11502f50bc83	5194	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/spacing-end.docx
+b0e34e41eebb61caa9afd4902ea2043d878b8e4b3229903559282dde368073ca	15693	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/table-complex-example.docx
+82d116bcb0aceab990bd48d3a10b8a09fc4c1f60b66587a9629fe80e29600fd3	14566	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/table-complex2-example.docx
+9b5c45658198f1e29427e54e26e619711ab4b38f2353af05839d654f6685a9da	10506	edge	ok	-	-	-	MIT	WPS Office	n	examples/table-empty.docx
+91a04ed8214bb676a7b29e92f851cd4916e9aab1c51bb67a46f91368677e4239	17100	edge	ok	-	-	-	MIT	WPS Office	n	examples/table-in-table-corruption.docx
+57d0124228bb85a4a56866753c88e17854e620c2066815503da3ab0c57ff0e5f	5497	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/table-loop.docx
+36e31758cf439f4439d0075b826c4907560ec10f80b678de6c74139ae40bacf6	5413	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/table-raw-xml.docx
+e4f12824721bf88e688d95e72f3085cf73c4b28400790a56f04db51f42d0d9a0	4393	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/table-repeat.docx
+e254494ce75ba751ee572a01b550ea116974c1974847a928012cc3331994ff77	5896	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/table-unbalanced-loop-2.docx
+5396a8c8c0d3476e6b2670152ca706981c31df0726238b5926bdad0838746d93	7958	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/table-unbalanced-loop.docx
+8acd3811f9b88dc148d883836521e87f6b1e7b3c52ebc6c79c1dceed1382967f	24066	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-dash-loop-list.docx
+58893279df7e3d50360156e3e33158073ca9ac363aec8743568f8019893bfdb8	21897	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-dash-loop-table.docx
+604200a6fc88a5a20def9c811810a6c9bddd4cca2a2265ad82eb9ecf4ab040ff	20668	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-dash-loop.docx
+fabc153fbba796dad030fb6787f00abac7b7c05c09ca9632644b17d0562697e5	11663	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/tag-docprops-in-doc.docx
+981b6b86274319d5df17f456f0073cd798a0bb17d4014c7e121a8a262f2a8601	18139	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-docprops.docx
+96a00052d565894a8975ffd97329fdb252bcb8c26892973020fdc92477d818a2	19424	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-example.docx
+2c8e260ac4831d4e703d342ebbec919d6e1c7c0608a125b859a2110e4304334a	20761	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-formating.docx
+713763da36a443e1379575ba62dfca8cd09532a1ff392f53aa339ab5785c6a41	23150	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-intelligent-loop-table.docx
+6a8614c7c28c4c2519bc0f0f559479059c7eddd75f656cbec3ef5181fdc1bad2	18627	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/tag-inverted-loop-example.docx
+7eb897800275a32e9460c9f9f89ebb71cc0c5dc3038421f411bf74bb1bb088be	12553	word-authored	ok	-	-	-	MIT	Microsoft Word	n	examples/tag-loop-example.docx
+4eb25d927875d544e48a725004b573fe52af7dcc21ff06e17d50e69966068823	22354	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-looping.docx
+47d1b37eab884c8ab80248afda6f124fea642b1e40beeb825924d058d57fad7e	4223	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/tag-multiline.docx
+98dfa3350b366a8197169c2c7c6b0b9441de5b429ff2648b9697e2dc23a4646c	22464	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/tag-product-loop.docx
+ebcfd3e602cda4e1ae392f187f748b53e0d5058110ad322aab14b29efd7909d3	9701	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/tag-spanning-multiline.docx
+24e1dbe5c2af2daf529dba7d20d09eda326180a03d872f92f9720861c4b3c549	12260	edge	ok	-	-	-	MIT	WPS Office	n	examples/tag-spanning-multiple-lines.docx
+f87aa958c3ec8cc5d58acbfafbcfa6d0e7a835240c1ac2907fc4b9a252b3a422	10314	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/tag-splitted-multiline.docx
+83da64e991fb9efe1616c0d640a7836026620b0f3f7913422cbe6b71cdfd163a	23825	other-producers	ok	-	-	-	MIT	Google Docs	y	examples/tag-with-comment.docx
+3bf5bfa783391a571c36809207a6da39ec20f3c4c82621de0858de0aa41c9893	7146523	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/tbl-without-sibling.docx
+977d783826ad354880487c7bc9b6392ac0644c72a23c5cf6d81b228502b06af6	21793	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/text-example.docx
+a9e337fd6f2f91df455cc5e9c4b4952f6f8e59cb724172b591758a30fbb527da	10287	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/two-tags.docx
+19e3a297881a97488460c104bbe6a4bb7c4388237b9ef3fc171b24ba3434ca13	4146	other-producers	ok	-	-	-	MIT	LibreOffice	n	examples/users.docx
+7069110a91fa32c91ebd384fa0f019f5e1efaf8c40d30a4ce038468fa2e3ba55	12580	other-producers	ok	-	-	-	MIT	WPS Office	n	examples/with-comments.docx
+3539ddd2a414e285bc090e0b874e4187180a9bf817d96b4e95af83f115b13998	18868	other-producers	ok	-	-	-	MIT	docxtemplater (Word-template derived)	n	examples/with-default-contenttype.docx
+dfe455e490d2901475c7030c040b8dbc3be5bd0f13ca086297cf6f9c88de7ef4	14325	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/xml-insertion-example.docx

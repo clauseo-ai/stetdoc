@@ -1,0 +1,53 @@
+[package]
+name = "stetdoc-fuzz"
+description = "Fuzz targets for the container, the span tree, batches and the files path, run with `cargo xtask fuzz`"
+version = "0.0.0"
+edition = "2024"
+license = "MIT OR Apache-2.0"
+authors = ["Clauseo"]
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+# `libfuzzer-sys` is declared here and not in the root `[workspace.dependencies]`, because this crate
+# is outside that workspace. It is the one exception to that rule. `Cargo.lock` is committed, and
+# `cargo xtask check` runs cargo-deny on this crate with `deny.toml` next to this file.
+[dependencies]
+libfuzzer-sys = "0.4"
+stetdoc-core = { path = "../crates/stetdoc-core", features = ["fuzzing"] }
+
+# A workspace of its own: cargo-fuzz needs one, and it keeps libFuzzer, which is compiled from C++,
+# out of `cargo xtask check`. The root workspace does not list this crate.
+[workspace]
+
+[profile.release]
+debug = 1
+
+[[bin]]
+name = "package"
+path = "fuzz_targets/package.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "xml"
+path = "fuzz_targets/xml.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "batch"
+path = "fuzz_targets/batch.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "files"
+path = "fuzz_targets/files.rs"
+test = false
+doc = false
+bench = false

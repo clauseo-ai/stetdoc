@@ -1,0 +1,2 @@
+error[malformed_input]: not a ZIP package: no end of central directory record
+next: Check that the input is a valid .docx. Opening and re-saving it in Word or LibreOffice often repairs it.

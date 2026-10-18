@@ -1,0 +1,13 @@
+0f058d2823ed48b3dd3df5915fdbf47e591adffd6e4e6b507be4cd70999090e0	13628	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/each-tag-missing-data.docx
+aa7491bf3ecbe8ecb7022cdca4542159c760c2e1dcd65502aee8af097f9077d4	13719	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/each-tag-nested-ok.docx
+61f8bf2d7e730d6a9984652a1cf439dc6c13b5b0292f31a123ebac27a5b3bbe7	6755	other-producers	ok	-	-	-	MIT	docx.js or docx-rs	n	tests/templates/each-tag-oneline-ok.docx
+be26bead755bc3b9cc0e90de7f29827279e057d7e6667dfd8b0a0c59d3b44459	13617	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/each-tag-simple-ok.docx
+dcb4b4ca1266e3f2d5353c4b2e2a8dba24fb7ae03f557139d62e61bcc6de8536	13386	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/expression-tag-simple-ok.docx
+50eac0e1badcaa816c2a7bed7cdc3c739c4e124f87b2b148c200aead0c194251	11914	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/html-tag-ok.docx
+26b7d78f0250f1bfea071b9df47524feaf951fc9889a4ffdd11352faebc05c53	13697	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/if-tag-nested-ok.docx
+e23873cc86c8a4d21b7f228b68aa6819f9f0eafedc0416a90822ca3c062935f6	12769	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/if-tag-ok.docx
+7bcecd4f559fe5616e72bb882712342811b4229486e068920db6c735376f9896	13594	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/if-tag-oneline-ok.docx
+bc29a0531c096af598f5b2e32e5b1edf6d687e75140ca0c2a9d198bb07ea57cb	11922	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/image-tag-ok.docx
+d5d2d04ace698abd3114d8999ec6d8af3ee8a5d74bd182cd200fd052bd65b1fb	21987	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/mixed-ok.docx
+c68532b8a25128319f87d9f5a7c155068c02c7b9fed714608a8f7ca99171383b	13538	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/table-tag-ok.docx
+0413095be37bd88c234f613c0818f2e133d7659f6ad85c48050c653f6044881b	11930	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/templates/unknown-tag.docx

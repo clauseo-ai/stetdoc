@@ -1,0 +1,12 @@
+# A batch on stdin, applied to a .docx and written to another one.
+bin.name = "stetdoc"
+args = ["edit", "contract.docx", "-o", "edited.docx", "--author", "Jane Doe"]
+stdin = """
+base: 5737b772923cf8d3:0:5737b772923cf8d3
+---
+@replace
+ref: p4
+find: thirty
+with: sixty
+"""
+fs.sandbox = true

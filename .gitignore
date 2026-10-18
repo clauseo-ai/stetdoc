@@ -1,0 +1,9 @@
+/target
+**/*.snap.new
+*.pending-snap
+.DS_Store
+# The trycmd cases of stetdoc-cli get their documents and sandboxes from tests/cli.rs.
+/crates/stetdoc-cli/tests/cmd/*.in/*.docx
+/crates/stetdoc-cli/tests/cmd/*.out/
+/crates/stetdoc-cli/doc/*.in/*.docx
+/crates/stetdoc-cli/doc/*.out/

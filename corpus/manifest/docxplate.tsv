@@ -1,0 +1,12 @@
+03afa172793a567fffb19d5da332f1906a041c3308519673df315b8a210d7083	9161	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/depth.docx
+849ecf316048ac73b5e69d37d0c099797176e39d2e651316b381ea8be34c4712	5376	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/formatters.docx
+a923b20ad5d09323f7bb17286cadd0717441b22c821350a7d05d75c9c34b6b56	7589	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/header-footer.docx
+ed498d0fdf0d8931dcfaa5fb7ebe8429d8ddd05d646c8c7e0c68b5ff33e564ab	8289	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/issue.31.docx
+23d6253bfe7fd64e167bdda884bb34e5c23ede6f8a5db6d130d8baa253cefc59	8861	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/issue.48.docx
+25c9c74c797605ffed1346efc3f4eef29592d98bd345ff41a4a4c349bfcf3712	8018	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/issue.51.docx
+4a7da80b6ee47f3b9ddee192276f8aaef261ac10b2185a2f3ed084c1515a0dfa	9294	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/lists.docx
+e1cd86b2a6c2f0d2b68f5c7f23d26de199dd69a36372bfbca7333e66d312a475	9616	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/tables.docx
+c553ae9220cf4fa13a1797d8618daa979be544f9c55eaf0322c5d2de24686fb9	11944	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/user.template-no-images.docx
+cb7a23a10eab000143194d267320c8e4ba945345c80300094ebbd151912252d3	22082	edge	ok	-	-	-	MIT	WPS Office	n	test-data/user.template-with-images.docx
+4468bca4c00f74e5775e2b33ef43395575a7739a726c2e0d9794f451d7af4a36	17041	edge	ok	-	-	-	MIT	WPS Office	n	test-data/vmerge.docx
+cc0f7c93711aced810cf60c6246d39105739c95b5299534adefee97a52b5b3c0	10625	other-producers	ok	-	-	-	MIT	LibreOffice	n	test-data/watermark.docx

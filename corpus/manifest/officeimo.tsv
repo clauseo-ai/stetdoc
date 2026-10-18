@@ -1,0 +1,113 @@
+1be12e36737d1d044242bfc88d3416a25f4da036fe2a0b810ffe3672b58b5c98	20034	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Assets/WordTemplates/BasicShapes.docx
+50bf04c9144faf3144a18c367c342caf496deb456fa40f3993cd235239b3f283	20324	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Assets/WordTemplates/SmartArt1.docx
+46d2029933078021487e539279d48d146ed36d92d0a160b161dfe0f558545e67	21961	word-authored	ok	-	-	-	MIT	Microsoft Word	y	Assets/WordTemplates/SmartArt2.docx
+143d453e945872a3b5b9565e59f4d0215754b04565cce4b40b8189a394359945	125571	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Build/Project/Evidence/2026-09-11/premium-reports/report.docx
+b6af7cb8a55c3595c4bb4234eaccedb18c478ca3cd5558c18b2e24d7b188f841	21528	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Build/Project/Evidence/2026-09-11/report-quality/report.docx
+ff2f7c5ec54ec261dcccd49640839c3f1303ce3be826b791a44c203496e98cc4	18441	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Documents/Basic Document with always read only protection.docx
+e61522745c71529aae26ec83f97605edab06eb66bcb2090ee6768fa76db0715e	18592	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Documents/Document with ENFORCED password protection.docx
+5a1cbed85e6d7efb0fe8addac370d532065c63ab97deed418c18122309da5a6f	18526	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Documents/Document with read-only RECOMMENDATION.docx
+e95de929c5d105dbb8f5226eaa297cea49e9c3fdf43979c159e750adb75e4816	18461	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Documents/Test1_RecommendationOnly.docx
+7ae20cdd163e5662e5a9fd20eb471c01855744fe5a7b36339f1e87bbbb28daf1	18518	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Documents/Test2_PasswordOnly.docx
+00706926aaa4bbbad2ab00c1c7fe24b14f03785b8783ffd566aff4b5768ecebf	18507	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Documents/Test3_PasswordAndRecommendation.docx
+47d59dbbaca7fa29963c1eefca22a842e4c6194d71e850b204b3a8c8a1dd04a2	2160	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Templates/BasicDocument.docx
+37b873a087a114c990504673be383566512d71728243975f7ccc45166c58b59b	12886	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Templates/BasicDocumentWithBookmarks.docx
+e8727eaa9770a4076ca411bc6f6eb7ccf2657585862d460ab5b399c554627185	1515043	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Examples/Templates/BasicDocumentWithImages.docx
+76e7f022d6f4574c6900b9e27e41bc9e1421516852e9e6bf80426f120b94b06c	20227	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/DocumentWithBuiltinAndCustomProperties.docx
+b91341d4f2ea30e64522ce69e3f332817f5bbb8ad4080281d66ece617ddd6c8e	15559	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/DocumentWithFields.docx
+6d839c690d2dc55c9798771a97df1bb07a78c19dbc36b2ac6b90e6e8e4887bec	16059	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/DocumentWithFootNotes.docx
+fa80028ebbda0ada1d3eff940bdf1d2618f0b85369c0627ec5f8ea6b8a410a79	4978976	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/DocumentWithImagesWraps.docx
+8bfacfa0c07ba5814184e49560c4e6521e95c7700f55c5eeea89f19f65976073	12063	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/DocumentWithSection.docx
+b06fba659603e8e96a95b3bd79ce107d6595652544717009f746c6f5e6a5879d	12478	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/DocumentWithTables.docx
+0ca6aec112389e29a2a2e448b03ea953fb359474d3989898098da2a5fa29dc8e	22326	edge	ok	-	-	-	MIT	ONLYOFFICE	n	OfficeIMO.Examples/Templates/Hamlet.docx
+c41cb8d209701bd0502cfe5a01e69d48e4281ca822bedf9e15248c9c8240236a	17196	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/List Library Bullet Styles.docx
+3ea3c63a5eb5da5a753cf2dee0de987fcae953519417fc43a257e5d000aa7716	14096	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/List Library Numbering Styles.docx
+1402d7cc0e1486e6fa38dcf5803818eaeafe596472cf20403612f348848504fa	15379	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/List Library Styles.docx
+6b2065c623108a9400b838a2e595f5c3b9ea74e041bc683619826bfa3a6d94c2	13699	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/List Library Table Styles.docx
+17e7c77b7f1af18ba77eb563f14c99527d9ba60b042a09e5d8af45f1627dcb07	14059	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/ListsCreatedByWord.docx
+2be12152836c3dfe4d2267d5590974aa2ead2d5c9af16ac36c0b3de2da936250	13534	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/TableExamples.docx
+643e27d283708b9b9cc34ed3ee83f2bd25b96b2e966d0edd8498a1a7cabc6c11	19566	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/partitionedFieldInstructions.docx
+269329fc7ae54b3f289b3ac52efde387edc2e566ef9a48d637e841022c7e0eab	1311881	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/sample1.docx
+40258ea32f3175c3a91cab65dd6a7eddeb94180edd186ad882ca51b8b0dfa7b4	120515	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	OfficeIMO.Examples/Templates/sample2.docx
+58211ac149c4b05110cb95959f0f5f529333af5aea060d5a5baf096f531848b8	34375	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Examples/Templates/sample3.docx
+a2723283cb33632237d6ed26fab15def717e80247322e014674b8c2e1e29043d	21005	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Markup/Examples/document.generated.docx
+578a8a82bbfb877bad9cf0aacf7febc61d1d9c118c6af67f3a21dadc9e9b4547	43590	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.Pdf.Tests/Pdf/ReferenceBaselines/native-word-report.docx
+cac35c025abb249028181a9b54bfae02a4fcc1d1138cf34071eb01341a97438a	31440	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.Pdf.Tests/Pdf/ReferenceBaselines/word-business-delivery-summary.docx
+854939ffb66560617b94d26b3c4755a0b4cbac217e5fc64cf6a581024bc41983	6145	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/BasicDocument.docx
+fbdb19790427aac7bdf1fb02ae200b067fae04be46a1c4f52a6e284dd2e45244	1197	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/BasicDocumentWithSections.docx
+13b9adf6b884607a08db33b86d9210abcbceb69c8a073370903b3496b26ad0de	6697	other-producers	ok	-	-	-	MIT	LibreOffice	n	OfficeIMO.TestAssets/Documents/Charts/LibreOffice/area-point.docx
+f1e936c2e99f2c5f7856121dcd87516ff0d54fc6d2b3f6a8f25fd0c5e8842d4e	6315	other-producers	ok	-	-	-	MIT	LibreOffice	n	OfficeIMO.TestAssets/Documents/Charts/LibreOffice/status-pie.docx
+b46bd3d732545a216b9c898c248da07025417976e839cee1115251fa41c42230	857802	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/DocumentWithImages - Copy.docx
+1a2d98117e2661b2bb22600e7d8c3b9db7feda65e3e81d36ea4ee2331c1b1e70	1922060	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/DocumentWithImages.docx
+331bd930f625d89fbf6bcb4c8212ab61f83f82b43c3d33647e5f90c0ebbabe3e	26097	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Drawing/WordGroupedWarning.docx
+ed3206887807f3bcbc9a4e354d616118e828b6feeb7acd938f6ce55583f3d1eb	83702	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/EmbeddedFileBrokenSections.docx
+b58e2b51b14a4994bc29b414e2fa7907542e449425a84e313acea13459d53476	11898	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/EmptyDocument.docx
+29a4109afca71d2ec057a748c2b8944734da350c7b4b6b6309c1eada7d2c0f75	14168	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/EmptyDocumentWithParagraphPropertyPageBreakBefore.docx
+2f2e7d981ac3a9f595be4ce2e182300168a101fb839ad79c52948a41aed29fae	11921	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/EmptyDocumentWithSection.docx
+b531d1b78acf1150c219a135ecba3919cf39b241007a170f304cde4dd5ea5103	19117	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/EmptyDocumentWithSectionAndHeader.docx
+dc95f492a3828b6a8b39fd424b06672c6e79346e114b2fe62e7760dc8606f146	18364	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/EmptyDocumentWithSectionAndHeaderSameAsPrevious.docx
+8d403a6a226e3d00b50ad801ca052849ebb5547c0b918abd9bd753fc9ef866ef	153106	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/ExampleTemplate.dotx
+7ca6d2bc1f983f634a1c4b93123793de9edad906a58b25b475e4db1742823557	18397	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/FieldsAndSections.docx
+acf6fc96d1d298d1410ad73c0a74c8c5b1a466aab5b63b2073123cc7b4717789	26354	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/FieldsAndSectionsAdvanced.docx
+6d80e3fc30bd7efabecf6cb8669ab2d5ed3ebb8f4ca235b0413b6687416168b1	7542	other-producers	ok	-	-	-	MIT	unknown (no Application)	n	OfficeIMO.TestAssets/Documents/IWorkCorpus/native-exports/pages-simple-v15.4.docx
+c3bf61d585ab8a606e4be0067e51b57cd23095d482f38e49bf32dea97163812c	11311	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/Issue2510-SymbolBullets.docx
+c7e1b327353c86da73746675d7e3c66c99913bbfaec50d5dc82125f14c47fd14	13704	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/NestedTables.docx
+a5d43aaeb228ba99a473a8697dabf659bc70683ae8a5e60659371f0b69a889b2	13279	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Normal Subscript Superscript.docx
+af5a13bfec5a4ff320f6616c7459506a4d7fdcf3c8f3a9d9383b178a10f16e20	13338	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/ParagraphStyle.docx
+0c2f696901f199539189b024978a847c5ffcf33418f5c41cc899863ba62f7794	12155	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/TestDocument365.docx
+d24fefc478cb968f38b9d1125c6a4ef27a91993a80c016370fcb3b16a8e4dba8	23208	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/DigitalSignatures/signed-valid.docx
+ae62f73a58476c6a97c5d6e73febaadfa6195669b6ebc3f83457adaad5f87a05	19363	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/imported-note-part-list-of-figures.docx
+81656f08ee223e7eb2d1000197dc0dcef00552873141692f80c3ccb2de7c2bde	19895	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/imported-related-part-index.docx
+a60b85c507fc08b01988fa06779d9f69dd8c7226a33b7cdb9b7ff9e4395d8a85	19802	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/imported-related-part-list-of-figures.docx
+0500e727982bfc232f7774de49185189c574f8c570f37125e4283e03b4fb5a95	13566	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-bookmark-scope-toc.docx
+24ade36195ba704883af3610cd061bcc2affe6ad181bdd19288805586a5fa225	13302	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-custom-style-toc.docx
+ce1aa564b85ab63c1b47059fce4b4bdb6a965d5d4f275fe75dfd2d60dea89db5	21064	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-index-containers.docx
+dd33ac7a6f8c0056df92d32c3557c8658067d993649929a29f14c0d2a63f8148	13902	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-index-custom-separators.docx
+9ac30e165ff63d99e089552590833d86b9a1a372a5d819d108e21ef1d6f617b1	13857	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-index-page-range.docx
+b1151e662bf9c07c5dfe0aff5d4de0edafdfa2120882881498ae8bd91afcdff9	16481	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-index-table-text-box.docx
+ff5ba312feb2be316126ac0b76cda9a93f6ec3e875ecf29dfd146c672d6fb8a9	16646	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-index-text-box.docx
+bc095c960c1fdea965bc93711e2e704ce47adb43788b4cdcc13ee48dd8d6c83b	13989	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-index.docx
+82d3c148a1c7e2174084a76d45c183c531f4094e66b4b84138f78f0160cb004b	13868	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-equations.docx
+1422634232965dbf8bfb8547e2f2945a1378935e5dd55be4cc527453523349ce	11816	word-authored	ok	-	-	-	MIT	Microsoft Word	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures-content-control.docx
+d36300d93c93ede472e642fb179f7ce10d890ffa5ac189e91614cb74208de62b	13571	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures-no-page-numbers.docx
+433b979d97aa56317fea349316d93180da2ef163fbfc1949c3e963d7efb4f57d	11765	word-authored	ok	-	-	-	MIT	Microsoft Word	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures-separator.docx
+8216fbddfc291abe20ccc6ce73cbb02a2eab502f14fd0872321a18728b413c09	11890	word-authored	ok	-	-	-	MIT	Microsoft Word	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures-table-cell.docx
+e56729cf6ce53860f381d6b1a0f0aabf53f2e5a18b2ae0e7796b0183a24e06ee	16760	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures-table-text-box.docx
+abff9f1e5adc3476cc0b386acbadfb99cb40af1801737809d11948af7f542487	16814	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures-text-box.docx
+18e39581120029778a1d5a35423c44e3185619762a89a253b1f0f654ca498a9d	11758	word-authored	ok	-	-	-	MIT	Microsoft Word	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-figures.docx
+f57d26309393e6f8cb434d0096b543fb2581865eded48fe74017afa6b0f62161	13951	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-list-of-tables.docx
+03de22b7c676101cbf2abc50feb3b6b9e1ef862535bf5a547942d9b52d73d51b	13845	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-outline-toc.docx
+201ee79d62008ac5a484fccb7a94478c4b202a36d5d4c9ee73a01f727a254ea1	13501	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-page-number-separator-toc.docx
+d539d6d20782ca3d149f6ea36fbf7489848b917ed1aefda9be2f5fea5474cb4e	13538	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-page-number-suppression-toc.docx
+0b6224c81dcd3fa56f33927b54ea51fce88100bccf574b0f3d432091f414e432	13901	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-tc-toc.docx
+6372f63fd0233694a45f2d4de1f197a400d5a44c278352cc092024ad04ff602b	20955	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-toc-content-control.docx
+200dcc6c6b489a03d9d416ac8a0ad062f489b9e8005390c5ff61e84eb40d707d	14047	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-toc-table-cell.docx
+7868c012af4b97b7f8f87c62c72b020c39ebab010247d6a13b40529a05d2bfda	16810	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-toc-table-text-box.docx
+d08255570195f4ee1061cf98a8f6878695c2ef9447db764090bd784aeae03dda	16400	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-toc-text-box.docx
+0076fe8aca65f205f0896bd451d0994f1f3b2d755539f8e781e645de34f6bcfe	13387	edge	ok	-	-	-	MIT	Microsoft Word	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/FieldEvaluation/word-generated-toc.docx
+bc17ccde3a9e5a0b042f2950daa8fc15188ae9dd938a8e1349d89b5b008a7099	20621	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/imported-related-part-comments-revisions.docx
+71c874c96251359e04443548405edddfaffa50468fdfa8473b8bd79f0e3e213e	22187	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/word-authored-body-table-comments-revisions.docx
+a38c7eda0945ae399452a43aeb9f7a391a1a0f41351868e65776ce83b577594d	17547	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/word-authored-comments-revisions.docx
+ea95eb9ac034bdfd931a0657e7ba6c81f73b6e198bf396cac22b0ef8639ac54c	13384	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/word-authored-move-formatting-revisions.docx
+242ba08d21ff7694fb8955f0ccd144e469ffbf99128a68a77ad12ee6658cd350	12031	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/word-authored-paragraph-section-formatting-revisions.docx
+bcc30b9ad8b515aaf3163cf9151a52ad7d88947a1e74f9afe364478a19a807dd	24817	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/word-authored-related-part-revisions.docx
+474d47ca16e5aa25c8e4fc2598ef2787f416c11a86e4cea373b475ba602691a0	17613	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/ReviewRedline/word-authored-threaded-comments.docx
+556d97dc2b0fa4c621e66377c1701a8f562aacf5bb72fcec53242b913b8f9244	382517	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/TemplateMailMerge/word-authored-content-control-form.docx
+a75202c81fe9eb5de181d1ea593bceaef50953b10ff84604c48a22d8d279a198	13673	word-authored	ok	-	-	-	MIT	Microsoft Word	y	OfficeIMO.TestAssets/Documents/Word/PremiumGaps/TemplateMailMerge/word-authored-multi-section-template.docx
+8facd98fb95995b07903d5bd841ac7bf5389e19f14196da3c04843636ed26971	20099	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/Apps/OfficeIMO.Web.Converter/wwwroot/samples/business-summary.docx
+47d0a728b3348c763cd275ab158582b59fa6681ebfb02d642c33a4a1ac108cc4	20257	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/features/word-comparison/comparisonreportworkflow.redline.docx
+d0543e040cff92cc935c68944ccd8a55d45508f7f0c8d30347707fda769b7b3b	20428	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/features/word-comparison/comparisonreportworkflow.source.docx
+e77f1a15a4e944923e5533c5218010f26709c76d49974a75f20580de545b7331	20485	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/features/word-comparison/comparisonreportworkflow.target.docx
+38552405b565f7322836bf843953a73dbedc1f9519f8bb6118b7864ef3c0a016	18729	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/features/word-grouped-tables/mailmergegroupedtableworkflow.docx
+ada1d513c004e5c4dbe653a3875b90f2fea3d2624eea68c44b141e6edd9f6b64	18692	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/features/word-mail-merge/mailmergeinvoiceworkflow.docx
+eb91755dccfea1b812699768048609357ce1dbc32efa6bb47b8859b710258c52	19440	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/features/word-review-report/reviewreportworkflow.docx
+fcac335e144e80b969d374ae8a627ca26d5226af52441c1d79313bfb29d4a6e9	20886	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/word/customer-delivery-summary.docx
+defe47f05eba4092b818c61f1cb6df88cace395e9857bd91ce1f5d205cb90e9f	101512	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/project-delivery-gantt/report.docx
+e7c86b8a5e0d0c82725079a75bb659d492e965bdc2a298bb3748bff22760e6ce	19149	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-decision-record/example.docx
+a90f748275dd268286ad7cb5f9f08f060bb3ed73d740f3b8f16450c610e931bc	20847	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-meeting-minutes/example.docx
+62d52fede7a5642bc1c6e2868af029e864c5c3432a9944e813bd8cc3d6cfb242	20520	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-mixed-orientation-report/example.docx
+804b948332a07070ee729b033ae358496841b5269a75cf1d981adf89d8c2fb1b	19134	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-onboarding-checklist/example.docx
+257e8b89c064dc46c07feed773f3753d73439e747c3121d375786fb61f67163f	20908	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-policy-brief/example.docx
+875462a5867f4d93ea45dc91156aa16d4e583b740a3371d193396fa690da28cb	21130	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-project-charter/example.docx
+4633981b582e2d3f5c077032fa5a008330e0decaab3337fb0e95bc0911ac35fc	21119	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-research-brief/example.docx
+9dc9f33e80db3c99eed08dfb3a198a30d92fd4e3eb111a1ca7387ecf74fabaa6	18865	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-service-intake/example.docx
+de67318fd72e7750c8c67b2e82f3ef44f3411622a2c81e0cdaa218af55dc1fa4	18777	other-producers	ok	-	-	-	MIT	unknown (no docProps)	n	Website/static/downloads/showcase/workflows/word-service-intake/template.docx

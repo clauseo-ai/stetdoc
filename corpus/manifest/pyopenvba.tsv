@@ -1,0 +1,14 @@
+eb437f1c47e50d03454b0b52bd7f3a2ef018f0b84d787ac840513604bc73f73e	13150	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/pyopenvba/_templates/blank_files/blank_document.docm
+f1335fca6eac3718221c68a06190d5a777b10c7f20f41b5731ed7f10515201c0	18902	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/WordExcelInteropFixture.docm
+0b3abdda75690f83f7b8b041514c1fee61a0fe45f3266bd9820a7cad2fac9a44	13293	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/first_macro/word_before.docm
+23b00cfe49a6f3ea283da9fe03459ebabe8e70b0a425527a2ef63f5c0fe0e180	16822	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/first_macro/word_emptied.docm
+2ca84b583b6ddf7910ad77aa5dbbb1827000ebf1f7d2fc9eb9eb0f04d5a79be8	18107	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/first_macro/word_module.docm
+f240c862f63f78dd882f9b017ee89f012c658253d5af4496ee4f82cf20f06d8a	13269	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/no_vba/document.docm
+68aeecfdbf3199ccc06ff16da24857026381ade560e5b431de1140d97590f0b9	43915	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/shapes/word_shapes.docm
+d406e089381e82d7a40aa0f6537a2f9b5b1f8e98657ea613fb06a68fe2720bbf	16335	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/fixtures/signature_parts/word.docm
+dd4a9aa2c2c25f39ec3c9ab3551c9ec0295be0dfd829637f286e4c5cee2387d8	17047	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/live_word_testing/Doc1.docm
+229b742350c665742be4b1848bcb677f8f233ad78e2020cbfde69d54a37c9a3b	13662	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/live_word_testing/document_events.docm
+7ab5d8690281836baea3d2d70edd38cec509c2d54dad0b10c8450456a44dbe90	16764	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/live_word_testing/large_vba_module.docm
+a744a20d362894f236c9b6882edef1fe8de26fdff26e5f00d55670733d979c7c	13590	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/live_word_testing/live_create_test.docm
+9bf829549a1f62195e3ac25df8fe1ef6031e62c211b7d8719dce67d9924bba91	15313	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/live_word_testing/multi_module_doc.docm
+cd53ee69db3adae03436addbbe4265553e6b7534d2a1b0cf4a8d1e5065adb518	13778	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/live_word_testing/simple_macros.docm

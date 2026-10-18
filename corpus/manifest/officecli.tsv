@@ -1,0 +1,20 @@
+7d963a30d166ed12343227481e587deead2f5e81843c30d536a0a6638df95be2	18420	edge	ok	-	-	-	Apache-2.0	WPS Office	n	assets/showcase/academic-paper.docx
+2a54626492abbbecaafd416c3960b79e461b14441ee6ca3fb9339a9d1fca3dcb	10367	other-producers	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	assets/showcase/annual-report.docx
+5cfabb3491c12408e6a06c73b0cdffc7049f919d6f11c0accf8bf1e9beaa179a	17656	edge	ok	-	-	-	Apache-2.0	WPS Office	n	assets/showcase/employee-handbook.docx
+19114630896ec66f97cad09587b62c230ec052e61a78b6c6aa51c6312c2952e7	7986	other-producers	ok	-	-	-	Apache-2.0	unknown (no docProps)	n	assets/showcase/project-proposal.docx
+5ccc975c4f23f20b63102eb5ef3f66b7dbddc1e06eca68ede77419a30d95244c	12116	edge	ok	-	-	-	Apache-2.0	WPS Office	n	assets/showcase/restaurant-menu.docx
+d9ed83a33fcbd16884f42e4c410f514b2b087cf80fa4a7a86a4d715952afaf14	5236	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/ppt/ole/data.docx
+86e0a54de0e308bc12dc4a4831ee466117cf7ae1aaa6f582c0bbd5062263fe10	26224	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/charts.docx
+1bf600c2f7ca78c2f76782bc376fdbcc6c8940d0e6ef501d44767206c541ce8f	6153	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/content-controls.docx
+de5daf0dfca99db95621ae23831b8d22750adb7c38398a822a5b0ac38458bbbd	922012	edge	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.129	n	examples/word/diagram.docx
+cfbcd83bb7bd44d82a8d7a68ad7df9b4dc577a652a9995f3681593e74026f16c	5855	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.113	n	examples/word/document-formatting.docx
+728c0898f78e5694c14e88cf2f829c05c57fbbf98572de239db2e32f79105a4e	6933	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/fields.docx
+513d9caab442d874cf17ce867d337af36cee15756cc2c33658a7e57580a8f123	13896	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/formulas.docx
+07df42011cbcf3f1751b28ccf9010a9f813d68c5d7a120aeb230e2b5d34e46bb	7353	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.119	n	examples/word/numbering.docx
+4967ba1bf552e6bb43af21cce16b1eacb94ba5c4e78b219a5c0c272e17e20bd5	8261	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/paragraph-formatting.docx
+aae77dac6d5bb3647b523470e99f37993c652638b488b854368f221b65018f79	25715	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/pictures.docx
+430fb0c10c1111ad4cc6a36fbf4fe5b90ed638e091351cfbbf287b87c7353bae	7238	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.119	n	examples/word/revisions.docx
+78f525f1477b87a6f8e69c9ebbe29de00a622308fef4cd9312bee175e8bfcbc7	7351	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.119	n	examples/word/run-formatting.docx
+03953be4044371527a182667f18ef190961ed77b25989ffece0109380eddfa20	9133	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/sections.docx
+494bd28da2fa906f4eef0f62c549b36ae82f313e1dae70ef272dbef93445141e	8542	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.119	n	examples/word/tables.docx
+4a225915ebebb4f8f7b83bb0bcfc94cfd39213d973c9e6075aeff196e0db3e14	8618	other-producers	ok	-	-	-	Apache-2.0	other:OfficeCLI/1.0.126	n	examples/word/textbox.docx

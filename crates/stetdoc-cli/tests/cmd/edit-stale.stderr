@@ -1,0 +1,2 @@
+error[stale_ref]: This batch was written for another document (namespace 0000000000000000, not 5737b772923cf8d3). Refs do not carry over when a file is reopened. View the document again. (operation 0)
+next: View the document again to get fresh refs, then rewrite the batch.

@@ -1,0 +1,7 @@
+# The nightly toolchain for fuzzing only: cargo-fuzz needs a compiler that takes `-Z` flags. The
+# rest of the workspace builds on the toolchain in the root `rust-toolchain.toml`. Keep this equal
+# to `TOOLCHAIN` in `xtask/src/fuzz.rs` and to the install step in `.github/workflows/ci.yml`; a
+# test checks.
+[toolchain]
+channel = "nightly-2026-09-28"
+profile = "minimal"

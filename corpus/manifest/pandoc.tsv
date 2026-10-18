@@ -1,0 +1,136 @@
+56c9eb96fdfec9d5841f8ad4b603e6d36d265907142abef19c262c0d91dc3948	14206	edge	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/11113.docx
+5af59455e266e4ba98866db7c3f2b00219fcc9e8c88f89f12cefb384274c33be	15080	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/11689.docx
+e150d111d4c3d8ec03c33cad7b3694ba3a9871031cbc4c8f9c89795842175db0	10947	edge	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/command/11833.docx
+87742da12fecf8301faa898fb457b9045de462128523011f0d0658f6b5e8fbe3	11923	edge	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/7691.docx
+ecaa16e2c527539861f5a63c32046b82e72dd6ce5698fdf45cff681522e00674	12631	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/9002.docx
+5faea750b5f5b36910a43ee50af8ff8d608af0a205f6910220d8113cae1316a5	13439	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/9358.docx
+f825faae8fc5c6be10dbad05ec52a89eda7e98b373a10c2a083201d49a4ca5e4	13701	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/9391.docx
+ee1ea76ce97d72e6122550c4f52d5cc2a6f289ba113425abc3e783a29e9685e1	13799	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/command/9603.docx
+0d99c52804c856788c773639a36f695e908bff14b07e4b242e377f6131f8941e	35146	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/0_level_headers.docx
+e2079bf5334e9291ef1ed870dfeec7fbba5762492c40ff513990984b455c1dd5	22264	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/adjacent_codeblocks.docx
+e31df4512420095ddd61e583debf79ebda3bd30a0bd4e5106d778304960eb751	8463	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/already_auto_ident.docx
+2e219951e06a202bcddfa3ed9503b77d51c40ed8d2a489dc5bee9f1d4d1be13f	11582	edge	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/alternate_document_path.docx
+c00c83f0666301f283e8bb513c4dfaaa908c6dc0aa87a5fb495558718e75db45	27098	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/anchor_header_after_anchor.docx
+f6901b01b1b7e289ce23d694087acec1183475567a3bee8847e0c61b2109b9c9	12153	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/block_quotes.docx
+4befadc2fcc30221f2eea54824d464c5ea89cd0ffb0c28b772e39e3dccc38e1f	18059	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/char_styles.docx
+560bec785eb4d9d79dba11bc036ac97692b6826796e17479db644b4c4fa5165a	8465	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/codeblock.docx
+b6df01371955a599f38ec1192d130ecd750a5d83363b7c3755adb0f15679a507	17109	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/comments.docx
+e11fac51c9210a2b3d320aac9c9168dd1dffd07d345deb0ec0b99a3a0ab35e21	17078	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/comments_warning.docx
+1b429f6b694893fac056c69f20c31aa4ad7fa2533857836002ecdd39b31ab8c5	9951	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/compact-style-removal.docx
+bef87b2dbdac587374c0ea0af6554953aec1fe113d82f509ff15ef71afaeca99	14978	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/cross_reference.docx
+c97751c49b8c84b3acc1e265462e0eec045dd8d4b322d162ae1442f81fde8e1e	14838	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/custom-style-reference.docx
+2919fbb144c78033f1e7b981ecc4cfa86a00a26f4018c61116af496f9036f03a	18131	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/deep_normalize.docx
+e67345aaa850fda07528a821b907e594449ea53036afd930e970f6234f7194c9	9174	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/definition_list.docx
+38342a4ae44586feeeb4ee6f65c6827412d425eccc7d59fa322ec0144a862b93	22716	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/diagram.docx
+22083b930abb1b9817a91722d0eb29eff8e6d02f1cf0a490b3b763365e13a4ef	15671	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/drop_cap.docx
+6ad4900a3f09a98da6807fd423f646855c19fc3d5d44e3cbfffa5e8e0898a635	70197	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/dummy_item_after_list_item.docx
+3139f9e057d816821d101fdbe19762eeba78bd94046d1271d8dc21bff84f0ae5	70234	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/dummy_item_after_paragraph.docx
+383e353f855438bceb80cefd593d42cda2599f39c21b3b43cb7263474a755a64	14312	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/empty_field.docx
+b4ef1f6a67bd0e432c8358b56b78a44fc6fbef141edfec232f230c4652354229	12539	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/enumerated_headings.docx
+b4a9e407340cc8d08a1c902d9840f690e104f2b9d68f46d5e2f47921deea3c20	10405	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/german-reference.docx
+172b4bca913f60a98cf9ac7dd7550957949dbab730045c745978862fd956c4bd	43957	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/german_styled_lists.docx
+989548cfff203c97dcf5a3ffe0503859e15964e6d8690d243133a38b18d67eca	10698	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/block_quotes.docx
+78b3acfe8a247d3012f1eb9a09085f05a422b409703cdc6c1c1fd88df42081e1	10510	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/codeblock.docx
+908f30fbcf8e0aa3f9ef2b9f7f980c314b6578bea4f09fff838a6f3de5b5df7c	10824	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/comments.docx
+285196000d388fea7a7bfb148d3ac402c8b758602f938429f0f1b6f0835745b6	10684	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/csl_bibliography.docx
+f4a492943808c54074f1579dcc21ba627352f51b6ad9adbc324d957658d5ba7e	10609	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/custom_style_no_reference.docx
+dfe59ad30ab87f81edd26adb260c8f3695e5e25d789ef203cc1168db339ac33a	11242	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/custom_style_preserve.docx
+1c4fc596c1fa0be71f928f1384703e0f94e861c00f7928be487716dbbe94f5f5	12542	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/custom_style_reference.docx
+e91cf27155df6878d7e7a107212ffdd8506ee96d34432ff43677d8a343f86bc5	10501	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/definition_list.docx
+e1e5c463ae5a796880c67235beaf7a694bbdeeeff1068d0205414913b471cbb2	10515	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/document-properties-short-desc.docx
+2946bee3c3ec62f235c71d939147d2473d99f0aa78b54c1cf39c0aaf765ced79	10993	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/document-properties.docx
+40f6252f6dacbda17501354da50413907581c235213740eba4e28f14fc8b70dd	10778	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/headers.docx
+a73165469bdaac4fe2605762dfb721b7cedfe462b894687ee6a01669cf537654	27434	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/image.docx
+4f5610a379c78897447faaf77298726637845de7fc8adb3ef3cb0593090d2544	10451	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/inline_code.docx
+9fffc84c3802357d623d861fcd6e85bb78cfd5797fe36221065ea9b857a74fdb	10627	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/inline_formatting.docx
+f6fb68abc388414a4f994a31ab72f1ff3fff226136d67fb53365b2f2b3beed6c	27383	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/inline_images.docx
+61ddc77f8c63b841d6b970b4f8853b5077227a95f6465b6a9c8e7a3b7a94e7e5	10664	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/link_in_notes.docx
+d1a099b37d0371d91be58298ef54bedebc80076a1e4539daf32bc2a39dc11299	10861	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/links.docx
+87c3af8b459ade89a15f1b92bda6ac4610e211c026a4cf66154fb175cb4e14d8	11053	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/lists.docx
+ceb51b49cc1b9b59cf97c7fe50238160c01be768d47627e25b65272ec457d9a9	10788	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/lists_9994.docx
+4d4983f93257c1aa64c142acb7fa43b179293441bba902112859a7f5e8be8c9d	10677	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/lists_continuing.docx
+33c8af3d66ffb5085d658d8e89f3721ba129b7db1b1a6b6901696d402a5c0610	10670	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/lists_div_bullets.docx
+f3e73cc8ad14a907a41a55b6e3a68aab9476efd576176893ac5031df689d5b0d	10903	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/lists_multiple_initial.docx
+80bb016c0ef8b87f7b6c0bae60ff175a37c596cfd8fa04780677d2355a6c5769	10686	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/lists_restarting.docx
+92afdec6ac6af74b02d526540434f9c2c097c33d323d57430201503ed793b73f	10752	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/mark_math.docx
+1809a84f821812cfa53ad71fe12519d4ddd9c98765255918beed3d6806a5ca79	10878	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/nested_anchors_in_header.docx
+8b9e937871f8875b6d446070dba19b8c7ccdbbe714109d4d5f27e29f514a20f6	10628	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/notes.docx
+28e55e57b7daa6b4636a66c2606a6969e9be94ec853d04cf4b705b17180c09a0	10544	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/raw-blocks.docx
+1d9da4a0baf8229cdc08a9315938b46dcbad0006381275427934c037902c8267	10683	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/raw-bookmarks.docx
+1a6d0e1cdf49e209cd76446282366472523b0dcab579518a4bf0011bd8a9ad3b	10496	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/table_one_row.docx
+d3d1b9ade329b354633ebb486f9d2228031ce721b3061558d4f8fedf5c609daf	10951	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/table_with_list_cell.docx
+62fc32afccffab38bd32bf971341a557613fdcd1d9070139a45b8fd468ea4526	10879	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/tables-default-widths.docx
+5739f136ce7239e0f09f0063d58239f2600029d5af03bdbf360805126acfda2b	10893	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/tables.docx
+f3f69a5f1c86d6c13a8cbb8042d7616cba74296ee259146b22251d0831d7fbfe	10519	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/tables_separated_with_rawblock.docx
+52a58be725aa66e5a4854370fc4c8ece59be26db11e8b7af890364b74b3b4d92	10773	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/task_list.docx
+80f7a6d8bacf47e2e026d840c9fbadfdf2527bdc9a2977b616b5ae3d029b6b26	10492	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/track_changes_deletion.docx
+63d25e5eb36ef53acf08cebbedb119f0ba71d1b3e23e4ab3e3da81b362646d46	10437	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/track_changes_insertion.docx
+6c3ecf36c0e2fa4e4d974ccf89ce643759ce265504c995f7af26813200533436	10506	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/track_changes_move.docx
+9876f0b05b4c55b5c9a5f356081c6ddf0da85b28253572a8a133ca518b671ddd	10591	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/track_changes_scrubbed_metadata.docx
+6b20c99eda5b1f4ae5ce2686be34d1ef409668af88d40d57d8beb95560dc7c19	10468	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/unicode.docx
+2ba91463e1260dd10d36d5bf1d1f3137eb81b01d40e541ca8e01a4ee4411a3e0	10479	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/golden/verbatim_subsuper.docx
+12667eac12915a109ee6ccaaa821a6f468a3a9ddb41099a761da51606c4031ae	14754	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/hanging_indent.docx
+d5bde0239367f1fd990fc5219331b1f2f23c021f884718f68493328150892ba8	18926	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/headers.docx
+5b4ed41bfefd4feb37fe6bacb911d13bc45cdbddfc4ab0ce27a1778d7a15f2d4	13680	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/i18n_blocks.docx
+f95aaf3a2cd5b914d35048a8a8ac7610969ae5e9470448b9d76ac8142d5f410a	35407	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/image.docx
+8065acde23fe24fd232c503382ae41a8e18eef73de9754eed9e51850541ea184	23559	other-producers	ok	-	-	-	GPL-2.0-or-later	LibreOffice	n	test/docx/image_vml.docx
+188839764b68c8f41c2dc65b1b7f27ef09b1302692335bb47d4540f021965df4	74199	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/image_vml_as_object.docx
+844c550ca10afdbc032757bf2bad7562c2057059afd71f75c45588c225c3a6b7	19882	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/image_with_textbox_caption.docx
+76a5dc71142604fe7d8b266f70263794055fabc262e7bc6b0da1c27c92a1be3a	8379	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/inline_code.docx
+0d868a2dbedabc866088711ab72cdd9904ccc00a54d5aec26e823e66b4779f22	20047	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/inline_formatting.docx
+e7f289c4722968471fec2344d6cccb033cee2380b5958cf24f8467d86ee72ec8	14305	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/inline_images.docx
+52fb997054e2510caf169256dda7847195ba35eaaf3e23e1f7cbd7efffcb99b7	13628	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/instrText_hyperlink.docx
+38bd262b4276803b866d98c917c7f8e52d647ba2f699796c0db14d3c6b248a2f	16269	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/link_in_notes.docx
+8a217ced47458d54baad1109633ac5612e8661877d6f19efb3a54b42bf4869d0	15874	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/link_tooltips.docx
+529af3511760ff21d5d74587d01a8d376b5cc20c624038c91004cd6ec46c0223	32356	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/links.docx
+2dfc35136f82850cbd22c941c148c3a309c3bd2084d316e23775b85206534333	9952	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/lists-compact.docx
+e5b1a7204be70bb0398ee9b585e53901f057b851a9f13f41fc4b9554548f741e	9473	other-producers	ok	-	-	-	GPL-2.0-or-later	LibreOffice	n	test/docx/lists.docx
+71cc0a8468c253cbad04bb0d4597f7b9f8aade0c4592ae5fa0c1963748e103d2	17717	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/lists_continuing.docx
+e2d15b1db0af8f6edb5925818b8d422cb24a996e2d38dfaa6cedb9197e3244e3	16735	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/lists_level_override.docx
+82a7d9ef72325b53a2a2de927406f17ed6cc9625e74a339d523c11434d756a0b	22718	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/lists_restart_8367.docx
+d4d1827009ffaff49c8b84ebccdf661fbe7f32ea1d6e73a324b9563923e50199	18189	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/lists_restarting.docx
+592885bfe715d41ec57e4e1d9dfdbc0cbea0c221e1ed6bb27e37615907186108	12757	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/lists_sublist_reset.docx
+cd560f3f139beffc810ec12505de97b2a3cfb7e12aaa8f5a85148272d950bc7a	17716	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/mendeley_citations.docx
+6b2fcb3cb98842e856357745c4e50308093977ef4c28d351273667f0ebe2698c	26077	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/metadata.docx
+e2270c2b157f9944cd0b096e8d44a7367ebc124dd177e4bbb6ac598f28abab08	38654	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/metadata_after_normal.docx
+f14d82adf16226721c68b0a0272d0d61db44e696041e1a5b6c2afe04dd0f8cf9	17535	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/nested_anchors_in_header.docx
+48db95ea05d5a4f85cd1d3f4074ac2681074a6a2eb979a4dc2ca09f3deca7372	14112	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/nested_instrText.docx
+b52b096bda700e0434af8aa884de4e40ee1876d07d0551eb0ebd6d943ff06a88	11694	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/nested_sdt.docx
+0859a711b5175b4e7297bcc756e68c790437b2a5345ed64a55443c7d50ae87cf	13641	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/nested_smart_tags.docx
+ca188dab080ee7782111370238c103ef58b45ddcc99a82dd42ca5a714e1bbcd7	14672	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/normalize.docx
+887cbbc9d248706b146dba09f543e3d8952cc59abcf054b467c1773bcd120d00	19056	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/notes.docx
+5310462e44b2b601a259d1b0ae83c8407f81a9e966b623d235c9240ce7929d67	2289	other-producers	ok	-	-	-	GPL-2.0-or-later	unknown (no docProps)	n	test/docx/ns0-reference.docx
+a82993f4bd661a9d88ebb4393729fd067b0cac61706882a31e1f54cd71ec9156	15467	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/numbered_header.docx
+81a29c029b50bfcada05c44cefe7f794e102b2b2b04faa8d64ff1dee624628e0	13747	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/overlapping_targets.docx
+c55d2062474c6c6a06eb5f609c8f25cda67fb2b39ed412d72e35d54e5e36e643	14431	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/pageref.docx
+9845f2d9fa6c980aa7b3456c1babb1bb5273687bc6122cc0d124fbb5f38ab8c6	12066	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/paragraph_insertion_deletion.docx
+52a9bf4ec3e01c9252b87c1cee0dff672bbe7a279c71c3a2a5bb02e5534e9907	12655	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/relative_indentation_blockquotes.docx
+b79853b199c8ceb698ff083c5d2fd0af4aeb5f98b92b34afdf1ba55e4563f5df	29409	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/sdt_elements.docx
+0d491048f55d1e806e187449785aa79cdbb29ead49944dc79efdcee85ef97b84	26716	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/sdt_in_footnote.docx
+8f3c116a108ca239bac2dc20f0a950fa4c1c44054b80c0285fea5e0f24b647d3	8408	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/special_punctuation.docx
+4c66cba3986d0f462ea13b487663bc3f62e45e9060152704aa0825d19da785ee	40487	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/table_captions_no_field.docx
+9f1a710ae81ec1572a268f3dbc55b5af33d3de26ef071f9796cc67aab77328da	41091	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/table_captions_with_field.docx
+d0cfbad2182a33e058aefe6eb6efc96cfdcbe85af266afab69e46b1f24e56ebb	13143	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/table_gridbefore.docx
+e5a1c8507b9d33fa884bde402de7d7f11531f55efc96b2a1da4ec1f8b4b60792	15826	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/table_header_rowspan.docx
+c2a5fe244f931e03f68989ec1fac2f45a5c58d1737ec16d5a8af01f9998dc978	12185	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/table_one_header_row.docx
+f80b30b16fcdef3774a4d8359d5861fc11204b7e8bbaa750394d936360dbdf99	12148	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/table_one_row.docx
+d2ae3268a3389787d9bace1f92133cfcc40eaa69c38a9a04111b9ee234e863cd	10006	other-producers	ok	-	-	-	GPL-2.0-or-later	LibreOffice	n	test/docx/table_variable_width.docx
+e9560eceed1d21d7a4ca4659a65ed9586135b9196c5fe7079f9c5b1b26609f9a	19028	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/table_with_list_cell.docx
+b6156434c0d1e6cf697e2774c9ce6e6616a2e0965160e2f74269dfc7008894de	31751	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/tables.docx
+5c77c40314136e773b6a0827c40f06f8da79453bcd40123249fb4fbd3ed023ee	12919	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/tabs.docx
+cb4541872bca25d3269983a10333d95a1ef3e7b23053b2edc69a300ba9d0899e	10749	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/task_list.docx
+a30338884675f1b64f9142097aef017a52c95888f972acf8dde8f8c5f5818f76	42504	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/text_in_shape_format.docx
+2855ac4e3a5305d29de2ce7491d7647dbcb71fc304ce184e588b5282db178747	40379	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/textbox_image.docx
+4b27e66960671211dbac92b5780201ec379926dee3343fbbb57638872dd1d2f6	36750	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/textbox_image_duplicate_encoding.docx
+a7254a9f2c055e6d8e4d46336ba9f31794f54f9ebd04f1bacdb2805456e8e7df	13350	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/track_changes_deletion.docx
+c6d340a0f08f3cfd25ba52488d8445cdc540754638ba26923b9bf0a661909999	1093	other-producers	ok	-	-	-	GPL-2.0-or-later	unknown (no docProps)	n	test/docx/track_changes_edge_spaces.docx
+94b98d852342f3838c36ad09b19f6ce7247010fa7bb03ab2faadb0a027f2aa07	12956	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/track_changes_insertion.docx
+9ea28f56f9fe00146a845497e226b19ec901685dd22798a2817b470abb0d1e5d	26151	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	y	test/docx/track_changes_move.docx
+cc3f45e39a4ffb06d8d1d0f841f99217ba49474cc947a650ddccdd03a7900114	13325	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	test/docx/track_changes_scrubbed_metadata.docx
+7058a3620402bc7f5a8f5ce825f7d621251adbcc08c6b0ff0efe2ad0d4b3ebe2	12916	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/trailing_spaces_in_formatting.docx
+97c7a121d8115876fdd7167aa3845c4ab0efb94fee304e67176913f95ba39f40	4179	other-producers	ok	-	-	-	GPL-2.0-or-later	LibreOffice	n	test/docx/trim_last_inline.docx
+a2f90d5ace8500ddc9d30be6b8a30730ffa289680ca516c6b442ef6310f469f8	11506	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/unicode.docx
+555a9ef5f1741c87ff9fd8944857efa96092c7f334cefb6d02a65cc3ff14cfbf	13276	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/unused_anchors.docx
+256cd0e4a798054da0e7d26a27f8d4f23b69e08fb3d7ac0801be4d924820bdab	10353	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word for Mac	n	test/docx/verbatim_subsuper.docx
+96b9a9557db731685396c3edf62a4c18a37a42edc0049443e2d2a45364490d94	14943	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	y	test/docx/zotero_citations.docx
+41629261b18d0492039d098cee28bff489cfa69aa5ec447037cb123dc090e8ea	10921	word-authored	ok	-	-	-	GPL-2.0-or-later	Microsoft Word	n	wasm/examples/docx-with-equations-to-latex/equations.docx

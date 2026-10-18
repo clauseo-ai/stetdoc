@@ -1,0 +1,2 @@
+error[invalid_payload]: contract.docx is a .docx, and stetdoc never edits a package in place.
+next: Name the file to write with -o, or unpack the document and edit the working copy.

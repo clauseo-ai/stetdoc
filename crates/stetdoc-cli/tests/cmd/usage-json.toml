@@ -1,0 +1,5 @@
+# With --json anywhere, an argument error is JSON too: invalid_payload, exit 2.
+bin.name = "stetdoc"
+args = ["view", "--json", "--bogus"]
+status.code = 2
+fs.sandbox = true

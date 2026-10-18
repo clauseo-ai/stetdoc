@@ -1,0 +1,112 @@
+25a5a840551080fb7f67c472fec594b2ca99bc049173022ea638c725c433c99a	13409	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/example-browserify/quill-html.docx
+ea674cb4dd3d8e1d9ea11cb90095c190eb913ebbc65f1d6019ae9f44af6baebc	19391	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-browserify/swapi-complex.docx
+aa9c30971d78395aa834760c16897bf132672315e0ee401aa3cdb6dabd88d0f3	21242	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-browserify/swapi-simple.docx
+dda175add0b6e08f6b0bd115ccf17a47df15117798a07697aa83f914d8b7de0d	37455	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-many-tiles.docx
+975ebc83b17c2224d2c0701ba2d13a4ae4d93bcddc357bc6fd4c30b409c6f234	2106101	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-many-tiles_report.docx
+23cf995850649e278b10d1f64ffa32dad2554e2a5422bfb2b08c2cb75361e433	24168	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-qr.docx
+0eb6be2a9435d95e929da75004a0344af2e92a162c0662a21d859eb3a75cf8a0	26828	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-qrAndHtml.docx
+40175ab2030c0ec20db55f34b1ed4577df24458e367942020b31ddb97dcc4e80	24952	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-qrAndHtml_report.docx
+9574341f719c9482218859841db0ddbaa8cc6d645716e6f4b3f3217127e6300d	22451	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-qr_report.docx
+87dbd62402b733b49fbfc97dd5b6f9905c2dac95f16daad4a62b2e4e5bf2a6f1	26502	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-tiles.docx
+fa2fb9b282bd0da0535bc13fe9f457c18afe20801921068b7cc3a60835c433f8	72287	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/images-tiles_report.docx
+909742aca229fee6e44027ebdda4f5bfa53b35f493fce7ee401e1991120c368b	21842	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-bullets.docx
+629a3055539f61b9a812dc3c4eea788b3e25e439d0a15a87e3cae0602897cfa5	22754	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-bullets_report.docx
+96eca671fca41d704cc0766d2fe9fba85f3d804d06917f50d789fc39203a6f44	57418	edge	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-complex_report.docx
+627f77506b8482d0cd3272c055a56d6f1946cdabc279d680f2fb5e53cff3c6bf	28993	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/example-node/swapi-html.docx
+41a7c7b34329baa44b4f1f36e711a5345b114e6d4f6890d50e3b2921f466f333	30413	word-authored	ok	-	-	-	MIT	Microsoft Word	y	examples/example-node/swapi-html_report.docx
+636d92da3dab8a1e6c4fdde5b5beb781e3b20755ec3ec922ca44c48f447d05f7	17562	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-links.docx
+c3b7248fd4678611aee9b349bc5eecfd795bf490d9dce4e7b92ff0d7b59acd40	18062	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-links_report.docx
+d890aacac1e8be4aeb2c6de6e90b5b56219db7017c3c5bff76fd51cbd02118ba	21310	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-promise.docx
+d53eccea6580217a5fbc2617a52c29b96eacbbc38de26e3de005bca6421bc3d6	21866	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-promise_report.docx
+4c6b7c9545daa20b475d340e6a49703e3fab59bd3d5a8de26a95ed0754960a69	21762	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-simple_report.docx
+f0ca2999f4a77577085ba619e536ad475ae9624765f83266ce1379bec0e69238	24641	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-watermark.docx
+0f8618e52149eb1f3545ad6fabe5ca797eff950d8fad4a7c2084461ab1b28a53	25490	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-node/swapi-watermark_report.docx
+2ce24ce4e963358000fdbe0e17d3553799efd4fb225c3146ed9591b781abb7bb	17362	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-vm2/simple-sandbox.docx
+9c8f7c48f850308ad015f1ba1a91f6a0b02f15846e31434c3278a6afe1578d52	17525	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-vm2/simple-sandbox_report.docx
+25457727802773f6627be949815967909be7a2e108fe4f0f4e78214c3075fcb7	21762	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	examples/example-vm2/swapi-simple_report.docx
+3a7465b6f49d2ac4133a99d033581dcc71b4e6f232db2d44f9342f87c3f9c0c8	19263	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/anchor-empty.docx
+126a9c9362a0cee1937801ce2c33c0dd41ea1eb25150d6f592cc81417cfd5d89	11769	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/commandExecutionError.docx
+210149f103bec70aa719aa40b6994b7706708cb6d1e950282580b83e5b1d2534	12186	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/confusingCommandNames.docx
+32462fbc64ace477d4c025bdd23a13d2971cd1bfa15ef9e8a2f7e1052aa8873b	12476	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/dynamic-columns-with-dynamic-rows.docx
+d2924701f29e5912d9580a19cab19f0287f39ccc74f75e7ce6354f41a252eceb	12388	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/dynamic-columns.docx
+cd6c348f9cb116bc65b355893b47318ef89cc2ee06c6ace6b055a141ba3d5b02	11906	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/exec.docx
+1cc1e8773e34c4c72d456d68041efe9c805e7b4f8352432408c5f1ad5ce039a7	11980	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/execAndIns.docx
+3c7e5e664d5d45d58c59e78f44b45248240bb13f643dec201586b46a8c5353bd	11836	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/execPromise.docx
+a3de5ed9f0770cf1d85b6efeb3922bd2335006b936e382f6477d11aec4b83535	11939	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/execShorthand.docx
+97c151a00531c5ebdaaf00b970379dfabcb50d5345f2a49ada9c1f95a933bc35	11832	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/execWithContext.docx
+fdc75c8ab8831d89ac977f46b967b16aa2f7cedcc352b44827985494e77ec51b	20980	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/existingUppercaseJPEGExtension.docx
+d026ffd56d8a9fbc24843c2e3878cdc291e7135efdb32ea94e7390f9edcb6829	78055	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/falsy-block.docx
+5cc4565e9a6607a8a79ff60759733ddc22d564684eefac7e367becaa9c6811f4	12026	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/fixSmartQuotes.docx
+66841f29bdbee23372a52999a052fff84931694dd2f9efcb9d7d46902256ff8f	12304	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for-row1.docx
+141c22173acebe97a516c69ebcee4dea15496f48a0356676c0305ee018256795	11591	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for1.docx
+7042909c51a59ae3a27cc5b7b5aec92bcb811e9a2c84b957e5ae1e4c1aa26ce4	12005	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/for1alias.docx
+13fc8c204100da97d0af558645a4924906f144a0c91705cc56f2b00747088855	11639	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for1customDelimiter.docx
+c3ed017ad99a1c2ac7b2e7faac5c73ef8c31e98c2b09ef5d19c110aeb537b16e	11595	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for1inline.docx
+ec6e2c5976eb160a0199fa3767a63fad37f8cc068085350a3fd309ead95f9120	11640	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for1inlineWithSpaces.docx
+5007aae31d1df2f50018fd74a724475d94f09c101c02f940c6dcbdb6b912ee8a	12112	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/for1js.docx
+936905a2dd86b0532844d00d4462211a460ca5fb309f96797fbd407d0d36c476	11614	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for1scalars.docx
+ccdd81e2fa0110e9bd42189e94cdb969c307d382a1d2c3baf7b78e10f57a19ab	12762	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for2.docx
+eb7cc99f8a73f7a90d767f815a7281c7755488c39567de093e84499dbb4e6022	12844	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/for3.docx
+2733116bec8461eb17ed44680f2c61c4393af31ea5689cb4e6343a1ca0137370	15218	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/forLoopWithTextBox.docx
+d95f011e5af14cd296ef1bfbb757668dbe3a6558397bce1156c23dfbf1f7565f	12127	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/forOverObject.docx
+baa152620fdd77d85d7a01e7b6f5cb62ab19a845450dda79f416b2f626c673d0	12160	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/forOverObjectKeys.docx
+b43bdac5036a43c43b33d6ca49dbbf9f49758ae243039c71789998100fee65b2	13903	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/forWithIdx.docx
+b4045b9d78790af0d04b2dad8fce4462e339c2caa42d95134386f467421465d6	16929	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/htmls.docx
+0a14522e31721a124823cda2559aef8535faa44c5e19c1ff436bbe84d1335926	12356	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/if-row1.docx
+d229c1d971559da2689b613a255ff967c1e695d6bc5a5a58a9ff41c115d266f1	11749	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/if.docx
+e7a3d26ef3a4c2732680f560f4c606f93de162faaf54bbb5d0a696e873ec5405	11911	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/if2.docx
+cac7fa9c861b230b6b5f830228b06ff7bbe43f22e8c38ecc3bc8ea80c89b9b46	11688	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/ifInline.docx
+6967dc4ca89a0bfae17243a5e162e81564f8825a5802b6a9711ca08af547fe7a	13180	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/ifStatementsOnSameLine.docx
+dcc1640e68f9d840bee64b141ad1db093c8199e52f48d6f78784d6e4317c769b	13524	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/ifStatementsOnSameRow1.docx
+8ae751387161ff2ba1a1293e97d8c3298f52a2a0e36adad37a28a62f3ae02919	13465	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/ifStatementsOnSameRow2.docx
+58b3373ece2a9adf7d06b2c824fe362a8035884b59e6bd9088b394c5085a7998	12705	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageCaption.docx
+dc05bfad08df3eecc58785d2647babec7ca9ca81ebb1902ac235e2c39c05e6a2	14957	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageExisting.docx
+d388b910a87e4d95a23bac79fbcc786520cf33c8e53de3ac1a415eb37d73af79	476024	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageExistingMultiple.docx
+c9ef6eabf174c8e5d63ad55acecf72e7d87377e01d84930f962b34a1a6b6fcee	14634	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageHeader.docx
+ca2b3e190ff6f869b3a28cb6f1eb7e07fc95ffc7d8f09411a45578bd35450601	29693	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageInShapeInFooter.docx
+663b9c6f117f81826cabd051f75a209a47206b65c7e43b2d43ca7520641faea8	12549	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageMultiDelimiter.docx
+bb0568a53d590fde1cc353d6f7155495b485356c0db81e74a5e6cf62727978b0	12013	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageRotation.docx
+9ea87248d9c5cc465ecbf4f351cf55b3a8d73391ff17b6bcc5aa2a1474c2b2bd	12257	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imageSimple.docx
+db160975f194be4541756b79931272e651c3a6e05736908cb0c57b2525e1a88c	12541	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/imagesSVG.docx
+36690bde1005ce6650b99829b9c93315cf6e6bb85bae653b95979c35977e0861	11682	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/insJsComplex.docx
+2c9f33cf8f31aec457f74cee692d9886213615b0c17b020b5d790f5d2337ead4	11519	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/insJsSimple.docx
+9377d04d315c046fde8727cc2164f1e91bfaa37dae67492ef05b3242754cdc7a	11979	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/insJsWithLoops.docx
+8a526f7ecdc40ec5ad70239000880eba6fe7d3e0ff90fb20e570bfd446d557f0	12121	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/insOmitted.docx
+b91685d9c8ec0fb434daf60a4a05e2cd1bea469e5d4c4e717d13d9aee4d8272b	11879	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/insShorthand.docx
+a4ef7d7be9feae126e9fa973a0f57ee6a3036b708aa79b5399698dde4a80db36	12044	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/insertArray.docx
+77b8f7f0a24c6bd82c10bb0f881727716b0bfee28c07952e8d7e932e49ee5d08	18564	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/insertInHeaderAndFooter.docx
+9ae6ee4643dc8dc6a1b0a868c30b0aaafe32cf30e43488356ed46027a8d579d5	11528	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/invalidCommand.docx
+d30f9b15159b07ccd63cfe96b5555699e97b28037a069e5f3f8abc8446b8ee77	12156	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/invalidFor.docx
+3b2fa87f4c660258f01824488430e855e3513bfc6ac82ef364656b332c414518	11920	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/invalidForCmd.docx
+2e5c128c056e5f84fc3507bee4721bb814376c39a273f6c774349ddd8cf1987a	11654	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/invalidIf.docx
+1e0601fb96b36f3371a20b4440f264c1679634a1b8515e1f4ab4bd2ea4bfcdee	12712	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/invalidMultipleErrors.docx
+6509b97753003d79b9646c75efc923e5e8053c33c2ec5c8669036926d35ccbd6	49459	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/link-regression-issue-133.docx
+f0477226d1db3a83efd2b8fd20592c8228fb654bae1ed1191726e5e3fa421b00	11987	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/link-regression-issue-83.docx
+5b04710cbde26acca4e6ada85d2a7d965ce7863879ea594c4f370c4d846eace7	11943	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/links.docx
+a1bc782d440d93754167a8f61d6432acac51d170c9e2e5ab9a87c7b1f26a94e6	11557	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/literalXml.docx
+2e853f5f376e3c1fd07a5f319c9de7b8cd04c2b66bb35d45ed826df91a172d6e	11577	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/longText.docx
+480349025a61b8a02f11d46c270d397be5d41e6117d67cbdad904b5b57e46ddb	11911	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/macroEnabledTemplate.docm
+c7f15f0d272bcd185719651b0df70de9734a91e071dfede87dfc7c8fb2d60051	12590	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/missingEndFor.docx
+52e348b0cbb8958911785aadaf2a4776411169656693bfebe7ec05e12505af10	12106	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/missingEndIf.docx
+beadb1660bb1851357caa383984014c4c9d82fd271c0ef40816f9eb46787ace1	12593	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/nestedInlineForLoopWithSurroundingText.docx
+b17d12099628bffb32174d45a6f9784d70226b9250cb9df189c926753fc3aee6	11791	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/newlineInVariableIssue143.docx
+e9259abedde669fb5a85fde4b048bdc47218c60141584aca308fda72080e1050	32221	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/noQuery.docx
+54279e092466f866373951ffb3ddc1d3f4577dcae23ff1c82abaad64fa80b1d1	64282	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/noQueryBrackets.docx
+e6017914fc9315f58cc53b88531dde01cab76f6261ef38c9a3595e671b748885	63896	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/noQuerySimpleInserts.docx
+85e14ab72c80bb451b64ac9c597c24bb700c48565dad78df4d337fbde29e4ce1	12854	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/nonAlphaCommandNames1.docx
+61c269481cb977d295b1d9125460f2ca5de8c10315100d2c7903b01e828af45f	12825	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/nonAlphaCommandNames2.docx
+6cee32f3095b5264d7f860bbd37e01ddd9da9254797c92ce2ed090e8daf15f61	12017	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/objectCommandResultError.docx
+9277587146d9e7a5cefb3368eca708974d23e0ad9cc4c45a55e7fbcdd7da10ad	11556	edge	ok	-	-	-	MIT	Microsoft Word	n	src/__tests__/fixtures/office365.docx
+638cb27a31e47c3f1a56c0cbb60d0c2cc97c01c52c107e1f0b09e2214bb3b55c	12053	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/referenceError.docx
+760c496f827a9849a1d69b845aaf5f783efd0fa5a022526fa656120a4c1ca4c9	12057	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/rejectNullishIMAGE.docx
+295d51e0e3b406c5abab8e13f83eab8238d7153e1d9d941ef70170b25225618f	11848	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/rejectNullishINS.docx
+25d119833a7a40f39068aa6f7bcd96d95f4c9c3417dc161b6bdd14dcbde5ce01	27175	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/replaceOneImage.docx
+4b261942a5cd601ef9afc80969f9529d96cc6a5470f008597b8cd0f620744877	30435	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/replaceTwoImages.docx
+237332975417d59607b7c1db8df8314f3afdcf33c0ab8db21c4ea09b5973e026	63896	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/simpleQuery.docx
+63c993017fd7ab3b50d9bdd52c78ad32fff3f50e529058cf5022908949d68045	63971	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/simpleQuerySimpleInserts.docx
+2d7993a5d34ab5e0b62121845e25235a89fce62441e26ee237537043e153c781	11517	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/splitDelimiters.docx
+1e6039bac8a8209c220f2fff65f9cd31957248396021f75ac28e3627e1f24498	12328	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/tableWithHTML.docx
+6060690258bd06096e56d254fc641bdeb51c8e4388eae788a0ee0c32efbc6cd7	12350	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/unmatchedEndFor.docx
+722807659ca1ce42c81949ccbd9a077b1f352670470175bd94e3bcfc9a733168	12292	word-authored	ok	-	-	-	MIT	Microsoft Word	y	src/__tests__/fixtures/unmatchedEndIf.docx
+3e2825cc30e087c5763e7344ebe62ddca9dd12dabe933e1493fd2fc03fd74400	65741	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	src/__tests__/fixtures/wbs.docx
+a1e3d00c9a8bf4dc1ac50b44dcf637f0ea887f9184ae3c1cad0451aa0b3f16f0	24470	other-producers	ok	-	-	-	MIT	LibreOffice	n	src/__tests__/fixtures/zipGeneration.docx

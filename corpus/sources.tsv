@@ -1,0 +1,61 @@
+# name	url	commit	spdx	how	vendorable (after a licence review; nothing is vendored now)
+open-xml-sdk	https://github.com/dotnet/Open-XML-SDK	431ab05cf160248cc3885a4a766026d4f8243792	MIT	fetch	yes
+open-xml-powertools	https://github.com/OfficeDev/Open-Xml-PowerTools	5881422a881f6ccefce2b9801b5dc6a753670d6e	MIT	fetch	yes
+poi	https://github.com/apache/poi	b9de5f42fd8a7134cc221da68a62261e1087d056	Apache-2.0	fetch	yes
+python-docx	https://github.com/python-openxml/python-docx	e45454602b53e8e572b179ccf1c91093ec9f4ed7	MIT	fetch	yes
+docx4j	https://github.com/plutext/docx4j	0e8e7633ef46012e0d3603339728b83ed21d5045	Apache-2.0	fetch	yes
+mammoth-js	https://github.com/mwilliamson/mammoth.js	791a189230977143cde64dbf9f1d24dce96ac8a1	BSD-2-Clause	fetch	yes
+pandoc	https://github.com/jgm/pandoc	37b5a8a9e96ee5cfba772cfd1349e05274e49820	GPL-2.0-or-later	fetch	no
+libreoffice-core	https://github.com/LibreOffice/core	dfbde789eeef41f8aee33de12b7b674a49760470	MPL-2.0	fetch	no
+tika	https://github.com/apache/tika	de6af231dcb721856b719966bc010f909358319c	Apache-2.0	fetch	yes
+docxtemplater	https://github.com/open-xml-templating/docxtemplater	0894df85bdfa3157f6a6e55b74279fc57a9f0d4c	MIT	fetch	yes
+docxjs	https://github.com/VolodymyrBaydalka/docxjs	c533f383069008d4a1e05c6171ef8777fd078385	Apache-2.0	fetch	yes
+unstructured	https://github.com/Unstructured-IO/unstructured	f4105db674e4bf6c98ddb8fe6a5e32df0d7237b4	Apache-2.0	fetch	yes
+docling	https://github.com/docling-project/docling	b91e6b22b3fac9c15f3cb78b8db573c7c54f4d64	MIT	fetch	yes
+markitdown	https://github.com/microsoft/markitdown	4cc9fa17653d695d64fb9eee5b33d4de55ff84e8	MIT	fetch	yes
+docx-rs	https://github.com/bokuweb/docx-rs	4ff72dc8ba5f33ca40c121f30664d12e4fe6cdb2	MIT	fetch	yes
+docx-js	https://github.com/dolanmiu/docx	bd5ab7ace6075349b6b260eee5a8f2371f603202	MIT	fetch	yes
+officeimo	https://github.com/EvotecIT/OfficeIMO	3472faec6b9eb4bdec147204d3d7319e4fb18f91	MIT	fetch	yes
+aspose-words-net	https://github.com/aspose-words/Aspose.Words-for-.NET	1b48badc2a1a264f3c0294a64ec5c6ec1ea1359e	MIT	fetch	yes
+npoi	https://github.com/nissl-lab/npoi	832eb28f142d54fb8a87b65fa61b5916a763b528	Apache-2.0	fetch	yes
+docx-templates	https://github.com/guigrpa/docx-templates	54c2e80a090d0219503df1f26af91228b9880d77	MIT	fetch	yes
+open-agreements	https://github.com/open-agreements/open-agreements	454c20d973dc280e5dc82a3b40ae55b996051f9c	Apache-2.0 (code); per-document licence in the manifest	fetch	partly
+clippit	https://github.com/sergey-tihon/Clippit	88195321a87a450a26108d6a09ecc8aff9dadd6d	MIT	fetch	yes
+poi-tl	https://github.com/Sayi/poi-tl	b5005446e2af099537327c5929cb17286e5e085f	Apache-2.0	fetch	yes
+docsharp	https://github.com/manfromarce/DocSharp	7c996f8f6934139d4a4a698963baeb59fd8d60df	MIT	fetch	yes
+docx-mcp	https://github.com/SecurityRonin/docx-mcp	9c0c0b7694d8123e82fe6b7c480899890dca0695	MIT	fetch	yes
+docx-redline-js	https://github.com/AnsonLai/docx-redline-js	683c30a318d3c980ff59c15ae0c619d82b770530	MIT	fetch	yes
+document-change-benchmark	https://github.com/SybilGambleyyu/document-change-benchmark	a537bea556ce492a435946fb8f1f41ef0e9930bc	MIT	fetch	yes
+red-line-district	https://github.com/lawyer-not-liar/red-line-district	0626b4cd806e65977f5f1b5efc726c0ed6c03797	MIT	fetch	yes
+fixtures-ooxml	https://github.com/rcarmo/fixtures-ooxml	0cf83c156c8e9433347e446e58c415db011b17be	MIT	fetch	yes
+ruby-docx	https://github.com/ruby-docx/docx	e083d0b59d2ed55dc9ecbd3e40e0714167a1119c	MIT	fetch	yes
+word-to-markdown	https://github.com/benbalter/word-to-markdown	69194c4566b9b4ca2f97d80094bec9445e15000b	MIT	fetch	yes
+html2openxml	https://github.com/onizet/html2openxml	a887e140c5be32c7d30576775c8b570b03c8f58d	MIT	fetch	yes
+amberg-docxtemplater	https://github.com/Amberg/DocxTemplater	e94ac862aca276ef2e57d806b979f7fa34162705	MIT	fetch	yes
+docxbox	https://github.com/gyselroth/docxBox	ce7c4db5ef0d99f697b07cd086967c2bdb649f33	MIT	fetch	yes
+pyopenvba	https://github.com/WilliamSmithEdward/pyOpenVBA	2b41b07ca817538be628cd4591d13a9b2c92c058	MIT	fetch	yes
+betteroffice	https://github.com/openooxml/betteroffice	17a722c58d2457a49b4601bc3ac63bd10587290c	Apache-2.0	fetch	yes
+docassemble-assemblyline	https://github.com/SuffolkLITLab/docassemble-AssemblyLine	ed08f23f57b934476cd65a12f05edca2ac518003	MIT	fetch	yes
+officecli	https://github.com/iOfficeAI/OfficeCLI	d49beb48af7c7f50c4ec745269ac4b5b44c866dc	Apache-2.0	fetch	yes
+officeagent-net	https://github.com/ilia-sokolov/OfficeAgent.NET	80596e619478e306337bfd9bc70cdb854cf55c6a	MIT	fetch	yes
+yumdocs	https://github.com/yumdocs/yumdocs	25326df8a111379caf4ad58d9fd8cc04aca3e421	MIT	fetch	yes
+docxplate	https://github.com/bobiverse/docxplate	f80cf8d6eeed90525f9915bd25c31f17d4d19018	MIT	fetch	yes
+sablon	https://github.com/CommonPaper/sablon	a301dd39048e4cf94c3f82f7302efc9e1f1f8f24	MIT	fetch	yes
+bonterms-cloud-terms	https://github.com/Bonterms/Cloud-Terms	df13f512c3bd923cc09cc2dae918812f876ea6e9	CC-BY-4.0	fetch	yes
+bonterms-mutual-nda	https://github.com/Bonterms/Mutual-NDA	1b6e3a67176d47bbb89633bd4ec2be2c32d6cacf	CC-BY-4.0	fetch	yes
+eu-ai-act	https://github.com/smucclaw/eu-ai-act	ec26eabbc00c8eb6e17ebaa12a7b1bbbd25cfce3	Apache-2.0	fetch	no
+officedissector	https://github.com/grierforensics/officedissector	2059a5ba08fa139362e3936578f99c4da9a9b55d	GPL-3.0-or-later	fetch	no
+phpword	https://github.com/PHPOffice/PHPWord	a40907eae98485f127da6b3d04a1cf628b54fa64	LGPL-3.0-only	fetch	no
+casualoffice-docs	https://github.com/CasualOffice/docs	77e9530dc8ae9629399569fae4638214c39f48d3	Apache-2.0	fetch	no
+docxodus	https://github.com/JSv4/Docxodus	bcd1ee8cfb5b1855e1fee83231cd4c7b69ab177b	MIT	fetch	yes
+adeu	https://github.com/dealfluence/adeu	965736d2d8ea32f42ed9a2a0a01b3c5a538f7f75	MIT	fetch	yes
+docx-cli	https://github.com/kklimuk/docx-cli	74672e4af3444d101399e28284ec19fc11de6821	MIT	fetch	yes
+stemma	https://github.com/stemma-sh/stemma	ad1e70deac0a828d5162ac3b3f2186c2bb0c075e	Apache-2.0 OR MIT	fetch	yes
+scriptor	https://github.com/truespar/scriptor	7d67ae99cfaf1cd342fb4949889fd681ee713c30	Apache-2.0 OR MIT	fetch	yes
+pyred	https://github.com/JSv4/Python-Redlines	a84be23f0e3d333572a5b5a5d6db2205ae2cb5cf	MIT	fetch	yes
+docxml	https://github.com/jwmurray/docxml	97d47f786a5a133263f7d85c2eab058b69817186	Apache-2.0 OR MIT	fetch	yes
+linch-docx-rs	https://github.com/laofahai/linch-docx-rs	10a2803ae0e16b1957e57fe7f09d15fbb965972c	MIT	fetch	yes
+cat-agent-skills	https://github.com/microsoft/cat-agent-skills	71194891766adb23a75287ca92abd0fb5f4b9acb	MIT	fetch	no
+harvey-labs	https://github.com/harveyai/harvey-labs	465d1fcf270daa01b0d1d63e30e3da9876d7a268	MIT	fetch	no
+generated-edge	local: stetdoc_testkit::fixtures (crates/stetdoc-testkit/src/fixtures)		CC0-1.0	generate	yes
+generated-hostile	local: stetdoc_testkit::fixtures (crates/stetdoc-testkit/src/fixtures)		CC0-1.0	generate	yes

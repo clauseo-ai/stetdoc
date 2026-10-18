@@ -1,0 +1,26 @@
+{
+  "name": "@stetdoc/node-win32-x64-msvc",
+  "version": "1.0.0-dev",
+  "description": "The stetdoc native addon for win32-x64-msvc. Install `stetdoc`, which depends on it.",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "crates/stetdoc-napi/npm/targets/win32-x64-msvc"
+  },
+  "homepage": "https://github.com/clauseo-ai/stetdoc#readme",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "main": "stetdoc.win32-x64-msvc.node",
+  "files": [
+    "stetdoc.win32-x64-msvc.node"
+  ],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "x64"
+  ]
+}

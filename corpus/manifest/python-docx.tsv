@@ -1,0 +1,45 @@
+5e036b49ff8d24f9f7eed8ae60a39f7a570f66f9bbebcf76b3ed8f2f28f89b3d	25142	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/blk-containing-table.docx
+93f40c8a23dbcbc75b073e0f7050a5f064e6aff58c1bc6c6003359122e9faf79	15649	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/blk-paras-and-tables.docx
+8ee6b9bd84c59169bc7e5838003806edefb2c51920f40035b7879d4a3414deed	20023	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/comments-rich-para.docx
+871f058319e155fa5d76625a4e019d63f804e9b17da24f7047b38c6b1ee353d1	25591	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/doc-access-sections.docx
+fc5879727f3c8b513c4b4a32dd58e37aa16aee6c0699b520d5536dee1670f68d	17956	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/doc-add-section.docx
+358ba16289fc12f9c50a22d74ab610ef4dc74563c5ed7c889ac48f372b956dd0	11992	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/doc-coreprops.docx
+0cde4019e31cf05f229e5955c6021fd07c863a2936a7f4de0d9169d426f4fe59	21366	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/doc-default.docx
+546b286667a8891d6e9206f754014112de86c05e9d9dc4500aef8ce5410cc2bd	11394	edge	ok	-	-	-	MIT	Microsoft Word for Mac	y	features/steps/test_files/doc-no-coreprops.docx
+2c29ec565cc971743f95ea7bba0b716c146c09ddfb9e5b414400b5fe33a387d7	17711	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/doc-odd-even-hdrs.docx
+560b0e299a592f6b7d1ec9abab98648f1d92bf8fa684ce544a0424fdde798903	21309	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/doc-word-default-blank.docx
+b4f97dfacde60d114e91fcd38b85fb941b4d60537922eff07dbb460dff0fbe9d	15846	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/fnt-color.docx
+5a4cb270680d1365688073e4816be98c2ab1a7ba2921d86cb3efadca97a72d27	18079	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/hdr-header-footer.docx
+66b45ace7afa65acab6036bdc63d9416554576df633c13a6774bf41d4a60a47e	24334	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/num-having-numbering-part.docx
+8a276964f84b5104fffdf0e29ecb96744e1c3d0139543f6feba0e2152619a7e0	15126	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/par-alignment.docx
+28a23ab5ad87a927fcf1e82111ee6843e1f9bc29b3e2d825b869b41847a750bf	12071	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/par-hlink-frags.docx
+206539619eb347b1cd5b3fe88031cc18327accfe5d34a886f3d9120115f6bdad	12385	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/par-hyperlinks.docx
+0e1381929a0833057ef0095e42f0d34f9a456821b8e9053489b596b1b417b3c9	27969	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/par-known-paragraphs.docx
+0a2155da9b7eb69af16b33f0012e53f67d179d6bafa9ee2e460c0c91ff5e47db	20901	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/par-known-styles.docx
+a87b16cbd3b86bda5a5a3a7d02dde898094074455126dee89216b9e7a36ee960	12244	word-authored	ok	-	-	-	MIT	Microsoft Word	n	features/steps/test_files/par-rendered-page-breaks.docx
+cd647c103be2a6f6af62f5d093236796ac2d515307ddf44dd774b74941b79d15	26645	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/run-char-style.docx
+b66ecfd9c0c886b0454c2844b28f6be9be2ec93eb214ea60a2c741ad856e2d7b	14645	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/run-enumerated-props.docx
+9e7e7b1bd132fe889d43d57fbe1e99c126544326fa21364695f2eec7cd336578	14849	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/sct-first-page-hdrftr.docx
+d92e9ca7b09fab7b475c57dfba08f6acba2742aff2691cc7284649c640059c73	12051	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/sct-inner-content.docx
+0d741b9f881f3a1583711f0d85227768b01fa13760ebf972c43e1496b18ab3d5	28168	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/sct-section-props.docx
+cef04e3a5b3c040e5210e02eb20ca0357768cf2f6e80b38df4f2f57a0f848845	10760	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/set-no-settings-part.docx
+8fcf0f0433be0968d9305c564ce69601931695ffe163d264fb69b7782feff517	122610	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/shp-inline-shape-access.docx
+eb885bd1892b1c4a67c5ce7d997b24323aa63233f8bf10939e71f661b180083d	12195	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/sty-behav-props.docx
+b5e861d2d5cc53ba0d2ab3115bf51d270621c484c9b3fef6569c48ed9423b295	8358	edge	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/sty-having-no-styles-part.docx
+c57dae87cc43ef35a85b25c78d15d4506075a289c0d8de78617930ec82aee84b	21573	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/sty-having-styles-part.docx
+97a0978dfb941a7041867a2432616e3b5e3bbf6f7efb76bc5be2e722cd6cb012	13560	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/sty-known-styles.docx
+cf1ab27e6cf523b57b3166d2e927b688aea0f5e10590b21745b334b56a0f418d	13170	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	features/steps/test_files/tab-stops.docx
+c2f09412ae551d52b6a35b974f1fc428f0c9a3de2ccacfdb7ab5d55985f137c2	25129	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/tbl-2x2-table.docx
+dc01708a24c5e940c94b99b7ee496606e5f17152bc41cec211c9f8c72334cb22	36051	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/tbl-cell-access.docx
+612ab03dfde001588d0081706238c08d2938b55807de5342677cfcc0bcd53e6d	13773	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/tbl-cell-props.docx
+4a3d8bb3570a798c5c6a59d14b092a8ef579a89d41a2ec9a31e7c4f2ef77e892	13654	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	features/steps/test_files/tbl-col-props.docx
+761802878f363b57dce41b77657946ae5dc70d745261561242c9ed5a769260d9	50294	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/tbl-having-applied-style.docx
+5e23ecb6ec09b5db467ddeb22110c2aab83d1218662e8f7c8db444f085e081cc	32010	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/tbl-having-tables.docx
+2513f8adbe54b1dcc769a2da8da61746758ea96b588d0ba22b606185b43dc51a	16017	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/tbl-on-off-props.docx
+70f6a24488b85609e5d3ceaed653e584d23e6867a7f22bd267827d73fbfc2cad	20419	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/tbl-props.docx
+27d22be137f8c1c63356f917ce74b3ca21ba5638a7c7c2899acb887013ef0686	12859	word-authored	ok	-	-	-	MIT	Microsoft Word	y	features/steps/test_files/txt-font-highlight-color.docx
+a5de256a9cd1598d4e63ba0883995899ddb72ec9390c04d46474c2b093ffde96	37924	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	features/steps/test_files/txt-font-props.docx
+2094b5bddffe9cf973d61fe03388413804f034160718494a65db7e98da40d35d	38116	other-producers	ok	-	-	-	MIT	python-docx (default template)	n	src/docx/templates/default.docx
+16243dd05f686d6d5fab331843691492ad78ae3eb4f13cc8686077b44718c0ba	11949	word-authored	ok	-	-	-	MIT	Microsoft Word	y	tests/test_files/blk-inner-content.docx
+72f40baa1b89e4849e817121dbbf148ed78e51be9bf04d8e6f4bc1494aa517b7	132875	other-producers	ok	-	-	-	MIT	python-docx (default template)	y	tests/test_files/having-images.docx
+fba1c76b66ff30982e5281941ca1111eaeaeb092abb6dfbe1730bed3774f40b6	31773	word-authored	ok	-	-	-	MIT	Microsoft Word for Mac	y	tests/test_files/test.docx

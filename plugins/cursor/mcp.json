@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "stetdoc": {
+      "command": "stetdoc",
+      "args": [
+        "mcp"
+      ]
+    }
+  }
+}

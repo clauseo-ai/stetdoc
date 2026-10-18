@@ -15,9 +15,20 @@
 //! A reader that opens a set resolves the links once and works inside the generation they name,
 //! which no fetch changes or removes while it is in use. A reader that keeps opening paths
 //! through the links moves to a newer generation between two reads, which holds the same files
-//! by name. Neither can meet a missing file. The one exception is the first repair of a set made
-//! by the previous layout, which stored `<set>-<hash12>` as a real directory: it is renamed to a
-//! generation name and the link takes its place, which leaves the name absent for an instant.
+//! by name. Neither can meet a missing file, as long as it opens those paths through
+//! [`through_link`]. The one exception is the first repair of a set made by the previous
+//! layout, which stored `<set>-<hash12>` as a real directory: it is renamed to a generation
+//! name and the link takes its place, which leaves the name absent for an instant.
+//!
+//! The rename that replaces a link is atomic for the name, but on macOS a path walk that
+//! is following the old link at that moment can fail once with EINVAL. XNU passes the file
+//! system's error from reading a link straight back from the walk (`lookup_handle_symlink` in
+//! bsd/vfs/vfs_lookup.c, lines 1960-1991, VNOP_READLINK), and APFS, whose source is not public,
+//! evidently answers EINVAL for the link the rename just replaced. On GitHub's macOS 15 and
+//! 26 runners the concurrency test met it in about 5 runs of 6; macOS 27 and Linux never did
+//! (0 of 600 runs on Linux). A second walk finds the new link, so every open
+//! through a link here goes through [`through_link`], which tries again on EINVAL a few times
+//! and lets every other error through at once.
 //!
 //! A generation that is no longer reached by the link of its manifest, and a set of another
 //! manifest, is deleted only when its modification time is older than [`KEEP`], because a reader
@@ -50,6 +61,37 @@ pub fn doc_id(doc: &Doc) -> String {
     format!("{}:{}", doc.source, doc.path)
 }
 
+/// How many times in all [`through_link`] tries an operation that keeps failing with EINVAL.
+pub const WALK_ATTEMPTS: u32 = 5;
+
+/// EINVAL, the same number on Linux, macOS and the BSDs.
+const EINVAL: i32 = 22;
+
+/// Runs `op`, which opens a path through a set link, and runs it again while it fails with
+/// EINVAL, up to [`WALK_ATTEMPTS`] times in all: a path walk that meets a link while a rename
+/// replaces it can fail that way on macOS (see the module docs). Any other error, and EINVAL
+/// on the last attempt, is returned as it is.
+///
+/// `through_link` in crates/stetdoc-testkit/src/corpus.rs is a copy for the readers of a
+/// set; the two must change together.
+pub fn through_link<T>(mut op: impl FnMut() -> std::io::Result<T>) -> std::io::Result<T> {
+    let mut attempt = 1;
+    loop {
+        match op() {
+            Err(e) if attempt < WALK_ATTEMPTS && is_walk_einval(&e) => {
+                attempt += 1;
+                std::thread::yield_now();
+            }
+            done => return done,
+        }
+    }
+}
+
+/// Whether `e` is the EINVAL that a path walk through a replaced link can return.
+fn is_walk_einval(e: &std::io::Error) -> bool {
+    cfg!(unix) && e.raw_os_error() == Some(EINVAL)
+}
+
 /// The stable name of `set` for a manifest: the set name and the first twelve digits of the
 /// manifest hash. It is a symlink to the newest generation of the set.
 pub fn set_name(set: &str, manifest_hash: &str) -> String {
@@ -69,7 +111,8 @@ pub fn immutable_dir(root: &Path, set: &str, manifest_hash: &str) -> PathBuf {
 
 /// Whether `set` exists for this manifest hash and was built from it.
 pub fn set_complete(root: &Path, set: &str, manifest_hash: &str) -> bool {
-    fs::read_to_string(immutable_dir(root, set, manifest_hash).join("COMPLETE"))
+    let complete = immutable_dir(root, set, manifest_hash).join("COMPLETE");
+    through_link(|| fs::read_to_string(&complete))
         .is_ok_and(|text| text.lines().next() == Some(manifest_hash))
 }
 
@@ -259,7 +302,7 @@ pub fn publish(root: &Path, set: &str, manifest_hash: &str) -> Res<()> {
 /// Sets the modification time of a directory to now, so it measures the last use. A failure
 /// is ignored: the time only protects a set from early deletion.
 pub fn touch(dir: &Path) {
-    if let Ok(file) = fs::File::open(dir) {
+    if let Ok(file) = through_link(|| fs::File::open(dir)) {
         let _ = file.set_modified(SystemTime::now());
     }
 }
@@ -271,7 +314,7 @@ fn is_hex(text: &str, n: usize) -> bool {
 
 /// The age of what `path` leads to, or `None` when it leads nowhere.
 fn age_of(path: &Path) -> Option<Duration> {
-    let modified = fs::metadata(path).ok()?.modified().ok()?;
+    let modified = through_link(|| fs::metadata(path)).ok()?.modified().ok()?;
     SystemTime::now().duration_since(modified).ok()
 }
 
@@ -343,4 +386,59 @@ pub fn clean_leftovers(root: &Path) {
             let _ = remove_any(p);
         });
     });
+}
+
+#[cfg(test)]
+mod walk_tests {
+    use super::*;
+    use std::cell::Cell;
+    use std::io;
+
+    /// An opener that fails with `error` for its first `failures` calls and then succeeds.
+    fn opener(
+        failures: u32,
+        error: fn() -> io::Error,
+        calls: &Cell<u32>,
+    ) -> impl FnMut() -> io::Result<u32> {
+        move || {
+            calls.set(calls.get() + 1);
+            if calls.get() <= failures {
+                Err(error())
+            } else {
+                Ok(calls.get())
+            }
+        }
+    }
+
+    fn einval() -> io::Error {
+        io::Error::from_raw_os_error(EINVAL)
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn one_einval_is_tried_again_and_succeeds() {
+        let calls = Cell::new(0);
+        assert_eq!(
+            through_link(opener(1, einval, &calls)).expect("the second try"),
+            2
+        );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_lasting_einval_fails_with_it_after_the_bound() {
+        let calls = Cell::new(0);
+        let err = through_link(opener(u32::MAX, einval, &calls)).expect_err("never succeeds");
+        assert_eq!(err.raw_os_error(), Some(EINVAL));
+        assert_eq!(calls.get(), WALK_ATTEMPTS);
+    }
+
+    #[test]
+    fn another_error_fails_at_once() {
+        let calls = Cell::new(0);
+        let not_found = || io::Error::from(io::ErrorKind::NotFound);
+        let err = through_link(opener(u32::MAX, not_found, &calls)).expect_err("fails");
+        assert_eq!(err.kind(), io::ErrorKind::NotFound);
+        assert_eq!(calls.get(), 1);
+    }
 }

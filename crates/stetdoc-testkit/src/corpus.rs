@@ -13,6 +13,37 @@ pub const ENV_DIR: &str = "STETDOC_CORPUS_DIR";
 /// The environment variable that names the set to read.
 pub const ENV_SET: &str = "STETDOC_CORPUS_SET";
 
+/// How many times in all [`through_link`] tries an open that keeps failing with EINVAL.
+const WALK_ATTEMPTS: u32 = 5;
+
+/// EINVAL, the same number on Linux, macOS and the BSDs.
+const EINVAL: i32 = 22;
+
+/// Runs `op`, which opens a path through a set link, and runs it again while it fails with
+/// EINVAL, up to [`WALK_ATTEMPTS`] times in all. On macOS a path walk that meets the link
+/// while a fetch renames a new one over it can fail that way once; the module docs of
+/// xtask/src/corpus/sets.rs give the cause. Any other error, and EINVAL on the last attempt, is
+/// returned as it is.
+///
+/// A copy of `through_link` in xtask/src/corpus/sets.rs; the two must change together.
+fn through_link<T>(mut op: impl FnMut() -> std::io::Result<T>) -> std::io::Result<T> {
+    let mut attempt = 1;
+    loop {
+        match op() {
+            Err(e) if attempt < WALK_ATTEMPTS && is_walk_einval(&e) => {
+                attempt += 1;
+                std::thread::yield_now();
+            }
+            done => return done,
+        }
+    }
+}
+
+/// Whether `e` is the EINVAL that a path walk through a replaced link can return.
+fn is_walk_einval(e: &std::io::Error) -> bool {
+    cfg!(unix) && e.raw_os_error() == Some(EINVAL)
+}
+
 /// One document of a set.
 #[derive(Clone, Debug)]
 pub struct Entry {
@@ -94,8 +125,7 @@ impl Corpus {
     /// once, here, so the entries keep pointing into the directory that was read.
     pub fn open(root: &Path, name: &str) -> Result<Corpus, String> {
         let link = root.join("sets").join(name);
-        let dir = link
-            .canonicalize()
+        let dir = through_link(|| link.canonicalize())
             .ok()
             .filter(|dir| dir.join("COMPLETE").exists())
             .ok_or_else(|| {
@@ -104,7 +134,7 @@ impl Corpus {
                     link.display()
                 )
             })?;
-        let text = std::fs::read_to_string(dir.join("INDEX.tsv"))
+        let text = through_link(|| std::fs::read_to_string(dir.join("INDEX.tsv")))
             .map_err(|e| format!("cannot read INDEX.tsv: {e}"))?;
         Ok(Corpus {
             entries: parse_index(&text, &dir)?,
@@ -165,6 +195,53 @@ impl Entry {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::cell::Cell;
+    use std::io;
+
+    /// An opener that fails with `error` for its first `failures` calls and then succeeds.
+    fn opener(
+        failures: u32,
+        error: fn() -> io::Error,
+        calls: &Cell<u32>,
+    ) -> impl FnMut() -> io::Result<u32> {
+        move || {
+            calls.set(calls.get() + 1);
+            if calls.get() <= failures {
+                Err(error())
+            } else {
+                Ok(calls.get())
+            }
+        }
+    }
+
+    fn einval() -> io::Error {
+        io::Error::from_raw_os_error(EINVAL)
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn one_einval_is_tried_again_and_succeeds() {
+        let calls = Cell::new(0);
+        assert_eq!(through_link(opener(1, einval, &calls)).unwrap(), 2);
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_lasting_einval_fails_with_it_after_the_bound() {
+        let calls = Cell::new(0);
+        let err = through_link(opener(u32::MAX, einval, &calls)).unwrap_err();
+        assert_eq!(err.raw_os_error(), Some(EINVAL));
+        assert_eq!(calls.get(), WALK_ATTEMPTS);
+    }
+
+    #[test]
+    fn another_error_fails_at_once() {
+        let calls = Cell::new(0);
+        let not_found = || io::Error::from(io::ErrorKind::NotFound);
+        let err = through_link(opener(u32::MAX, not_found, &calls)).unwrap_err();
+        assert_eq!(err.kind(), io::ErrorKind::NotFound);
+        assert_eq!(calls.get(), 1);
+    }
 
     const INDEX: &str = "id\ttier\texpect\tsha256\tsize\tpath\tproducer\tword_fp\tspdx\tstage\treason\tpart\ns:a.docx\tlab\tok\taaa\t3\tlab/aaa-a.docx\tpython-docx\tn\tMIT\t-\t-\t-\ns:b.docx\thostile\tmalformed_input\tbbb\t4\thostile/bbb-b.docx\tunknown\t?\tMIT\topen\tzip.no_eocd\t-\ns:c.docx\thostile\tlimit_exceeded\tccc\t5\thostile/ccc-c.docx\tunknown\t?\tMIT\tread\tzip.high_compression_ratio\tdocProps/app.xml;word/theme/theme1.xml\n";
 

@@ -86,12 +86,14 @@ fn a_reader_of_the_curated_set_never_misses_a_file_while_fetches_republish_it() 
             let mut rounds = 0;
             while !stop.load(Ordering::SeqCst) {
                 // Resolve the link once, then read INDEX.tsv and every file from that directory.
-                let dir = fs::canonicalize(&link).map_err(|e| format!("link: {e}"))?;
-                let index = fs::read_to_string(dir.join("INDEX.tsv"))
+                let dir = sets::through_link(|| fs::canonicalize(&link))
+                    .map_err(|e| format!("link: {e}"))?;
+                let index = sets::through_link(|| fs::read_to_string(dir.join("INDEX.tsv")))
                     .map_err(|e| format!("INDEX.tsv of {}: {e}", dir.display()))?;
                 for line in index.lines().skip(1) {
                     let rel = line.split('\t').nth(5).ok_or("a row has no path")?;
-                    fs::read(dir.join(rel)).map_err(|e| format!("{}: {e}", rel))?;
+                    sets::through_link(|| fs::read(dir.join(rel)))
+                        .map_err(|e| format!("{}: {e}", rel))?;
                 }
                 rounds += 1;
             }
@@ -119,22 +121,23 @@ fn a_reader_of_the_curated_set_never_misses_a_file_while_fetches_republish_it() 
 }
 
 /// Reads the set the way the testkit does or the way a plain walker does, over and over, and
-/// counts what goes wrong.
+/// counts what goes wrong. Every open goes through [`sets::through_link`], as the module asks
+/// of a reader; nothing else is forgiven.
 fn read_set_until(link: &Path, pinned: bool, stop: &AtomicBool) -> (usize, Vec<String>) {
     let mut rounds = 0;
     let mut errors = Vec::new();
     while !stop.load(Ordering::SeqCst) {
         let dir = if pinned {
-            fs::canonicalize(link).unwrap_or_else(|_| link.to_path_buf())
+            sets::through_link(|| fs::canonicalize(link)).unwrap_or_else(|_| link.to_path_buf())
         } else {
             link.to_path_buf()
         };
-        match fs::read_to_string(dir.join("INDEX.tsv")) {
+        match sets::through_link(|| fs::read_to_string(dir.join("INDEX.tsv"))) {
             Err(e) => errors.push(format!("INDEX.tsv: {e}")),
             Ok(index) => {
                 for line in index.lines().skip(1) {
                     let rel = line.split('\t').nth(5).unwrap_or("");
-                    if let Err(e) = fs::read(dir.join(rel)) {
+                    if let Err(e) = sets::through_link(|| fs::read(dir.join(rel))) {
                         errors.push(format!("{rel}: {e}"));
                     }
                 }

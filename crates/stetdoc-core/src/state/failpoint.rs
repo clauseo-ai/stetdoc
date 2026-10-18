@@ -20,18 +20,24 @@ mod armed {
 
     thread_local! {
         static COUNTDOWN: Cell<Option<usize>> = const { Cell::new(None) };
+        // Steps are recorded only between `arm` and `disarm`. Recording every call would grow
+        // this list for the whole life of a thread, and the benchmarks, which run a test build,
+        // would count its doublings toward whichever measured run they fell in.
+        static RECORDING: Cell<bool> = const { Cell::new(false) };
         static SEEN: RefCell<Vec<&'static str>> = const { RefCell::new(Vec::new()) };
     }
 
     /// Makes the call after `skip` more calls fail, on this thread.
     pub(in crate::state) fn arm(skip: usize) {
         COUNTDOWN.with(|c| c.set(Some(skip)));
+        RECORDING.with(|r| r.set(true));
         SEEN.with(|s| s.borrow_mut().clear());
     }
 
     /// Stops injecting, and returns the steps that were reached since `arm`, the failing one last.
     pub(in crate::state) fn disarm() -> Vec<&'static str> {
         COUNTDOWN.with(|c| c.set(None));
+        RECORDING.with(|r| r.set(false));
         SEEN.with(|s| std::mem::take(&mut *s.borrow_mut()))
     }
 
@@ -47,7 +53,9 @@ mod armed {
                 false
             }
         });
-        SEEN.with(|s| s.borrow_mut().push(step));
+        if RECORDING.with(Cell::get) {
+            SEEN.with(|s| s.borrow_mut().push(step));
+        }
         if fail {
             Err(StetError::new(
                 crate::api::error::ErrorCode::Internal,

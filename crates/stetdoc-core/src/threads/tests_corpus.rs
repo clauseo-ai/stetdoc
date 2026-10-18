@@ -81,8 +81,9 @@ fn independent(bytes: &[u8]) -> Option<(usize, usize, usize, usize)> {
     let mut marked: HashSet<i64> = HashSet::new();
     let names: Vec<String> = zip
         .file_names()
-        .filter(|n| n.starts_with("word/") && n.ends_with(".xml") && *n != "word/comments.xml")
-        .map(str::to_owned)
+        .filter_map(Result::ok)
+        .filter(|n| n.starts_with("word/") && n.ends_with(".xml") && n != "word/comments.xml")
+        .map(|n| n.into_owned())
         .collect();
     for name in names {
         let Some(text) = part(&mut zip, &name) else {

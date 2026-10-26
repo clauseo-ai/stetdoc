@@ -330,6 +330,26 @@ fn first_difference(law: &str, got: &[String], want: &[String]) -> Option<String
     ))
 }
 
+/// The dumped body of a rejected redline without, for each note of the original that holds no block (`tags`), one note of the
+/// same kind that holds exactly one empty paragraph. A reject keeps a note's last paragraph, emptied, since a note must hold a
+/// block (`check` W9, revisions.md 3), so it gives `WC063-Footnote-Mod`'s empty note back that way. Nothing else is left out.
+fn without_emptied_notes(got: &[String], tags: &[&str]) -> Vec<String> {
+    let mut out = got.to_vec();
+    let notes = got
+        .iter()
+        .position(|l| l == "--notes--")
+        .map_or(got.len(), |i| i + 1);
+    for tag in tags {
+        let emptied = |l: &String| {
+            l.starts_with(&format!("{tag} P ")) && !l.contains('\n') && l.ends_with(" runs=[] | ")
+        };
+        if let Some(i) = out.iter().skip(notes).position(emptied) {
+            out.remove(notes + i);
+        }
+    }
+    out
+}
+
 /// Compares two packages and checks N1, N2, N4 and N7 on the redline. The blocks that the receipt excludes are left out of both
 /// dumps of each law, and everything else is compared: the body, the notes, and the headers and footers (all of them for N1,
 /// which reads the revised package against itself, and the paired slots for N2).
@@ -398,7 +418,7 @@ pub(super) fn check_pair(original: Vec<u8>, revised: Vec<u8>) -> Result<Verdict,
     let rejected = dump(&resolved(&redline, Action::Reject)?, &on_rejected)?;
     failures.extend(first_difference(
         "N2 reject",
-        &rejected.body,
+        &without_emptied_notes(&rejected.body, &want_orig.empty_notes),
         &want_orig.body,
     ));
     for (slot, pa, pb) in paired_slots(&want_orig, &want_rev) {
@@ -417,4 +437,37 @@ pub(super) fn check_pair(original: Vec<u8>, revised: Vec<u8>) -> Result<Verdict,
         redline,
         accepted: (prepared.original, prepared.revised),
     })
+}
+
+#[test]
+fn n2_takes_one_emptied_paragraph_for_an_empty_note_of_the_original_and_nothing_else() {
+    let line = |s: &str| s.to_owned();
+    let empty = line("F P c= s=footnote text l= n= p= m= runs=[] | ");
+    let text = line("F P c= s=footnote text l= n= p= m= runs=[\"|\"] | the note");
+    let two = format!("{empty}\n{}", empty.trim_start_matches("F "));
+    let body = |notes: &[&String]| {
+        let mut b = vec![line("P | Ten"), line("--notes--")];
+        b.extend(notes.iter().map(|n| (*n).clone()));
+        b
+    };
+    // One emptied paragraph stands for the original's empty note, and only for one.
+    assert_eq!(without_emptied_notes(&body(&[&empty]), &["F"]), body(&[]));
+    assert_eq!(
+        without_emptied_notes(&body(&[&empty, &empty]), &["F"]),
+        body(&[&empty])
+    );
+    // Not without an empty note in the original, not for an endnote, not with text, not with two paragraphs.
+    assert_eq!(
+        without_emptied_notes(&body(&[&empty]), &[]),
+        body(&[&empty])
+    );
+    assert_eq!(
+        without_emptied_notes(&body(&[&empty]), &["E"]),
+        body(&[&empty])
+    );
+    assert_eq!(
+        without_emptied_notes(&body(&[&text]), &["F"]),
+        body(&[&text])
+    );
+    assert_eq!(without_emptied_notes(&body(&[&two]), &["F"]), body(&[&two]));
 }

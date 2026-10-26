@@ -535,7 +535,7 @@ insertion, or the absorbed block of a merge.
 | Accept a deletion | The element is detached, so `Gone(Deleted)` | audit |
 | Reject an insertion | The inserted element is detached. `revisions` declares `retire(r, Rejected)`, and without the declaration the audit records `Deleted` | `revisions` declares |
 | Reject a deletion | None. The block is restored, and touched | `revisions` touches |
-| Split p5 at an offset | **The original ref names the first part, and the new block, the second, gets a new ref.** `revisions` should keep the original element for the first part, so there is nothing to declare. If it keeps the original element for the second part instead, it declares `rebind(p5, first-part element)`, and the old element is minted as the new block | audit, or `revisions` declares |
+| Split p5 at an offset | **The original ref names the first part, and the new block, the second, gets a new ref.** A split before the text (offset 0, or `before` the first word) is the exception: p5 keeps its text, and the new empty paragraph before it gets the new ref, as an insertion before p5 does, so a reject gives back p5 itself (`revisions` 3.2.1). `revisions` should keep the original element for the first part, so there is nothing to declare. If it keeps the original element for the second part instead, it declares `rebind(p5, first-part element)`, and the old element is minted as the new block | audit, or `revisions` declares |
 | Merge p6 into p5, untracked | One declaration, `merge(p5, p6, element)`, where the element is whichever of the two the compiler kept. p5 names it and p6 becomes `Gone(MergedInto(p5))` | `revisions` declares |
 | Merge, tracked | Both elements stay in the tree, with nothing declared, until the deleted mark is accepted. The accept joins into the first element: p5's element survives, p6's properties and content move into it, and `revisions` declares `merge(p5, p6, into: p5's element)`. p5 keeps its ref and its element, and p6 is `Gone(MergedInto(p5))` | `revisions` declares |
 | Merge three blocks | Two `merge` declarations, each naming a block by its current element. Accepting two consecutive deleted marks, in p5, p6 and p7, joins into the first element, so `revisions` declares `merge(p6, p7, into: e6)` and then `merge(p5, p6, into: e5)`. p5 names e5 at the end, p6 and p7 are `Gone(MergedInto(p5))`, and e6 and e7 are gone from the tree. The other order and the other element are as valid. The audit checks the composition, section 7 | `revisions` declares |
@@ -583,7 +583,7 @@ mark is live changes no block but itself. The tests of `state/tests_deleted.rs` 
 
 **What the agent sees.** Receipts list each touched block with its ref after the edit, and carry the
 new base token. A split receipt says the original ref is the first part, and shows the new ref beside
-it. A merge receipt says which ref survived. These are `projection` and `ops` concerns, and the table
+it; for a split before the text, the new ref is the empty first part and the original ref keeps the text. A merge receipt says which ref survived. These are `projection` and `ops` concerns, and the table
 gives them the facts through the `Committed` report (section 10.4).
 
 ## 7. Minting, declarations and the commit-time audit

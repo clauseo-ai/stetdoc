@@ -284,7 +284,12 @@ pub(super) fn random_call(
             let at = rng.below(p.text.len() + 1);
             log.push(format!("split {:?} {at}", p.key.node()));
             let fx = c.split_block(&p.key, at)?;
-            if let Some(k) = fx.new_blocks.first() {
+            // A cut before the text that leaves the paragraph untouched is an empty X before it, which keeps the text.
+            if let Some(k) = fx.new_blocks.first()
+                && !fx.touched.contains(&p.key)
+            {
+                model.insert(k.clone(), Vec::new());
+            } else if let Some(k) = fx.new_blocks.first() {
                 model.insert(p.key.clone(), p.text[..at].to_vec());
                 model.insert(k.clone(), p.text[at..].to_vec());
             }

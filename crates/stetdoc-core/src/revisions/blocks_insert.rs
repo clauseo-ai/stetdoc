@@ -1,12 +1,12 @@
 //! `insert_block` and `split_block`: new paragraphs in the two shapes Word writes (design
 //! `revisions.md`, 3.2.1).
 //!
-//! **Y** (Enter in a paragraph that has a successor or ends its container, and every split): the paragraph that was there keeps
+//! **Y** (Enter in a paragraph that has a successor or ends its container, and every split but one before the text): the paragraph that was there keeps
 //! its element, its text before the cut and a copy of its properties with an inserted mark. A new
 //! paragraph after it holds the rest and the **original** mark and properties. Rejecting the mark joins the
 //! two halves again, and the later paragraph's properties are the original's.
 //!
-//! **X** (a paragraph that stands alone: inserted before another, or where Y cannot go): a new
+//! **X** (a paragraph that stands alone: inserted before another, cut off before a paragraph's text, or where Y cannot go): a new
 //! paragraph with an inserted mark and all its content inserted. It has a **twin**, the paragraph after it,
 //! which rejecting its mark joins it into. Its properties are a copy of the twin's, and when an edit makes
 //! them differ, a `pPrChange` aligns it to the twin, so that Word gets the same answer under either rule
@@ -507,10 +507,23 @@ impl Compiler<'_, '_> {
     }
 
     /// Cuts a paragraph in two at `at`, a character offset in its `Final` text. The first paragraph keeps
-    /// its element and its ref, the second is new and holds the original mark and properties.
+    /// its element and its ref, the second is new and holds the original mark and properties. A cut before
+    /// the first character (that ends no field) keeps the element and the ref for the text instead, and the
+    /// new paragraph is an empty X before it, so that rejecting gives back the very `w:p` (design 3.2.1).
     pub(crate) fn split_block(&mut self, block: &BlockKey, at: usize) -> Result<Effect, StetError> {
+        self.split_block_as(block, at, true)
+    }
+
+    /// `split_block`, where `x_at_start` says whether a cut at the start may be an X. `compare` cuts its
+    /// paragraphs with Y alone, since it takes the new block for the part after the cut.
+    pub(super) fn split_block_as(
+        &mut self,
+        block: &BlockKey,
+        at: usize,
+        x_at_start: bool,
+    ) -> Result<Effect, StetError> {
         self.begin();
-        match self.split_block_inner(block, at) {
+        match self.split_block_inner(block, at, x_at_start) {
             Ok(()) => Ok(self.end()),
             Err(e) => {
                 self.fx = Effect::default();
@@ -519,7 +532,12 @@ impl Compiler<'_, '_> {
         }
     }
 
-    fn split_block_inner(&mut self, block: &BlockKey, at: usize) -> Result<(), StetError> {
+    fn split_block_inner(
+        &mut self,
+        block: &BlockKey,
+        at: usize,
+        x_at_start: bool,
+    ) -> Result<(), StetError> {
         let p = self.editable_paragraph(block)?;
         let len = p.map.len(Mode::Final);
         if at > len {
@@ -554,14 +572,29 @@ impl Compiler<'_, '_> {
                 "this position is inside a field, whose result is read-only. Split the paragraph before or after the field.",
             ));
         }
-        let new = self.make_y(&p.part, p.node, Some(b), &NewParagraph::default())?;
+        // A cut before everything the paragraph shows, with no field ending there, would leave a Y's first half empty, and
+        // rejecting its mark would remove that element, its attributes and its ref with it. So the paragraph keeps them and
+        // its text, and the new one is an empty X before it. A field's end before the text stays in a Y's first half.
+        let at_start = x_at_start
+            && gap.left.is_none()
+            && ends == 0
+            && wrapper_exit(self.tree_ro(&p.part)?, p.node, Place::Before)?.is_none();
+        let new = if at_start {
+            let n = Some(p.node);
+            self.make_x(&p.part, n, n, n, None, &NewParagraph::default())?
+        } else {
+            self.make_y(&p.part, p.node, Some(b), &NewParagraph::default())?
+        };
         let key = BlockKey::new(p.part.clone(), new);
         self.fx.new_blocks.push(key.clone());
         self.fx.origins.push(Origin {
             block: key,
             from: vec![block.clone()],
         });
-        self.touch(block);
+        // An X leaves the paragraph as it was, as an insertion before it does.
+        if !at_start {
+            self.touch(block);
+        }
         Ok(())
     }
 }

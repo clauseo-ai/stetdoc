@@ -77,7 +77,7 @@ The keys after the edit of a unit must be a subset of the keys of its **origin**
 | Edit | Units checked | Origin |
 |---|---|---|
 | text, properties or markers inside a paragraph | the paragraph | itself in the base |
-| split (the second half is a new element, the first keeps the element) | both halves | the paragraph before the split, for both |
+| split (the second half is a new element, the first keeps the element; before the text, an empty new element before the paragraph, as for an insertion) | both halves | the paragraph before the split, for both |
 | Enter after a paragraph with a successor (`revisions.md`'s shape Y) | both | the original paragraph, for both |
 | a paragraph inserted before another (shape X) | the new paragraph | its twin, declared |
 | merge, or an accepted paragraph-mark deletion (the compiler joins into the first element) | the survivor | the first paragraph and every paragraph it absorbed, union, declared or not |

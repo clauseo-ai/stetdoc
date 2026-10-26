@@ -20,7 +20,7 @@ impl Compiler<'_, '_> {
         at: usize,
     ) -> Result<Effect, StetError> {
         let track = std::mem::replace(&mut self.track, Track::Untracked);
-        let res = self.split_block(block, at);
+        let res = self.split_block_as(block, at, false);
         self.track = track;
         res
     }

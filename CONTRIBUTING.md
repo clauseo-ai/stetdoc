@@ -112,8 +112,43 @@ STETDOC_SEED=<seed> cargo test --release -p stetdoc-testkit --test laws_random
 ```
 
 `STETDOC_BATCHES` sets the batches per document (50 by default, the minimum a release needs), `STETDOC_FILE_EDITS`
-the random edits of files (10), and `STETDOC_SHARD=i/n` runs one shard of the documents, as the nightly
-`laws` workflow does on the full corpora. The fixed batches of `laws::edits` stay as a smoke set.
+the random edits of files (10), `STETDOC_ONLY` a comma-separated list of pieces of document ids to run alone, and
+`STETDOC_SHARD=i/n` one shard of the documents, as the nightly `laws` workflow does on the full corpora. The fixed batches
+of `laws::edits` stay as a smoke set.
+
+### The nightly laws run
+
+`.github/workflows/laws.yml` runs the three corpus tests of `laws_random` (random batches, random edits of files, L2 by
+block) every night on the full corpora, about 48,600 documents, in 40 shards. A document's shard is the first 16
+hexadecimal digits of its SHA-256 in `INDEX.tsv`, modulo 40, so a shard reads and opens only its own documents and holds
+the same ones every night. `laws::sweep` prints, with `laws:` in front, each failure the moment it is found (`FAILED
+<document id>: seed <seed>, batch <k>: ...`), progress every 3 minutes, a line for a document still running after 120 s,
+and the slowest 20 documents at the end, so the log of a cancelled job still says what it found and how far it got. A
+document that runs over 600 s is a failure: a performance bug. After `STETDOC_DEADLINE` (Unix seconds; the workflow sets it
+15 minutes before the job's timeout) no new document starts, and the sweep says how many it did not reach and fails. The
+failures and each sweep's summary are also on the run page. `STETDOC_WATCH_SECS`, `STETDOC_LIMIT_SECS` and
+`STETDOC_PROGRESS_SECS` change the watchdog, the limit and the progress interval.
+
+To run a failure again, take the seed from the top of the shard's log (`random edit batches: seed ...`) and a piece of the
+document's id:
+
+```
+STETDOC_CORPUS_SET=full STETDOC_ONLY=RP052-Deleted-Para-Mark STETDOC_SEED=10390364666906268427 \
+  cargo test --release -p stetdoc-testkit --test laws_random -- random_batches_on_the_curated --nocapture
+```
+
+Use `random_edits_of_files_on_the_curated` for a failure of the random edits of files, and `STETDOC_SHARD=<i>/40` instead of
+`STETDOC_ONLY` to run the whole shard (about an hour on a laptop).
+
+The size was measured in October 2026 with `/usr/bin/time` on a Mac. Per document, the three tests cost 4.8 seconds of an
+Apple M-series core on shard 0 of 64 (763 documents: 3.6 for the random batches, 1.3 for the random edits of files, 0.02
+for L2 by block) and 5.3 on shard 26 of 40 (1,223 documents). L2 by block over the whole corpus took 998 core-seconds on
+the Mac and about 37 minutes on a third of a 4-vCPU runner (about 2,960 vCPU-seconds) in the nights of October 19 to 25,
+so a runner's vCPU does about a third of the work of a Mac core: about 15 vCPU-seconds a document. A shard of 1,215
+documents on 4 vCPUs then takes about 76 minutes, and with the checkout, the cache and the build about 81, which is 60% of
+the 135-minute timeout. GitHub runs 20 jobs of a public repository at once, so the 40 shards run in two waves, about three
+hours in all. Measure again and change the shard count when the corpora or the engine's speed change a lot: the slowest
+documents in the log and the time of each shard tell.
 
 ### The LibreOffice oracle
 

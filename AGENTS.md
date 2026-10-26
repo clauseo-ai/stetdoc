@@ -105,6 +105,11 @@ which compiles the core twice, so `corpus`, `expect` and `fixtures` are plain da
 only the testkit's tests use. The harnesses of `package`, `xml` and `state` stay in the core (they read the fetched corpus,
 see `xtask/core-io-exceptions.txt`), and so do the write-protocol tests of `document`.
 
+The nightly `laws` workflow runs the random laws on the full corpora in shards, and its log names each failure as it is found:
+the document id, the seed and the batch. `STETDOC_CORPUS_SET=full STETDOC_ONLY=<a piece of the id> STETDOC_SEED=<seed> cargo
+test --release -p stetdoc-testkit --test laws_random -- random_batches_on_the_curated --nocapture` runs that document again in
+seconds; [`CONTRIBUTING.md`](CONTRIBUTING.md#the-nightly-laws-run) has the rest.
+
 ## How to contribute a change
 
 These steps apply to people and to the AI agents working for them.

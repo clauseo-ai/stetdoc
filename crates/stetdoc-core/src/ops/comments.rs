@@ -327,10 +327,17 @@ pub(super) fn delete_note(
             )
             .with_next("Name a note as the view shows it, such as {fn3}.")
         })?;
-    let before = c.tx().minted_annotation_ids().end;
+    let before = c.tx().minted_annotation_ids();
     let deleted = comments::notes::delete_note(c, endnote, id)?;
-    // The calls `comments` made are one effect here: the blocks it changed and the revision ids it took.
-    let minted = before..c.tx().minted_annotation_ids().end;
+    // The calls `comments` made are one effect here: the blocks it changed and the revision ids it took. Before the first id of
+    // the transaction the range is `0..0`, and its end is not where this operation's ids start: the first id is the highest
+    // `w:id` of the document plus one, which can be past two billion, and every id of a range is counted later.
+    let now = c.tx().minted_annotation_ids();
+    let minted = if before.is_empty() {
+        now
+    } else {
+        before.end..now.end
+    };
     let notes_parts: Vec<std::sync::Arc<str>> = c
         .tx()
         .parts()

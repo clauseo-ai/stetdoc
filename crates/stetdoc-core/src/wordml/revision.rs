@@ -150,28 +150,9 @@ pub fn revision_at(n: &NodeRef<'_>) -> Option<Revision> {
     if !n.is_element() || !is_word_ns(n.namespace()) {
         return None;
     }
-    let parent = n.parent();
-    let under = |name: &str| {
-        parent
-            .as_ref()
-            .is_some_and(|p| p.local_name() == name && is_word_ns(p.namespace()))
-    };
-    let in_mark = under("rPr")
-        && n.parent()
-            .and_then(|p| p.parent())
-            .is_some_and(|g| g.local_name() == "pPr" && is_word_ns(g.namespace()));
-    let kind = match n.local_name() {
-        "ins" if under("numPr") => RevKind::NumPrIns,
-        "ins" if under("trPr") => RevKind::RowIns,
-        "del" if under("trPr") => RevKind::RowDel,
-        "ins" if in_mark => RevKind::MarkIns,
-        "del" if in_mark => RevKind::MarkDel,
-        "moveFrom" if in_mark => RevKind::MarkMoveFrom,
-        "moveTo" if in_mark => RevKind::MarkMoveTo,
-        "ins" => RevKind::Ins,
-        "del" => RevKind::Del,
-        "moveFrom" => RevKind::MoveFrom,
-        "moveTo" => RevKind::MoveTo,
+    let name = n.local_name();
+    let kind = match name {
+        "ins" | "del" | "moveFrom" | "moveTo" => mark_kind(n, name)?,
         "rPrChange" => RevKind::RunProps,
         "pPrChange" => RevKind::ParagraphProps,
         "sectPrChange" => RevKind::SectionProps,
@@ -206,6 +187,36 @@ pub fn revision_at(n: &NodeRef<'_>) -> Option<Revision> {
         date: text("date"),
         date_utc: attr_in(n, &[W16DU], "dateUtc").map(|v| v.into_owned()),
         branch: Branch::Outside,
+    })
+}
+
+/// The kind of an `ins`, `del`, `moveFrom` or `moveTo` element, which its parent decides: a numbering or a
+/// row change, a change of a paragraph mark (in `w:pPr/w:rPr`), or a change of content. The parent is read only for
+/// these four names, which few elements have.
+fn mark_kind(n: &NodeRef<'_>, name: &str) -> Option<RevKind> {
+    let parent = n.parent();
+    let under = |name: &str| {
+        parent
+            .as_ref()
+            .is_some_and(|p| p.local_name() == name && is_word_ns(p.namespace()))
+    };
+    let in_mark = under("rPr")
+        && n.parent()
+            .and_then(|p| p.parent())
+            .is_some_and(|g| g.local_name() == "pPr" && is_word_ns(g.namespace()));
+    Some(match name {
+        "ins" if under("numPr") => RevKind::NumPrIns,
+        "ins" if under("trPr") => RevKind::RowIns,
+        "del" if under("trPr") => RevKind::RowDel,
+        "ins" if in_mark => RevKind::MarkIns,
+        "del" if in_mark => RevKind::MarkDel,
+        "moveFrom" if in_mark => RevKind::MarkMoveFrom,
+        "moveTo" if in_mark => RevKind::MarkMoveTo,
+        "ins" => RevKind::Ins,
+        "del" => RevKind::Del,
+        "moveFrom" => RevKind::MoveFrom,
+        "moveTo" => RevKind::MoveTo,
+        _ => return None,
     })
 }
 

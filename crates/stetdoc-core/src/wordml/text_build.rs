@@ -190,6 +190,24 @@ impl<'t> Builder<'t> {
         flags: u8,
     ) {
         let width = u32::try_from(text.chars().count()).unwrap_or(u32::MAX);
+        self.item_of_width(kind, node, info, text, width, from, flags);
+    }
+
+    /// `item`, for a caller that has counted the characters of `text` already: `width` is their number.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the arguments of `item` and the width it would count"
+    )]
+    pub fn item_of_width(
+        &mut self,
+        kind: ItemKind,
+        node: NodeId,
+        info: Info,
+        text: &str,
+        width: u32,
+        from: u32,
+        flags: u8,
+    ) {
         if width > 0 && self.state.in_code() {
             if kind == ItemKind::Text {
                 self.anomaly(AnomalyKind::TextInFieldCode, node);

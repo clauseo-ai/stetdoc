@@ -258,7 +258,9 @@ impl<'t> Builder<'t> {
         if deleted_text && !info.in_del && info.vis.0 & super::text_model::Vis::FINAL != 0 {
             self.anomaly(AnomalyKind::DelTextOutsideDeletion, c.id());
         }
-        let preserve = space_preserved(c);
+        // Whether the element keeps its white space matters only for a text with white space at an end,
+        // so it is looked up (an attribute of it or of an ancestor) for the first such text only.
+        let mut preserve: Option<bool> = None;
         for child in c.children() {
             let cdata = match child.kind() {
                 NodeKind::Text => 0,
@@ -269,7 +271,7 @@ impl<'t> Builder<'t> {
             if raw.is_empty() {
                 continue;
             }
-            if !preserve && edge_space(&raw) {
+            if edge_space(&raw) && !*preserve.get_or_insert_with(|| space_preserved(c)) {
                 self.anomaly(AnomalyKind::EdgeSpaceWithoutPreserve, child.id());
             }
             let span = text_span(&raw);
@@ -277,7 +279,8 @@ impl<'t> Builder<'t> {
                 // An empty text node: no character.
                 continue;
             }
-            let whole = span.start == 0 && span.end == raw.chars().count();
+            let chars = raw.chars().count();
+            let whole = span.start == 0 && span.end == chars;
             let counted: std::borrow::Cow<'_, str> = if whole {
                 std::borrow::Cow::Borrowed(&*raw)
             } else {
@@ -288,7 +291,16 @@ impl<'t> Builder<'t> {
                     .into()
             };
             let from = u32::try_from(span.start).unwrap_or(u32::MAX);
-            self.item(ItemKind::Text, child.id(), info, &counted, from, cdata);
+            let width = u32::try_from(span.len()).unwrap_or(u32::MAX);
+            self.item_of_width(
+                ItemKind::Text,
+                child.id(),
+                info,
+                &counted,
+                width,
+                from,
+                cdata,
+            );
         }
     }
 

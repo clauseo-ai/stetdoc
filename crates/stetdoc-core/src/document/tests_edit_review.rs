@@ -4,6 +4,7 @@ use super::tests_edit::*;
 use super::*;
 use crate::api::edit::Edit;
 use crate::api::revision::ChangeKind;
+use crate::api::stamp::Stamp;
 use crate::api::view::Mode;
 
 /// A document with two authors' changes: Clauseo changed p4 and p5, and the base is the one after both.
@@ -415,4 +416,176 @@ fn a_footer_that_an_accept_takes_out_of_the_document_is_never_an_internal_error(
             receipt.text
         );
     }
+}
+
+/// A document of one body, from the testkit's fixture builder.
+fn of_body(body: &str) -> Document {
+    let doc = stetdoc_testkit::fixtures::parts::Doc::new()
+        .body(body)
+        .bytes();
+    let bytes = stetdoc_testkit::fixtures::zip::Zip::new(
+        stetdoc_testkit::fixtures::parts::entries_doc(&doc),
+    )
+    .build();
+    Document::open(bytes, &OpenOptions::default()).unwrap()
+}
+
+/// Applies operations, tracked, as another author.
+fn run_as(doc: &mut Document, author: &str, ops: &str) {
+    let b = batch(doc, ops);
+    doc.edit(Edit::ops(b, Stamp::new(author, "2026-10-06T10:00:00")))
+        .unwrap();
+}
+
+/// The codes of the violations a document has, each once, sorted.
+fn violations(doc: &Document) -> Vec<crate::api::check::FindingCode> {
+    let mut found: Vec<_> = doc
+        .check()
+        .by_code
+        .iter()
+        .map(|(c, _)| *c)
+        .filter(|c| c.class() == crate::api::check::Class::Violation)
+        .collect();
+    found.sort();
+    found
+}
+
+#[test]
+fn a_marker_that_an_accepted_mark_leaves_between_blocks_keeps_the_problem_it_had() {
+    // The move's range start has no `w:date`, which the schema requires: a problem of the input. Accepting the deletion of
+    // the mark of the paragraph that holds only the start puts the start between the blocks, in the body, and the body
+    // must carry the problem of the paragraph that went.
+    let mut doc = of_body(concat!(
+        "<w:p><w:r><w:t>Intro</w:t></w:r></w:p>",
+        r#"<w:p><w:pPr><w:rPr><w:del w:id="1" w:author="B" w:date="2020-01-01T00:00:00Z"/></w:rPr></w:pPr>"#,
+        r#"<w:moveFromRangeStart w:id="2" w:author="A" w:name="move1"/></w:p>"#,
+        r#"<w:p><w:moveFrom w:id="3" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t>Moved</w:t></w:r></w:moveFrom>"#,
+        r#"<w:moveFromRangeEnd w:id="2"/></w:p>"#,
+        r#"<w:p><w:moveToRangeStart w:id="4" w:author="A" w:date="2020-01-01T00:00:00Z" w:name="move1"/>"#,
+        r#"<w:moveTo w:id="5" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t>Moved</w:t></w:r></w:moveTo>"#,
+        r#"<w:moveToRangeEnd w:id="4"/></w:p>"#,
+    ));
+    let before = violations(&doc);
+    assert!(!before.is_empty());
+    run(&mut doc, r#"{"op":"accept","author":"B"}"#);
+    assert_eq!(violations(&doc), before);
+}
+
+#[test]
+fn accepting_a_table_deletion_keeps_a_comment_s_start_before_its_end() {
+    // The comment's start is in the paragraph and its end inside another author's insertion: the markers that the table's
+    // removal keeps go to the next paragraph in document order.
+    let mut doc = of_body(concat!(
+        r#"<w:tbl><w:tblPr/><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid>"#,
+        "<w:tr><w:tc><w:p><w:r><w:t>Table</w:t></w:r></w:p></w:tc></w:tr></w:tbl>",
+        "<w:p><w:r><w:t>After</w:t></w:r></w:p>",
+    ));
+    run_as(
+        &mut doc,
+        "Reviewer",
+        r#"{"op":"replace","ref":"p1","start":2,"end":5,"with":"days"},{"op":"comment","ref":"p1","text":"A note."}"#,
+    );
+    let before = violations(&doc);
+    run(&mut doc, r#"{"op":"delete","ref":"t1"}"#);
+    run(&mut doc, r#"{"op":"accept","author":"Clauseo"}"#);
+    assert_eq!(violations(&doc), before);
+    let files = doc.files().unwrap();
+    assert!(
+        files.files.iter().any(|(_, text)| text.contains("After")),
+        "the paragraph after the table is there"
+    );
+}
+
+#[test]
+fn accepting_a_move_removes_a_deletion_that_held_only_its_range_marker() {
+    // A tracked delete over a moved run and an insertion after it wraps the range end alone in a `w:del`; accepting the move removes the marker,
+    // and the deletion it leaves with nothing in it goes too.
+    let mut doc = of_body(concat!(
+        "<w:p><w:r><w:t xml:space=\"preserve\">Run 1. </w:t></w:r>",
+        r#"<w:moveToRangeStart w:id="0" w:author="A" w:date="2020-01-01T00:00:00Z" w:name="move1"/>"#,
+        r#"<w:moveTo w:id="1" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t xml:space="preserve">Run 2. </w:t></w:r></w:moveTo>"#,
+        r#"<w:moveToRangeEnd w:id="0"/>"#,
+        r#"<w:ins w:id="2" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t xml:space="preserve">Run 4. </w:t></w:r></w:ins>"#,
+        r#"<w:moveFromRangeStart w:id="5" w:author="A" w:date="2020-01-01T00:00:00Z" w:name="move1"/>"#,
+        r#"<w:moveFrom w:id="6" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t>Run 2.</w:t></w:r></w:moveFrom>"#,
+        r#"<w:moveFromRangeEnd w:id="5"/></w:p>"#,
+    ));
+    let before = violations(&doc);
+    run(
+        &mut doc,
+        r#"{"op":"delete","ref":"p1"},{"op":"accept","author":"A"},{"op":"format","ref":"p1","bold":true}"#,
+    );
+    assert_eq!(violations(&doc), before);
+}
+
+#[test]
+fn a_split_before_the_text_keeps_the_ref_on_the_text_and_a_reject_gives_back_the_very_paragraph() {
+    // A split at offset 0 used to leave the original element empty, with the inserted mark, and move the text to a new one.
+    // Rejecting removed the empty element, so the text came back under the new ref and without the paragraph's attributes.
+    let body = "<w:p w14:paraId=\"1A2B3C4D\" w:rsidR=\"00AB12CD\"><w:pPr><w:jc w:val=\"both\"/></w:pPr><w:r><w:t>Alpha beta gamma.</w:t></w:r></w:p><w:p><w:r><w:t>Second one.</w:t></w:r></w:p>";
+    let xml = stetdoc_testkit::fixtures::parts::Doc::new()
+        .root_attrs(" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\"")
+        .body(body)
+        .bytes();
+    let bytes = stetdoc_testkit::fixtures::zip::Zip::new(
+        stetdoc_testkit::fixtures::parts::entries_doc(&xml),
+    )
+    .build();
+    let main_xml = |doc: &Document| {
+        let view = doc.state.parts();
+        let id = view.id("word/document.xml").unwrap();
+        String::from_utf8(view.tree(id).unwrap().serialize()).unwrap()
+    };
+    for how in [r#""at":0"#, r#""before":"Alpha""#] {
+        let mut doc = Document::open(bytes.clone(), &OpenOptions::default()).unwrap();
+        let before = main_xml(&doc);
+        let receipt = run(&mut doc, &format!(r#"{{"op":"split","ref":"p1",{how}}}"#));
+        assert_eq!(receipt.added, ["p3"], "{how}: {}", receipt.text);
+        assert_eq!(final_text(&doc, "p1"), "Alpha beta gamma.", "{how}");
+        assert_eq!(final_text(&doc, "p3"), "", "{how}");
+        let after = main_xml(&doc);
+        assert!(
+            after.find("w:ins ").unwrap() < after.find("1A2B3C4D").unwrap(),
+            "{how}: the new paragraph stands before the text: {after}"
+        );
+        let receipt = run(&mut doc, r#"{"op":"reject","all":true}"#);
+        assert_eq!(pending(&doc), 0, "{how}");
+        assert_eq!(main_xml(&doc), before, "{how}: {}", receipt.text);
+        assert_eq!(final_text(&doc, "p1"), "Alpha beta gamma.", "{how}");
+        assert!(
+            receipt.retired.iter().any(|r| r.r#ref == "p3"),
+            "{how}: {:?}",
+            receipt.retired
+        );
+    }
+}
+
+#[test]
+fn a_deleted_paragraph_is_one_change_with_the_pieces_that_have_no_width() {
+    // Another author deleted the paragraph: its mark, a field's begin and code in one w:del, an empty run left outside, and the
+    // field's result and end in another. The first w:del holds nothing with width, and it is still a piece of the paragraph's
+    // deletion: rejecting the change by the id of the second gives the whole field back, not its result without its begin.
+    let del = |id: u32| format!(r#"w:id="{id}" w:author="Reviewer" w:date="2026-10-01T09:00:00Z""#);
+    let body = format!(
+        r#"<w:p><w:pPr><w:rPr><w:del {}/></w:rPr></w:pPr><w:del {}><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:delInstrText xml:space="preserve"> FORMTEXT </w:delInstrText></w:r></w:del><w:r/><w:del {}><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:delText>Name</w:delText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:r><w:delText xml:space="preserve"> here.</w:delText></w:r></w:del></w:p><w:p><w:r><w:t>Next.</w:t></w:r></w:p>"#,
+        del(3),
+        del(1),
+        del(2)
+    );
+    let mut doc = Document::open(
+        crate::threads::tests_support::Pkg::new(&body).bytes(),
+        &OpenOptions::default(),
+    )
+    .unwrap();
+    assert!(doc.check().ok, "{:?}", doc.check());
+    let changes = doc.revisions(&RevisionFilter::default()).unwrap();
+    assert_eq!(changes.len(), 1, "{changes:?}");
+    assert_eq!(changes[0].kind, ChangeKind::ParagraphDeleted);
+    let mut ids = changes[0].ids.clone();
+    ids.sort_unstable();
+    assert_eq!(ids, [1, 2, 3]);
+    run(&mut doc, r#"{"op":"reject","ids":[2]}"#);
+    assert_eq!(pending(&doc), 0);
+    assert!(doc.check().ok, "{:?}", doc.check());
+    assert_eq!(final_text(&doc, "p1"), "Name here.");
 }

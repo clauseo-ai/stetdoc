@@ -12,7 +12,7 @@ use stetdoc_testkit::laws::generate::{
 };
 use stetdoc_testkit::laws::random::{self, Base, batch_count, check, seed};
 use stetdoc_testkit::laws::random_files;
-use stetdoc_testkit::laws::sweep::{in_parallel, over_the_corpus};
+use stetdoc_testkit::laws::sweep::{in_parallel, over_the_corpus, survey_of_the_corpus};
 
 /// The random runs are for a release build: `cargo xtask check` runs this file again with `--release`, and a debug build keeps the
 /// fixed smoke set of `laws_identity.rs`. A debug run says that it skips them.
@@ -238,12 +238,14 @@ fn random_batches_on_the_curated_documents_keep_their_laws() {
         return;
     }
     let seed = seed();
-    let Some(swept) = over_the_corpus(random::batches) else {
+    let Some(swept) = over_the_corpus("random batches", random::batches) else {
         eprintln!("skipped: STETDOC_CORPUS_DIR is not set (cargo xtask check sets it)");
         return;
     };
     if let Err(e) = swept.unwrap().verdict(200) {
-        panic!("{e}\nSTETDOC_SEED={seed} runs the same batches again");
+        panic!(
+            "{e}\nSTETDOC_SEED={seed} runs the same batches again, and STETDOC_ONLY=<a piece of the document's id> runs only that document"
+        );
     }
 }
 
@@ -253,19 +255,21 @@ fn random_edits_of_files_on_the_curated_documents_keep_their_laws() {
         return;
     }
     let seed = seed();
-    let Some(swept) = over_the_corpus(random_files::file_edits) else {
+    let Some(swept) = over_the_corpus("random edits of files", random_files::file_edits) else {
         eprintln!("skipped: STETDOC_CORPUS_DIR is not set (cargo xtask check sets it)");
         return;
     };
     if let Err(e) = swept.unwrap().verdict(200) {
-        panic!("{e}\nSTETDOC_SEED={seed} runs the same edits again");
+        panic!(
+            "{e}\nSTETDOC_SEED={seed} runs the same edits again, and STETDOC_ONLY=<a piece of the document's id> runs only that document"
+        );
     }
 }
 
 #[test]
 fn the_body_of_most_curated_documents_lines_up_with_the_view_for_l2_by_block() {
     use stetdoc_testkit::laws::blocks::lines_up;
-    let Some(swept) = over_the_corpus(|bytes| {
+    let Some(swept) = survey_of_the_corpus("L2 by block", |bytes| {
         let doc =
             Document::open(bytes.to_vec(), &OpenOptions::default()).map_err(|e| e.to_string())?;
         let facts = Facts::of(&doc)?;
@@ -287,6 +291,9 @@ fn the_body_of_most_curated_documents_lines_up_with_the_view_for_l2_by_block() {
         swept.checked - missed,
         swept.checked
     );
+    if let Some(problem) = swept.reach().or_else(|| swept.slow()) {
+        panic!("{problem}");
+    }
     assert!(
         missed * 10 <= swept.checked,
         "only {} of {} documents line up:\n{}",

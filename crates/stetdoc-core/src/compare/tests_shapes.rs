@@ -434,3 +434,22 @@ fn a_paragraph_that_gained_a_neighbour_is_an_insertion_and_not_a_split() {
     let (v, xml) = run(&a, &b);
     assert_eq!(v.receipt.counts.split, 0, "{xml}");
 }
+
+#[test]
+fn deletions_that_end_the_body_go_after_an_inserted_table_so_rejecting_restores_the_last_paragraph()
+{
+    // DB010: the original ends with a picture, the revised with new text, a new table and an empty last paragraph. The picture's
+    // paragraph cannot share the last mark (it holds an atom), so it takes the inserted end mark: placed before the table, its
+    // join would have to reach across the table that rejecting removes, which it does not, and an empty paragraph was left.
+    let pic = "<w:p><w:r><w:drawing><wp:inline><wp:docPr id=\"7\" name=\"q\"/></wp:inline></w:drawing></w:r></w:p>";
+    let table = "<w:tbl><w:tblPr><w:tblW w:w=\"0\" w:type=\"auto\"/></w:tblPr><w:tblGrid><w:gridCol w:w=\"4788\"/></w:tblGrid><w:tr><w:tc><w:p/></w:tc></w:tr></w:tbl>";
+    let a = Pk::new(&format!("{}{pic}", p(&long(1))));
+    let b = Pk::new(&format!("{}{}{table}<w:p/>", p(&long(2)), p(&long(3))));
+    let (v, xml) = run(&a, &b);
+    assert!(v.receipt.exclusions.is_empty(), "{xml}");
+    let (table_at, picture_at) = (
+        xml.find("<w:tbl>").unwrap(),
+        xml.find("<w:drawing>").unwrap(),
+    );
+    assert!(table_at < picture_at, "{xml}");
+}

@@ -32,7 +32,8 @@ impl Engine<'_, '_> {
         let Ok(story) = view.story(id) else {
             return Ok(Vec::new());
         };
-        let ranges = super::moves::ranges_of(&story, view.tree(id)?, &wrappers);
+        let tree = view.tree(id)?;
+        let ranges = super::moves::ranges_of(&story, tree, &wrappers);
         let mut out: Vec<NodeId> = Vec::new();
         for m in ranges.values() {
             for n in std::iter::once(m.start).chain(m.end) {
@@ -41,10 +42,28 @@ impl Engine<'_, '_> {
                 }
             }
         }
+        // Resolution is by move (design 3.5): the ranges of the other side, which share the name, go as well, even when
+        // no wrapper is left in them (an earlier step emptied the source, and its markers would dangle).
+        let names: Vec<&str> = ranges
+            .values()
+            .map(|m| m.name.as_str())
+            .filter(|n| !n.is_empty())
+            .collect();
+        for a in story.anchors(tree).moves {
+            if !names.contains(&a.name.as_str()) {
+                continue;
+            }
+            for n in a.start.iter().chain(a.end.iter()).map(|l| l.node) {
+                if !out.contains(&n) {
+                    out.push(n);
+                }
+            }
+        }
         Ok(out)
     }
 
-    /// Removes the move range markers that are still in the tree.
+    /// Removes the move range markers that are still in the tree, and the revision wrappers that held nothing else (a
+    /// deletion of the marker alone, which a tracked delete over the move writes).
     pub(super) fn drop_markers(&mut self, markers: Vec<NodeId>) -> Result<(), StetError> {
         for n in markers {
             let tree = self.tx.part_mut(&self.part)?;
@@ -53,7 +72,10 @@ impl Engine<'_, '_> {
             }
             let parent = parent_of(tree, n);
             detach(tree, n)?;
-            self.dirty.extend(parent);
+            if let Some(parent) = parent {
+                let kept = prune_from(tree, parent)?;
+                self.dirty.push(kept);
+            }
         }
         Ok(())
     }

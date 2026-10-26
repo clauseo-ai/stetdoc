@@ -314,25 +314,35 @@ pub struct FieldIndex {
 }
 
 /// True if anything below `n` is a field character, a simple field or field instruction, which are
-/// the only things that begin, change or end a field. One walk, no allocation beyond the stack.
+/// the only things that begin, change or end a field. One walk in document order, by the links of the
+/// tree, with no allocation: it is asked of every paragraph of a story.
 pub(super) fn has_field_markup(n: &NodeRef<'_>) -> bool {
-    let mut stack = vec![n.children()];
-    while let Some(top) = stack.last_mut() {
-        let Some(c) = top.next() else {
-            stack.pop();
-            continue;
+    let mut cur = n.first_child();
+    while let Some(c) = cur {
+        if c.is_element() {
+            if matches!(
+                c.local_name(),
+                "fldChar" | "fldSimple" | "instrText" | "delInstrText"
+            ) && is_word_ns(c.namespace())
+            {
+                return true;
+            }
+            if let Some(first) = c.first_child() {
+                cur = Some(first);
+                continue;
+            }
+        }
+        // The next node: a sibling, or the sibling of the nearest ancestor below `n` that has one.
+        let mut up = c;
+        cur = loop {
+            if let Some(next) = up.next_sibling() {
+                break Some(next);
+            }
+            match up.parent() {
+                Some(p) if p.id() != n.id() => up = p,
+                _ => break None,
+            }
         };
-        if !c.is_element() {
-            continue;
-        }
-        if matches!(
-            c.local_name(),
-            "fldChar" | "fldSimple" | "instrText" | "delInstrText"
-        ) && is_word_ns(c.namespace())
-        {
-            return true;
-        }
-        stack.push(c.children());
     }
     false
 }

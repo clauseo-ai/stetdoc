@@ -27,7 +27,7 @@ fn every_fixture_that_opens_is_its_input_and_stable() {
 
 #[test]
 fn every_curated_document_is_its_input_and_stable() {
-    let Some(swept) = over_the_corpus(identity) else {
+    let Some(swept) = over_the_corpus("L1 and L4", identity) else {
         eprintln!("skipped: STETDOC_CORPUS_DIR is not set (cargo xtask check sets it)");
         return;
     };
@@ -75,7 +75,7 @@ fn edits_on_every_fixture_that_opens_keep_their_laws() {
 
 #[test]
 fn edits_on_the_curated_documents_keep_their_laws() {
-    let Some(swept) = over_the_corpus(stetdoc_testkit::laws::edits::smoke) else {
+    let Some(swept) = over_the_corpus("fixed edits", stetdoc_testkit::laws::edits::smoke) else {
         eprintln!("skipped: STETDOC_CORPUS_DIR is not set (cargo xtask check sets it)");
         return;
     };
@@ -107,7 +107,8 @@ fn edits_of_files_on_every_fixture_that_opens_keep_their_laws() {
 
 #[test]
 fn edits_of_files_on_the_curated_documents_keep_their_laws() {
-    let Some(swept) = over_the_corpus(stetdoc_testkit::laws::files::smoke) else {
+    let Some(swept) = over_the_corpus("fixed edits of files", stetdoc_testkit::laws::files::smoke)
+    else {
         eprintln!("skipped: STETDOC_CORPUS_DIR is not set (cargo xtask check sets it)");
         return;
     };
@@ -135,7 +136,7 @@ fn the_read_surface_answers_on_every_fixture_that_opens() {
 
 #[test]
 fn the_read_surface_answers_on_the_curated_documents() {
-    let Some(swept) = over_the_corpus(stetdoc_testkit::laws::surface::smoke) else {
+    let Some(swept) = over_the_corpus("read surface", stetdoc_testkit::laws::surface::smoke) else {
         eprintln!("skipped: STETDOC_CORPUS_DIR is not set (cargo xtask check sets it)");
         return;
     };

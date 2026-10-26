@@ -127,7 +127,9 @@ impl Engine<'_, '_> {
                     self.dirty.push(prev);
                     self.retire_removed(&key)?;
                 }
-                (Some(left), None) if left.is_empty() => {
+                (Some(left), None)
+                    if left.is_empty() && (self.accept || !only_block_of_note(tree, para)) =>
+                {
                     let parent = parent_of(tree, para);
                     detach(tree, para)?;
                     self.dirty.extend(parent);
@@ -158,7 +160,12 @@ impl Engine<'_, '_> {
         };
         let second = BlockKey::new(part.clone(), next);
         match join(self.tx, &part, para, next, why)? {
-            Joined::FirstRemoved => self.retire_removed(&key)?,
+            Joined::FirstRemoved => {
+                if why == Why::SecondRejected {
+                    self.inherited.push((key.clone(), second.clone()));
+                }
+                self.retire_removed(&key)?;
+            }
             Joined::Merged => {
                 self.joined.push((key.clone(), second.clone()));
                 if why == Why::SecondRejected {
@@ -227,6 +234,26 @@ fn previous_block(tree: &SpanTree, para: NodeId) -> bool {
         cur = c.prev_sibling();
     }
     false
+}
+
+/// True if `para` is the only block of a note or a comment. A rejection keeps it, emptied of what it takes out, as it keeps the
+/// last paragraph of any container (design 3.2.1), even when all the note's paragraphs were inserted: a note goes only with its
+/// reference (3.6.4), so when the reference goes too the note goes with it, and when the reference stays the note must keep a
+/// block (`check`'s W9).
+fn only_block_of_note(tree: &SpanTree, para: NodeId) -> bool {
+    let Some(parent) = tree.node_ref(para).parent() else {
+        return false;
+    };
+    (is_w(&parent, "footnote") || is_w(&parent, "endnote") || is_w(&parent, "comment"))
+        && parent
+            .child_elements()
+            .filter(|c| {
+                ["p", "tbl", "sdt", "customXml", "altChunk"]
+                    .iter()
+                    .any(|b| is_w(c, b))
+            })
+            .count()
+            == 1
 }
 
 /// True if rejecting removes the paragraph's whole container with it: it is in an inserted row or cell, or in a note or

@@ -565,7 +565,10 @@ walks back over the paragraphs whose marks are inserted and the tables whose row
 joins the marks), and gives the paragraph it reaches the inserted mark, next to a deleted one if it is a deleted copy of the
 original (one paragraph mark both inserted and deleted, as two authors leave it). The container's last paragraph keeps a live
 mark, with its own properties and that paragraph's in a `pPrChange` and an `rPrChange` in its mark, so that rejecting joins
-them into a paragraph with the earlier one's properties, as it was. It mirrors the `RP040` shape of 6.1. When the gap after a
+them into a paragraph with the earlier one's properties, as it was. It mirrors the `RP040` shape of 6.1. A join does not reach
+across a table that rejecting removes (`revisions.md`, finding 28), so in the gap that ends a container the deleted blocks go
+after the last inserted table, right before the paragraphs that end the container, and not before the gap's first insertion:
+the paragraph that takes the mark is then next to the run it joins (`DB010`). When the gap after a
 container's last pair holds both deleted and inserted blocks and its last blocks on both sides are paragraphs with no section
 break, no atom and no markup-compatibility content, `tables::pair_the_last_paragraphs` pairs those two, so they share the last
 mark as one paragraph whose text is replaced, which is what Word writes for text typed over a cell's. When nothing before the run

@@ -224,6 +224,39 @@ fn a_dry_run_is_the_real_edit_without_its_effect() {
 }
 
 #[test]
+fn a_new_block_that_takes_an_older_ref_is_not_listed_as_added() {
+    // Another author inserts a paragraph after p10, the last of the body, which marks p10's paragraph mark as inserted. A
+    // split of p10 gives its second half that mark, and rejecting the insertion joins the second half into the inserted
+    // paragraph, whose ref `p11` the joined block keeps. That ref existed before the batch: no operation lists it as added,
+    // and a dry run issues none.
+    let prelude =
+        r#"{"op":"insert","ref":"p10","place":"after","paragraphs":["Inserted by another."]}"#;
+    let ops = r#"{"op":"split","ref":"p10","at":4},{"op":"reject","author":"Other"}"#;
+    let open = || {
+        let mut doc = rich();
+        let b = batch(&doc, prelude);
+        doc.edit(Edit::ops(b, Stamp::new("Other", "2026-10-05T10:00:00")))
+            .unwrap();
+        doc
+    };
+    let (mut dry, mut real) = (open(), open());
+    let b = batch(&dry, ops);
+    let dry_receipt = dry.edit(Edit::ops(b, stamp()).dry_run()).unwrap();
+    let real_receipt = run(&mut real, ops);
+    assert_eq!(dry_receipt.operations[0].added_count, 1);
+    for (d, r) in dry_receipt.operations.iter().zip(&real_receipt.operations) {
+        assert_eq!(d.added, Vec::<String>::new(), "{}", dry_receipt.text);
+        assert_eq!(d.added_count, r.added_count);
+        assert!(
+            r.added.iter().all(|a| real_receipt.added.contains(a)),
+            "an operation lists only minted refs: {:?} against {:?}",
+            r.added,
+            real_receipt.added
+        );
+    }
+}
+
+#[test]
 fn an_untracked_edit_writes_no_revision() {
     let mut doc = rich();
     let b = batch(

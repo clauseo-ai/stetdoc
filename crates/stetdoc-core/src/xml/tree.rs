@@ -222,6 +222,13 @@ impl SpanTree {
     }
 
     pub(super) fn str_of(&self, s: Span) -> &str {
+        // A source known to be UTF-8 is sliced without a check: a span of a parsed tree starts and
+        // ends at a character boundary, and one that does not reads as "" either way.
+        if let Some(text) = self.source.as_str()
+            && (s.end as usize) <= text.len()
+        {
+            return text.get(s.start as usize..s.end as usize).unwrap_or("");
+        }
         std::str::from_utf8(self.bytes(s)).unwrap_or("")
     }
 

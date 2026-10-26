@@ -210,13 +210,9 @@ impl Engine<'_, '_> {
 
     /// Gives a story that a removal left with no block (the body, a note, a comment, a header or a footer)
     /// the empty paragraph it must have. A story is never left with no paragraph; a note that no reference
-    /// names any more is removed elsewhere, and one that stays keeps one.
+    /// names any more is removed elsewhere, and one that stays keeps one. A reject keeps the last paragraph of a
+    /// story itself (`resolve_mark`), so on a reject this fills only a story whose last block was an inserted table.
     pub(super) fn fill_empty_stories(&mut self) -> Result<(), StetError> {
-        // Rejecting gives back what was there before the insertions, and a story whose every block was
-        // inserted had none (WC063-Footnote-Mod has an empty note): reversibility decides there.
-        if !self.accept {
-            return Ok(());
-        }
         let part = self.part.clone();
         let tree = self.tx.part_mut(&part)?;
         let root = tree.root();

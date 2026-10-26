@@ -111,7 +111,9 @@ fn parse_part(bytes: Bytes, limits: &Limits) -> Result<SpanTree, StetError> {
         return Err(limit("XML part is larger than 4 GiB once decoded"));
     }
     let body = source.get(bom_len..).unwrap_or(&[]);
-    if let Err(e) = std::str::from_utf8(body) {
+    if source.as_str().is_none()
+        && let Err(e) = std::str::from_utf8(body)
+    {
         return Err(malformed(format!(
             "malformed XML at byte {}{note}: invalid UTF-8",
             bom_len + e.valid_up_to()

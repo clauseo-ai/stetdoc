@@ -45,10 +45,14 @@ fn unrenamed_qname(qname: &str) -> Cow<'_, str> {
 const PROPERTIES: &str = "properties";
 
 /// Whether a qualified name is a property container that the compiler copies from one place to
-/// another: `w:rPr` and `w:pPr` (the prefix of a key is the schema's, `w` in either dialect), and
-/// not the math `m:rPr`.
+/// another: `w:rPr` and `w:pPr`, and the containers a tracked change of properties keeps a copy of
+/// in its record (`w:tblPr` in `w:tblPrChange`, `w:tblPrEx`, `w:trPr`, `w:tcPr`, `w:sectPr`). The
+/// prefix of a key is the schema's, `w` in either dialect, and the math `m:rPr` is not one.
 fn is_property_container(qname: &str) -> bool {
-    matches!(qname, "w:rPr" | "w:pPr")
+    matches!(
+        qname,
+        "w:rPr" | "w:pPr" | "w:tblPr" | "w:tblPrEx" | "w:trPr" | "w:tcPr" | "w:sectPr"
+    )
 }
 
 /// What is wrong, independent of where in the file.
@@ -73,8 +77,9 @@ impl Key {
     /// A property container (`w:rPr`, `w:pPr`) is keyed by its name and not by its declaration,
     /// so a violation in one is the same wherever in the unit the container stands: the mark's
     /// `w:rPr` (`CT_ParaRPr`), a run's (`CT_RPr`), a paragraph's `w:pPr` or the snapshot in a
-    /// `w:pPrChange` (`CT_PPrExtended`). The compiler copies a mark's properties onto a new run
-    /// and a paragraph's into the snapshot of a change, and a copy of a defect the unit had is
+    /// `w:pPrChange` (`CT_PPrExtended`), and a table's `w:tblPr` (`CT_TblPr`) or its snapshot in a
+    /// `w:tblPrChange` (`CT_TblPrBase`). The compiler copies a mark's properties onto a new run
+    /// and a container's into the snapshot of a change, and a copy of a defect the unit had is
     /// carried. A defect that is new (another property twice) still has a key of its own. An out-of-order violation in a property
     /// container is keyed by the container alone, without the child the validator names.
     pub(crate) fn schema(key: &ViolationKey) -> Key {

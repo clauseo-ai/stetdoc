@@ -145,6 +145,50 @@ fn rejecting_the_insertion_of_a_footnote_removes_the_reference_and_the_note_and_
 }
 
 #[test]
+fn rejecting_the_inserted_paragraph_of_a_note_whose_reference_stays_keeps_the_note_with_a_paragraph()
+ {
+    // Revision footnotes.docx: the note's content and mark are inserted, its reference is not. Rejecting the note's
+    // paragraph alone cannot remove the note, which goes only with its reference, so it keeps its one paragraph, emptied.
+    let body = format!(
+        "<w:p>{}<w:r><w:footnoteReference w:id=\"1\"/></w:r></w:p>",
+        r("text")
+    );
+    let inner = format!(
+        "<w:p><w:pPr><w:rPr><w:ins w:id=\"2\" {AT}/></w:rPr></w:pPr><w:ins w:id=\"3\" {AT}><w:r><w:footnoteRef/></w:r><w:r><w:t>the note</w:t></w:r></w:ins></w:p>"
+    );
+    for ids in [vec![2], vec![3], vec![2, 3]] {
+        let s = with_notes(&body, &[note(1, "", &inner)]);
+        let mut tx = s.begin();
+        let step = Step {
+            action: Action::Reject,
+            selector: Selector::Ids(ids.clone()),
+        };
+        let res = resolve(&mut tx, &mut ChangeIndex::new(), &[step]).unwrap();
+        assert!(res[0].notes.is_empty(), "{ids:?}");
+        let xml = notes_xml(&tx);
+        assert_eq!(ids_of_notes(&xml), ["-1", "0", "1"], "{ids:?}");
+        let kept = xml.split("w:id=\"1\">").nth(1).unwrap_or_default();
+        assert!(kept.starts_with("<w:p"), "{ids:?}: {xml}");
+        assert!(
+            !kept.contains("the note") && !kept.contains("w:ins"),
+            "{ids:?}: {xml}"
+        );
+    }
+    // A note whose only block is an inserted table keeps a paragraph too.
+    let table = format!(
+        "<w:tbl><w:tblPr/><w:tblGrid><w:gridCol/></w:tblGrid><w:tr><w:trPr><w:ins w:id=\"2\" {AT}/></w:trPr><w:tc><w:p><w:pPr><w:rPr><w:ins w:id=\"4\" {AT}/></w:rPr></w:pPr><w:ins w:id=\"3\" {AT}><w:r><w:t>cell</w:t></w:r></w:ins></w:p></w:tc></w:tr></w:tbl>"
+    );
+    let s = with_notes(&body, &[note(1, "", &table)]);
+    let mut tx = s.begin();
+    resolve(&mut tx, &mut ChangeIndex::new(), &[reject_all()]).unwrap();
+    let xml = notes_xml(&tx);
+    assert!(
+        xml.contains("<w:footnote w:id=\"1\"><w:p/></w:footnote>"),
+        "{xml}"
+    );
+}
+
+#[test]
 fn a_note_that_a_reference_still_names_stays() {
     // The deletion of the reference is pending, so the reference is in the document still: rejecting
     // something else leaves the note where it is.
@@ -240,10 +284,9 @@ fn a_resolution_removes_only_the_notes_that_lost_their_last_reference() {
 }
 
 #[test]
-fn a_note_that_stays_keeps_a_paragraph_on_accept_and_a_reject_gives_back_what_was_there() {
+fn a_note_that_stays_keeps_a_paragraph_on_accept() {
     // The reference stays, so the note stays: accepting the deletion of all its content leaves it one empty
-    // paragraph. A reject gives back what was there before the insertions (WC063-Footnote-Mod has an empty note),
-    // so it adds none.
+    // paragraph. A reject keeps one too (`rejecting_the_inserted_paragraph_of_a_note_whose_reference_stays_...`).
     let body = format!(
         "<w:p>{}<w:r><w:footnoteReference w:id=\"1\"/></w:r></w:p>",
         r("text")
@@ -259,12 +302,4 @@ fn a_note_that_stays_keeps_a_paragraph_on_accept_and_a_reject_gives_back_what_wa
         xml.contains("<w:footnote w:id=\"1\"><w:p/></w:footnote>"),
         "{xml}"
     );
-    let inserted = format!(
-        "<w:p><w:pPr><w:rPr><w:ins w:id=\"2\" {AT}/></w:rPr></w:pPr><w:ins w:id=\"3\" {AT}><w:r><w:footnoteRef/></w:r><w:r><w:t>the note</w:t></w:r></w:ins></w:p>"
-    );
-    let s = with_notes(&body, &[note(1, "", &inserted)]);
-    let mut tx = s.begin();
-    resolve(&mut tx, &mut ChangeIndex::new(), &[reject_all()]).unwrap();
-    let xml = notes_xml(&tx);
-    assert!(!xml.contains("<w:footnote w:id=\"1\"><w:p/>"), "{xml}");
 }

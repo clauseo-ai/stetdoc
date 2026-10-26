@@ -263,7 +263,7 @@ impl Package {
                         e.name
                     )));
                 }
-                Bytes::from(data)
+                Bytes::from_part(data.to_vec())
             }
             8 => {
                 // Deflate cannot expand by more than about 1032 to 1, so a larger declared size is a lie.

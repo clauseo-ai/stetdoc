@@ -254,8 +254,70 @@ released yet.
 - The library's documentation, `crates/stetdoc-napi/npm/README.md`, shipped in the package, and its sections in `README.md`
   and `CONTRIBUTING.md`.
 
+### Changed
+
+- The first view of a large document, and the first range with its margin notes, take about half the time they did: the
+  text model is built only for the paragraphs that hold a note reference when the notes are numbered, a UTF-8 part's names and
+  text are not checked again on every read, a revision is looked for by its name before its namespace, and mentions of
+  clauses are found in one pass over the words. Views, receipts and peak memory are unchanged.
+
 ### Fixed
 
+- The random law L2 allows a table next to a removed block to gain, in its first or last paragraph, the comment markers
+  that the removal hoists there (design `revisions.md`, 3.6.5). It failed on `floattable-anchorpos.docx`, where deleting a
+  table moved its comment into the first cell of the table after it.
+
+- Rejecting the inserted paragraphs of a footnote, an endnote or a comment whose reference stays keeps the note's last
+  paragraph, emptied, instead of leaving a note with no paragraph, which the check refused as `validation_failed`
+  (`Revision footnotes.docx`). When the reference is rejected too, the note goes with it, as before.
+- The random law L2 reads `<w:p a="1" />` opened as `<w:p a="1" >` to hold the comment markers that a deletion hoists into
+  it as the same start tag. It took the space before the `>` for a changed paragraph and failed on
+  `tdf112450_vml_polyline.docx`.
+- Resolving a move removes the range markers of both its sides, as the design says (resolution is by move), also when an
+  earlier rejection had emptied one side. The emptied side's markers stayed under the move's name, and `check` refused the
+  edit for a move with a source and no destination (`Tika-792.docx`).
+
+- Rejecting a paragraph inserted after an empty last paragraph no longer fails with `validation_failed` when the original
+  paragraph had a problem in its attributes, such as a Word 2007 beta `paraId`: the paragraph that stays takes the original's
+  attributes back, and the reject now declares that it came from the original, so `check` carries the problem.
+
+- An operation's `added` in a receipt lists only refs the edit minted. When a block a split made was then joined into an
+  older block by an `accept` or `reject` of the same batch, the joined block keeps the older ref, and the split listed that
+  ref as added, in a dry run too, which must issue none (H14).
+- An accept that leaves a range marker between blocks (the paragraph that held only a move's range start goes) no longer
+  fails with `validation_failed` when the marker already had a problem, such as a `w:moveFromRangeStart` without its
+  `w:date`: `check` gives the body the problems of the paragraph the marker came from, as it does for any other unit.
+- Accepting the deletion of a table keeps a comment's range start before its end when the markers stand at different
+  depths (the end inside another author's insertion). The end came first, and `check` refused the accept.
+- Accepting or rejecting a move removes a deletion that held nothing but the move's range marker, instead of leaving an empty
+  `w:del` that the compiler refused as `internal` and `check` as a new violation.
+- A table of contents, or another field whose result spans paragraphs, no longer collapses in a view when that hides
+  something the view shows. In `Redline` a tracked change on the mark of the paragraph where the field ends keeps it open,
+  so a tracked split there is shown. In `Final` that paragraph joins the next one when its mark is deleted, so the field
+  stays open when the next paragraph has text, and takes in an empty one, as it does once the deletion is accepted. A paragraph that joins the one where the field
+  begins is read the same way.
+
+- The random law L5 compares each paragraph's style against its own view's common style, so a reject that changes which
+  style is commonest in the document no longer reads as a change on every line. It tolerates exactly one empty paragraph
+  that a reject adds as the last block of a cell whose last block was a table (W9), where it used to drop every such
+  paragraph from both sides (`tdf153891.docx`).
+- A split before a paragraph's text (`at: 0`, or `before` its first word) keeps the paragraph's ref, element and
+  attributes on the text and adds the new empty paragraph, with the new ref, before it. Rejecting the split gives back the
+  very paragraph under its old ref; before, the text came back under the new ref and lost the paragraph's `w14:paraId`
+  and rsids.
+- A deleted paragraph is one `ParagraphDeleted` change with every piece of its deletion, a piece that holds nothing with
+  width (a field's `begin` and code) included. Such a piece was a change of its own, so rejecting the paragraph's deletion
+  gave back a field's result without its `begin`, and the edit was refused with `validation_failed`.
+- A tracked `merge` of two list paragraphs that each hold a legacy `w:numberingChange` is applied. Their change ids made
+  their properties look different, so the second took the first's, and the copy carried the first's numbering change and
+  its id: two tracked changes had the same id and the edit was refused with `validation_failed`. The copy now follows the
+  copy rule and leaves out every change-tracking element.
+- A tracked `set` on a table, row, cell or section whose properties already break the schema (a second `w:tblLook`) is
+  applied. The copy of the old properties in the change's record carried the same problem, and the check counted it as new
+  and refused the edit with `validation_failed`.
+- `compare` places the deleted blocks at the end of a story after the last inserted table, before the paragraphs that end the
+  story, so that rejecting everything restores the original's last paragraph. Placed before the table, the paragraph that took
+  the inserted end mark could not join across the table that rejecting removes, and an empty paragraph was left (`DB010`).
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

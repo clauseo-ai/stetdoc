@@ -647,7 +647,10 @@ export type OpInfo = {
 
 /** The result of one operation of a batch. */
 export type OpResult = {
-  /** The refs of the blocks it added. Empty for a dry run, which issues no ref. */
+  /**
+   * The refs minted for the blocks it added. Empty for a dry run, which issues no ref. A block it added that a later
+   * operation joined an older block into carries the older block's ref, which is not listed.
+   */
   added: string[];
   /** How many blocks it added: the same for a dry run as for the real edit. */
   added_count: number;

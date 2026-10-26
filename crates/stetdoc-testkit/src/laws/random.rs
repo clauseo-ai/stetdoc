@@ -22,7 +22,6 @@
 
 use super::blocks::per_block;
 use super::edits::{Applied, input_codes, run_batch};
-use super::files::without_cell_end_stubs;
 use super::generate::{Facts, Generated, Rng, fnv, generate};
 use super::locality::locality;
 use std::cell::OnceCell;
@@ -32,6 +31,11 @@ use stetdoc_core::{
     Batch, Budget, Document, Edit, ErrorCode, FindingCode, Limits, Mode, OpenOptions,
     RevisionFilter, Scope, Stamp, StoryName, ViewSpec,
 };
+use view_lines::{ViewLine, block_lines, restored};
+
+#[cfg(test)]
+mod tests;
+mod view_lines;
 
 /// The seed of this run: `STETDOC_SEED`, or one from the clock, printed once so that a failure can be run again.
 pub fn seed() -> u64 {
@@ -46,11 +50,12 @@ pub fn seed() -> u64 {
                     .map_or(0, |d| d.as_nanos() as u64);
                 fnv(&now.to_le_bytes())
             });
-        // Written to the process's stderr, past the test harness's capture, so that every run shows its seed.
-        let _ = writeln!(
-            std::io::stderr(),
-            "random edit batches: seed {seed} (STETDOC_SEED={seed} runs the same batches)"
-        );
+        // Written to the process's stderr, past the test harness's capture, so that every run shows its seed, and to the run
+        // page's summary on GitHub Actions.
+        let line =
+            format!("random edit batches: seed {seed} (STETDOC_SEED={seed} runs the same batches)");
+        let _ = writeln!(std::io::stderr(), "{line}");
+        super::sweep::to_the_summary(&line);
         seed
     })
 }
@@ -80,26 +85,8 @@ fn open(bytes: &[u8]) -> Result<Document, String> {
     Document::open(bytes.to_vec(), &OpenOptions::default()).map_err(|e| format!("open: {e}"))
 }
 
-/// Whether a document is in this run's shard: `STETDOC_SHARD=i/n` takes the documents whose hash is `i` modulo `n`, so that the
-/// nightly run of the full corpora can be split over machines. Every document is when it is unset.
-pub fn in_shard(bytes: &[u8]) -> bool {
-    let Ok(shard) = std::env::var("STETDOC_SHARD") else {
-        return true;
-    };
-    let parsed = shard
-        .split_once('/')
-        .and_then(|(i, n)| Some((i.trim().parse::<u64>().ok()?, n.trim().parse::<u64>().ok()?)));
-    match parsed {
-        Some((i, n)) if n > 0 => fnv(bytes) % n == i,
-        _ => panic!("STETDOC_SHARD is `i/n`, such as 3/16, not {shard:?}"),
-    }
-}
-
 /// Runs [`batch_count`] random batches on a document, with the run's seed.
 pub fn batches(bytes: &[u8]) -> Result<(), String> {
-    if !in_shard(bytes) {
-        return Ok(());
-    }
     batches_with(bytes, seed(), batch_count())
 }
 
@@ -137,7 +124,7 @@ pub fn batches_with(bytes: &[u8], seed: u64, n: usize) -> Result<(), String> {
 }
 
 /// The Original and the Final lines of a document's body, and whether it has revisions of the author.
-type Original = (Vec<String>, Vec<String>, bool);
+type Original = (Vec<ViewLine>, Vec<ViewLine>, bool);
 
 /// A document that batches run on, with what every batch on it needs, worked out once.
 pub struct Base {
@@ -482,17 +469,11 @@ fn reversible(base: &Base, g: &Generated, applied: Applied) -> Result<(), String
     review(&mut doc, "reject")?;
     for (mode, a) in [(Mode::Original, original_lines), (Mode::Final, final_lines)] {
         let b = lines(&doc, mode)?;
-        let a = a.clone();
-        if a != b {
-            let at = a
-                .iter()
-                .zip(&b)
-                .position(|(p, q)| p != q)
-                .unwrap_or(a.len().min(b.len()));
+        if let Err(at) = restored(a, &b) {
             return Err(format!(
                 "L5: rejecting the author's revisions did not restore the {mode:?} view, first at line {at}: {:?} and then {:?}",
-                a.get(at),
-                b.get(at)
+                a.get(at).map(|l| &l.text),
+                b.get(at).map(|l| &l.text)
             ));
         }
     }
@@ -527,8 +508,8 @@ pub(super) fn without_comment_marks(line: &str) -> String {
     out.trim_end().to_string()
 }
 
-/// The block lines of the body in a mode, without refs and without comment markers.
-fn lines(doc: &Document, mode: Mode) -> Result<Vec<String>, String> {
+/// The block lines of the body in a mode, one per block, without refs and without comment markers.
+fn lines(doc: &Document, mode: Mode) -> Result<Vec<ViewLine>, String> {
     let mut spec = ViewSpec {
         scope: Scope::Story(StoryName::Body),
         mode,
@@ -538,15 +519,10 @@ fn lines(doc: &Document, mode: Mode) -> Result<Vec<String>, String> {
     let mut out = Vec::new();
     for _ in 0..10_000 {
         let page = doc.view(&spec).map_err(|e| format!("view: {e}"))?;
-        out.extend(
-            without_cell_end_stubs(&page.text)
-                .lines()
-                .filter(|l| l.split(' ').next().is_some_and(is_ref))
-                .map(|l| without_refs(&without_comment_marks(l))),
-        );
+        out.extend(block_lines(&page.text));
         match page.next {
             Some(next) => spec.after = Some(next),
-            None => return Ok(lone_empty_is_none(out)),
+            None => return Ok(view_lines::lone_empty_is_none(out)),
         }
     }
     Err("a view did not end".to_string())

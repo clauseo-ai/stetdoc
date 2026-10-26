@@ -685,7 +685,10 @@ an empty last paragraph, which is what Word shows.
 
 stetdoc writes the same shapes and chooses by position:
 
-- `split_block(P, k)` writes Y.
+- `split_block(P, k)` writes Y, except that a cut before the first character of P's `Final` text that ends no field
+  writes an empty X before P, as `insert_block(P, Before, ..)` does. A Y there would leave P's element empty with the
+  inserted mark, and rejecting the mark would remove that element (6.2) and keep the new one, losing P's attributes and
+  its ref. The X keeps P's element, attributes, text and ref, so a reject gives back the very `w:p`.
 - `insert_block(R, Before, ..)` writes X before R.
 - `insert_block(R, After, ..)` writes Y when a paragraph follows R in the same container and R's mark holds no
   revision of any kind, and **when nothing follows R in its container** (`wordml::ends_container`, which reads through
@@ -1312,8 +1315,11 @@ For each part with selected elements, over its `SpanTree` from `Tx::part_mut` (t
    that changed inside it leaves its last block as it was, so a cell that already ended with a table (LibreOffice writes
    them, `tdf153891`) gets none on accept, while a reject of a paragraph inserted after such a table gives the cell the
    paragraph W9 asks for. A story (the body, a note, a comment, a header or a footer) that an accept leaves with no block
-   keeps one empty paragraph, which takes the markers left between blocks there. A reject gives back a story whose
-   blocks were all inserted as it was (`WC063-Footnote-Mod` has an empty note).
+   keeps one empty paragraph, which takes the markers left between blocks there. A reject keeps the last paragraph of a
+   note or a comment whose blocks were all inserted, emptied, as it keeps the last paragraph of any container (3.2.1): the
+   note goes only with its reference (3.6.4), and while the reference stays it must hold a block (`check` W9). A story that a
+   reject leaves with no block, because its last block was an inserted table, gets one empty paragraph as on accept. So the
+   compare law N2 takes one emptied paragraph for the empty note of `WC063-Footnote-Mod`, an original that breaks W9.
 4. **Prune** the containers that became empty (3B).
 5. **Notes.** A note whose last reference was removed by an accepted deletion or a rejected insertion is removed
    (3.6.4).

@@ -91,11 +91,10 @@ error code at a stage (`open`, `read`, `xml`, `document`) with a reason from `co
 At `read` and `xml` it names the part too: a layer that never reads it sees `Ok`. Add a real
 document to `corpus/manifest/<source>.tsv` (SHA-256, tier, licence, outcome, stage, part, reason;
 pin the commit in `corpus/sources.tsv`) and its source to `corpus/SOURCES.md`. No document is
-committed: `cargo xtask corpus fetch` downloads them (network on the first run) and `cargo xtask
-check` runs it first. All checkouts share the cache: `STETDOC_CORPUS_DIR`, else
-`$XDG_CACHE_HOME/stetdoc/corpora`, else `~/.cache/stetdoc/corpora`. Tests read
-`sets/curated/<tier>/` and `INDEX.tsv` there (`STETDOC_CORPUS_SET` picks another set; a set never
-changes). Oracle tests (Word, LibreOffice) skip locally without the tool.
+committed: `cargo xtask corpus fetch` downloads them (network on the first run) and `cargo xtask check` runs it first. All
+checkouts share the cache: `STETDOC_CORPUS_DIR`, else `$XDG_CACHE_HOME/stetdoc/corpora`, else `~/.cache/stetdoc/corpora`.
+Tests read `sets/curated/<tier>/` and `INDEX.tsv` there (`STETDOC_CORPUS_SET` picks another set; a set never changes).
+Oracle tests (Word, LibreOffice) skip locally without the tool.
 
 ## Where the laws live
 
@@ -103,7 +102,8 @@ The laws run through `Document`: each is a function in the testkit's `laws` modu
 `crates/stetdoc-testkit/tests/laws_*.rs`. The core's own tests dev-depend on the testkit for the corpus and the fixtures,
 which compiles the core twice, so `corpus`, `expect` and `fixtures` are plain data, never a core type, and `laws` is a module
 only the testkit's tests use. The harnesses of `package`, `xml` and `state` stay in the core (they read the fetched corpus,
-see `xtask/core-io-exceptions.txt`), and so do the write-protocol tests of `document`.
+see `xtask/core-io-exceptions.txt`), and so do the write-protocol tests of `document`. The nightly `laws` run names each
+failure's document, seed and batch, and [`CONTRIBUTING.md`](CONTRIBUTING.md#the-nightly-laws-run) says how to rerun it in seconds.
 
 ## How to contribute a change
 

@@ -384,5 +384,12 @@ pub(super) fn complete(receipt: &mut Receipt, committed: &Committed) {
             .map(|(_, shown)| shown.to_string())
             .collect()
     };
+    // An operation lists only the refs the commit minted. A block it made can end up with a ref that existed, when a later
+    // operation of the batch joins an older block into it and the older block's ref moves onto it: that ref is not new, and
+    // a dry run, which sees it in the staged state, would otherwise show it as added (H14).
+    let minted: HashSet<&str> = receipt.added.iter().map(String::as_str).collect();
+    for op in &mut receipt.operations {
+        op.added.retain(|shown| minted.contains(shown.as_str()));
+    }
     receipt.text = receipt_text::compose(receipt);
 }

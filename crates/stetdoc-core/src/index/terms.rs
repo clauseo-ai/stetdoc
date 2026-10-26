@@ -196,7 +196,7 @@ fn parenthetical_terms(text: &str) -> Vec<String> {
 /// Every term the text defines, with how.
 pub(crate) fn definitions(text: &str) -> Vec<(String, DefKind)> {
     // Both kinds of definition have a quoted term, so a paragraph with no quote defines nothing.
-    if !text.contains(['"', '\u{201c}']) {
+    if !text.contains('"') && !text.contains('\u{201c}') {
         return Vec::new();
     }
     let mut out: Vec<(String, DefKind)> = paragraph_terms(text)

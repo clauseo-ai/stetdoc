@@ -7,7 +7,7 @@ use super::names::{is_w, is_word_ns};
 use super::tree_ops::{child_ids, detach, insert, move_to, next_sibling_of, parent_of, rename};
 use crate::api::error::StetError;
 use crate::wordml::{NodeId, revision_at};
-use crate::xml::SpanTree;
+use crate::xml::{NodeRef, SpanTree};
 
 /// True if the node is in the document: its ancestors reach the root element.
 pub(super) fn is_attached(tree: &SpanTree, node: NodeId) -> bool {
@@ -91,18 +91,21 @@ pub(super) fn hoist_out(tree: &mut SpanTree, el: NodeId) -> Result<Hoisted, Stet
     let parent = parent_of(tree, el)
         .ok_or_else(|| super::errors::internal("a removed element has no parent"))?;
     let mut keep: Vec<NodeId> = Vec::new();
-    let mut stack = vec![tree.node_ref(el)];
-    // Document order, so the markers keep their order: a depth-first walk with the children reversed.
+    let mut stack: Vec<NodeRef<'_>> = tree.node_ref(el).child_elements().collect();
+    stack.reverse();
+    // Document order, so the markers keep their order (a comment's start before its end): a pre-order walk, which takes a
+    // leftover whole and goes into anything else.
     while let Some(n) = stack.pop() {
-        for c in n.child_elements().collect::<Vec<_>>().into_iter().rev() {
-            if is_leftover(&c) {
-                keep.push(c.id());
-            } else {
-                stack.push(c);
+        if is_leftover(&n) {
+            keep.push(n.id());
+        } else {
+            let at = stack.len();
+            stack.extend(n.child_elements());
+            if let Some(children) = stack.get_mut(at..) {
+                children.reverse();
             }
         }
     }
-    keep.reverse();
     let swallowed: Vec<i64> = revision_ids_below(tree, el)
         .into_iter()
         .filter(|id| {

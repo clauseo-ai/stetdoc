@@ -71,17 +71,17 @@ fn mark_of(xml: &[u8], el: &El) -> Option<Mark> {
     }
 }
 
-/// The start tag of an element as written with a start and an end tag: `<w:p a="1"/>` reads as `<w:p a="1">`.
-fn start_tag<'a>(xml: &'a [u8], el: &El) -> std::borrow::Cow<'a, [u8]> {
+/// The start tag of an element as written with a start and an end tag, without white space before its `>`: `<w:p a="1"/>` and
+/// `<w:p a="1" />` read as `<w:p a="1">`, and so does the `<w:p a="1" >` that opening the second to give it children writes.
+fn start_tag(xml: &[u8], el: &El) -> Vec<u8> {
     let tag = xml.get(el.span.0..el.inner.0).unwrap_or_default();
-    match tag.strip_suffix(b"/>") {
-        Some(body) => {
-            let mut open = body.trim_ascii_end().to_vec();
-            open.push(b'>');
-            std::borrow::Cow::Owned(open)
-        }
-        None => std::borrow::Cow::Borrowed(tag),
-    }
+    let body = tag
+        .strip_suffix(b"/>")
+        .or_else(|| tag.strip_suffix(b">"))
+        .unwrap_or(tag);
+    let mut open = body.trim_ascii_end().to_vec();
+    open.push(b'>');
+    open
 }
 
 /// What `new` gained, when it is `old` with only range markers and comment reference runs added among the children of a
@@ -294,6 +294,21 @@ mod tests {
 
     fn gained(old: &[u8], new: &[u8]) -> Option<Vec<String>> {
         hoisted_into(old, new).map(|g| g.into_iter().map(|(f, id)| format!("{f} {id}")).collect())
+    }
+
+    #[test]
+    fn an_empty_paragraph_with_a_space_before_its_slash_counts_as_opened() {
+        // tdf112450_vml_polyline, seed 134: `<w:p a="1" />` is opened as `<w:p a="1" >` to hold a hoisted comment.
+        let old = br#"<w:p w:rsidR="1" />"#;
+        let mark = r#"<w:commentRangeStart w:id="1"/><w:commentRangeEnd w:id="1"/></w:p>"#;
+        let new = format!(r#"<w:p w:rsidR="1" >{mark}"#);
+        assert_eq!(
+            gained(old, new.as_bytes()),
+            Some(vec!["comment 1".into(), "comment 1".into()])
+        );
+        // Another attribute is still a change of the start tag.
+        let other = format!(r#"<w:p w:rsidR="2" >{mark}"#);
+        assert_eq!(gained(old, other.as_bytes()), None);
     }
 
     #[test]

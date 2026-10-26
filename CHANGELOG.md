@@ -256,6 +256,10 @@ released yet.
 
 ### Fixed
 
+- A tracked `merge` of two list paragraphs that each hold a legacy `w:numberingChange` is applied. Their change ids made
+  their properties look different, so the second took the first's, and the copy carried the first's numbering change and
+  its id: two tracked changes had the same id and the edit was refused with `validation_failed`. The copy now follows the
+  copy rule and leaves out every change-tracking element.
 - A tracked `set` on a table, row, cell or section whose properties already break the schema (a second `w:tblLook`) is
   applied. The copy of the old properties in the change's record carried the same problem, and the check counted it as new
   and refused the edit with `validation_failed`.

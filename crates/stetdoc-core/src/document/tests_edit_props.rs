@@ -413,3 +413,30 @@ fn a_tracked_property_change_copies_a_problem_of_the_old_properties_without_addi
         before.matches("w:tblLook").count()
     );
 }
+
+#[test]
+fn a_tracked_merge_copies_no_change_tracking_of_the_first_paragraph_onto_the_second() {
+    // Two list items, each with a legacy w:numberingChange of its own id. The ids are no difference between their properties,
+    // and when the properties do differ the second takes the first's by the copy rule, without its numbering change.
+    let item = |id: u32, spacing: &str| {
+        format!(
+            r#"<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/><w:numberingChange w:id="{id}" w:author="A" w:date="2008-12-04T16:14:00Z" w:original="1."/></w:numPr>{spacing}</w:pPr><w:r><w:t>Item {id}.</w:t></w:r></w:p>"#
+        )
+    };
+    let spaced = r#"<w:spacing w:after="120"/>"#;
+    for (second, aligned) in [("", false), (spaced, true)] {
+        let body = format!("{}{}", item(1, ""), item(2, second));
+        let bytes = Pkg::new(&body).styles(STYLES).numbering(NUMBERING).bytes();
+        let mut doc = Document::open(bytes, &OpenOptions::default()).unwrap();
+        assert!(doc.check().ok, "{:?}", doc.check());
+        run(&mut doc, r#"{"op":"merge","ref":"p1"}"#);
+        let xml = main_xml(&doc);
+        assert!(doc.check().ok, "{second}: {:?} in {xml}", doc.check());
+        assert_eq!(
+            xml.matches(r#"w:numberingChange w:id="1""#).count(),
+            1,
+            "{xml}"
+        );
+        assert_eq!(xml.contains("w:pPrChange"), aligned, "{xml}");
+    }
+}

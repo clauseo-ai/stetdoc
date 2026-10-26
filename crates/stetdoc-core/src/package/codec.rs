@@ -107,7 +107,7 @@ pub(crate) fn inflate_to_bytes(
         inflate_flags::TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF,
     );
     match status {
-        TINFLStatus::Done if written == expected => Ok(Bytes::from(out)),
+        TINFLStatus::Done if written == expected => Ok(Bytes::from_part(out)),
         TINFLStatus::Done => Err(malformed(format!(
             "part {name}: inflated to {written} bytes but the central directory says {expected}"
         ))),

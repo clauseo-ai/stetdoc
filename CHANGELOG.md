@@ -256,6 +256,9 @@ released yet.
 
 ### Fixed
 
+- A tracked `set` on a table, row, cell or section whose properties already break the schema (a second `w:tblLook`) is
+  applied. The copy of the old properties in the change's record carried the same problem, and the check counted it as new
+  and refused the edit with `validation_failed`.
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

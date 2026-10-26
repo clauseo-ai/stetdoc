@@ -263,6 +263,9 @@ fn runs(range: std::ops::Range<usize>, skip: &HashSet<usize>) -> Vec<Vec<usize>>
 }
 
 /// The entries for the unpaired blocks of one gap: the deletions first and then the insertions, as Word writes a replacement.
+/// In the gap that ends the container, the deletions go after the last inserted table, before the paragraphs that end the
+/// container: the end mark that `settle_end_marks` gives the paragraph before those must not reach across the table, which
+/// rejecting removes and a join does not cross (design `compare.md` 6.2, `revisions.md` finding 28).
 #[expect(
     clippy::too_many_arguments,
     reason = "one gap of one list, with what it needs to name its nodes"
@@ -275,6 +278,7 @@ fn gap_entries(
     id_b: &dyn Fn(usize) -> Option<NodeId>,
     last_b: usize,
     paired_para: &dyn Fn(usize) -> bool,
+    table_b: &dyn Fn(usize) -> bool,
     groups: &[&Group],
     out: &mut Vec<Entry>,
     lost: &mut usize,
@@ -300,7 +304,13 @@ fn gap_entries(
             .min();
         let lo = after_b.map_or(g.b.start, |m| (m + 1).max(g.b.start));
         let hi = before_b.map_or(g.b.end, |m| m.min(g.b.end));
-        let free = (lo..hi).find(|i| !skip_b.contains(i));
+        let after_table = g
+            .next_b
+            .is_none()
+            .then(|| (lo..hi).rev().find(|&i| table_b(i)))
+            .flatten()
+            .and_then(|t| (t + 1..hi).find(|i| !skip_b.contains(i)));
+        let free = after_table.or_else(|| (lo..hi).find(|i| !skip_b.contains(i)));
         // before the first free revised block of the gap, else before the next pair, else after the previous pair
         let (anchor, before, trailing) = if let Some(i) = free {
             (id_b(i), true, None)
@@ -386,6 +396,7 @@ fn plan_container(
             &id_b,
             cb.blocks.len().saturating_sub(1),
             &paired_para,
+            &|i| matches!(cb.blocks.get(i).map(|n| &n.body), Some(Body::Table(_))),
             &groups,
             &mut entries,
             lost,
@@ -468,6 +479,7 @@ fn plan_rows(
             id_a,
             id_b,
             usize::MAX,
+            &|_| false,
             &|_| false,
             &[],
             out,

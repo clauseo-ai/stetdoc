@@ -6,7 +6,7 @@
 //! touched block, or the markup between blocks next to it, had, or a comment the old body did not have (one the batch made);
 //! and markup between blocks may move only from beside a touched block.
 
-use super::blocks::{children, contains, is_marker, span, El};
+use super::blocks::{El, children, contains, is_marker, span};
 use std::collections::BTreeSet;
 
 /// A marker or a comment reference, by the family whose ids it shares and its id.
@@ -524,11 +524,13 @@ mod tests {
             r#"<w:sdt><w:sdtPr><w:tag w:val="other"/></w:sdtPr><w:sdtContent>{}</w:sdtContent></w:sdt>"#,
             with("5", own)
         );
-        assert!(compare(
-            &old,
-            &format!("{A}{other}{C}"),
-            &[false, false, true, false]
-        )
-        .is_err());
+        assert!(
+            compare(
+                &old,
+                &format!("{A}{other}{C}"),
+                &[false, false, true, false]
+            )
+            .is_err()
+        );
     }
 }

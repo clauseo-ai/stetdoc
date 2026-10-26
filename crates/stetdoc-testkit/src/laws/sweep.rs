@@ -14,7 +14,7 @@
 //! - **Streaming.** Each failure is printed the moment it is found, and progress every few minutes (`STETDOC_PROGRESS_SECS`, 180
 //!   by default): documents done of the total, the time, the failures so far.
 //! - **Time.** Each document's time is kept, and the slowest 20 are printed at the end. A watchdog names a document still running
-//!   after `STETDOC_WATCH_SECS` (60 by default), and a document over `STETDOC_LIMIT_SECS` (300 by default) is a failure of the
+//!   after `STETDOC_WATCH_SECS` (120 by default), and a document over `STETDOC_LIMIT_SECS` (600 by default) is a failure of the
 //!   sweep: a performance bug. Rust cannot stop a running thread, so the watchdog names a runaway in the log before a timeout
 //!   kills the job.
 //! - **Deadline.** After `STETDOC_DEADLINE` (Unix seconds) no worker takes a new document; the sweep reports what it found and
@@ -231,11 +231,13 @@ pub const ENV_LIMIT: &str = "STETDOC_LIMIT_SECS";
 /// Seconds between two progress lines.
 pub const ENV_PROGRESS: &str = "STETDOC_PROGRESS_SECS";
 
-/// The watchdog's default: the nightly measurement put 99.9% of documents under 15 s of 50 random batches on a 4-core runner,
-/// so a document at 60 s is worth a line in the log.
-pub const WATCH: Duration = Duration::from_secs(60);
-/// The hard limit's default: five times the watchdog, and well over the slowest document the nightly measured.
-pub const LIMIT: Duration = Duration::from_secs(300);
+/// The watchdog's default. The slowest documents of the full corpora take about a minute of 50 random batches on a runner of
+/// ubuntu-latest (measured in October 2026: about 20 seconds of an Apple M-series core, which does about three times the work of a
+/// runner's vCPU), so a document still running after two minutes is worth a line in the log.
+pub const WATCH: Duration = Duration::from_secs(120);
+/// The hard limit's default: ten times the slowest documents measured, so that no document of the corpora comes near it on a
+/// runner or on a busy laptop, and one that passes it has a performance bug (twelve seconds a batch).
+pub const LIMIT: Duration = Duration::from_secs(600);
 /// The default time between two progress lines.
 pub const PROGRESS: Duration = Duration::from_secs(180);
 

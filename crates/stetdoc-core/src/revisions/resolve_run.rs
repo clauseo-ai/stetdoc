@@ -32,10 +32,28 @@ impl Engine<'_, '_> {
         let Ok(story) = view.story(id) else {
             return Ok(Vec::new());
         };
-        let ranges = super::moves::ranges_of(&story, view.tree(id)?, &wrappers);
+        let tree = view.tree(id)?;
+        let ranges = super::moves::ranges_of(&story, tree, &wrappers);
         let mut out: Vec<NodeId> = Vec::new();
         for m in ranges.values() {
             for n in std::iter::once(m.start).chain(m.end) {
+                if !out.contains(&n) {
+                    out.push(n);
+                }
+            }
+        }
+        // Resolution is by move (design 3.5): the ranges of the other side, which share the name, go as well, even when
+        // no wrapper is left in them (an earlier step emptied the source, and its markers would dangle).
+        let names: Vec<&str> = ranges
+            .values()
+            .map(|m| m.name.as_str())
+            .filter(|n| !n.is_empty())
+            .collect();
+        for a in story.anchors(tree).moves {
+            if !names.contains(&a.name.as_str()) {
+                continue;
+            }
+            for n in a.start.iter().chain(a.end.iter()).map(|l| l.node) {
                 if !out.contains(&n) {
                     out.push(n);
                 }

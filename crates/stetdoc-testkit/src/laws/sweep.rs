@@ -66,6 +66,8 @@ pub struct Swept {
     pub skipped: Vec<String>,
     /// The sentences of the law's failures, with the id of the document, sorted.
     pub failures: Vec<String>,
+    /// Whether `STETDOC_ONLY` chose the documents, so that the sweep is a rerun of a few and not a run of the set.
+    pub only: bool,
 }
 
 impl Swept {
@@ -101,7 +103,11 @@ impl Swept {
     /// `Ok` when the law held for every document, enough documents were checked, and the skips are few.
     pub fn verdict(&self, at_least: usize) -> Result<(), String> {
         let mut problems = Vec::new();
-        if self.checked < at_least {
+        if self.only && self.checked == 0 {
+            problems.push(format!(
+                "{ENV_ONLY} names no document of the set that opens"
+            ));
+        } else if !self.only && self.checked < at_least {
             problems.push(format!(
                 "only {} documents were checked, {at_least} expected",
                 self.checked
@@ -129,7 +135,24 @@ impl Swept {
     }
 }
 
-/// Runs `law` over the documents of the corpus set that must open. `None` when `STETDOC_CORPUS_DIR` is not set.
+/// Picks the documents of a sweep: a comma-separated list of pieces of document ids (`<source>:<path in the source>`). When it is
+/// set, a sweep runs only the documents whose id holds one of the pieces, so that a failure that a nightly run found runs again in
+/// seconds with the seed it printed.
+pub const ENV_ONLY: &str = "STETDOC_ONLY";
+
+/// The pieces of `STETDOC_ONLY`, or `None` when it is unset or empty.
+fn only() -> Option<Vec<String>> {
+    let pieces: Vec<String> = std::env::var(ENV_ONLY)
+        .ok()?
+        .split(',')
+        .map(|p| p.trim().to_string())
+        .filter(|p| !p.is_empty())
+        .collect();
+    (!pieces.is_empty()).then_some(pieces)
+}
+
+/// Runs `law` over the documents of the corpus set that must open, or those of them that `STETDOC_ONLY` names. `None` when
+/// `STETDOC_CORPUS_DIR` is not set.
 pub fn over_the_corpus(
     law: impl Fn(&[u8]) -> Result<(), String> + Sync,
 ) -> Option<Result<Swept, String>> {
@@ -137,7 +160,14 @@ pub fn over_the_corpus(
         Ok(corpus) => corpus,
         Err(e) => return Some(Err(e)),
     };
-    let entries: Vec<_> = corpus.expected_ok().collect();
+    let only = only();
+    let entries: Vec<_> = corpus
+        .expected_ok()
+        .filter(|e| {
+            only.as_ref()
+                .is_none_or(|pieces| pieces.iter().any(|p| e.id.contains(p.as_str())))
+        })
+        .collect();
     let skipped = Mutex::new(Vec::new());
     let checked = Mutex::new(Vec::new());
     let failures = in_parallel(&entries, |entry| {
@@ -166,6 +196,7 @@ pub fn over_the_corpus(
         checked_ids,
         skipped,
         failures,
+        only: only.is_some(),
     }))
 }
 
@@ -179,6 +210,7 @@ mod tests {
             checked_ids: vec!["a:one.docx".into(), "b:two.docx".into()],
             skipped: Vec::new(),
             failures: failures.iter().map(|f| (*f).to_string()).collect(),
+            only: false,
         }
     }
 
@@ -231,5 +263,14 @@ mod tests {
         found.skipped.clear();
         found.failures = vec!["b:two.docx: broke".into()];
         assert!(found.verdict(2).unwrap_err().contains("1 failures"));
+    }
+
+    #[test]
+    fn a_rerun_of_a_few_documents_needs_no_minimum_but_must_check_one() {
+        let mut found = swept(&[]);
+        found.only = true;
+        assert!(found.verdict(200).is_ok());
+        found.checked = 0;
+        assert!(found.verdict(200).unwrap_err().contains(ENV_ONLY));
     }
 }

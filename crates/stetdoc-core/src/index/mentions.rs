@@ -172,22 +172,56 @@ fn clean(word: &str) -> (&str, bool) {
 /// Whether a word may be a noun, as the first test of the search: the word without what opens and closes a
 /// phrase. It is true of every word that `clean` and `Noun::of` call a noun, and of a few more.
 fn may_be_noun(word: &str) -> bool {
-    Noun::of(
-        word.trim_start_matches(['(', '"', '\u{201c}'])
-            .trim_end_matches([',', ';', ':', '.', ')']),
-    )
-    .is_some()
+    let word = word.trim_start_matches(['(', '"', '\u{201c}']);
+    // Every noun starts with one of these letters, or is a section sign (`0xC2 0xA7`): most words are
+    // turned away by their first byte.
+    let first = word.as_bytes().first().map(u8::to_ascii_lowercase);
+    if !matches!(first, Some(b'a' | b'c' | b'e' | b'p' | b'r' | b's' | 0xC2)) {
+        return false;
+    }
+    Noun::of(word.trim_end_matches([',', ';', ':', '.', ')'])).is_some()
+}
+
+/// The words of a text, split at white space as `str::split_whitespace` splits it. Text that is ASCII and has
+/// no vertical tab, which almost all text is, is split by its bytes, where `u8::is_ascii_whitespace` is the
+/// same test as `char::is_whitespace`.
+enum Words<'a> {
+    Ascii(std::str::SplitAsciiWhitespace<'a>),
+    Any(std::str::SplitWhitespace<'a>),
+}
+
+impl<'a> Words<'a> {
+    fn of(text: &'a str) -> Words<'a> {
+        if text.is_ascii() && !text.as_bytes().contains(&0x0B) {
+            Words::Ascii(text.split_ascii_whitespace())
+        } else {
+            Words::Any(text.split_whitespace())
+        }
+    }
+}
+
+impl<'a> Iterator for Words<'a> {
+    type Item = &'a str;
+
+    fn next(&mut self) -> Option<&'a str> {
+        match self {
+            Words::Ascii(it) => it.next(),
+            Words::Any(it) => it.next(),
+        }
+    }
 }
 
 /// Every mention in a text, in order.
 pub(crate) fn find(text: &str) -> Vec<Raw> {
     // Most paragraphs have no noun at all, and they are not worth a vector of their words.
-    if !text.split_whitespace().any(may_be_noun) {
+    let Some(first) = Words::of(text).position(may_be_noun) else {
         return Vec::new();
-    }
-    let words: Vec<&str> = text.split_whitespace().collect();
+    };
+    // A word and the space after it are rarely fewer than four bytes, so the vector is not grown.
+    let mut words: Vec<&str> = Vec::with_capacity(text.len() / 4 + 1);
+    words.extend(Words::of(text));
     let mut out = Vec::new();
-    let mut i = 0usize;
+    let mut i = first;
     while let Some(word) = words.get(i) {
         if !may_be_noun(word) {
             i += 1;

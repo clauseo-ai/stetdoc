@@ -283,9 +283,10 @@ impl PartsView<'_> {
                 let rels = self.rels(part)?;
                 facts.counts.sections =
                     u32::try_from(story.sections(tree, &rels).len()).unwrap_or(u32::MAX);
-                let (gone_final, gone_original) = refs_gone(&story, tree);
+                let refs = note_refs(tree);
+                let (gone_final, gone_original) = refs_gone(&story, tree, &refs);
                 let mut all = NoteNumbers::default();
-                for (kind, id, node) in note_refs(tree) {
+                for &(kind, id, node) in &refs {
                     all.count(kind, id);
                     if !gone_final.contains(&node) {
                         facts.final_numbers.count(kind, id);
@@ -343,9 +344,13 @@ impl PartsView<'_> {
 
 /// The note references of a story that are gone in `Final` (in a pending deletion) and in `Original` (in a pending
 /// insertion), by node. A reference the text model does not read (in a text box) is in neither.
+///
+/// Only the paragraphs that hold one of `refs` (the story's references, from `note_refs`) have their text model
+/// built: a paragraph's model reads only what is inside it, so no other paragraph can show a reference.
 fn refs_gone(
     story: &crate::wordml::Story,
     tree: &SpanTree,
+    refs: &[(NoteKind, i64, NodeId)],
 ) -> (
     std::collections::HashSet<NodeId>,
     std::collections::HashSet<NodeId>,
@@ -354,8 +359,27 @@ fn refs_gone(
         std::collections::HashSet::new(),
         std::collections::HashSet::new(),
     );
+    if refs.is_empty() {
+        return gone;
+    }
+    let paragraphs: std::collections::HashSet<NodeId> = story
+        .blocks()
+        .iter()
+        .filter(|e| e.kind == crate::wordml::BlockKind::Paragraph)
+        .map(|e| e.node)
+        .collect();
+    let mut holding = std::collections::HashSet::new();
+    for &(_, _, node) in refs {
+        let mut at = tree.node_ref(node).parent();
+        while let Some(n) = at {
+            if paragraphs.contains(&n.id()) {
+                holding.insert(n.id());
+            }
+            at = n.parent();
+        }
+    }
     for entry in story.blocks() {
-        if entry.kind != crate::wordml::BlockKind::Paragraph {
+        if entry.kind != crate::wordml::BlockKind::Paragraph || !holding.contains(&entry.node) {
             continue;
         }
         let Some(p) = Paragraph::new(tree, entry.node) else {

@@ -273,7 +273,8 @@ released yet.
 - A table of contents, or another field whose result spans paragraphs, no longer collapses in a view when that hides
   something the view shows. In `Redline` a tracked change on the mark of the paragraph where the field ends keeps it open,
   so a tracked split there is shown. In `Final` that paragraph joins the next one when its mark is deleted, so the field
-  stays open when the next paragraph has text, and takes in an empty one, as it does once the deletion is accepted.
+  stays open when the next paragraph has text, and takes in an empty one, as it does once the deletion is accepted. A paragraph that joins the one where the field
+  begins is read the same way.
 
 - A split before a paragraph's text (`at: 0`, or `before` its first word) keeps the paragraph's ref, element and
   attributes on the text and adds the new empty paragraph, with the new ref, before it. Rejecting the split gives back the

@@ -11,9 +11,15 @@ use stetdoc_testkit::fixtures::{parts, zip::Zip};
 
 /// A table of contents over p1 to p4, where p4 holds the field's end and then `tail`, followed by `next` and "After".
 fn toc(tail: &str, next: &str) -> Document {
+    toc_after("", tail, next)
+}
+
+/// `toc`, after the body XML `lead`.
+fn toc_after(lead: &str, tail: &str, next: &str) -> Document {
     let run = |t: &str| format!(r#"<w:r><w:t xml:space="preserve">{t}</w:t></w:r>"#);
     let para = |inner: String| format!("<w:p>{inner}</w:p>");
     let body = [
+        lead.to_string(),
         para(format!(
             r#"<w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TOC \o "1-3" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r>{}"#,
             run("Heading one\t1")
@@ -114,4 +120,24 @@ fn a_tracked_split_after_the_end_of_a_table_of_contents_shows_its_new_mark_in_re
     let b = batch(&doc, r#"{"op":"split","ref":"p4","before":"Tail"}"#);
     doc.edit(Edit::ops(b, stamp()).untracked()).unwrap();
     assert!(shown(&doc, Mode::Redline).contains("{opaque toc"));
+}
+
+#[test]
+fn deleting_a_paragraph_before_a_table_of_contents_shows_in_final_what_accepting_leaves() {
+    // The paragraph holds text and a field with an empty result (a TA entry), and its mark joins it to the paragraph where the
+    // table begins. In Final only the empty field is left, which is no text, so the field takes it in, as it does once the
+    // deletion is accepted (Complex 3.docx, seed 107).
+    let lead = r#"<w:p><w:r><w:t>Quote</w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TA \l "Quote" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>"#;
+    let mut doc = toc_after(lead, "", "Heading");
+    assert_eq!(final_lines(&doc), ["Quote", "toc", "Heading", "After"]);
+    run(&mut doc, r#"{"op":"delete","ref":"p1"}"#);
+    let intended = final_lines(&doc);
+    assert_eq!(
+        intended,
+        ["toc", "Heading", "After"],
+        "{}",
+        shown(&doc, Mode::Final)
+    );
+    accept(&mut doc);
+    assert_eq!(final_lines(&doc), intended, "{}", shown(&doc, Mode::Final));
 }

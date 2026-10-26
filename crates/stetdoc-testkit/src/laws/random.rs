@@ -46,11 +46,12 @@ pub fn seed() -> u64 {
                     .map_or(0, |d| d.as_nanos() as u64);
                 fnv(&now.to_le_bytes())
             });
-        // Written to the process's stderr, past the test harness's capture, so that every run shows its seed.
-        let _ = writeln!(
-            std::io::stderr(),
-            "random edit batches: seed {seed} (STETDOC_SEED={seed} runs the same batches)"
-        );
+        // Written to the process's stderr, past the test harness's capture, so that every run shows its seed, and to the run
+        // page's summary on GitHub Actions.
+        let line =
+            format!("random edit batches: seed {seed} (STETDOC_SEED={seed} runs the same batches)");
+        let _ = writeln!(std::io::stderr(), "{line}");
+        super::sweep::to_the_summary(&line);
         seed
     })
 }
@@ -80,26 +81,8 @@ fn open(bytes: &[u8]) -> Result<Document, String> {
     Document::open(bytes.to_vec(), &OpenOptions::default()).map_err(|e| format!("open: {e}"))
 }
 
-/// Whether a document is in this run's shard: `STETDOC_SHARD=i/n` takes the documents whose hash is `i` modulo `n`, so that the
-/// nightly run of the full corpora can be split over machines. Every document is when it is unset.
-pub fn in_shard(bytes: &[u8]) -> bool {
-    let Ok(shard) = std::env::var("STETDOC_SHARD") else {
-        return true;
-    };
-    let parsed = shard
-        .split_once('/')
-        .and_then(|(i, n)| Some((i.trim().parse::<u64>().ok()?, n.trim().parse::<u64>().ok()?)));
-    match parsed {
-        Some((i, n)) if n > 0 => fnv(bytes) % n == i,
-        _ => panic!("STETDOC_SHARD is `i/n`, such as 3/16, not {shard:?}"),
-    }
-}
-
 /// Runs [`batch_count`] random batches on a document, with the run's seed.
 pub fn batches(bytes: &[u8]) -> Result<(), String> {
-    if !in_shard(bytes) {
-        return Ok(());
-    }
     batches_with(bytes, seed(), batch_count())
 }
 
@@ -527,7 +510,7 @@ pub(super) fn without_comment_marks(line: &str) -> String {
     out.trim_end().to_string()
 }
 
-/// The block lines of the body in a mode, without refs and without comment markers.
+/// The block lines of the body in a mode, one per block, without refs and without comment markers.
 fn lines(doc: &Document, mode: Mode) -> Result<Vec<String>, String> {
     let mut spec = ViewSpec {
         scope: Scope::Story(StoryName::Body),
@@ -538,18 +521,44 @@ fn lines(doc: &Document, mode: Mode) -> Result<Vec<String>, String> {
     let mut out = Vec::new();
     for _ in 0..10_000 {
         let page = doc.view(&spec).map_err(|e| format!("view: {e}"))?;
-        out.extend(
-            without_cell_end_stubs(&page.text)
-                .lines()
-                .filter(|l| l.split(' ').next().is_some_and(is_ref))
-                .map(|l| without_refs(&without_comment_marks(l))),
-        );
+        out.extend(block_lines(&page.text));
         match page.next {
             Some(next) => spec.after = Some(next),
             None => return Ok(lone_empty_is_none(out)),
         }
     }
     Err("a view did not end".to_string())
+}
+
+/// The block lines of a page of the view, without refs and without comment markers. A long block is one logical line that the
+/// view writes as several physical ones (a continuation ends in an odd number of backslashes, design 5.3), and where it breaks
+/// depends on the length of the block's ref, so the continuations are joined before the refs are taken out: two views that differ
+/// only in a ref compare equal.
+fn block_lines(page: &str) -> Vec<String> {
+    without_cell_end_stubs(&joined(page))
+        .lines()
+        .filter(|l| l.split(' ').next().is_some_and(is_ref))
+        .map(|l| without_refs(&without_comment_marks(l)))
+        .collect()
+}
+
+/// A text with its continuations joined: a physical line that ends in an odd number of backslashes loses the last one and runs
+/// on into the next line.
+fn joined(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut runs_on = false;
+    for (i, line) in text.split('\n').enumerate() {
+        if i > 0 && !runs_on {
+            out.push('\n');
+        }
+        runs_on = line.chars().rev().take_while(|c| *c == '\\').count() % 2 == 1;
+        out.push_str(if runs_on {
+            line.get(..line.len() - 1).unwrap_or_default()
+        } else {
+            line
+        });
+    }
+    out
 }
 
 /// A story whose only paragraph is empty has no lines: a story is never left with no paragraph, so removing everything in it
@@ -573,4 +582,61 @@ fn review(doc: &mut Document, action: &str) -> Result<(), String> {
     doc.edit(Edit::ops(b, stamp("Clauseo")))
         .map(|_| ())
         .map_err(|e| format!("L5: {action}: {e}"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A line written as the view writes it: broken after the last space from column 1,000 to 1,498, else at 1,498, each piece but the last
+    /// ending in a backslash.
+    fn wrapped(line: &str) -> String {
+        let chars: Vec<char> = line.chars().collect();
+        let mut out = String::new();
+        let mut start = 0;
+        while chars.len() - start > 1498 {
+            let window = &chars[start..start + 1498];
+            let at = window[1000..]
+                .iter()
+                .rposition(|c| *c == ' ')
+                .map_or(1498, |i| 1000 + i + 1);
+            out.extend(&window[..at]);
+            out.push_str("\\\n");
+            start += at;
+        }
+        out.extend(&chars[start..]);
+        out
+    }
+
+    #[test]
+    fn a_long_block_under_refs_of_two_lengths_gives_the_same_lines() {
+        // Words, and then a long run without a space, where the view breaks at column 1,498 whatever the ref.
+        let words: String = (0..100).map(|i| format!("word{i} ")).collect();
+        let text = format!("{words}{}", "abcdefghij".repeat(300));
+        assert!(text.chars().count() > 1498 * 2);
+        let page = |r: &str| {
+            format!(
+                "p1 Before.\n{}\np2 After.\n",
+                wrapped(&format!("{r} {text}"))
+            )
+        };
+        let (short, long) = (page("p86"), page("p301"));
+        // The view breaks the two in different places, so the physical lines differ beyond their refs.
+        assert_ne!(
+            short.lines().nth(1).map(without_refs),
+            long.lines().nth(1).map(without_refs)
+        );
+        let lines = block_lines(&short);
+        let text = text.as_str();
+        assert_eq!(lines, block_lines(&long));
+        assert_eq!(lines.len(), 3, "{lines:?}");
+        assert_eq!(lines[1], format!("# {text}"));
+    }
+
+    #[test]
+    fn an_even_run_of_backslashes_ends_a_line_and_an_odd_one_continues_it() {
+        assert_eq!(joined("p1 a\\\\\np2 b"), "p1 a\\\\\np2 b");
+        assert_eq!(joined("p1 a\\\nb\np2 c\n"), "p1 ab\np2 c\n");
+        assert_eq!(joined("p1 a\\\\\\\nb"), "p1 a\\\\b");
+    }
 }

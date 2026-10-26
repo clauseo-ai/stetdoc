@@ -4,7 +4,7 @@
 
 use super::files::{final_lines, one, plain, replaced};
 use super::generate::{Rng, fnv};
-use super::random::{file_edit_count, in_shard, seed};
+use super::random::{file_edit_count, seed};
 use stetdoc_core::{Document, OpenOptions, Receipt};
 
 fn open(bytes: &[u8]) -> Result<Document, String> {
@@ -13,9 +13,6 @@ fn open(bytes: &[u8]) -> Result<Document, String> {
 
 /// Runs [`file_edit_count`] random edits of files on a document, with the run's seed.
 pub fn file_edits(bytes: &[u8]) -> Result<(), String> {
-    if !in_shard(bytes) {
-        return Ok(());
-    }
     file_edits_with(bytes, seed(), file_edit_count())
 }
 

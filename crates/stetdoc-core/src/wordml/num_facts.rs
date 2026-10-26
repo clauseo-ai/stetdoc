@@ -126,6 +126,7 @@ impl Story {
     /// One fact for every paragraph of the story, in entry order. One pass, no field pass.
     pub fn num_facts(&self, tree: &SpanTree) -> Vec<NumFact> {
         let mut out = Vec::new();
+        let mut known = None;
         for (entry, e) in self.entries.iter().enumerate() {
             if e.kind != BlockKind::Paragraph {
                 continue;
@@ -152,7 +153,7 @@ impl Story {
                     .as_ref()
                     .is_some_and(|ppr| w_child(ppr, "sectPr").is_some())
                     && !has_text(&p),
-                join_applies: self.joins_with_next(tree, entry),
+                join_applies: self.joins_with_next_in_order(tree, entry, &mut known),
             });
         }
         out

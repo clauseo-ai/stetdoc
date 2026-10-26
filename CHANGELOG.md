@@ -256,6 +256,13 @@ released yet.
 
 ### Fixed
 
+- An accept that leaves a range marker between blocks (the paragraph that held only a move's range start goes) no longer
+  fails with `validation_failed` when the marker already had a problem, such as a `w:moveFromRangeStart` without its
+  `w:date`: `check` gives the body the problems of the paragraph the marker came from, as it does for any other unit.
+- Accepting the deletion of a table keeps a comment's range start before its end when the markers stand at different
+  depths (the end inside another author's insertion). The end came first, and `check` refused the accept.
+- Accepting or rejecting a move removes a deletion that held nothing but the move's range marker, instead of leaving an empty
+  `w:del` that the compiler refused as `internal` and `check` as a new violation.
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

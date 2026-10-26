@@ -256,6 +256,9 @@ released yet.
 
 ### Fixed
 
+- `compare` places the deleted blocks at the end of a story after the last inserted table, before the paragraphs that end the
+  story, so that rejecting everything restores the original's last paragraph. Placed before the table, the paragraph that took
+  the inserted end mark could not join across the table that rejecting removes, and an empty paragraph was left (`DB010`).
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

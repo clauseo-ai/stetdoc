@@ -416,3 +416,33 @@ fn a_footer_that_an_accept_takes_out_of_the_document_is_never_an_internal_error(
         );
     }
 }
+
+#[test]
+fn a_deleted_paragraph_is_one_change_with_the_pieces_that_have_no_width() {
+    // Another author deleted the paragraph: its mark, a field's begin and code in one w:del, an empty run left outside, and the
+    // field's result and end in another. The first w:del holds nothing with width, and it is still a piece of the paragraph's
+    // deletion: rejecting the change by the id of the second gives the whole field back, not its result without its begin.
+    let del = |id: u32| format!(r#"w:id="{id}" w:author="Reviewer" w:date="2026-10-01T09:00:00Z""#);
+    let body = format!(
+        r#"<w:p><w:pPr><w:rPr><w:del {}/></w:rPr></w:pPr><w:del {}><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:delInstrText xml:space="preserve"> FORMTEXT </w:delInstrText></w:r></w:del><w:r/><w:del {}><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:delText>Name</w:delText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:r><w:delText xml:space="preserve"> here.</w:delText></w:r></w:del></w:p><w:p><w:r><w:t>Next.</w:t></w:r></w:p>"#,
+        del(3),
+        del(1),
+        del(2)
+    );
+    let mut doc = Document::open(
+        crate::threads::tests_support::Pkg::new(&body).bytes(),
+        &OpenOptions::default(),
+    )
+    .unwrap();
+    assert!(doc.check().ok, "{:?}", doc.check());
+    let changes = doc.revisions(&RevisionFilter::default()).unwrap();
+    assert_eq!(changes.len(), 1, "{changes:?}");
+    assert_eq!(changes[0].kind, ChangeKind::ParagraphDeleted);
+    let mut ids = changes[0].ids.clone();
+    ids.sort_unstable();
+    assert_eq!(ids, [1, 2, 3]);
+    run(&mut doc, r#"{"op":"reject","ids":[2]}"#);
+    assert_eq!(pending(&doc), 0);
+    assert!(doc.check().ok, "{:?}", doc.check());
+    assert_eq!(final_text(&doc, "p1"), "Name here.");
+}

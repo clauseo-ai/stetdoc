@@ -256,6 +256,9 @@ released yet.
 
 ### Fixed
 
+- A deleted paragraph is one `ParagraphDeleted` change with every piece of its deletion, a piece that holds nothing with
+  width (a field's `begin` and code) included. Such a piece was a change of its own, so rejecting the paragraph's deletion
+  gave back a field's result without its `begin`, and the edit was refused with `validation_failed`.
 - A tracked `merge` of two list paragraphs that each hold a legacy `w:numberingChange` is applied. Their change ids made
   their properties look different, so the second took the first's, and the copy carried the first's numbering change and
   its id: two tracked changes had the same id and the edit was refused with `validation_failed`. The copy now follows the

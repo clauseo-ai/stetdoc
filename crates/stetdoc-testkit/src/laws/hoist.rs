@@ -1,11 +1,12 @@
 //! The one change L2 by block allows a block the batch does not touch (`laws::blocks`): the paragraph before or after a block
 //! the batch touches may gain the range markers and comment reference runs that a removal hoists into it. A comment survives
 //! the removal of its text (comments-and-notes.md item 7, revisions.md 3.6.5), so its range markers and its reference run
-//! move to the paragraph next to it, and so do bookmarks, permission ranges and move ranges. Each mark gained must be one a
+//! move to the paragraph next to it, and so do bookmarks, permission ranges and move ranges. When the neighbour is a table,
+//! that paragraph is its first or its last. Each mark gained must be one a
 //! touched block, or the markup between blocks next to it, had, or a comment the old body did not have (one the batch made);
 //! and markup between blocks may move only from beside a touched block.
 
-use super::blocks::{El, children, contains, is_marker, span};
+use super::blocks::{children, contains, is_marker, span, El};
 use std::collections::BTreeSet;
 
 /// A marker or a comment reference, by the family whose ids it shares and its id.
@@ -114,6 +115,26 @@ fn gained_in(old: &[u8], o: &El, new: &[u8], n: &El) -> Option<Vec<Mark>> {
                 }
             }
             next.peek().is_none().then_some(gained)
+        }
+        // A table is looked through to the paragraph next to the removal: its first or its last (revisions.md 3.6.5 puts the
+        // markers into the neighbouring paragraph, which is in a cell when the neighbour is a table). Only one child may
+        // differ, and it is the first or the last of its kind (the first or last row, cell or paragraph).
+        "tbl" | "tr" | "tc" if old_kids.len() == new_kids.len() => {
+            let differ: Vec<usize> = (0..old_kids.len())
+                .filter(|&k| {
+                    old_kids.get(k).map(|e| span(old, e)) != new_kids.get(k).map(|e| span(new, e))
+                })
+                .collect();
+            let [k] = differ.as_slice() else {
+                return None;
+            };
+            let (ok, nk) = (old_kids.get(*k)?, new_kids.get(*k)?);
+            let kind: Vec<usize> = (0..old_kids.len())
+                .filter(|&j| old_kids.get(j).is_some_and(|e| e.name == ok.name))
+                .collect();
+            let edge = kind.first() == Some(k) || kind.last() == Some(k);
+            let inner = matches!(ok.name.as_str(), "tr" | "tc" | "p");
+            (edge && inner).then(|| gained_in(old, ok, new, nk))?
         }
         "sdt" | "sdtContent" | "customXml" if old_kids.len() == new_kids.len() => {
             for (ok, nk) in old_kids.iter().zip(&new_kids) {
@@ -341,6 +362,26 @@ mod tests {
     }
 
     #[test]
+    fn a_table_next_to_a_removal_is_looked_through_to_its_first_or_last_paragraph() {
+        // floattable-anchorpos.docx, seed 10998282968869546347: removing a table hoists its comment into the first paragraph of
+        // the table after it.
+        let tbl = |a: &str, b: &str| {
+            format!(
+                r#"<w:tbl><w:tblPr/><w:tr><w:tc><w:p>{a}<w:r><w:t>A</w:t></w:r></w:p></w:tc></w:tr><w:tr><w:tc><w:p>{b}<w:r><w:t>B</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"#
+            )
+        };
+        let mark = r#"<w:commentRangeStart w:id="2"/><w:commentRangeEnd w:id="2"/>"#;
+        let old = tbl("", "");
+        let comments = Some(vec!["comment 2".to_string(), "comment 2".to_string()]);
+        assert_eq!(gained(old.as_bytes(), tbl(mark, "").as_bytes()), comments);
+        assert_eq!(gained(old.as_bytes(), tbl("", mark).as_bytes()), comments);
+        // Text that changed, or marks in two rows, is not a hoist.
+        let text = old.replacen(">A<", ">X<", 1);
+        assert_eq!(gained(old.as_bytes(), text.as_bytes()), None);
+        assert_eq!(gained(old.as_bytes(), tbl(mark, mark).as_bytes()), None);
+    }
+
+    #[test]
     fn a_neighbour_whose_text_or_properties_changed_is_not() {
         let old = br#"<w:p><w:r><w:t>Kept.</w:t></w:r></w:p>"#;
         let changed = br#"<w:p><w:commentRangeEnd w:id="2"/><w:r><w:t>Changed.</w:t></w:r></w:p>"#;
@@ -483,13 +524,11 @@ mod tests {
             r#"<w:sdt><w:sdtPr><w:tag w:val="other"/></w:sdtPr><w:sdtContent>{}</w:sdtContent></w:sdt>"#,
             with("5", own)
         );
-        assert!(
-            compare(
-                &old,
-                &format!("{A}{other}{C}"),
-                &[false, false, true, false]
-            )
-            .is_err()
-        );
+        assert!(compare(
+            &old,
+            &format!("{A}{other}{C}"),
+            &[false, false, true, false]
+        )
+        .is_err());
     }
 }

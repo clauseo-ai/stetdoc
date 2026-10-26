@@ -1,6 +1,7 @@
 //! L2 Locality by block, for the random batches of `laws::random`: a top-level block of the body that the batch does not name,
 //! and that no merge, split or insert touches, keeps its XML byte for byte. One change is allowed, to the paragraph before or
-//! after a block the batch touches: it may gain the range markers and comment reference runs that a removal hoists into it,
+//! after a block the batch touches (in a table there, its first or last paragraph): it may gain the range markers and comment
+//! reference runs that a removal hoists into it,
 //! when each one's id is that of a marker or a reference that a touched block (or the markup between blocks next to it) had,
 //! or of a comment that the old body did not have at all, one the batch made. Markup between blocks next to a touched block
 //! may move into such a paragraph.
@@ -438,6 +439,53 @@ mod tests {
         let e = per_block(&bytes, &changed, &facts, &g).unwrap_err();
         assert!(
             e.starts_with("L2: p4, which the batch does not name"),
+            "{e}"
+        );
+    }
+
+    #[test]
+    fn a_table_after_a_removed_table_may_gain_its_comment_in_its_first_paragraph() {
+        // floattable-anchorpos.docx, seed 10998282968869546347: removing t1 hoists its comment into p2, in t2.
+        let table = |t: &str| {
+            format!(
+                r#"<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr><w:p><w:r><w:t>{t}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"#
+            )
+        };
+        let body = format!(
+            "{}{}<w:p><w:r><w:t>D</w:t></w:r></w:p>",
+            table("C"),
+            table("A")
+        );
+        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+        let facts =
+            Facts::of(&Document::open(bytes.clone(), &OpenOptions::default()).unwrap()).unwrap();
+        assert_eq!(facts.top, ["t1", "t2", "p3"]);
+        let comment = r#"{"op":"comment","ref":"p1","start":0,"end":0,"text":"Note"}"#;
+        let g = generated(
+            &[
+                ("comment", comment),
+                ("delete", r#"{"op":"delete","ref":"t1"}"#),
+            ],
+            false,
+        );
+        let after = edited(&bytes, &g.json());
+        let xml = part(&after, "word/document.xml").unwrap();
+        assert!(
+            String::from_utf8_lossy(&xml).contains("commentReference"),
+            "the comment is gone"
+        );
+        per_block(&bytes, &after, &facts, &g).unwrap();
+        // The table's text changing is still caught.
+        let changed = edited(
+            &bytes,
+            &format!(
+                r#"{},{{"op":"replace","ref":"p2","find":"A","with":"B"}}"#,
+                g.json()
+            ),
+        );
+        let e = per_block(&bytes, &changed, &facts, &g).unwrap_err();
+        assert!(
+            e.starts_with("L2: t2, which the batch does not name"),
             "{e}"
         );
     }

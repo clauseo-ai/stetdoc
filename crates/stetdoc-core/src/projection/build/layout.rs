@@ -137,10 +137,13 @@ fn collapse_fields(story: &Story, tree: &SpanTree, tops: Vec<Top>, mode: Mode) -
         {
             continue;
         }
-        let Some(te) = joined_end(story, tree, &tops, (tb, te), mode) else {
+        let (Some(tb), Some(te)) = (
+            joined_start(story, tree, &tops, (tb, at), mode),
+            joined_end(story, tree, &tops, (tb, te), mode),
+        ) else {
             continue;
         };
-        let Some(last) = tops.get(te) else {
+        let (Some(first), Some(last)) = (tops.get(tb), tops.get(te)) else {
             continue;
         };
         out.extend(tops.get(at..tb).unwrap_or_default().iter().cloned());
@@ -192,26 +195,46 @@ fn field_is_alone(
             .unwrap_or(true),
         None => true,
     };
-    !text_before_begin && !text_after_end && !joined_text_before(story, tree, begin, mode)
+    !text_before_begin && !text_after_end
 }
 
-/// True if, in `mode`, a paragraph before entry `begin` loses its mark and so joins the paragraph where the field begins, and
-/// shows text: that text is then before the field in the paragraph the view and an accept make.
-fn joined_text_before(story: &Story, tree: &SpanTree, begin: usize, mode: Mode) -> bool {
-    let mut k = begin;
-    while let Some(prev) = k.checked_sub(1) {
-        if story.join_run(tree, prev, mode).end <= k {
-            return false;
-        }
-        if story
-            .paragraph(tree, prev)
-            .is_none_or(|p| !super::scan::shows_nothing(&p.map(), mode))
+/// True if paragraph `i` shows text in `mode`: an item with width that the mode shows. A field with an empty result is
+/// no text, as `field_is_alone` counts it, so the paragraphs a field takes in are judged as the paragraph an accept makes.
+fn shows_text(story: &Story, tree: &SpanTree, i: usize, mode: Mode) -> bool {
+    story.paragraph(tree, i).is_none_or(|p| {
+        p.map()
+            .items()
+            .iter()
+            .any(|item| item.len > 0 && item.vis.in_mode(mode))
+    })
+}
+
+/// The index of the first top a collapsed field covers, from the top where it begins `tb` in `mode`, or `None` when the
+/// field cannot collapse. A paragraph before it whose mark is gone in `mode` joins the paragraph where the field begins: one
+/// that shows text keeps the field open, and one that shows none is in the field's tops, as it is in the paragraph an accept
+/// leaves. A top that an earlier field took (before `at`) is not taken again.
+fn joined_start(
+    story: &Story,
+    tree: &SpanTree,
+    tops: &[Top],
+    (tb, at): (usize, usize),
+    mode: Mode,
+) -> Option<usize> {
+    let mut first = tb;
+    while let Some(prev) = first.checked_sub(1) {
+        let (top, begin) = (tops.get(prev)?, tops.get(first)?.first);
+        if top.collapse.is_some()
+            || top.end != begin
+            || story.join_run(tree, top.first, mode).end <= begin
         {
-            return true;
+            return Some(first);
         }
-        k = prev;
+        if prev < at || top.unit != tops.get(tb)?.unit || shows_text(story, tree, top.first, mode) {
+            return None;
+        }
+        first = prev;
     }
-    false
+    Some(first)
 }
 
 /// The index of the last top a collapsed field covers, from its first and last tops `(tb, te)` in `mode`, or `None` when the
@@ -234,11 +257,7 @@ fn joined_end(
     if run.end <= end + 1 {
         return Some(te);
     }
-    let joined_show_nothing = (end + 1..run.end).all(|k| {
-        story
-            .paragraph(tree, k)
-            .is_some_and(|p| super::scan::shows_nothing(&p.map(), mode))
-    });
+    let joined_show_nothing = (end + 1..run.end).all(|k| !shows_text(story, tree, k, mode));
     let last = tops
         .binary_search_by_key(&(run.end - 1), |t| t.first)
         .ok()?;

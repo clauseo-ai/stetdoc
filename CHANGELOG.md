@@ -256,6 +256,10 @@ released yet.
 
 ### Fixed
 
+- A split before a paragraph's text (`at: 0`, or `before` its first word) keeps the paragraph's ref, element and
+  attributes on the text and adds the new empty paragraph, with the new ref, before it. Rejecting the split gives back the
+  very paragraph under its old ref; before, the text came back under the new ref and lost the paragraph's `w14:paraId`
+  and rsids.
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

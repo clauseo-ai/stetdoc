@@ -416,3 +416,45 @@ fn a_footer_that_an_accept_takes_out_of_the_document_is_never_an_internal_error(
         );
     }
 }
+
+#[test]
+fn a_split_before_the_text_keeps_the_ref_on_the_text_and_a_reject_gives_back_the_very_paragraph() {
+    // A split at offset 0 used to leave the original element empty, with the inserted mark, and move the text to a new one.
+    // Rejecting removed the empty element, so the text came back under the new ref and without the paragraph's attributes.
+    let body = "<w:p w14:paraId=\"1A2B3C4D\" w:rsidR=\"00AB12CD\"><w:pPr><w:jc w:val=\"both\"/></w:pPr><w:r><w:t>Alpha beta gamma.</w:t></w:r></w:p><w:p><w:r><w:t>Second one.</w:t></w:r></w:p>";
+    let xml = stetdoc_testkit::fixtures::parts::Doc::new()
+        .root_attrs(" xmlns:w14=\"http://schemas.microsoft.com/office/word/2010/wordml\"")
+        .body(body)
+        .bytes();
+    let bytes = stetdoc_testkit::fixtures::zip::Zip::new(
+        stetdoc_testkit::fixtures::parts::entries_doc(&xml),
+    )
+    .build();
+    let main_xml = |doc: &Document| {
+        let view = doc.state.parts();
+        let id = view.id("word/document.xml").unwrap();
+        String::from_utf8(view.tree(id).unwrap().serialize()).unwrap()
+    };
+    for how in [r#""at":0"#, r#""before":"Alpha""#] {
+        let mut doc = Document::open(bytes.clone(), &OpenOptions::default()).unwrap();
+        let before = main_xml(&doc);
+        let receipt = run(&mut doc, &format!(r#"{{"op":"split","ref":"p1",{how}}}"#));
+        assert_eq!(receipt.added, ["p3"], "{how}: {}", receipt.text);
+        assert_eq!(final_text(&doc, "p1"), "Alpha beta gamma.", "{how}");
+        assert_eq!(final_text(&doc, "p3"), "", "{how}");
+        let after = main_xml(&doc);
+        assert!(
+            after.find("w:ins ").unwrap() < after.find("1A2B3C4D").unwrap(),
+            "{how}: the new paragraph stands before the text: {after}"
+        );
+        let receipt = run(&mut doc, r#"{"op":"reject","all":true}"#);
+        assert_eq!(pending(&doc), 0, "{how}");
+        assert_eq!(main_xml(&doc), before, "{how}: {}", receipt.text);
+        assert_eq!(final_text(&doc, "p1"), "Alpha beta gamma.", "{how}");
+        assert!(
+            receipt.retired.iter().any(|r| r.r#ref == "p3"),
+            "{how}: {:?}",
+            receipt.retired
+        );
+    }
+}

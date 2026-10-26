@@ -685,7 +685,10 @@ an empty last paragraph, which is what Word shows.
 
 stetdoc writes the same shapes and chooses by position:
 
-- `split_block(P, k)` writes Y.
+- `split_block(P, k)` writes Y, except that a cut before the first character of P's `Final` text that ends no field
+  writes an empty X before P, as `insert_block(P, Before, ..)` does. A Y there would leave P's element empty with the
+  inserted mark, and rejecting the mark would remove that element (6.2) and keep the new one, losing P's attributes and
+  its ref. The X keeps P's element, attributes, text and ref, so a reject gives back the very `w:p`.
 - `insert_block(R, Before, ..)` writes X before R.
 - `insert_block(R, After, ..)` writes Y when a paragraph follows R in the same container and R's mark holds no
   revision of any kind, and **when nothing follows R in its container** (`wordml::ends_container`, which reads through

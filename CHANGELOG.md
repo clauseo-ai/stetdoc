@@ -266,6 +266,11 @@ released yet.
   depths (the end inside another author's insertion). The end came first, and `check` refused the accept.
 - Accepting or rejecting a move removes a deletion that held nothing but the move's range marker, instead of leaving an empty
   `w:del` that the compiler refused as `internal` and `check` as a new violation.
+- A table of contents, or another field whose result spans paragraphs, no longer collapses in a view when that hides
+  something the view shows. In `Redline` a tracked change on the mark of the paragraph where the field ends keeps it open,
+  so a tracked split there is shown. In `Final` that paragraph joins the next one when its mark is deleted, so the field
+  stays open when the next paragraph has text, and takes in an empty one, as it does once the deletion is accepted.
+
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

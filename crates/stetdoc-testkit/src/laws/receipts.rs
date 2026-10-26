@@ -254,6 +254,73 @@ fn shown_refs(facts: &super::facts::Facts) -> std::collections::BTreeSet<String>
     paras.chain(tables).collect()
 }
 
+/// The refs inside the collapsed fields of the views (`{opaque toc p2..p9 4 paragraphs}`), which are live but not shown as
+/// paragraphs. The block names only its first and last ref, and the refs between them are not in sequence (a split mints a
+/// new number), so they are read from a `Range` view of first..last, which shows every paragraph of the field (design
+/// projection-and-index.md 4.2, `Range`).
+fn collapsed_refs(doc: &stetdoc_core::Document) -> Result<Vec<String>, String> {
+    use serde_json::Value;
+    use stetdoc_core::{Budget, FormatId, Mode, Scope, StoryName, ViewSpec};
+    fn walk<'v>(v: &'v Value, key: &str, out: &mut Vec<&'v Value>) {
+        match v {
+            Value::Object(m) => {
+                if let Some(found) = m.get(key) {
+                    out.push(found);
+                }
+                m.values().for_each(|x| walk(x, key, out));
+            }
+            Value::Array(a) => a.iter().for_each(|x| walk(x, key, out)),
+            _ => {}
+        }
+    }
+    let pages = |scope: Scope| -> Result<Vec<Value>, String> {
+        let mut spec = ViewSpec {
+            scope,
+            mode: Mode::Redline,
+            budget: Budget(u32::MAX),
+            format: FormatId::new(FormatId::JSON),
+            ..ViewSpec::default()
+        };
+        let mut out = Vec::new();
+        for _ in 0..10_000 {
+            let page = doc.view(&spec).map_err(|e| format!("view: {e}"))?;
+            out.push(serde_json::from_str(&page.text).map_err(|e| format!("json/1: {e}"))?);
+            match page.next {
+                Some(next) => spec.after = Some(next),
+                None => return Ok(out),
+            }
+        }
+        Err("a view did not end".to_string())
+    };
+    let mut refs = Vec::new();
+    for story in [StoryName::Body, StoryName::Notes, StoryName::Headers] {
+        let Ok(story_pages) = pages(Scope::Story(story)) else {
+            continue;
+        };
+        let mut collapsed = Vec::new();
+        story_pages
+            .iter()
+            .for_each(|p| walk(p, "collapsed", &mut collapsed));
+        for c in collapsed {
+            let end = |k: &str| c.get(k).and_then(Value::as_str).map(str::to_string);
+            let (Some(from), to) = (end("first"), end("last")) else {
+                continue;
+            };
+            let range = pages(Scope::Range { from, to })?;
+            let mut found = Vec::new();
+            for page in &range {
+                walk(page, "paragraph", &mut found);
+            }
+            refs.extend(
+                found
+                    .into_iter()
+                    .filter_map(|p| p.get("ref").and_then(Value::as_str).map(str::to_string)),
+            );
+        }
+    }
+    Ok(refs)
+}
+
 /// H3, for refs: every ref that the document had before the batch and lacks after it went stale, and is in the receipt's
 /// `retired`, whatever retired it (a deletion, a rejection, a merge that absorbed its block); and no ref in `retired` is still
 /// in the document. `before` is what the views said before the batch.
@@ -262,10 +329,11 @@ pub fn stale_refs_are_retired(
     doc: &stetdoc_core::Document,
     receipt: &Receipt,
 ) -> Result<(), String> {
-    let (was, is) = (
+    let (was, mut is) = (
         shown_refs(before),
         shown_refs(&super::facts::Facts::of(doc)?),
     );
+    is.extend(collapsed_refs(doc)?);
     let retired: std::collections::BTreeSet<&str> =
         receipt.retired.iter().map(|r| r.r#ref.as_str()).collect();
     let unsaid: Vec<&String> = was
@@ -291,6 +359,44 @@ mod tests {
     use crate::fixtures::parts::{Doc, entries_doc};
     use crate::fixtures::zip::Zip;
     use crate::laws::edits::{input_codes, run_batch};
+
+    #[test]
+    fn a_ref_inside_a_field_that_an_edit_collapsed_is_not_stale() {
+        // word-generated-list-of-figures-table-cell.docx, seed 4506652605846074927: an untracked split before "Tail" leaves the
+        // paragraphs of the table of contents its own, so the view collapses them, and their refs stay live.
+        let run = |t: &str| format!(r#"<w:r><w:t xml:space="preserve">{t}</w:t></w:r>"#);
+        let body = format!(
+            r#"<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TOC </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r>{}</w:p><w:p>{}</w:p><w:p>{}</w:p><w:p><w:r><w:fldChar w:fldCharType="end"/></w:r>{}</w:p><w:p>{}</w:p><w:p>{}</w:p>"#,
+            run("One\t1"),
+            run("Two\t1"),
+            run("Three\t2"),
+            run("Tail"),
+            run("After"),
+            run("End")
+        );
+        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+        let doc = stetdoc_core::Document::open(bytes.clone(), &Default::default()).unwrap();
+        let before = crate::laws::facts::Facts::of(&doc).unwrap();
+        let input = input_codes(&bytes).unwrap_or_default();
+        let split = r#"{"op":"split","ref":"p4","before":"Tail"}"#;
+        let Ok(Ok(applied)) = run_batch(&bytes, &input, split, false) else {
+            panic!("the split failed")
+        };
+        assert!(applied.receipt.retired.is_empty());
+        assert_eq!(
+            super::collapsed_refs(&applied.doc).unwrap(),
+            ["p1", "p2", "p3", "p4"]
+        );
+        super::stale_refs_are_retired(&before, &applied.doc, &applied.receipt).unwrap();
+        // A ref that really went stale is still one: delete After, and leave it out of the receipt.
+        let Ok(Ok(mut applied)) = run_batch(&bytes, &input, r#"{"op":"delete","ref":"p5"}"#, false)
+        else {
+            panic!("the deletion failed")
+        };
+        applied.receipt.retired.clear();
+        let e = super::stale_refs_are_retired(&before, &applied.doc, &applied.receipt).unwrap_err();
+        assert!(e.contains("\"p5\""), "{e}");
+    }
 
     #[test]
     fn an_arrow_to_a_new_block_is_left_out_and_one_to_an_old_block_stays() {

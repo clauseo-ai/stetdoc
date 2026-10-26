@@ -137,6 +137,12 @@ fn collapse_fields(story: &Story, tree: &SpanTree, tops: Vec<Top>, mode: Mode) -
         {
             continue;
         }
+        let Some(te) = joined_end(story, tree, &tops, (tb, te), mode) else {
+            continue;
+        };
+        let Some(last) = tops.get(te) else {
+            continue;
+        };
         out.extend(tops.get(at..tb).unwrap_or_default().iter().cloned());
         out.push(Top {
             first: first.first,
@@ -186,5 +192,56 @@ fn field_is_alone(
             .unwrap_or(true),
         None => true,
     };
-    !text_before_begin && !text_after_end
+    !text_before_begin && !text_after_end && !joined_text_before(story, tree, begin, mode)
+}
+
+/// True if, in `mode`, a paragraph before entry `begin` loses its mark and so joins the paragraph where the field begins, and
+/// shows text: that text is then before the field in the paragraph the view and an accept make.
+fn joined_text_before(story: &Story, tree: &SpanTree, begin: usize, mode: Mode) -> bool {
+    let mut k = begin;
+    while let Some(prev) = k.checked_sub(1) {
+        if story.join_run(tree, prev, mode).end <= k {
+            return false;
+        }
+        if story
+            .paragraph(tree, prev)
+            .is_none_or(|p| !super::scan::shows_nothing(&p.map(), mode))
+        {
+            return true;
+        }
+        k = prev;
+    }
+    false
+}
+
+/// The index of the last top a collapsed field covers, from its first and last tops `(tb, te)` in `mode`, or `None` when the
+/// field cannot collapse. The paragraph where the field ends ends the field's tops unless its mark is gone in `mode`: then it
+/// joins the paragraphs after it, which must show nothing, and the last of them is in the field's tops, as it is in the
+/// paragraph an accept leaves. In `Redline` a revision on that mark is shown, so the field stays open.
+fn joined_end(
+    story: &Story,
+    tree: &SpanTree,
+    tops: &[Top],
+    (tb, te): (usize, usize),
+    mode: Mode,
+) -> Option<usize> {
+    let end = tops.get(te)?.first;
+    let p = story.paragraph(tree, end)?;
+    if mode == Mode::Redline && !p.mark_revs().is_none() {
+        return None;
+    }
+    let run = story.join_run(tree, end, mode);
+    if run.end <= end + 1 {
+        return Some(te);
+    }
+    let joined_show_nothing = (end + 1..run.end).all(|k| {
+        story
+            .paragraph(tree, k)
+            .is_some_and(|p| super::scan::shows_nothing(&p.map(), mode))
+    });
+    let last = tops
+        .binary_search_by_key(&(run.end - 1), |t| t.first)
+        .ok()?;
+    let same_unit = tops.get(tb)?.unit == tops.get(last)?.unit;
+    (joined_show_nothing && same_unit).then_some(last)
 }

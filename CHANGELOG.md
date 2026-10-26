@@ -256,6 +256,10 @@ released yet.
 
 ### Fixed
 
+- Resolving a move removes the range markers of both its sides, as the design says (resolution is by move), also when an
+  earlier rejection had emptied one side. The emptied side's markers stayed under the move's name, and `check` refused the
+  edit for a move with a source and no destination (`Tika-792.docx`).
+
 - Rejecting a paragraph inserted after an empty last paragraph no longer fails with `validation_failed` when the original
   paragraph had a problem in its attributes, such as a Word 2007 beta `paraId`: the paragraph that stays takes the original's
   attributes back, and the reject now declares that it came from the original, so `check` carries the problem.

@@ -51,3 +51,39 @@ fn rejecting_a_paragraph_inserted_at_the_end_gives_back_an_attribute_the_schema_
     // The paragraph that stays is the empty one the original had, under the ref of the inserted paragraph.
     assert_eq!(final_text(&doc, "p3"), "");
 }
+
+#[test]
+fn a_move_whose_source_a_rejection_emptied_is_resolved_with_both_ranges() {
+    // The moved-from text is an insertion inside the `w:moveFrom`: rejecting it empties the source, whose wrapper goes and
+    // whose range markers stay. Accepting the move then resolves it whole (design `revisions.md`, 3.5), and the source's
+    // markers go with the destination's instead of standing alone under the move's name.
+    let doc = stetdoc_testkit::fixtures::parts::Doc::new()
+        .body(concat!(
+            r#"<w:p><w:r><w:t>Kept</w:t></w:r><w:moveToRangeStart w:id="2" w:author="A" w:date="2020-01-01T00:00:00Z" w:name="move1"/>"#,
+            r#"<w:moveTo w:id="3" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t>moved</w:t></w:r></w:moveTo></w:p>"#,
+            r#"<w:p><w:moveFromRangeStart w:id="5" w:author="A" w:date="2020-01-01T00:00:00Z" w:name="move1"/><w:moveToRangeEnd w:id="2"/>"#,
+            r#"<w:moveFrom w:id="6" w:author="A" w:date="2020-01-01T00:00:00Z"><w:ins w:id="7" w:author="A" w:date="2020-01-01T00:00:00Z"><w:r><w:t>b</w:t></w:r></w:ins></w:moveFrom>"#,
+            r#"<w:moveFromRangeEnd w:id="5"/><w:r><w:t>Tail</w:t></w:r></w:p>"#,
+        ))
+        .bytes();
+    let bytes = stetdoc_testkit::fixtures::zip::Zip::new(
+        stetdoc_testkit::fixtures::parts::entries_doc(&doc),
+    )
+    .build();
+    let mut doc = Document::open(bytes, &OpenOptions::default()).unwrap();
+    let before = violations(&doc);
+    let b = batch(
+        &doc,
+        r#"{"op":"reject","ids":[7]},{"op":"accept","all":true}"#,
+    );
+    doc.edit(crate::api::edit::Edit::ops(b, stamp()).untracked())
+        .unwrap();
+    assert_eq!(violations(&doc), before);
+    assert_eq!(final_text(&doc, "p1"), "Keptmoved");
+    assert!(
+        doc.revisions(&RevisionFilter::default())
+            .unwrap()
+            .is_empty(),
+        "nothing is pending"
+    );
+}

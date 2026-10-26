@@ -18,12 +18,10 @@
 //! | `StyleDefs` | the styles part | 0 |
 //! | `NumberingDefs` | the numbering part | 0 |
 //! | `Cascade` | the styles, theme and settings parts | 0 |
-//! | `Vec<NumFact>` | the story part | 0 |
 //! | `StoryNumbers` | the story part, the numbering part and the styles part | the mode |
 //!
 //! A story's numbers do not depend on the theme or the settings: the numbers read from the cascade only
-//! what the styles part says. The facts numbering reads about a story's paragraphs are the same in every mode,
-//! so they are read once and shared by the numbers of every mode. The sites that `sites.rs` builds are not cached.
+//! what the styles part says. The sites that `sites.rs` builds are not cached.
 
 use super::derived::Dep;
 use super::parts::PartId;
@@ -33,7 +31,7 @@ use crate::api::error::StetError;
 use crate::api::view::Mode;
 use crate::numbering::StoryNumbers;
 use crate::styles::Cascade;
-use crate::wordml::{NumFact, NumberingDefs, StyleDefs};
+use crate::wordml::{NumberingDefs, StyleDefs};
 use std::sync::Arc;
 
 /// The start of every relationship type that the parts we read are named by, in the Transitional
@@ -181,7 +179,7 @@ impl<'a> PartsView<'a> {
         let build = |_: Option<&StoryNumbers>| -> Result<StoryNumbers, StetError> {
             let story = self.story(parts.story)?;
             let tree = self.tree(parts.story)?;
-            let facts = self.num_facts(parts.story)?;
+            let facts = story.num_facts(tree);
             // The field pass is the story's own, run once and kept with it.
             let list_num = story.fields(tree).iter().any(|f| &*f.keyword == "LISTNUM");
             let numbers =
@@ -189,15 +187,6 @@ impl<'a> PartsView<'a> {
             Ok(numbers.with_list_num_fields(list_num))
         };
         self.derived(variant(mode), &parts.deps(), &build)
-    }
-
-    /// What numbering reads about each paragraph of a story, the same in every mode: read once for the numbers of
-    /// all of them, and kept until the story part changes.
-    fn num_facts(&self, story_part: PartId) -> Result<Arc<Vec<NumFact>>, StetError> {
-        let build = |_: Option<&Vec<NumFact>>| -> Result<Vec<NumFact>, StetError> {
-            Ok(self.story(story_part)?.num_facts(self.tree(story_part)?))
-        };
-        self.derived(0, &deps_of(&[Some(story_part)]), &build)
     }
 
     /// The sites of one story in one mode, for the questions the cascade answers. `site` is the same for

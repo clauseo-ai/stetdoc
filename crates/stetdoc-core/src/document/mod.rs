@@ -178,6 +178,8 @@ mod tests_edit_ops;
 #[cfg(test)]
 mod tests_edit_props;
 #[cfg(test)]
+mod tests_edit_reject;
+#[cfg(test)]
 mod tests_edit_review;
 #[cfg(test)]
 mod tests_edit_toc;

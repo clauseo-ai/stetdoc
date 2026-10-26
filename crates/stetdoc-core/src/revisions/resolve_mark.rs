@@ -158,7 +158,12 @@ impl Engine<'_, '_> {
         };
         let second = BlockKey::new(part.clone(), next);
         match join(self.tx, &part, para, next, why)? {
-            Joined::FirstRemoved => self.retire_removed(&key)?,
+            Joined::FirstRemoved => {
+                if why == Why::SecondRejected {
+                    self.inherited.push((key.clone(), second.clone()));
+                }
+                self.retire_removed(&key)?;
+            }
             Joined::Merged => {
                 self.joined.push((key.clone(), second.clone()));
                 if why == Why::SecondRejected {

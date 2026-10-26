@@ -52,6 +52,9 @@ pub(crate) struct Resolution {
     pub removed: Vec<Removed>,
     /// Pairs of paragraphs that were joined: the first, which survives, and the second.
     pub joined: Vec<(BlockKey, BlockKey)>,
+    /// Pairs of paragraphs where the second survives and took over what the first, which left the tree, still had: its
+    /// attributes and its empty runs, as the rejection of a Y paragraph's new half gives them back (design 6.2).
+    pub inherited: Vec<(BlockKey, BlockKey)>,
     /// The notes that were removed because the step took out their last reference (3.6.4).
     pub notes: Vec<super::notes::RemovedNote>,
     /// Things worth telling that are not errors.
@@ -60,15 +63,23 @@ pub(crate) struct Resolution {
 
 impl Resolution {
     /// The origins of the step, which `document` converts into `check`'s `Declared`: a paragraph that a join
-    /// made the later one's content part of came from both.
+    /// made the later one's content part of came from both, and so did one that took over the attributes of the first.
     pub(crate) fn origins(&self) -> Vec<super::outcome::Origin> {
-        self.joined
+        let joined = self
+            .joined
             .iter()
             .map(|(first, second)| super::outcome::Origin {
                 block: first.clone(),
                 from: vec![first.clone(), second.clone()],
-            })
-            .collect()
+            });
+        let inherited = self
+            .inherited
+            .iter()
+            .map(|(first, second)| super::outcome::Origin {
+                block: second.clone(),
+                from: vec![second.clone(), first.clone()],
+            });
+        joined.chain(inherited).collect()
     }
 }
 
@@ -80,6 +91,7 @@ pub(super) struct Engine<'t, 's> {
     pub swallowed: Vec<i64>,
     pub removed: Vec<Removed>,
     pub joined: Vec<(BlockKey, BlockKey)>,
+    pub inherited: Vec<(BlockKey, BlockKey)>,
     pub warnings: Vec<String>,
     /// Nodes whose container changed: pruned afterwards, and their blocks touched.
     pub dirty: Vec<NodeId>,
@@ -191,6 +203,7 @@ pub(crate) fn resolve(
             swallowed: Vec::new(),
             removed: Vec::new(),
             joined: Vec::new(),
+            inherited: Vec::new(),
             notes: Vec::new(),
             warnings: Vec::new(),
         };
@@ -224,6 +237,7 @@ pub(crate) fn resolve(
                 swallowed: Vec::new(),
                 removed: Vec::new(),
                 joined: Vec::new(),
+                inherited: Vec::new(),
                 warnings: Vec::new(),
                 dirty: Vec::new(),
                 joins: Vec::new(),
@@ -235,6 +249,7 @@ pub(crate) fn resolve(
             res.swallowed.extend(engine.swallowed);
             res.removed.extend(engine.removed);
             res.joined.extend(engine.joined);
+            res.inherited.extend(engine.inherited);
             res.warnings.extend(engine.warnings);
         }
         if let Some(before) = &named_before {

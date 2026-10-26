@@ -256,6 +256,10 @@ released yet.
 
 ### Fixed
 
+- Rejecting a paragraph inserted after an empty last paragraph no longer fails with `validation_failed` when the original
+  paragraph had a problem in its attributes, such as a Word 2007 beta `paraId`: the paragraph that stays takes the original's
+  attributes back, and the reject now declares that it came from the original, so `check` carries the problem.
+
 - An operation's `added` in a receipt lists only refs the edit minted. When a block a split made was then joined into an
   older block by an `accept` or `reject` of the same batch, the joined block keeps the older ref, and the split listed that
   ref as added, in a dry run too, which must issue none (H14).

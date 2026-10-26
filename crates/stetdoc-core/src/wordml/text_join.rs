@@ -142,6 +142,31 @@ impl Story {
             && container_of(&tree.node_ref(here.node)) == container_of(&tree.node_ref(next.node))
     }
 
+    /// `joins_with_next`, for a caller that asks it of every entry in order: `known` keeps the container of the
+    /// last paragraph looked at, which is the next one's own, so each container is found once.
+    pub(super) fn joins_with_next_in_order(
+        &self,
+        tree: &SpanTree,
+        i: usize,
+        known: &mut Option<(NodeId, Option<NodeId>)>,
+    ) -> bool {
+        let paragraph = |k: usize| {
+            self.entries
+                .get(k)
+                .filter(|e| e.kind == BlockKind::Paragraph)
+        };
+        let (Some(here), Some(next)) = (paragraph(i), paragraph(i + 1)) else {
+            return false;
+        };
+        let here_container = match *known {
+            Some((node, container)) if node == here.node => container,
+            _ => container_of(&tree.node_ref(here.node)),
+        };
+        let next_container = container_of(&tree.node_ref(next.node));
+        *known = Some((next.node, next_container));
+        here.unit == next.unit && here_container == next_container
+    }
+
     /// The paragraphs [`Story::join_run`] finds from entry `i`, with their text joined: the range of
     /// entries and the [`Joined`] over their maps. `None` if entry `i` is not a paragraph, or if `tree`
     /// was edited since the story was scanned ([`Story::is_current`]).

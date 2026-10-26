@@ -63,6 +63,13 @@ pub(super) struct Builder<'t> {
 /// first new field gets.
 pub(super) fn build(p: &NodeRef<'_>, carry: &[OpenField], base_id: u32) -> TextMap {
     let mut b = Builder::new(carry, base_id);
+    // Room for what the paragraph's markup suggests, so that the text and the items are rarely grown: a
+    // paragraph's text is about a third of its bytes or less, and an item takes about fifty bytes of them.
+    if let Some((start, end)) = p.source_span() {
+        let bytes = end.saturating_sub(start);
+        b.text.reserve(bytes / 3);
+        b.items.reserve(bytes / 48 + 1);
+    }
     let info = b.seed(p);
     b.stack.push(Frame {
         it: p.children(),
@@ -190,6 +197,24 @@ impl<'t> Builder<'t> {
         flags: u8,
     ) {
         let width = u32::try_from(text.chars().count()).unwrap_or(u32::MAX);
+        self.item_of_width(kind, node, info, text, width, from, flags);
+    }
+
+    /// `item`, for a caller that has counted the characters of `text` already: `width` is their number.
+    #[expect(
+        clippy::too_many_arguments,
+        reason = "the arguments of `item` and the width it would count"
+    )]
+    pub fn item_of_width(
+        &mut self,
+        kind: ItemKind,
+        node: NodeId,
+        info: Info,
+        text: &str,
+        width: u32,
+        from: u32,
+        flags: u8,
+    ) {
         if width > 0 && self.state.in_code() {
             if kind == ItemKind::Text {
                 self.anomaly(AnomalyKind::TextInFieldCode, node);

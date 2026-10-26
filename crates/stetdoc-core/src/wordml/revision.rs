@@ -147,31 +147,40 @@ fn in_snapshot(n: &NodeRef<'_>) -> bool {
 /// and for one inside the old properties of a property change. The branch is `Outside`:
 /// [`Story::revisions`] works it out.
 pub fn revision_at(n: &NodeRef<'_>) -> Option<Revision> {
-    if !n.is_element() || !is_word_ns(n.namespace()) {
+    if !n.is_element() {
         return None;
     }
-    let parent = n.parent();
-    let under = |name: &str| {
-        parent
-            .as_ref()
-            .is_some_and(|p| p.local_name() == name && is_word_ns(p.namespace()))
+    // The name first, which turns most elements away, and the namespace only of the few it names.
+    let name = n.local_name();
+    let plain = match name {
+        "ins" | "del" | "moveFrom" | "moveTo" => None,
+        _ => Some(plain_kind(name)?),
     };
-    let in_mark = under("rPr")
-        && n.parent()
-            .and_then(|p| p.parent())
-            .is_some_and(|g| g.local_name() == "pPr" && is_word_ns(g.namespace()));
-    let kind = match n.local_name() {
-        "ins" if under("numPr") => RevKind::NumPrIns,
-        "ins" if under("trPr") => RevKind::RowIns,
-        "del" if under("trPr") => RevKind::RowDel,
-        "ins" if in_mark => RevKind::MarkIns,
-        "del" if in_mark => RevKind::MarkDel,
-        "moveFrom" if in_mark => RevKind::MarkMoveFrom,
-        "moveTo" if in_mark => RevKind::MarkMoveTo,
-        "ins" => RevKind::Ins,
-        "del" => RevKind::Del,
-        "moveFrom" => RevKind::MoveFrom,
-        "moveTo" => RevKind::MoveTo,
+    if !is_word_ns(n.namespace()) {
+        return None;
+    }
+    let kind = match plain {
+        Some(kind) => kind,
+        None => mark_kind(n, name)?,
+    };
+    if in_snapshot(n) {
+        return None;
+    }
+    let text = |name: &str| w_attr(n, name).map(|v| v.into_owned());
+    Some(Revision {
+        kind,
+        node: n.id(),
+        id: w_attr(n, "id").and_then(|v| int(&v)),
+        author: text("author"),
+        date: text("date"),
+        date_utc: attr_in(n, &[W16DU], "dateUtc").map(|v| v.into_owned()),
+        branch: Branch::Outside,
+    })
+}
+
+/// The kind of a revision element whose name alone decides it, or `None` for a name that is no revision.
+fn plain_kind(name: &str) -> Option<RevKind> {
+    Some(match name {
         "rPrChange" => RevKind::RunProps,
         "pPrChange" => RevKind::ParagraphProps,
         "sectPrChange" => RevKind::SectionProps,
@@ -193,19 +202,36 @@ pub fn revision_at(n: &NodeRef<'_>) -> Option<Revision> {
         "customXmlMoveToRangeStart" => RevKind::CustomXmlMoveToStart,
         "customXmlMoveToRangeEnd" => RevKind::CustomXmlMoveToEnd,
         _ => return None,
+    })
+}
+
+/// The kind of an `ins`, `del`, `moveFrom` or `moveTo` element, which its parent decides: a numbering or a
+/// row change, a change of a paragraph mark (in `w:pPr/w:rPr`), or a change of content. The parent is read only for
+/// these four names, which few elements have.
+fn mark_kind(n: &NodeRef<'_>, name: &str) -> Option<RevKind> {
+    let parent = n.parent();
+    let under = |name: &str| {
+        parent
+            .as_ref()
+            .is_some_and(|p| p.local_name() == name && is_word_ns(p.namespace()))
     };
-    if in_snapshot(n) {
-        return None;
-    }
-    let text = |name: &str| w_attr(n, name).map(|v| v.into_owned());
-    Some(Revision {
-        kind,
-        node: n.id(),
-        id: w_attr(n, "id").and_then(|v| int(&v)),
-        author: text("author"),
-        date: text("date"),
-        date_utc: attr_in(n, &[W16DU], "dateUtc").map(|v| v.into_owned()),
-        branch: Branch::Outside,
+    let in_mark = under("rPr")
+        && n.parent()
+            .and_then(|p| p.parent())
+            .is_some_and(|g| g.local_name() == "pPr" && is_word_ns(g.namespace()));
+    Some(match name {
+        "ins" if under("numPr") => RevKind::NumPrIns,
+        "ins" if under("trPr") => RevKind::RowIns,
+        "del" if under("trPr") => RevKind::RowDel,
+        "ins" if in_mark => RevKind::MarkIns,
+        "del" if in_mark => RevKind::MarkDel,
+        "moveFrom" if in_mark => RevKind::MarkMoveFrom,
+        "moveTo" if in_mark => RevKind::MarkMoveTo,
+        "ins" => RevKind::Ins,
+        "del" => RevKind::Del,
+        "moveFrom" => RevKind::MoveFrom,
+        "moveTo" => RevKind::MoveTo,
+        _ => return None,
     })
 }
 

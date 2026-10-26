@@ -254,6 +254,13 @@ released yet.
 - The library's documentation, `crates/stetdoc-napi/npm/README.md`, shipped in the package, and its sections in `README.md`
   and `CONTRIBUTING.md`.
 
+### Changed
+
+- The first view of a large document, and the first range with its margin notes, take about half the time they did: the
+  text model is built only for the paragraphs that hold a note reference when the notes are numbered, a UTF-8 part's names and
+  text are not checked again on every read, a revision is looked for by its name before its namespace, and mentions of
+  clauses are found in one pass over the words. Views, receipts and peak memory are unchanged.
+
 ### Fixed
 
 - The random law L2 reads `<w:p a="1" />` opened as `<w:p a="1" >` to hold the comment markers that a deletion hoists into

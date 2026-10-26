@@ -15,8 +15,8 @@
 //!   by default): documents done of the total, the time, the failures so far.
 //! - **Time.** Each document's time is kept, and the slowest 20 are printed at the end. A watchdog names a document still running
 //!   after `STETDOC_WATCH_SECS` (120 by default), and a document over `STETDOC_LIMIT_SECS` (600 by default) is a failure of the
-//!   sweep: a performance bug. Rust cannot stop a running thread, so the watchdog names a runaway in the log before a timeout
-//!   kills the job.
+//!   sweep: a performance bug. Both are ten times longer in a debug build. Rust cannot stop a running thread, so the watchdog
+//!   names a runaway in the log before a timeout kills the job.
 //! - **Deadline.** After `STETDOC_DEADLINE` (Unix seconds) no worker takes a new document; the sweep reports what it found and
 //!   how many documents it did not reach, and fails when it left any.
 //!
@@ -318,13 +318,17 @@ pub struct Settings {
     pub misses: bool,
 }
 
+/// How much longer a document may take in a debug build, where the sweeps of `laws_identity.rs` run in `cargo xtask check`: a
+/// debug build is about ten times slower than a release one.
+const DEBUG_SLOWER: u32 = if cfg!(debug_assertions) { 10 } else { 1 };
+
 impl Default for Settings {
     fn default() -> Settings {
         Settings {
             shard: None,
             deadline: None,
-            watch: WATCH,
-            limit: LIMIT,
+            watch: WATCH * DEBUG_SLOWER,
+            limit: LIMIT * DEBUG_SLOWER,
             progress: PROGRESS,
             workers: std::thread::available_parallelism().map_or(4, |n| n.get()),
             misses: false,
@@ -356,18 +360,24 @@ impl Settings {
         Ok(Settings {
             shard: var(ENV_SHARD).map(|v| Shard::parse(&v)).transpose()?,
             deadline,
-            watch: secs(ENV_WATCH, WATCH)?,
-            limit: secs(ENV_LIMIT, LIMIT)?,
+            watch: secs(ENV_WATCH, WATCH * DEBUG_SLOWER)?,
+            limit: secs(ENV_LIMIT, LIMIT * DEBUG_SLOWER)?,
             progress: secs(ENV_PROGRESS, PROGRESS)?,
             ..Settings::default()
         })
     }
 }
 
-/// How a sweep over the corpus speaks: each line to stderr at once (with `--nocapture`, so the log of a job that is cancelled
-/// still has it), and the failures, the deadline and the summary also to the run page ([`to_the_summary`]).
+/// How a sweep over the corpus speaks: each line to stderr at once, past the test harness's capture, so that the log of a job
+/// that is cancelled still has it, and the failures, the deadline and the summary also to the run page ([`to_the_summary`]).
+/// The summary, with the slowest documents, and a survey's misses go through the capture instead, so that `cargo xtask check`
+/// shows them only for a test that fails (the nightly runs with `--nocapture`, which shows them always).
 pub fn to_the_log(said: Said, line: &str) {
-    let _ = writeln!(std::io::stderr(), "laws: {line}");
+    if matches!(said, Said::Summary | Said::Miss) {
+        eprintln!("laws: {line}");
+    } else {
+        let _ = writeln!(std::io::stderr(), "laws: {line}");
+    }
     if matches!(said, Said::Failure | Said::Deadline | Said::Summary) {
         to_the_summary(line);
     }

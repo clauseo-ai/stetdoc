@@ -44,7 +44,8 @@ impl Engine<'_, '_> {
         Ok(out)
     }
 
-    /// Removes the move range markers that are still in the tree.
+    /// Removes the move range markers that are still in the tree, and the revision wrappers that held nothing else (a
+    /// deletion of the marker alone, which a tracked delete over the move writes).
     pub(super) fn drop_markers(&mut self, markers: Vec<NodeId>) -> Result<(), StetError> {
         for n in markers {
             let tree = self.tx.part_mut(&self.part)?;
@@ -53,7 +54,10 @@ impl Engine<'_, '_> {
             }
             let parent = parent_of(tree, n);
             detach(tree, n)?;
-            self.dirty.extend(parent);
+            if let Some(parent) = parent {
+                let kept = prune_from(tree, parent)?;
+                self.dirty.push(kept);
+            }
         }
         Ok(())
     }

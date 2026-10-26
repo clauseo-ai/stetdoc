@@ -12,7 +12,7 @@
 use super::document::{SchemaPart, census_of, is_story, listing};
 use super::examine::examine;
 use super::keys::KeySet;
-use super::units::{Unit, UnitKind, kind_of, layout_of};
+use super::units::{Layout, Unit, UnitKind, kind_of, layout_of};
 use crate::api::error::{ErrorCode, StetError};
 use crate::schema::unit_root;
 use crate::state::{Dep, PartId, PartsView};
@@ -343,10 +343,17 @@ impl<'a> Origins<'a> {
             .child_elements()
             .map(|c| c.id())
             .collect();
+        // In a story, an element with no paragraph or table above it (the `w:body`, a block-level `w:sdt`, a marker between
+        // blocks) is the frame's, though `unit_root` gives the element itself.
+        let story = layout_of(part.kind) == Layout::Story;
+        let frame = before.root().id();
         while let Some(id) = stack.pop() {
             let was = before.node_ref(id);
             if was.is_element() {
-                let root = unit_root(before, id);
+                let mut root = unit_root(before, id);
+                if story && !crate::schema::is_unit_boundary(before, root) {
+                    root = frame;
+                }
                 if root == id {
                     // A unit of its own, such as a table inside a paragraph, is checked as itself, and it came from the unit
                     // whose root held it: when that unit is gone, its keys come along (a rejected split that had left the

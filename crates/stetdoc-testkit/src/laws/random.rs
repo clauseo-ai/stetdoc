@@ -22,7 +22,6 @@
 
 use super::blocks::per_block;
 use super::edits::{Applied, input_codes, run_batch};
-use super::files::without_cell_end_stubs;
 use super::generate::{Facts, Generated, Rng, fnv, generate};
 use super::locality::locality;
 use std::cell::OnceCell;
@@ -32,9 +31,11 @@ use stetdoc_core::{
     Batch, Budget, Document, Edit, ErrorCode, FindingCode, Limits, Mode, OpenOptions,
     RevisionFilter, Scope, Stamp, StoryName, ViewSpec,
 };
+use view_lines::{ViewLine, block_lines, restored};
 
 #[cfg(test)]
 mod tests;
+mod view_lines;
 
 /// The seed of this run: `STETDOC_SEED`, or one from the clock, printed once so that a failure can be run again.
 pub fn seed() -> u64 {
@@ -123,7 +124,7 @@ pub fn batches_with(bytes: &[u8], seed: u64, n: usize) -> Result<(), String> {
 }
 
 /// The Original and the Final lines of a document's body, and whether it has revisions of the author.
-type Original = (Vec<String>, Vec<String>, bool);
+type Original = (Vec<ViewLine>, Vec<ViewLine>, bool);
 
 /// A document that batches run on, with what every batch on it needs, worked out once.
 pub struct Base {
@@ -468,17 +469,11 @@ fn reversible(base: &Base, g: &Generated, applied: Applied) -> Result<(), String
     review(&mut doc, "reject")?;
     for (mode, a) in [(Mode::Original, original_lines), (Mode::Final, final_lines)] {
         let b = lines(&doc, mode)?;
-        let a = a.clone();
-        if a != b {
-            let at = a
-                .iter()
-                .zip(&b)
-                .position(|(p, q)| p != q)
-                .unwrap_or(a.len().min(b.len()));
+        if let Err(at) = restored(a, &b) {
             return Err(format!(
                 "L5: rejecting the author's revisions did not restore the {mode:?} view, first at line {at}: {:?} and then {:?}",
-                a.get(at),
-                b.get(at)
+                a.get(at).map(|l| &l.text),
+                b.get(at).map(|l| &l.text)
             ));
         }
     }
@@ -514,7 +509,7 @@ pub(super) fn without_comment_marks(line: &str) -> String {
 }
 
 /// The block lines of the body in a mode, one per block, without refs and without comment markers.
-fn lines(doc: &Document, mode: Mode) -> Result<Vec<String>, String> {
+fn lines(doc: &Document, mode: Mode) -> Result<Vec<ViewLine>, String> {
     let mut spec = ViewSpec {
         scope: Scope::Story(StoryName::Body),
         mode,
@@ -527,41 +522,10 @@ fn lines(doc: &Document, mode: Mode) -> Result<Vec<String>, String> {
         out.extend(block_lines(&page.text));
         match page.next {
             Some(next) => spec.after = Some(next),
-            None => return Ok(lone_empty_is_none(out)),
+            None => return Ok(view_lines::lone_empty_is_none(out)),
         }
     }
     Err("a view did not end".to_string())
-}
-
-/// The block lines of a page of the view, without refs and without comment markers. A long block is one logical line that the
-/// view writes as several physical ones (a continuation ends in an odd number of backslashes, design 5.3), and where it breaks
-/// depends on the length of the block's ref, so the continuations are joined before the refs are taken out: two views that differ
-/// only in a ref compare equal.
-fn block_lines(page: &str) -> Vec<String> {
-    without_cell_end_stubs(&joined(page))
-        .lines()
-        .filter(|l| l.split(' ').next().is_some_and(is_ref))
-        .map(|l| without_refs(&without_comment_marks(l)))
-        .collect()
-}
-
-/// A text with its continuations joined: a physical line that ends in an odd number of backslashes loses the last one and runs
-/// on into the next line.
-fn joined(text: &str) -> String {
-    let mut out = String::with_capacity(text.len());
-    let mut runs_on = false;
-    for (i, line) in text.split('\n').enumerate() {
-        if i > 0 && !runs_on {
-            out.push('\n');
-        }
-        runs_on = line.chars().rev().take_while(|c| *c == '\\').count() % 2 == 1;
-        out.push_str(if runs_on {
-            line.get(..line.len() - 1).unwrap_or_default()
-        } else {
-            line
-        });
-    }
-    out
 }
 
 /// A story whose only paragraph is empty has no lines: a story is never left with no paragraph, so removing everything in it

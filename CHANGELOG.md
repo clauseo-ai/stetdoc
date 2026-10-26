@@ -275,6 +275,10 @@ released yet.
   so a tracked split there is shown. In `Final` that paragraph joins the next one when its mark is deleted, so the field
   stays open when the next paragraph has text, and takes in an empty one, as it does once the deletion is accepted.
 
+- The random law L5 compares each paragraph's style against its own view's common style, so a reject that changes which
+  style is commonest in the document no longer reads as a change on every line. It tolerates exactly one empty paragraph
+  that a reject adds as the last block of a cell whose last block was a table (W9), where it used to drop every such
+  paragraph from both sides (`tdf153891.docx`).
 - A split before a paragraph's text (`at: 0`, or `before` its first word) keeps the paragraph's ref, element and
   attributes on the text and adds the new empty paragraph, with the new ref, before it. Rejecting the split gives back the
   very paragraph under its old ref; before, the text came back under the new ref and lost the paragraph's `w14:paraId`

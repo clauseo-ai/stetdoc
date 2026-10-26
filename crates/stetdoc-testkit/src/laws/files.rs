@@ -27,9 +27,20 @@ pub(super) fn open(bytes: &[u8]) -> Result<Document, String> {
 /// (projection-and-index.md, "A cell"): an empty paragraph of the body after a table, or the first paragraph of the next
 /// cell, has no `{+}` and is a line like any other.
 pub(super) fn without_cell_end_stubs(text: &str) -> String {
+    text.lines()
+        .zip(cell_end_stubs(text))
+        .filter(|(_, stub)| !stub)
+        .map(|(line, _)| line)
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+/// For each line of a text of the readable form, whether it is the empty paragraph that ends a cell right after a table in it,
+/// which [`without_cell_end_stubs`] leaves out.
+pub(super) fn cell_end_stubs(text: &str) -> Vec<bool> {
     let lines: Vec<&str> = text.lines().collect();
     let continues_cell = |line: &str| leading_tags(line).contains(&"{+}");
-    let mut out: Vec<&str> = Vec::with_capacity(lines.len());
+    let mut out: Vec<bool> = Vec::with_capacity(lines.len());
     for (i, line) in lines.iter().enumerate() {
         let after_table = i
             .checked_sub(1)
@@ -53,12 +64,9 @@ pub(super) fn without_cell_end_stubs(text: &str) -> String {
                     .trim()
                     .is_empty()
         };
-        if after_table && ends_cell && empty {
-            continue;
-        }
-        out.push(line);
+        out.push(after_table && ends_cell && empty);
     }
-    out.join("\n")
+    out
 }
 
 /// The tags at the start of a block line, after its ref: `{style "Normal"}`, `{+}` and the others, each whole.

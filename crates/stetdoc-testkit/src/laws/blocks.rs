@@ -11,9 +11,11 @@
 //! differ (an element the view shows another way) is not checked by block, and the entry check of L2 still holds for it.
 //!
 //! What a batch touches: the blocks its operations name (`ref`, `to`, `second`, and every block from `ref` through `to`), the
-//! block after a merge's paragraph, and the table that holds a named paragraph or row. An `accept` or `reject` touches every
-//! block with revision markup, an operation on an existing comment every block with that comment's markers, a `delete-note`
-//! every block with a note reference, and a section's properties the elements that hold a `w:sectPr`.
+//! block after a merge's paragraph, and the table that holds a named paragraph or row. A merge's paragraph after is the next
+//! one the operations before it left: a deleted paragraph, an earlier merge's second and, untracked, a table whose last row a
+//! `row` operation deleted are passed over. An `accept` or `reject` touches every block with revision markup, an operation
+//! on an existing comment every block with that comment's markers, a `delete-note` every block with a note reference, and a
+//! section's properties the elements that hold a `w:sectPr`.
 
 use super::facts::Facts;
 use super::generate::Generated;
@@ -185,6 +187,8 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
     // A ref that names a top-level block itself (not a paragraph of a table's cell).
     let is_top = |r: Option<&str>| r.is_some_and(|r| facts.top.iter().any(|t| t == r));
     let mut gone: BTreeSet<String> = BTreeSet::new();
+    // The rows that `row` operations deleted so far, for the table that loses its last row.
+    let mut rows_gone: BTreeSet<String> = BTreeSet::new();
     let mut t = Touched::default();
     for op in &g.ops {
         let Ok(v) = serde_json::from_str::<Value>(&op.json) else {
@@ -237,6 +241,19 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
                 }
             }
             "merge" => gone.extend(second.clone()),
+            // Untracked, a table that loses its last row is removed (revisions.md 3.2.3: a merge then joins the paragraphs on
+            // either side of where it was).
+            "row" if !g.tracked && v.get("action").and_then(Value::as_str) == Some("delete") => {
+                if let Some(row) = v.get("ref").and_then(Value::as_str) {
+                    rows_gone.insert(row.to_string());
+                    let emptied = facts.tables.iter().find(|t| {
+                        t.r == t.top
+                            && t.rows.iter().any(|(r, _)| r == row)
+                            && t.rows.iter().all(|(r, _)| rows_gone.contains(r))
+                    });
+                    gone.extend(emptied.map(|t| t.r.clone()));
+                }
+            }
             _ => {}
         }
         t.tops.extend([first, to, second].into_iter().flatten());
@@ -359,4 +376,69 @@ pub fn per_block(before: &[u8], after: &[u8], facts: &Facts, g: &Generated) -> R
         touched: &hit,
     };
     kept_or_hoisted(&before, &new, &new_els)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::fixtures::parts::{Doc, entries_doc};
+    use crate::fixtures::zip::Zip;
+    use crate::laws::edits::run_batch;
+    use crate::laws::generate::GenOp;
+    use stetdoc_core::{Document, OpenOptions};
+
+    fn generated(ops: &[(&'static str, &str)], tracked: bool) -> Generated {
+        let ops = ops
+            .iter()
+            .map(|(name, json)| GenOp {
+                name,
+                json: (*json).to_string(),
+                refused: None,
+                sticks: None,
+            })
+            .collect();
+        Generated { ops, tracked }
+    }
+
+    /// The bytes after an untracked batch of `ops`.
+    fn edited(bytes: &[u8], ops: &str) -> Vec<u8> {
+        run_batch(bytes, &[], ops, false).unwrap().unwrap().saved
+    }
+
+    #[test]
+    fn a_merge_after_the_last_row_of_a_table_is_deleted_names_the_paragraph_after_the_table() {
+        let para = |t: &str| format!("<w:p><w:r><w:t>{t}</w:t></w:r></w:p>");
+        let body = format!(
+            r#"{}<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr>{}</w:tc></w:tr></w:tbl>{}{}"#,
+            para("Before."),
+            para("Cell."),
+            para("After."),
+            para("Far.")
+        );
+        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+        let facts =
+            Facts::of(&Document::open(bytes.clone(), &OpenOptions::default()).unwrap()).unwrap();
+        assert_eq!(facts.top, ["p1", "t1", "p3", "p4"]);
+        let (delete, merge) = (
+            r#"{"op":"row","ref":"r1","action":"delete"}"#,
+            r#"{"op":"merge","ref":"p1"}"#,
+        );
+        // Untracked, the row's deletion removes the table, and the merge joins p1 with p3, which the batch names.
+        let g = generated(&[("row", delete), ("merge", merge)], false);
+        let after = edited(&bytes, &g.json());
+        per_block(&bytes, &after, &facts, &g).unwrap();
+        // A paragraph that the batch does not name and that changes is still caught.
+        let changed = edited(
+            &bytes,
+            &format!(
+                r#"{},{{"op":"replace","ref":"p4","find":"Far","with":"Near"}}"#,
+                g.json()
+            ),
+        );
+        let e = per_block(&bytes, &changed, &facts, &g).unwrap_err();
+        assert!(
+            e.starts_with("L2: p4, which the batch does not name"),
+            "{e}"
+        );
+    }
 }

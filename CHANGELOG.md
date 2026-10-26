@@ -275,6 +275,16 @@ released yet.
   attributes on the text and adds the new empty paragraph, with the new ref, before it. Rejecting the split gives back the
   very paragraph under its old ref; before, the text came back under the new ref and lost the paragraph's `w14:paraId`
   and rsids.
+- A deleted paragraph is one `ParagraphDeleted` change with every piece of its deletion, a piece that holds nothing with
+  width (a field's `begin` and code) included. Such a piece was a change of its own, so rejecting the paragraph's deletion
+  gave back a field's result without its `begin`, and the edit was refused with `validation_failed`.
+- A tracked `merge` of two list paragraphs that each hold a legacy `w:numberingChange` is applied. Their change ids made
+  their properties look different, so the second took the first's, and the copy carried the first's numbering change and
+  its id: two tracked changes had the same id and the edit was refused with `validation_failed`. The copy now follows the
+  copy rule and leaves out every change-tracking element.
+- A tracked `set` on a table, row, cell or section whose properties already break the schema (a second `w:tblLook`) is
+  applied. The copy of the old properties in the change's record carried the same problem, and the check counted it as new
+  and refused the edit with `validation_failed`.
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

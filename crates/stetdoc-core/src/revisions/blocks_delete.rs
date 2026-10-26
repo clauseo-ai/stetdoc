@@ -10,8 +10,9 @@ use super::blocks::{container_of, mark_of, opaque_after, prop_element_of, same_p
 use super::compiler::{Compiler, ParaView};
 use super::errors::{cross_block, readonly};
 use super::join::{Joined, Why, join, leftovers, ppr_revision_ids};
-use super::names::is_w;
+use super::names::{is_w, is_word_ns};
 use super::outcome::{Effect, Origin, RemovedKind, RemovedOwn};
+use super::policy::is_change_tracking;
 use super::props::Direct;
 use super::props_edit::find_chain;
 use super::text::final_starts;
@@ -19,22 +20,44 @@ use super::tree_ops::detach;
 use super::types::{PropEdit, PropElement};
 use crate::api::error::StetError;
 use crate::wordml::BlockKey;
-use crate::wordml::{BlockKind, Mode, NodeId, Paragraph, RevKind, SECTION_BREAK};
+use crate::wordml::{BlockKind, Mode, NodeId, RevKind, SECTION_BREAK};
 use crate::xml::{NodeRef, SpanTree};
 
-/// The edit that makes the base properties of Q those of P: P's are set, and what only Q has is cleared.
+/// The base properties of a paragraph: the children of its `w:pPr` but the mark, the section break and the change.
+fn base_of(tree: &SpanTree, para: NodeId) -> Vec<NodeRef<'_>> {
+    find_chain(tree, para, &["pPr"])
+        .map(|ppr| {
+            tree.node_ref(ppr)
+                .child_elements()
+                .filter(|c| !matches!(c.local_name(), "rPr" | "sectPr" | "pPrChange"))
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// A paragraph's base properties as the copy rule copies them (design `revisions.md`, 2.2): without a change-tracking element
+/// at any depth, such as the `w:numberingChange` in a `w:numPr`. Its id is the paragraph's own, and a copy of it on another
+/// paragraph would give two tracked changes the same id.
+fn copied_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
+    fn strip(mut e: PropElement) -> PropElement {
+        e.children = e
+            .children
+            .into_iter()
+            .filter(|c| !(is_word_ns(&c.ns) && is_change_tracking(&c.local)))
+            .map(strip)
+            .collect();
+        e
+    }
+    base_of(tree, para)
+        .iter()
+        .map(|c| strip(prop_element_of(c)))
+        .collect()
+}
+
+/// The edit that makes the base properties of Q those of P: P's are set, by the copy rule, and what only Q has is cleared.
 fn alignment_edit(tree: &SpanTree, p: NodeId, q: NodeId) -> PropEdit {
-    let base = |para: NodeId| -> Vec<NodeRef<'_>> {
-        find_chain(tree, para, &["pPr"])
-            .map(|ppr| {
-                tree.node_ref(ppr)
-                    .child_elements()
-                    .filter(|c| !matches!(c.local_name(), "rPr" | "sectPr" | "pPrChange"))
-                    .collect()
-            })
-            .unwrap_or_default()
-    };
-    let from: Vec<PropElement> = base(p).iter().map(prop_element_of).collect();
+    let base = |para: NodeId| base_of(tree, para);
+    let from: Vec<PropElement> = copied_base(tree, p);
     let clear = base(q)
         .iter()
         .filter(|c| {
@@ -400,10 +423,10 @@ impl Compiler<'_, '_> {
         let real = !self.tracked() || own != Direct::No;
         // The alignment: Q's base properties become P's, as a change of Q's.
         let live = p.map.len(Mode::Final) > 0;
+        // Change tracking in the properties (a `w:numberingChange` with each paragraph's own id) is no difference.
         let differ = {
             let tree = self.tree_ro(&part)?;
-            let base = |n: NodeId| Paragraph::new(tree, n).map(|x| x.base_props());
-            base(p.node) != base(q.node)
+            copied_base(tree, p.node) != copied_base(tree, q.node)
         };
         if live && differ {
             let edit = alignment_edit(self.tree_ro(&part)?, p.node, q.node);

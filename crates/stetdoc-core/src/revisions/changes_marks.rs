@@ -27,16 +27,16 @@ fn whole(side: RevKind) -> ChangeKind {
 
 /// The wrapper atoms of the items that have `key` among their wrappers, and whether every item with width
 /// has it.
-fn covered(wrappers: &[Vec<usize>], atoms: &Atoms, key: &Key) -> (Vec<usize>, bool) {
+fn covered(wrappers: &[(bool, Vec<usize>)], atoms: &Atoms, key: &Key) -> (Vec<usize>, bool) {
     let mut out = Vec::new();
     let mut all = true;
-    for item in wrappers {
+    for (width, item) in wrappers {
         let mine: Vec<usize> = item
             .iter()
             .copied()
             .filter(|&a| atoms.key(a).as_ref() == Some(key))
             .collect();
-        if mine.is_empty() {
+        if mine.is_empty() && *width {
             all = false;
         }
         out.extend(mine);
@@ -45,17 +45,20 @@ fn covered(wrappers: &[Vec<usize>], atoms: &Atoms, key: &Key) -> (Vec<usize>, bo
 }
 
 /// The leading items of a paragraph that have `key` among their wrappers: their atoms, and whether they are
-/// all the items with width.
-fn leading(wrappers: &[Vec<usize>], atoms: &Atoms, key: &Key) -> (Vec<usize>, bool) {
+/// all the items with width. An item with no width and without `key` does not end them.
+fn leading(wrappers: &[(bool, Vec<usize>)], atoms: &Atoms, key: &Key) -> (Vec<usize>, bool) {
     let mut out = Vec::new();
-    for item in wrappers {
+    for (width, item) in wrappers {
         let mine: Vec<usize> = item
             .iter()
             .copied()
             .filter(|&a| atoms.key(a).as_ref() == Some(key))
             .collect();
         if mine.is_empty() {
-            return (out, false);
+            if *width {
+                return (out, false);
+            }
+            continue;
         }
         out.extend(mine);
     }

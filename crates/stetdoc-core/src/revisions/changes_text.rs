@@ -305,16 +305,19 @@ fn revision_wrapper(k: WrapperKind) -> bool {
     )
 }
 
-/// For each item with width, the atoms of the revision wrappers around it.
-pub(super) fn item_wrappers(map: &TextMap, atoms: &Atoms) -> Vec<Vec<usize>> {
+/// For each item, whether it has width, and the atoms of the revision wrappers around it. An item with no
+/// width (a field's `begin` or its code) says nothing about whether a paragraph is wholly under a revision,
+/// but a revision around it is still one of the paragraph's.
+pub(super) fn item_wrappers(map: &TextMap, atoms: &Atoms) -> Vec<(bool, Vec<usize>)> {
     map.items()
         .iter()
-        .filter(|i| i.len > 0)
         .map(|i| {
-            map.context(i.ctx)
+            let wrappers = map
+                .context(i.ctx)
                 .filter(|c| revision_wrapper(c.kind))
                 .filter_map(|c| atoms.by_node.get(&c.node).copied())
-                .collect()
+                .collect();
+            (i.len > 0, wrappers)
         })
         .collect()
 }

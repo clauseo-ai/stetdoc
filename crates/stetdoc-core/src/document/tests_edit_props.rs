@@ -386,3 +386,57 @@ fn a_paragraph_the_schema_does_not_place_is_still_checked_by_its_own_content_mod
             .all(|f| f.code != FindingCode::SchemaOutOfOrder)
     );
 }
+
+#[test]
+fn a_tracked_property_change_copies_a_problem_of_the_old_properties_without_adding_it() {
+    // A second w:tblLook in the table's properties, and a second w:jc in the paragraph's. The record of a tracked change keeps
+    // a copy of the old properties, problem included: the problem is the same one, not a new one.
+    let look = r#"<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>"#;
+    let body = format!(
+        r#"<w:tbl><w:tblPr><w:tblStyle w:val="X"/><w:tblW w:type="auto" w:w="0"/>{look}{look}</w:tblPr><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid><w:tr><w:tc><w:p><w:r><w:t>A</w:t></w:r></w:p></w:tc></w:tr></w:tbl><w:p><w:pPr><w:jc w:val="left"/><w:jc w:val="right"/></w:pPr><w:r><w:t>B</w:t></w:r></w:p>"#
+    );
+    let mut doc = Document::open(Pkg::new(&body).bytes(), &OpenOptions::default()).unwrap();
+    assert_eq!(doc.check().violations, 2, "{:?}", doc.check());
+    let before = main_xml(&doc);
+    run(
+        &mut doc,
+        r#"{"op":"set","ref":"t1","props":[{"name":"jc","val":"center"}]},
+           {"op":"paragraph","ref":"p2","keep_next":true}"#,
+    );
+    let xml = main_xml(&doc);
+    for want in ["w:tblPrChange", "w:pPrChange", r#"<w:jc w:val="center"/>"#] {
+        assert!(xml.contains(want), "{want} in {xml}");
+    }
+    reject_all(&mut doc);
+    assert_eq!(
+        main_xml(&doc).matches("w:tblLook").count(),
+        before.matches("w:tblLook").count()
+    );
+}
+
+#[test]
+fn a_tracked_merge_copies_no_change_tracking_of_the_first_paragraph_onto_the_second() {
+    // Two list items, each with a legacy w:numberingChange of its own id. The ids are no difference between their properties,
+    // and when the properties do differ the second takes the first's by the copy rule, without its numbering change.
+    let item = |id: u32, spacing: &str| {
+        format!(
+            r#"<w:p><w:pPr><w:numPr><w:ilvl w:val="0"/><w:numId w:val="1"/><w:numberingChange w:id="{id}" w:author="A" w:date="2008-12-04T16:14:00Z" w:original="1."/></w:numPr>{spacing}</w:pPr><w:r><w:t>Item {id}.</w:t></w:r></w:p>"#
+        )
+    };
+    let spaced = r#"<w:spacing w:after="120"/>"#;
+    for (second, aligned) in [("", false), (spaced, true)] {
+        let body = format!("{}{}", item(1, ""), item(2, second));
+        let bytes = Pkg::new(&body).styles(STYLES).numbering(NUMBERING).bytes();
+        let mut doc = Document::open(bytes, &OpenOptions::default()).unwrap();
+        assert!(doc.check().ok, "{:?}", doc.check());
+        run(&mut doc, r#"{"op":"merge","ref":"p1"}"#);
+        let xml = main_xml(&doc);
+        assert!(doc.check().ok, "{second}: {:?} in {xml}", doc.check());
+        assert_eq!(
+            xml.matches(r#"w:numberingChange w:id="1""#).count(),
+            1,
+            "{xml}"
+        );
+        assert_eq!(xml.contains("w:pPrChange"), aligned, "{xml}");
+    }
+}

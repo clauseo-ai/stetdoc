@@ -267,6 +267,9 @@ released yet.
   that the removal hoists there (design `revisions.md`, 3.6.5). It failed on `floattable-anchorpos.docx`, where deleting a
   table moved its comment into the first cell of the table after it.
 
+- Rejecting the inserted paragraphs of a footnote, an endnote or a comment whose reference stays keeps the note's last
+  paragraph, emptied, instead of leaving a note with no paragraph, which the check refused as `validation_failed`
+  (`Revision footnotes.docx`). When the reference is rejected too, the note goes with it, as before.
 - The random law L2 reads `<w:p a="1" />` opened as `<w:p a="1" >` to hold the comment markers that a deletion hoists into
   it as the same start tag. It took the space before the `>` for a changed paragraph and failed on
   `tdf112450_vml_polyline.docx`.

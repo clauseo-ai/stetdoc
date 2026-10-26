@@ -279,6 +279,9 @@ pub(super) type Slot = (usize, &'static str, &'static str);
 pub(super) struct Dump {
     /// The body, then every note by its content.
     pub body: Vec<String>,
+    /// A tag (`F` or `E`) for each note that a reference names and that holds no block (`WC063-Footnote-Mod`), which `body`
+    /// cannot show.
+    pub empty_notes: Vec<&'static str>,
     /// Each header and footer part, by name.
     pub sides: HashMap<String, Vec<String>>,
     /// The part of each slot of each section, inheritance applied, and the number of sections.
@@ -377,6 +380,13 @@ pub(super) fn dump(state: &State, opts: &DumpOpts) -> Result<Dump, StetError> {
                 } else {
                     "F"
                 };
+                // a note that a reference names and that holds no block at all, which a dump cannot show
+                for (u, unit) in story.units().iter().enumerate() {
+                    let named = unit.id.is_some_and(|i| referenced.contains(&(endnote, i)));
+                    if named && !story.blocks().iter().any(|e| e.unit as usize == u) {
+                        out.empty_notes.push(tag);
+                    }
+                }
                 notes.extend(
                     by_unit
                         .into_iter()

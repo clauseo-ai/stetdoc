@@ -497,7 +497,10 @@ staged state of a dry run. The steps:
    it begins has no text before it and the paragraph where it ends has none after it, so that collapsing hides
    nothing else. The test counts the text that the view's mode shows, so the tops are per mode: text that a pending
    deletion takes out does not stop the field collapsing in `Final`, as it would not once the deletion is accepted
-   (law L5), while `Redline` shows the deletion and keeps the paragraphs open. A selection that starts inside the span shows its paragraphs, which is how an agent expands one.
+   (law L5), while `Redline` shows the deletion and keeps the paragraphs open. The paragraph where the field ends is read
+   with the paragraphs it joins in the mode: when its mark is deleted, `Final` reads it as one with the next, so text
+   there keeps the field open and an empty next paragraph is collapsed with it, as after an accept. Text in a paragraph that joins the one where the field begins keeps it open too. In `Redline` a
+   revision on that mark keeps the field open, so the view shows it. A selection that starts inside the span shows its paragraphs, which is how an agent expands one.
 4. **A paragraph.** `Story::paragraph(tree, i).map()` gives the `TextMap`; the style name is the site's style (the
    default paragraph style when there is none, `Normal` when the document has no styles part), shown only when it
    is not the common style; the label is `StoryNumbers`'s item for the paragraph in this mode; the flags come from

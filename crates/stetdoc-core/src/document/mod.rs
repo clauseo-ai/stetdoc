@@ -180,6 +180,8 @@ mod tests_edit_props;
 #[cfg(test)]
 mod tests_edit_review;
 #[cfg(test)]
+mod tests_edit_toc;
+#[cfg(test)]
 mod tests_inspect;
 #[cfg(test)]
 mod tests_scale;

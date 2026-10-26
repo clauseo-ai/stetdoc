@@ -207,6 +207,31 @@ fn delete_note_names_the_note_as_the_view_shows_it_and_owns_its_paragraphs() {
 }
 
 #[test]
+fn a_tracked_delete_note_counts_only_the_ids_it_made_when_the_document_uses_large_ids() {
+    // A bookmark with a `w:id` past two billion, as Word writes them: the first id the edit makes is one more. `delete-note`
+    // took the ids from 0 to there as its own, and the receipt counted each of them into a map, which took the process past
+    // 6 GB (aspose-words-net's DocumentVisitor-compatible features.docx, the nightly laws run, shard 1 of 16).
+    let body = r#"<w:p><w:bookmarkStart w:id="2112897428" w:name="far"/><w:r><w:t xml:space="preserve">Video </w:t></w:r><w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteReference w:id="2"/></w:r><w:r><w:t>provides a way.</w:t></w:r><w:bookmarkEnd w:id="2112897428"/></w:p>"#;
+    let note = r#"<w:footnote w:id="2"><w:p><w:r><w:rPr><w:rStyle w:val="FootnoteReference"/></w:rPr><w:footnoteRef/></w:r><w:r><w:t xml:space="preserve"> A note.</w:t></w:r></w:p></w:footnote>"#;
+    let bytes = crate::threads::tests_support::Pkg::new(body)
+        .footnotes(note)
+        .bytes();
+    let mut doc = Document::open(bytes, &OpenOptions::default()).unwrap();
+    let receipt = run(&mut doc, r#"{"op":"delete-note","note":"fn1"}"#);
+    assert!(receipt.operations[0].changed);
+    let ids: Vec<i64> = receipt.operations[0]
+        .revisions
+        .iter()
+        .flat_map(|r| r.ids.iter().copied())
+        .collect();
+    assert!(
+        !ids.is_empty() && ids.iter().all(|id| *id > 2_112_897_428),
+        "{ids:?}"
+    );
+    assert!(doc.check().ok, "{:?}", doc.check());
+}
+
+#[test]
 fn under_a_scope_a_comment_declares_the_styles_it_appended_and_nothing_else_of_styles_xml() {
     let rich = || {
         Document::open(

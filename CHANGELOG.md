@@ -256,6 +256,9 @@ released yet.
 
 ### Fixed
 
+- An operation's `added` in a receipt lists only refs the edit minted. When a block a split made was then joined into an
+  older block by an `accept` or `reject` of the same batch, the joined block keeps the older ref, and the split listed that
+  ref as added, in a dry run too, which must issue none (H14).
 - The random law L3 expects a whole-paragraph `replace` of a note's paragraph to keep the note's own number (U+0003), as
   every text edit does (design `revisions.md`, 3.6.4). It expected the bare text and failed on a note of `tdf129659.docx`.
 - A paragraph inserted after the last paragraph of a cell, a note, a comment or the body is written in Word's Enter shape:

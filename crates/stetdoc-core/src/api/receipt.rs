@@ -197,7 +197,8 @@ pub struct OpResult {
     pub origin: Option<Origin>,
     /// The refs of the existing blocks it changed.
     pub blocks: Vec<String>,
-    /// The refs of the blocks it added. Empty for a dry run, which issues no ref.
+    /// The refs minted for the blocks it added. Empty for a dry run, which issues no ref. A block it added that a later
+    /// operation joined an older block into carries the older block's ref, which is not listed.
     pub added: Vec<String>,
     /// How many blocks it added: the same for a dry run as for the real edit.
     pub added_count: u32,

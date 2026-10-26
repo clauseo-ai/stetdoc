@@ -83,14 +83,16 @@ const NOT_A_LAW: [&str; 10] = [
 /// A word is an acronym that names a law: `CFR`, `GDPR`, `EUMR`, `U.S.C.`.
 fn is_law_name(word: &str) -> bool {
     let w = word.trim_matches(|c: char| !c.is_alphanumeric() && c != '.');
-    let bare: String = w.chars().filter(|c| *c != '.').collect();
-    if bare.eq_ignore_ascii_case("usc") && w.contains('.') || bare == "CFR" {
+    // The word without its dots, read as often as it is needed rather than kept.
+    let bare = || w.chars().filter(|c| *c != '.');
+    let is = |name: &str| bare().eq(name.chars());
+    if bare().map(|c| c.to_ascii_lowercase()).eq("usc".chars()) && w.contains('.') || is("CFR") {
         return true;
     }
-    (3..=5).contains(&bare.chars().count())
-        && bare.chars().all(|c| c.is_ascii_uppercase())
-        && !bare.chars().all(|c| "IVXLCDM".contains(c))
-        && !NOT_A_LAW.contains(&bare.as_str())
+    (3..=5).contains(&bare().count())
+        && bare().all(|c| c.is_ascii_uppercase())
+        && !bare().all(|c| "IVXLCDM".contains(c))
+        && !NOT_A_LAW.iter().any(|name| is(name))
 }
 
 /// The words that join references in a list or a range.
@@ -159,8 +161,8 @@ fn clean(word: &str) -> (&str, bool) {
     let comma = word.ends_with(',');
     let trimmed = word.trim_end_matches([',', ';', ':', '.']);
     // An unbalanced closing parenthesis belongs to the sentence: `(see clause 4)`.
-    let opens = trimmed.matches('(').count();
-    let closes = trimmed.matches(')').count();
+    let opens = trimmed.bytes().filter(|&b| b == b'(').count();
+    let closes = trimmed.bytes().filter(|&b| b == b')').count();
     let trimmed = if closes > opens {
         trimmed.trim_end_matches(')')
     } else {
@@ -172,6 +174,16 @@ fn clean(word: &str) -> (&str, bool) {
 /// Whether a word may be a noun, as the first test of the search: the word without what opens and closes a
 /// phrase. It is true of every word that `clean` and `Noun::of` call a noun, and of a few more.
 fn may_be_noun(word: &str) -> bool {
+    // A word that starts with a letter no noun starts with is turned away before anything is trimmed.
+    if word.as_bytes().first().is_some_and(|b| {
+        b.is_ascii_alphanumeric()
+            && !matches!(
+                b.to_ascii_lowercase(),
+                b'a' | b'c' | b'e' | b'p' | b'r' | b's'
+            )
+    }) {
+        return false;
+    }
     let word = word.trim_start_matches(['(', '"', '\u{201c}']);
     // Every noun starts with one of these letters, or is a section sign (`0xC2 0xA7`): most words are
     // turned away by their first byte.
@@ -185,6 +197,7 @@ fn may_be_noun(word: &str) -> bool {
 /// The words of a text, split at white space as `str::split_whitespace` splits it. Text that is ASCII and has
 /// no vertical tab, which almost all text is, is split by its bytes, where `u8::is_ascii_whitespace` is the
 /// same test as `char::is_whitespace`.
+#[derive(Clone)]
 enum Words<'a> {
     Ascii(std::str::SplitAsciiWhitespace<'a>),
     Any(std::str::SplitWhitespace<'a>),
@@ -211,20 +224,40 @@ impl<'a> Iterator for Words<'a> {
     }
 }
 
-/// Every mention in a text, in order.
+/// The words after a noun, read from the text as far as the search looks and no further.
+struct Ahead<'a> {
+    read: Vec<&'a str>,
+    rest: Words<'a>,
+}
+
+impl<'a> Ahead<'a> {
+    /// The word `k` places after the noun, from 0.
+    fn get(&mut self, k: usize) -> Option<&'a str> {
+        while self.read.len() <= k {
+            let word = self.rest.next()?;
+            self.read.push(word);
+        }
+        self.read.get(k).copied()
+    }
+}
+
+/// Every mention in a text, in order. The words are read once, in order, and the few after a noun are read
+/// ahead of the search from a copy of where it is, so that no paragraph is made into a vector of its words.
 pub(crate) fn find(text: &str) -> Vec<Raw> {
-    // Most paragraphs have no noun at all, and they are not worth a vector of their words.
-    let Some(first) = Words::of(text).position(may_be_noun) else {
-        return Vec::new();
-    };
-    // A word and the space after it are rarely fewer than four bytes, so the vector is not grown.
-    let mut words: Vec<&str> = Vec::with_capacity(text.len() / 4 + 1);
-    words.extend(Words::of(text));
     let mut out = Vec::new();
-    let mut i = first;
-    while let Some(word) = words.get(i) {
+    let mut words = Words::of(text);
+    // The word before the one the search is at, and the number of that one.
+    let mut before: Option<&str> = None;
+    let mut i = 0usize;
+    let mut ahead = Ahead {
+        read: Vec::new(),
+        rest: words.clone(),
+    };
+    while let Some(word) = words.next() {
+        let at = i;
+        i += 1;
         if !may_be_noun(word) {
-            i += 1;
+            before = Some(word);
             continue;
         }
         let (bare, _) = clean(word);
@@ -234,21 +267,24 @@ pub(crate) fn find(text: &str) -> Vec<Raw> {
                 .next()
                 .is_some_and(|c| c.is_alphabetic() || c == '§')
         }) else {
-            i += 1;
+            before = Some(word);
             continue;
         };
-        // The references after the noun: a list joined by commas, `and`, `or` and `to`.
+        ahead.read.clear();
+        ahead.rest = words.clone();
+        // The references after the noun: a list joined by commas, `and`, `or` and `to`. `j` counts the words
+        // after the noun.
         let mut refs: Vec<String> = Vec::new();
-        let mut j = i + 1;
+        let mut j = 0usize;
         let mut expect = true;
-        while let Some(next) = words.get(j) {
+        while let Some(next) = ahead.get(j) {
             if expect {
                 let (token, comma) = clean(next);
                 if is_reference(token, noun) {
                     refs.push(token.to_string());
                     j += 1;
                     expect = comma || next.ends_with(',');
-                    if !expect && words.get(j).is_some_and(|w| joins(clean(w).0)) {
+                    if !expect && ahead.get(j).is_some_and(|w| joins(clean(w).0)) {
                         j += 1;
                         expect = true;
                     }
@@ -259,43 +295,45 @@ pub(crate) fn find(text: &str) -> Vec<Raw> {
             break;
         }
         if refs.is_empty() {
-            i += 1;
+            before = Some(word);
             continue;
         }
-        let before_law = i
-            .checked_sub(1)
-            .and_then(|b| words.get(b))
-            .is_some_and(|w| {
-                let w: String = clean(w)
-                    .0
-                    .chars()
-                    .filter(|c| *c != '.')
-                    .collect::<String>()
-                    .to_lowercase();
-                LAW_BEFORE.contains(&w.as_str())
-            });
-        let after_law = words.get(j).is_some_and(|w| is_law_name(w));
-        let of_other = words.get(j).is_some_and(|w| w.eq_ignore_ascii_case("of"))
-            && words.get(j + 1..).is_some_and(|rest| {
-                let mut it = rest.iter();
-                let mut name = it.next().copied();
-                if name.is_some_and(|w| w.eq_ignore_ascii_case("the")) {
-                    name = it.next().copied();
+        let before_law = before.is_some_and(|w| {
+            let w: String = clean(w)
+                .0
+                .chars()
+                .filter(|c| *c != '.')
+                .collect::<String>()
+                .to_lowercase();
+            LAW_BEFORE.contains(&w.as_str())
+        });
+        let after = ahead.get(j);
+        let after_law = after.is_some_and(is_law_name);
+        let after_of = after.is_some_and(|w| w.eq_ignore_ascii_case("of"));
+        let of_other = after_of && {
+            let mut k = j + 1;
+            let mut name = ahead.get(k);
+            if name.is_some_and(|w| w.eq_ignore_ascii_case("the")) {
+                k += 1;
+                name = ahead.get(k);
+            }
+            match name {
+                None => false,
+                Some(w) => {
+                    let w = clean(w).0;
+                    if w.chars().all(|c| c.is_ascii_digit()) && !w.is_empty() {
+                        // `of 45 CFR`, `of 11 U.S.C.`
+                        ahead.get(k + 1).is_some_and(is_law_name)
+                    } else {
+                        w.chars().next().is_some_and(char::is_uppercase)
+                            && !SELF.contains(&w.to_lowercase().as_str())
+                    }
                 }
-                let Some(w) = name else {
-                    return false;
-                };
-                let w = clean(w).0;
-                if w.chars().all(|c| c.is_ascii_digit()) && !w.is_empty() {
-                    // `of 45 CFR`, `of 11 U.S.C.`
-                    return it.next().is_some_and(|n| is_law_name(n));
-                }
-                w.chars().next().is_some_and(char::is_uppercase)
-                    && !SELF.contains(&w.to_lowercase().as_str())
-            });
+            }
+        };
         let outside = before_law || after_law || of_other;
-        let qualified = words.get(j).is_some_and(|w| w.eq_ignore_ascii_case("of"))
-            && words
+        let qualified = after_of
+            && ahead
                 .get(j + 1)
                 .is_some_and(|w| Noun::of(w).is_some_and(|n| n != Noun::Paragraph));
         let section_like = matches!(noun, Noun::Section)
@@ -313,15 +351,21 @@ pub(crate) fn find(text: &str) -> Vec<Raw> {
             out.push(Raw {
                 word: bare.to_string(),
                 noun,
-                text: format!("{bare} {reference}"),
+                text: [bare, reference.as_str()].join(" "),
                 statutory: section_like && first_group(&reference) >= 100,
                 reference,
                 outside,
                 qualified,
-                at: i,
+                at,
             });
         }
-        i = j.max(i + 1);
+        // The search goes on after the last reference (and a word that joins it to nothing), as many words
+        // past the noun as `j` counts, which have been read ahead already.
+        before = j.checked_sub(1).and_then(|k| ahead.get(k));
+        for _ in 0..j {
+            words.next();
+        }
+        i += j;
     }
     out
 }

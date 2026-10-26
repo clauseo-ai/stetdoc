@@ -147,12 +147,40 @@ fn in_snapshot(n: &NodeRef<'_>) -> bool {
 /// and for one inside the old properties of a property change. The branch is `Outside`:
 /// [`Story::revisions`] works it out.
 pub fn revision_at(n: &NodeRef<'_>) -> Option<Revision> {
-    if !n.is_element() || !is_word_ns(n.namespace()) {
+    if !n.is_element() {
         return None;
     }
+    // The name first, which turns most elements away, and the namespace only of the few it names.
     let name = n.local_name();
-    let kind = match name {
-        "ins" | "del" | "moveFrom" | "moveTo" => mark_kind(n, name)?,
+    let plain = match name {
+        "ins" | "del" | "moveFrom" | "moveTo" => None,
+        _ => Some(plain_kind(name)?),
+    };
+    if !is_word_ns(n.namespace()) {
+        return None;
+    }
+    let kind = match plain {
+        Some(kind) => kind,
+        None => mark_kind(n, name)?,
+    };
+    if in_snapshot(n) {
+        return None;
+    }
+    let text = |name: &str| w_attr(n, name).map(|v| v.into_owned());
+    Some(Revision {
+        kind,
+        node: n.id(),
+        id: w_attr(n, "id").and_then(|v| int(&v)),
+        author: text("author"),
+        date: text("date"),
+        date_utc: attr_in(n, &[W16DU], "dateUtc").map(|v| v.into_owned()),
+        branch: Branch::Outside,
+    })
+}
+
+/// The kind of a revision element whose name alone decides it, or `None` for a name that is no revision.
+fn plain_kind(name: &str) -> Option<RevKind> {
+    Some(match name {
         "rPrChange" => RevKind::RunProps,
         "pPrChange" => RevKind::ParagraphProps,
         "sectPrChange" => RevKind::SectionProps,
@@ -174,19 +202,6 @@ pub fn revision_at(n: &NodeRef<'_>) -> Option<Revision> {
         "customXmlMoveToRangeStart" => RevKind::CustomXmlMoveToStart,
         "customXmlMoveToRangeEnd" => RevKind::CustomXmlMoveToEnd,
         _ => return None,
-    };
-    if in_snapshot(n) {
-        return None;
-    }
-    let text = |name: &str| w_attr(n, name).map(|v| v.into_owned());
-    Some(Revision {
-        kind,
-        node: n.id(),
-        id: w_attr(n, "id").and_then(|v| int(&v)),
-        author: text("author"),
-        date: text("date"),
-        date_utc: attr_in(n, &[W16DU], "dateUtc").map(|v| v.into_owned()),
-        branch: Branch::Outside,
     })
 }
 

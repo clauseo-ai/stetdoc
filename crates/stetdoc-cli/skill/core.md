@@ -64,10 +64,12 @@ tracked changes and comments, or says it has none.
 To read a .docx, view it directly: `stetdoc view contract.docx`, `--revisions`, `--find` and the rest work on a .docx as on a
 working copy. Unpack only to edit the files.
 
-`stetdoc edit contract.docx -o contract.redline.docx` applies a batch to a .docx and writes another file, with no working
-copy to clean up. This is the default: the user's original stays as it was. Write the output next to the input, in the
-user's folder (for `/work/contract.docx`, `-o /work/contract.redline.docx`), never in a temporary folder, so the user
-finds it where the original is.
+`stetdoc edit contract.docx`, `replace` and `comment` edit a .docx with no working copy to clean up. Without `-o` or
+`--in-place` they write `contract.edited.docx` beside the input and leave the input unchanged. When that file exists they
+write `contract.edited-2.docx`, then `-3` and so on: they never overwrite. The receipt names the file. Make the next edit
+on the file you wrote, with `--in-place`: another edit of `contract.docx` starts a new file without your earlier edits.
+`-o OUT` names the file instead. Keep it next to the input, in the user's folder (for `/work/contract.docx`,
+`-o /work/contract.redline.docx`), never in a temporary folder, so the user finds it where the original is.
 
 `--in-place` (with MCP, `in_place: true`) writes the result back to the file it read. Use it only when the user asks you to
 update that file, or the file is one this task already wrote (such as the redline from your first edit). It writes
@@ -85,27 +87,52 @@ no base and a `next: stetdoc view ...` line instead: view the file, then write t
 on a .docx or a working copy, with no ref or base to copy:
 
 ```
-stetdoc replace contract.docx 'net 30' 'net 45' 'England and Wales' 'Singapore' -o contract.redline.docx
-stetdoc comment contract.docx 'Liability Cap' 'Is this cap mutual?' -o contract.commented.docx
+stetdoc replace contract.docx 'net 30' 'net 45' 'England and Wales' 'Singapore'
+stetdoc comment contract.edited.docx 'Liability Cap' 'Is this cap mutual?' --in-place
 ```
+
+The first writes `contract.edited.docx`, and the second adds the comment to that file.
 
 - **Pairs.** `replace FILE OLD NEW [OLD NEW ...]` applies every pair as one edit, all or nothing. An empty NEW (`''`) is a
   tracked deletion. Pairs whose texts overlap are refused. Put `--` before the pairs when a text starts with `-`.
 - **Matching.** OLD (and a comment's ANCHOR) is matched in the text as the final view reads it, across runs and
   formatting, case-sensitive, with curly and straight quotes the same. It must be there exactly once. If it is not there
   (`not_found`) or is there more than once (`ambiguous_match`), nothing is written and the error lists each place (ref,
-  clause and the text around it): use a longer OLD, or narrow the search with `--clause 11.1` or `--range p40..p60`.
+  clause or `(under "HEADING")`, and the text around it): use a longer OLD, or narrow the search with `--clause 11.1` or
+  `--range p40..p60`. `--ignore-case` matches whatever the case. Without it, a `not_found` error lists the places that
+  match in another case: rerun with `--ignore-case` if those are the ones you meant.
 - **Finding OLD first.** `stetdoc view contract.docx --find 'net 30' --find 'governing law'` prints one line per matching
   paragraph: its ref, its clause (`{§11.1}`) and about 100 characters of its exact text around the match, which you can
-  copy as OLD. With several texts each line says which matched. `--context N` shows the blocks whole.
+  copy as OLD. With several texts each line says which matched. A hit in a table cell ends with the row's other cells,
+  such as `{row: p36 "Greater than 4.25 to 1.00", p38 "2.25%"}`, so you can edit them by ref. `--context N` shows the
+  blocks whole.
 - **Every occurrence.** `--all` replaces every occurrence of each OLD and says how many. `--expect N` does the same only
   when there are exactly N, and otherwise refuses with `count_mismatch` (exit 3). Use it when the user said how many.
-- **Where it writes.** On a .docx, `-o OUT` writes a new file and `--in-place` writes the file back (see above for when).
-  A working copy is always written in place, and `-o` or `--in-place` is refused there. `--dry-run` shows the receipt and
+  `comment --all` and `comment --expect N` put one comment on each place.
+- **Where it writes.** On a .docx, the default is `NAME.edited.docx` beside it, `-o OUT` writes the file you name, and
+  `--in-place` writes the file back (see above for when). A working copy is always written in place, and `-o` or
+  `--in-place` is refused there. `--dry-run` shows the receipt and
   writes nothing, and on a .docx needs neither flag. `--author NAME` names the author, as for every edit.
 - **Quoting.** Put each text in single quotes. For a text with an apostrophe, use double quotes when it has no `$`,
   backtick or backslash, or a batch.
 - With MCP, the `replace` tool takes `pairs: [{old, new}]` and the `comment` tool `anchor` and `text`.
+
+## Manual markup, without tracked changes
+
+Some readers ask for a manual redline: old text struck through and new text underlined, with no Track Changes. Use it
+only when the user or the document asks for manual markup or "no track changes". Otherwise use tracked changes.
+
+```
+stetdoc replace contract.docx 'thirty days' 'sixty days' --manual
+```
+
+`--manual` on `replace` or `edit` keeps the old text, struck through, and adds the new text underlined after it, as plain
+formatting. An empty NEW leaves struck text only, and an insertion is underlined text only. `--manual-color` also makes
+deleted text red and new text blue. The receipt says `struck "...", underlined "..."` for each change, and `view` shows
+old and new run together without the formatting, with no tracked change. `stetdoc inspect FILE p4` shows the strike and
+the underline on the paragraph. Splitting, merging and table rows are refused under `--manual`: make them in a separate
+tracked edit. Text inside another author's pending tracked change is refused too. When you report, tell the user the
+file is a manual markup, not Track Changes, so it cannot be accepted or rejected in Word.
 
 Use a batch (Way 2) to insert or delete paragraphs, accept or reject revisions, reply to or resolve comments, change
 formatting, or for text that is long or holds many quotes.
@@ -115,6 +142,12 @@ formatting, or for text that is long or holds many quotes.
 A receipt lists the problems your change added, if any. Problems that were already in the input are summed up in one line
 (`66 problems were already in the input, and no new one was added`). They are not yours to fix, so mention them only if
 the user asks. `stetdoc check FILE --all` (with MCP, `all: true`) lists them.
+
+When the document holds tracked changes you did not make, receipts and views say so in a line such as
+`4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #0 insert p1 "shall pay ", ...`, followed by
+`Tell the user about them.` Do it: name who made them and what they change. `stetdoc view FILE --revisions --context 1`
+shows each of them in its paragraph. Without a saved author, a view says the changes are `already in the document`:
+tell the user about them if you did not make them.
 
 ## Way 1: edit the readable files
 
@@ -153,6 +186,8 @@ EOF
 
 - **The base.** The first line names the base token the batch was written against. Copy it from the last view, receipt or
   pack; never make one up. If a block you name has changed since, the batch is refused (`stale_ref`): view again and rewrite.
+  A batch for a .docx may leave the base out: its refs are then read against the file as it is now, so view the file again
+  after an edit that added or removed blocks. A working copy always needs it.
 - **Refs** name blocks: `p` paragraphs, `t` tables, `r` rows, `c3` comments, `fn3` and `en2` notes. A batch cannot name a
   paragraph that it creates itself. The receipt gives the refs of new paragraphs and the new base for the next batch.
 - **Ranges.** Prefer `find`, which must match once in the paragraph (or add `occurrence: 2`). Use `start` and `end` offsets only
@@ -171,7 +206,9 @@ EOF
 
 `view --revisions` lists tracked changes with their ids and authors, one line each and cut to 80 characters, and
 `view --comments` the threads. `--revisions --full` shows each change's whole text (up to 1000 characters), and
-`--revisions --find TEXT` lists only the changes whose text contains it (ignoring case unless TEXT has a capital). Then `accept` or
+`--revisions --find TEXT` lists only the changes whose text contains it (ignoring case unless TEXT has a capital).
+`--revisions --context N` shows each changed paragraph whole, in redline, with N paragraphs around it, so you can read
+each change in its sentence. Then `accept` or
 `reject` by `ids` (`ids: 57, 58`), by `author` or `all`, and `comment`, `reply`, `resolve`. `stetdoc compare original.docx revised.docx -o
 redline.docx` writes a redline of two versions, and `stetdoc view redline.docx --revisions` lists its changes.
 
@@ -190,8 +227,21 @@ your judgement.
   the user; do not work around it with other tools, and do not offer to.
 - Read an error's `next:` line and do what it says. Exit 7 (`internal`) is a bug in stetdoc: report it, do not work around it.
 - `--json` on any command prints data for programs, and errors as `{"error": {"code", "message", "next"}}`.
-- With stetdoc's MCP tools instead of a shell, each command is the tool of the same name (`skills get` is `skills_get`) with
-  its flags as arguments, and the edit tool takes the batch in `batch`.
+
+## With MCP tools
+
+With stetdoc's MCP tools instead of a shell, each command is the tool of the same name (`skills get` is `skills_get`), with
+its flags as arguments in snake case (`in_place`, `ignore_case`, `manual`, `manual_color`, `all`, `expect`). Each tool's
+description carries its rules, so read it. The same defaults apply: an edit of a .docx without `output` or `in_place`
+writes `NAME.edited.docx` beside it.
+
+- `replace` takes `pairs: [{"old": "net 30", "new": "net 45"}]`, and `comment` takes `anchor` and `text`.
+- `edit` takes typed operations in `ops`, one object per operation with `op` and that operation's fields:
+  `[{"op": "replace", "ref": "p4", "find": "thirty", "with": "sixty"}, {"op": "comment", "ref": "p9", "find": "Liability Cap", "text": "Mutual?"}]`.
+  `base` goes with `ops`, and may be left out for a .docx (see "The base"). A `set` operation takes
+  `props: [{"name": "spacing", "attrs": ["before=6pt"]}]`. For what `ops` cannot say, such as a property with children
+  (borders, tab stops), send the block text of Way 2 in `batch` instead. `ops` and `batch` cannot be sent together, and
+  `ops_file` names a file that holds a batch.
 
 ## Commands
 

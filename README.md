@@ -34,14 +34,18 @@ repository with `cargo install --path crates/stetdoc-cli`.
 ```
 export STETDOC_AUTHOR="Jane Doe"   # every revision has an author (or save yours once with stetdoc init)
 stetdoc view contract.docx --find 'net 30' --find 'governing law'   # each hit: ref, clause, exact text
-stetdoc replace contract.docx 'net 30' 'net 45' -o contract.redline.docx   # each OLD found once, all pairs or none
-stetdoc comment contract.redline.docx 'Liability Cap' 'Is this mutual?' --in-place
+stetdoc replace contract.docx 'net 30' 'net 45'   # writes contract.edited.docx; each OLD found once, all pairs or none
+stetdoc comment contract.edited.docx 'Liability Cap' 'Is this mutual?' --in-place
 stetdoc compare old.docx new.docx -o redline.docx   # a redline of any two versions
 ```
 
-`replace` matches OLD in the text as it reads, across formatting. Text that is missing or there more than once is
-refused with every place listed; `--clause 11.1` or `--range p40..p60` narrows the search, and `--all` or `--expect N`
-replaces every occurrence. For longer work, unpack a working copy and edit its readable files:
+An edit of a .docx writes `NAME.edited.docx` beside it (then `NAME.edited-2.docx`, never overwriting) and leaves the
+input unchanged, unless `-o FILE` names the output or `--in-place` writes back. `replace` matches OLD in the text as it
+reads, across formatting. Text that is missing or there more than once is refused with every place listed; `--clause
+11.1` or `--range p40..p60` narrows the search, `--ignore-case` ignores case, and `--all` or `--expect N` replaces (or
+comments on) every occurrence. `--manual` writes a manual redline instead, old text struck and new text underlined with
+no tracked changes, for readers who ask for one. Receipts and views name tracked changes made by others, so the agent can
+report them. For longer work, unpack a working copy and edit its readable files:
 
 ```
 stetdoc unpack contract.docx             # writes contract.stet/: readable files and a hidden complement

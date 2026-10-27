@@ -9,6 +9,9 @@ released yet.
 
 ### Added
 
+- The skill stub and `stetdoc skills get core` teach the default output (`NAME.edited.docx`, then `--in-place` on it),
+  `--manual` markup and when to use it, reporting tracked changes by others, `--ignore-case`, `comment --all` and
+  `--expect`, `view --revisions --context N`, table hits, and the MCP edit tool's typed `ops`.
 - `stetdoc init --agent antigravity` installs the skill for Antigravity CLI (`agy`), which replaced Gemini CLI: in
   `~/.gemini/config/skills/stetdoc` (read by its CLI, app and IDE) or a project's `.agents/skills/stetdoc`. It is detected
   by `agy` on the PATH or `~/.gemini/antigravity-cli`, and `--mcp` prints `agy mcp add stetdoc stetdoc mcp`. Picking

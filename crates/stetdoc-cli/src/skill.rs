@@ -23,12 +23,13 @@ const EARLIER: [&str; 1] = [include_str!("../skill/earlier/stub-1.md")];
 
 /// The stubs earlier builds wrote with a version line, each with the `{{version}}` placeholder on it. A file is matched
 /// against them with its version line normalised, as against the current stub.
-const EARLIER_VERSIONED: [&str; 5] = [
+const EARLIER_VERSIONED: [&str; 6] = [
     include_str!("../skill/earlier/stub-2.md"),
     include_str!("../skill/earlier/stub-3.md"),
     include_str!("../skill/earlier/stub-4.md"),
     include_str!("../skill/earlier/stub-5.md"),
     include_str!("../skill/earlier/stub-6.md"),
+    include_str!("../skill/earlier/stub-7.md"),
 ];
 
 /// The key of the front-matter line that carries the version.

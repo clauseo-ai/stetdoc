@@ -229,6 +229,11 @@ files. An edit is intent. A revision is what lands in the package.
 
 **Batch.** A list of operations applied atomically: all of them land, or none do.
 
+**Occurrence.** One place a text is in a paragraph's Final text, matched as an operation's
+`find` matches it: its ref, its clause, its character offsets and the text around it.
+`Document::occurrences` lists them, and `stetdoc replace` and `stetdoc comment` turn them into
+operations against the same state.
+
 **Scope guard.** An optional list of refs a batch may touch. Any change outside it
 rejects the batch.
 

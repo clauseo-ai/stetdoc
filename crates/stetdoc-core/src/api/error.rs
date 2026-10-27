@@ -214,6 +214,14 @@ error_codes! {
         next: "Add surrounding text to make the match unique, or target one \
                block by its ref.",
     }
+    CountMismatch {
+        wire: "count_mismatch",
+        exit: Target,
+        doc: "A find text matches a different number of times from the count the \
+              request expects, so nothing was applied.",
+        next: "Look at the places listed, then give the count they show or a \
+               narrower scope.",
+    }
     StaleRef {
         wire: "stale_ref",
         exit: Stale,

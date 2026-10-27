@@ -1,15 +1,19 @@
 //! One file per command. Each maps its arguments onto calls of the core, as the table in `docs/design/cli-and-skill.md`
 //! says, and returns what to print.
 
+mod apply;
 mod capabilities;
 mod check;
+mod comment;
 mod compare;
 mod edit;
+mod find;
 mod init;
 mod inspect;
 mod lookup;
 pub mod mcp;
 mod pack;
+mod replace;
 mod skills;
 mod unpack;
 mod view;
@@ -26,6 +30,8 @@ pub fn run(command: &Command) -> Result<Outcome, Failure> {
         Command::View(args) => view::run(args),
         Command::Inspect(args) => inspect::run(args),
         Command::Edit(args) => edit::run(args),
+        Command::Replace(args) => replace::run(args),
+        Command::Comment(args) => comment::run(args),
         Command::Compare(args) => compare::run(args),
         Command::Check(args) => check::run(args),
         Command::Lookup(args) => lookup::run(args),

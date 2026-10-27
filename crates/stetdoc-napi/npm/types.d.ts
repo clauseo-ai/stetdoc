@@ -152,7 +152,7 @@ export type CompareOptions = {
 /** Where a page continues: `p188` (after that block), `change:14` or `comment:7`. Opaque to callers. */
 export type Cursor = string;
 
-export type ErrorCode = "unsupported" | "cross_block" | "readonly_region" | "scope_violation" | "io_error" | "invalid_payload" | "not_found" | "ambiguous_match" | "stale_ref" | "stale_files" | "pending_edits" | "stale_target" | "validation_failed" | "malformed_input" | "limit_exceeded" | "corrupt_complement" | "unsupported_version" | "internal";
+export type ErrorCode = "unsupported" | "cross_block" | "readonly_region" | "scope_violation" | "io_error" | "invalid_payload" | "not_found" | "ambiguous_match" | "count_mismatch" | "stale_ref" | "stale_files" | "pending_edits" | "stale_target" | "validation_failed" | "malformed_input" | "limit_exceeded" | "corrupt_complement" | "unsupported_version" | "internal";
 
 /** An error code with its exit status. */
 export type ErrorInfo = {
@@ -404,6 +404,44 @@ export type MoveEntry = {
 export type NewParagraph = string | {
   style?: string | null;
   text: string;
+};
+
+/** One place a text is in a paragraph's Final text. */
+export type Occurrence = {
+  /** The ref of the paragraph. */
+  block: string;
+  /** The full label of the clause the paragraph is in, such as `11.1(a)`, when it is in one. */
+  clause?: string | null;
+  /** One past the last character of the match. */
+  end: number;
+  /** True when only the second try matched: curly and straight quotes taken as the same, as an operation's `find` does. */
+  loose: boolean;
+  /** Which match of the text in the paragraph it is, counted from 1: the `occurrence` an operation names it with. */
+  occurrence: number;
+  /** The match with up to 30 characters on each side, the match in square brackets, on one line. */
+  snippet: string;
+  /** The first character of the match, as an offset in the paragraph's Final text. */
+  start: number;
+  /** The story: `body`, `notes`, `headers` or `comments`. */
+  story: string;
+};
+
+/** Every place a text is, at one state. */
+export type Occurrences = {
+  /** The base token of the state the answer describes. */
+  base: string;
+  /**
+   * The paragraphs where the text is only in text a tracked deletion removes, one entry each with its first match in
+   * the Original text. They are not targets, and are listed so that a caller can say why the text was not found.
+   */
+  deleted: Occurrence[];
+  /**
+   * Every match in the Final text, in document order. Text that a tracked insertion added counts, and text that a
+   * tracked deletion removed does not.
+   */
+  hits: Occurrence[];
+  /** The text, as asked. */
+  needle: string;
 };
 
 /** One edit instruction. See `Op::spec` for the table that describes it. */

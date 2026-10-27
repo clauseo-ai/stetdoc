@@ -17,9 +17,9 @@ compiler before the code existed, and section 11 lists where the code differs fr
 
 ## The decisions that matter most
 
-1. **One handle, thirteen methods, three free functions** (1). `Document` is `open`, `resume`, `base`, `view`, `edit`,
-   `save`, `inspect`, `revisions`, `lookup`, `check`, `check_pending`, `files` and `export`. The free functions are `compare`,
-   `capabilities` and `json_schema`. `files` is new: the text editor backend needs the readable files without the
+1. **One handle, fourteen methods, three free functions** (1). `Document` is `open`, `resume`, `base`, `view`, `edit`,
+   `save`, `inspect`, `revisions`, `lookup`, `occurrences`, `check`, `check_pending`, `files` and `export`. The free functions are `compare`,
+   `capabilities` and `json_schema`. `occurrences` came later (decision 0007): it finds a text for the one-step `replace` and `comment` commands. `files` is new: the text editor backend needs the readable files without the
    complement, which `export` costs a ZIP write to build. `check_pending` is new: it is the whole of `stetdoc check`, the
    dry run of the pending files, the revisions already there by author and the exit status, in one call that the CLI, napi
    and a host application share. Every method that can fail returns `Result`, which `ARCHITECTURE.md` sketched as infallible for
@@ -92,6 +92,7 @@ impl Document {
     pub fn inspect(&self, target: &str) -> Result<Inspection, StetError>;   // "p42", "t3", "r17", "styles", "numbering", "sections"
     pub fn revisions(&self, filter: &RevisionFilter) -> Result<Vec<RevisionInfo>, StetError>;
     pub fn lookup(&self, query: &str) -> Result<Lookup, StetError>;
+    pub fn occurrences(&self, needle: &str, scope: &Scope) -> Result<Occurrences, StetError>;   // decision 0007
     pub fn check(&self) -> CheckReport;
     pub fn check_pending(&self, pending: Option<ReadableFiles>, stamp: Option<Stamp>, strict: bool) -> Result<CheckResult, StetError>;
     pub fn files(&self) -> Result<ReadableFiles, StetError>;       // what `export` writes as files, with no ZIP write

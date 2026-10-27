@@ -13,6 +13,8 @@ Every command takes `--json`, which prints the result, or the error, as JSON on 
 | `stetdoc view` | Show a document or a working copy: an outline of a large document, or a range, a search, the revisions, the comments |
 | `stetdoc inspect` | Show the effective formatting of a block and where each value comes from, or the styles, lists or sections |
 | `stetdoc edit` | Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place |
+| `stetdoc replace` | Replace text as tracked changes in one step: each OLD, found once in the document as it reads now, becomes NEW |
+| `stetdoc comment` | Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now |
 | `stetdoc compare` | Write a redline of the differences between two documents as tracked changes |
 | `stetdoc check` | Validate, and show every revision that pack would write, by author |
 | `stetdoc lookup` | Find a defined term, a cross-reference, or what refers to a clause |
@@ -298,6 +300,159 @@ next: If this file was rewritten since that view or receipt, by an edit that wro
 
 ```
 
+## `stetdoc replace`
+
+Replace text as tracked changes in one step: each OLD, found once in the document as it reads now, becomes NEW.
+
+```text
+stetdoc replace [OPTIONS] <INPUT> <OLD NEW> <OLD NEW>...
+```
+
+| Argument | Meaning |
+|---|---|
+| `<INPUT>` | A working copy, or a .docx with -o or --in-place. |
+| `<OLD NEW>` | OLD and NEW, as many pairs as you like, applied together or not at all. OLD is matched in the text as the final view reads it, across formatting, with curly and straight quotes the same; it must be there once (see --all and --expect). An empty NEW deletes OLD. Put -- before the pairs when a text starts with -. |
+| `--all` | Replace every occurrence of each OLD, and say how many. |
+| `--expect <N>` | Replace every occurrence of each OLD, and only if there are exactly N of each. |
+| `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
+| `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
+| `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
+| `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it. |
+| `--dry-run` | Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
+| `--quotes <QUOTES>` | Follow the paragraph's quotes (match), or keep them as typed. One of `match`, `as-typed`. Default `match`. |
+| `--author <NAME>` | The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default. |
+| `--date <DATE>` | The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock. |
+
+### Examples
+
+`replace` changes text in one step. It reads the document, finds each OLD in the text as the final view reads it, and
+applies every pair as tracked changes in one edit, all or nothing. There is no base to copy: stetdoc finds and edits in
+the same run, so nothing can change between the two. OLD is matched across formatting, with curly and straight quotes
+the same, and it must be in the document once.
+
+```console
+$ stetdoc replace contract.docx "thirty days" "sixty days" -o edited.docx --author "Jane Doe"
+replace "thirty days" with "sixty days": once, at p4
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
+0 replace p4: deletion #0, insertion #1
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+checked 1 unit.
+wrote edited.docx
+
+```
+
+Text that is there more than once, or not at all, is refused, and nothing is written. A refusal lists every place, with
+its ref, its clause when it is in one, and the text around it, so the next try can use a longer OLD or a scope.
+
+```console
+$ stetdoc replace contract.docx "Supplier" "Vendor" -o edited.docx --author "Jane Doe"
+? 3
+error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
+  p1 The [Supplier] shall indemnify the Customer,…
+  p2 …sses” means any loss, and the [Supplier]’s liability.
+next: Nothing was applied. Make OLD longer so it matches once, limit the search with --range or --clause, or pass --all to change every one.
+
+$ stetdoc replace contract.docx "ninety days" "sixty days" -o edited.docx --author "Jane Doe"
+? 3
+error[not_found]: "ninety days" is not in the document as it reads now.
+next: Nothing was applied. Write OLD exactly as the document reads now (stetdoc view FILE --find WORD shows it), or widen --range or --clause.
+
+```
+
+`--all` replaces every occurrence and says how many. `--expect N` does the same only when there are exactly N, and
+refuses with `count_mismatch` otherwise. `--range p40..p60` or `--clause 11.1` (a clause as `view --clause` names it)
+limits where OLD is looked for.
+
+```console
+$ stetdoc replace contract.docx "Supplier" "Vendor" --all -o edited.docx --author "Jane Doe"
+replace "Supplier" with "Vendor": 2 times, in 2 blocks: p1, p2
+applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base f2018f511cded939:0:f2018f511cded939
+0 replace p1: deletion #0, insertion #1
+1 replace p2: deletion #2, insertion #3
+p1 The {--Supplier--}{#0 JD}{++Vendor++}{#1 JD} shall indemnify the Customer, and shall pay on demand.
+p2 “Losses” means any loss, and the {--Supplier--}{#2 JD}{++Vendor++}{#3 JD}’s liability.
+checked 2 units.
+wrote edited.docx
+
+$ stetdoc replace contract.docx "Supplier" "Vendor" --expect 3 -o edited.docx --author "Jane Doe"
+? 3
+error[count_mismatch]: "Supplier" is in the document 2 times, not 3:
+  p1 The [Supplier] shall indemnify the Customer,…
+  p2 …sses” means any loss, and the [Supplier]’s liability.
+next: Nothing was applied. Check the places listed, then pass the count they show with --expect, or limit the search with --range or --clause.
+
+$ stetdoc replace contract.docx "Supplier" "Vendor" --range p2..p5 --dry-run --author "Jane Doe"
+replace "Supplier" with "Vendor": once, at p2
+dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
+0 replace p2: deletion #0, insertion #1
+p2 “Losses” means any loss, and the {--Supplier--}{#0 JD}{++Vendor++}{#1 JD}’s liability.
+checked 1 unit.
+
+```
+
+Several pairs go in one call and one edit. An empty NEW deletes OLD. `--dry-run` shows the receipt and writes nothing,
+and a .docx needs neither `-o` nor `--in-place` for it. `--in-place` writes the .docx back to itself, as `edit` does,
+and a working copy is written by the replace itself.
+
+```console
+$ stetdoc replace contract.docx "thirty days" "sixty days" ", and shall pay on demand" "" --in-place --author "Jane Doe"
+replace "thirty days" with "sixty days": once, at p4
+delete ", and shall pay on demand": once, at p1
+applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base 2fcb6ddbee598bc0:0:2fcb6ddbee598bc0
+0 replace p4: deletion #0, insertion #1
+1 delete p1: deletion #2
+p1 The Supplier shall indemnify the Customer{--, and shall pay on demand--}{#2 JD}.
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+checked 2 units.
+wrote contract.docx
+
+```
+
+## `stetdoc comment`
+
+Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now.
+
+```text
+stetdoc comment [OPTIONS] <INPUT> <ANCHOR> <TEXT>
+```
+
+| Argument | Meaning |
+|---|---|
+| `<INPUT>` | A working copy, or a .docx with -o or --in-place. |
+| `<ANCHOR>` | The text to anchor the comment to, matched as replace matches OLD. It must be there once. |
+| `<TEXT>` | The comment. A newline is a paragraph break of the comment. |
+| `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
+| `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
+| `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
+| `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it. |
+| `--dry-run` | Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
+| `--quotes <QUOTES>` | Follow the paragraph's quotes (match), or keep them as typed. One of `match`, `as-typed`. Default `match`. |
+| `--author <NAME>` | The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default. |
+| `--date <DATE>` | The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock. |
+
+### Examples
+
+`comment` adds a comment in one step: it finds ANCHOR in the text as the final view reads it, as `replace` finds OLD,
+and anchors the comment to it. ANCHOR must be there once, and `--range` or `--clause` limits where it is looked for.
+
+```console
+$ stetdoc comment contract.docx "thirty days" "Can we agree sixty?" -o commented.docx --author "Jane Doe"
+comment on "thirty days": once, at p4
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base a2a6bbc2e3a46398:0:a2a6bbc2e3a46398
+0 comment p4: c0 added
+p4 Payment is due within {c0}thirty days{/c0}.
+checked 1 unit.
+wrote commented.docx
+
+$ stetdoc comment contract.docx "Supplier" "Which one?" -o commented.docx --author "Jane Doe"
+? 3
+error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
+  p1 The [Supplier] shall indemnify the Customer,…
+  p2 …sses” means any loss, and the [Supplier]’s liability.
+next: Nothing was applied. Make the anchor longer so it matches once, or limit the search with --range or --clause.
+
+```
+
 ## `stetdoc compare`
 
 Write a redline of the differences between two documents as tracked changes.
@@ -494,6 +649,7 @@ error codes:
   invalid_payload      exit 2
   not_found            exit 3
   ambiguous_match      exit 3
+  count_mismatch       exit 3
   stale_ref            exit 4
   stale_files          exit 4
   pending_edits        exit 4
@@ -553,7 +709,7 @@ The exit status is the class of the error's code. The codes are in the [error re
 | 0 | success | |
 | 1 | operation failed | `unsupported`, `cross_block`, `readonly_region`, `scope_violation`, `io_error` |
 | 2 | usage | `invalid_payload`, and argument errors |
-| 3 | target | `not_found`, `ambiguous_match` |
+| 3 | target | `not_found`, `ambiguous_match`, `count_mismatch` |
 | 4 | stale | `stale_ref`, `stale_files`, `pending_edits`, `stale_target` |
 | 5 | validation | `validation_failed`, and `check --strict` with any violation |
 | 6 | input | `malformed_input`, `limit_exceeded`, `corrupt_complement`, `unsupported_version` |

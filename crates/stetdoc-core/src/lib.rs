@@ -91,6 +91,7 @@ pub use api::files::{NewParagraph, Origin, Place, ReadableFiles, RenderedBlock};
 pub use api::inspect::{InspectItem, Inspection};
 pub use api::limits::Limits;
 pub use api::lookup::{Hit, Lookup, Reference, Site};
+pub use api::occurrence::{Occurrence, Occurrences};
 pub use api::op::{
     CommentOp, DeleteCommentOp, DeleteNoteOp, DeleteOp, EditCommentOp, FormatOp, InsertOp, ListOp,
     MergeOp, Op, ParagraphOp, PropSet, ReplaceOp, ReplyOp, ResolveOp, ReviewOp, RowAction, RowOp,

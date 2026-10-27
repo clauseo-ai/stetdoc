@@ -56,6 +56,7 @@ impl Document {
     pub fn inspect(&self, target: &str) -> Result<Inspection, StetError>;   // "p42", "styles", "numbering", "sections"
     pub fn revisions(&self, filter: &RevisionFilter) -> Result<Vec<RevisionInfo>, StetError>;
     pub fn lookup(&self, query: &str) -> Result<Lookup, StetError>;   // defined terms, cross-references
+    pub fn occurrences(&self, needle: &str, scope: &Scope) -> Result<Occurrences, StetError>;   // where a text is, as `find` matches
     pub fn check(&self) -> CheckReport;
     pub fn check_pending(&self, pending: Option<ReadableFiles>, stamp: Option<Stamp>, strict: bool)
         -> Result<CheckResult, StetError>;                       // everything `stetdoc check` prints, and its exit status
@@ -575,7 +576,7 @@ enum.
 |---|---|
 | 1 operation failed | `unsupported`, `cross_block`, `readonly_region`, `scope_violation`, `io_error` (the CLI's file system) |
 | 2 usage | `invalid_payload`, CLI argument errors |
-| 3 target | `not_found`, `ambiguous_match` |
+| 3 target | `not_found`, `ambiguous_match`, `count_mismatch` |
 | 4 stale | `stale_ref`, `stale_files`, `pending_edits`, `stale_target` (a file the CLI would write holds a version it has not seen: a pack's output, or a .docx edited in place) |
 | 5 validation | `validation_failed` (the edit would add violations) |
 | 6 input | `malformed_input`, `limit_exceeded`, `corrupt_complement`, `unsupported_version` |

@@ -174,7 +174,7 @@ pub use table_site::{TableSite, TblLook};
 pub use text_content::space_preserved;
 pub use text_fields::FieldInfo;
 pub use text_join::{Joined, ends_container};
-pub use text_locate::{Gap, Located, Span};
+pub use text_locate::{Gap, Located, Span, fold_quotes};
 pub use text_model::{
     CDATA, Context, FIELD_RESULT, FieldRef, Item, ItemKind, NO_CONTEXT, NO_FIELD, TextMap, Vis,
     WrapperKind,

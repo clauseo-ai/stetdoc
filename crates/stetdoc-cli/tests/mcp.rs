@@ -432,3 +432,85 @@ fn edit_writes_a_docx_in_place_and_pack_done_removes_the_working_copy() {
     assert!(!tmp.path().join("contract.stet").exists());
     assert!(tmp.path().join("contract.edited.docx").is_file());
 }
+
+#[test]
+fn replace_and_comment_take_pairs_and_an_anchor_in_one_call() {
+    let tmp = tempfile::tempdir().unwrap();
+    fs::write(tmp.path().join("contract.docx"), contract::package()).unwrap();
+    let mut server = Server::start(tmp.path(), &[]);
+
+    let listing = server.request("tools/list", json!({}));
+    let tools = listing["result"]["tools"].as_array().unwrap();
+    let schema =
+        |name: &str| tools.iter().find(|t| t["name"] == name).unwrap()["inputSchema"].clone();
+    let replace = schema("replace");
+    assert_eq!(replace["properties"]["pairs"]["type"], "array");
+    assert_eq!(
+        replace["properties"]["pairs"]["items"]["required"],
+        json!(["old", "new"])
+    );
+    assert_eq!(
+        schema("comment")["required"],
+        json!(["input", "anchor", "text"])
+    );
+
+    // Two places: refused with both listed, and nothing written.
+    let several = server.call(
+        "replace",
+        json!({ "input": "contract.docx", "output": "out.docx", "pairs": [{ "old": "Supplier", "new": "Vendor" }] }),
+    );
+    assert_eq!(several["isError"], true, "{several}");
+    assert_eq!(
+        several["structuredContent"]["error"]["code"],
+        "ambiguous_match"
+    );
+    let message = several["structuredContent"]["error"]["message"]
+        .as_str()
+        .unwrap();
+    assert!(
+        message.contains("p1") && message.contains("p2"),
+        "{message}"
+    );
+    assert!(!tmp.path().join("out.docx").exists());
+
+    // A pair that is not an object of old and new is a usage error.
+    let wrong = server.call(
+        "replace",
+        json!({ "input": "contract.docx", "output": "out.docx", "pairs": ["thirty", "sixty"] }),
+    );
+    assert_eq!(
+        wrong["structuredContent"]["error"]["code"], "invalid_payload",
+        "{wrong}"
+    );
+
+    // Two pairs, one an empty new text, in place, with the server's author; the receipt carries the written file's base.
+    let done = server.call(
+        "replace",
+        json!({
+            "input": "contract.docx",
+            "in_place": true,
+            "pairs": [{ "old": "thirty days", "new": "sixty days" }, { "old": " on demand", "new": "" }],
+        }),
+    );
+    let done = ok(&done);
+    assert_eq!(done["found"][0]["count"], 1);
+    assert_eq!(done["found"][1]["hits"][0]["block"], "p1");
+    assert!(done["receipt"]["base"].is_string(), "{done}");
+    let text = done["receipt"]["text"].as_str().unwrap();
+    assert!(
+        text.contains("{++sixty++}") && text.contains("{-- on demand--}"),
+        "{text}"
+    );
+
+    let commented = server.call(
+        "comment",
+        json!({ "input": "contract.docx", "anchor": "sixty days", "text": "Agreed.", "in_place": true }),
+    );
+    let commented = ok(&commented);
+    assert_eq!(commented["found"][0]["hits"][0]["block"], "p4");
+    let view = server.call(
+        "view",
+        json!({ "input": "contract.docx", "comments": true }),
+    );
+    assert!(ok(&view)["text"].as_str().unwrap().contains("Agreed."));
+}

@@ -42,6 +42,8 @@ package. "Recover" means: lock, and if `.stet/writing` exists, run the recovery 
 | `inspect <doc> <target>` | `open` or `resume` → `inspect(target)` (`p42`, `t3`, `r17`, `styles`, `numbering`, `sections`) | nothing |
 | `edit <dir>` | recover → `resume` → `ensure_clean` → `Batch::parse` → `edit(Edit::ops(..))` → `export` → `write_plan(disk, default)` | the working copy. With `--dry-run`, nothing |
 | `edit <docx> -o <out>` | `open` → `Batch::parse` → `edit` → `save` | `<out>`, which must not be the input. Without `-o` or `--in-place` it is a usage error. The receipt is retold for the written file (`commands/written.rs`): the written bytes are opened, and when their readable files match the session's apart from the base, the head line and `receipt.base` carry the written file's base, so the next batch can chain from it; otherwise the base is left out (`null` in JSON) and `next` says to view the written file |
+| `replace <doc> OLD NEW ...` | open or resume as `edit` → `occurrences` for each OLD in the scope (`--range`, `--clause`) → a batch of `replace` (or `delete`, for an empty NEW) on each place's ref and offsets, against `base()` → `edit` → written as `edit` writes (`commands/apply.rs`) | as `edit`. Zero places is `not_found` and several `ambiguous_match` (unless `--all`, or `--expect N`, `count_mismatch`), each listing every place. With `--dry-run` a .docx needs neither `-o` nor `--in-place` |
+| `comment <doc> ANCHOR TEXT` | as `replace`, with one `comment` operation on the one place of ANCHOR | as `edit` |
 | `edit <docx> --in-place` | `open` → `Batch::parse` → `edit` → `save` | the input, written through a temporary file beside it (created readable by its owner only), an fsync and a rename, with its permissions kept and the folder synced on Unix. A link is written through, a hard link is broken, the owner is not kept, and a read-only file is refused. If the file no longer holds the bytes that were opened, the write is refused with `stale_target` (exit 4) and the file is untouched. With `--dry-run` or `-o` it is a usage error |
 | `compare <original> <revised> -o <out>` | `compare(a, b, CompareOptions { stamp, .. })` → `document.save()` | `<out>`. Prints `Compared.receipt`, retold for the written file as for `edit -o`, with `next: stetdoc view <out> --revisions` |
 | `check <doc> [--strict]` | `open` or recover → `resume` → `pending_files` → `check_pending(pending, stamp, strict)` | nothing. Exits with `CheckResult::exit_status` |
@@ -118,6 +120,7 @@ Text errors are `error[<code>]: <message>` with ` (operation N)` or ` (document.
 | `pack` | `{ "output": path, "receipt": Receipt or null, "saved": SaveReceipt, "working_copy": dir, "working_copy_removed": bool }` |
 | `unpack` | `{ "working_copy": dir, "base": token, "files": [names] }` |
 | `edit <docx> -o` or `--in-place` | `{ "output": path, "in_place": bool, "receipt": Receipt, "saved": SaveReceipt, "next": text or null }` (`receipt.base` is the written file's base, or null) |
+| `replace`, `comment` | what `edit` prints for the same target, with `found`: one entry per OLD (or the anchor) with `old`, `new`, `count` and its `hits` (`Occurrence`) |
 | `skills get` | `{ "name": name, "text": markdown }` |
 | `init` | `{ "written": [paths], "unchanged": [paths], "skipped": [paths] }` |
 

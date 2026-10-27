@@ -3,7 +3,7 @@
 //! **Owns.** `Document`: the orchestration of stage, ops, check, scope guard and commit; the working copy (`export`, `resume`,
 //! the manifest, `pending_files`, `write_plan` and `recover`); `save`; and the public `compare` entry.
 //!
-//! **Interface.** The public interface, as listed in `ARCHITECTURE.md`: the thirteen methods of `Document`, `WorkingCopy::{pending_files,
+//! **Interface.** The public interface, as listed in `ARCHITECTURE.md`: the fourteen methods of `Document`, `WorkingCopy::{pending_files,
 //! ensure_clean, write_plan, recover}`, and the free functions `compare`, `capabilities` and `json_schema`.
 //!
 //! **Invariants.**
@@ -43,8 +43,9 @@ use crate::api::error::{ErrorCode, StetError};
 use crate::api::files::ReadableFiles;
 use crate::api::limits::Limits;
 use crate::api::lookup::Lookup;
+use crate::api::occurrence::Occurrences;
 use crate::api::options::OpenOptions;
-use crate::api::view::{FormatId, RevisionFilter, View, ViewSpec};
+use crate::api::view::{FormatId, RevisionFilter, Scope, View, ViewSpec};
 use crate::api::working_copy::{SaveReceipt, Saved};
 use crate::projection;
 use crate::refs::{hex, sha256};
@@ -153,6 +154,14 @@ impl Document {
         Ok(found)
     }
 
+    /// Every place `needle` is in the paragraphs of `scope`, as an operation's `find` matches it: in the Final text, exactly,
+    /// or with curly and straight quotes taken as the same when nothing matches exactly. `Scope::Auto` is the body, the
+    /// notes and the headers and footers; `Range`, `Clause` and `Story` select as a view does, and any other scope is
+    /// `invalid_payload`. Each hit names its paragraph's ref and its `occurrence`, so a batch against `base()` can target it.
+    pub fn occurrences(&self, needle: &str, scope: &Scope) -> Result<Occurrences, StetError> {
+        projection::occurrences(&self.state, needle, scope)
+    }
+
     /// The readable files, without the complement. They carry the base token and the format, and no `rendered` hashes: a caller
     /// that edits them in the same process cannot have changed release.
     pub fn files(&self) -> Result<ReadableFiles, StetError> {
@@ -188,6 +197,8 @@ mod tests_edit_toc;
 mod tests_inspect;
 #[cfg(test)]
 mod tests_inspect_marks;
+#[cfg(test)]
+mod tests_occurrences;
 #[cfg(test)]
 mod tests_scale;
 #[cfg(test)]

@@ -10,6 +10,7 @@ use crate::api::files::ReadableFiles;
 use crate::api::inspect::Inspection;
 use crate::api::limits::Limits;
 use crate::api::lookup::Lookup;
+use crate::api::occurrence::Occurrences;
 use crate::api::op::Op;
 use crate::api::op_spec::OPS;
 use crate::api::options::{CompareOptions, OpenOptions};
@@ -97,6 +98,7 @@ struct Everything {
     view_spec: ViewSpec,
     view: View,
     lookup: Lookup,
+    occurrences: Occurrences,
     inspection: Inspection,
     check_report: CheckReport,
     revisions: Vec<RevisionInfo>,

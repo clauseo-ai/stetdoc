@@ -16,7 +16,7 @@ Exit status 0 is success. CLI argument errors also exit with 2. They belong to t
 |---|---|---|
 | 1 | operation failed | `unsupported`, `cross_block`, `readonly_region`, `scope_violation`, `io_error` |
 | 2 | usage | `invalid_payload` |
-| 3 | target | `not_found`, `ambiguous_match` |
+| 3 | target | `not_found`, `ambiguous_match`, `count_mismatch` |
 | 4 | stale | `stale_ref`, `stale_files`, `pending_edits`, `stale_target` |
 | 5 | validation | `validation_failed` |
 | 6 | input | `malformed_input`, `limit_exceeded`, `corrupt_complement`, `unsupported_version` |
@@ -71,6 +71,12 @@ Exit 3 (target). A ref, revision id, comment id or find text matches nothing.
 Exit 3 (target). A find text or string matches more than one place, so the target is not unique.
 
 **Next:** Add surrounding text to make the match unique, or target one block by its ref.
+
+### `count_mismatch`
+
+Exit 3 (target). A find text matches a different number of times from the count the request expects, so nothing was applied.
+
+**Next:** Look at the places listed, then give the count they show or a narrower scope.
 
 ### `stale_ref`
 

@@ -1,0 +1,194 @@
+A refusal of one pair applies none of them, and writes nothing: the view of the output finds no file.
+
+```console
+$ stetdoc replace contract.docx "thirty days" "sixty days" "ninety days" "sixty days" -o edited.docx --author "Jane Doe"
+? 3
+error[not_found]: pair 2: "ninety days" is not in the document as it reads now.
+next: Nothing was applied. Write OLD exactly as the document reads now (stetdoc view FILE --find WORD shows it), or widen --range or --clause.
+
+$ stetdoc view edited.docx
+? 3
+error[not_found]: There is no file at edited.docx.
+next: Check the path, and that the file is readable.
+
+```
+
+Two pairs that share text are refused, and so is an OLD without its NEW.
+
+```console
+$ stetdoc replace contract.docx "within thirty" "within sixty" "thirty days" "sixty days" --dry-run --author "Jane Doe"
+? 2
+error[invalid_payload]: pairs 1 and 2 overlap in p4, and one text cannot be replaced twice.
+next: Give one pair for the text they share.
+
+$ stetdoc replace contract.docx "thirty days" "sixty days" "English law" --dry-run --author "Jane Doe"
+? 2
+error[invalid_payload]: replace takes OLD NEW pairs, and 3 texts were given, so the last OLD has no NEW.
+next: Give a NEW after each OLD. An empty NEW ("") deletes OLD.
+
+```
+
+Places in one paragraph are applied from its end, so every offset holds, and the receipt is JSON with `--json`.
+
+```console
+$ stetdoc replace contract.docx "a" "A" --range p1..p1 --all --dry-run --author "Jane Doe"
+replace "a" with "A": 5 times, in 1 block: p1
+dry run: nothing was applied. A new block has no ref until the edit is applied. 5 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
+0 replace p1: deletion #0, insertion #1
+1 replace p1: deletion #2, insertion #3
+2 replace p1: deletion #4, insertion #5
+3 replace p1: deletion #6, insertion #7
+4 replace p1: deletion #8, insertion #9
+p1 The Supplier sh{--a--}{#8 JD}{++A++}{#9 JD}ll indemnify the Customer, {--a--}{#6 JD}{++A++}{#7 JD}nd sh{--a--}{#4 JD}{++A++}{#5 JD}ll p{--a--}{#2 JD}{++A++}{#3 JD}y on dem{--a--}{#0 JD}{++A++}{#1 JD}nd.
+checked 1 unit.
+
+$ stetdoc replace contract.docx "thirty" "sixty" --dry-run --json --author "Jane Doe"
+{
+  "added": [],
+  "added_count": 0,
+  "base": "5737b772923cf8d3:0:5737b772923cf8d3",
+  "blocks": [
+    {
+      "anchor": null,
+      "ref": "p4",
+      "story": "body",
+      "text": "p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days."
+    }
+  ],
+  "blocks_omitted": 0,
+  "comments": [],
+  "dry_run": true,
+  "found": [
+    {
+      "count": 1,
+      "hits": [
+        {
+          "block": "p4",
+          "clause": null,
+          "end": 28,
+          "loose": false,
+          "occurrence": 1,
+          "snippet": "Payment is due within [thirty] days.",
+          "start": 22,
+          "story": "body"
+        }
+      ],
+      "new": "sixty",
+      "old": "thirty"
+    }
+  ],
+  "moves": [],
+  "operations": [
+    {
+      "added": [],
+      "added_count": 0,
+      "blocks": [
+        "p4"
+      ],
+      "changed": true,
+      "folded": [],
+      "index": 0,
+      "op": "replace",
+      "removed_own": [],
+      "revisions": [
+        {
+          "block": "p4",
+          "date": "2026-10-06T09:30:00Z",
+          "ids": [
+            0
+          ],
+          "kind": "deletion"
+        },
+        {
+          "block": "p4",
+          "date": "2026-10-06T09:30:00Z",
+          "ids": [
+            1
+          ],
+          "kind": "insertion"
+        }
+      ],
+      "swallowed": [],
+      "warnings": []
+    }
+  ],
+  "retired": [],
+  "revisions": [
+    {
+      "author": "Jane Doe",
+      "changes": [
+        {
+          "block": "p4",
+          "date": "2026-10-06T09:30:00Z",
+          "ids": [
+            0
+          ],
+          "kind": "deletion"
+        },
+        {
+          "block": "p4",
+          "date": "2026-10-06T09:30:00Z",
+          "ids": [
+            1
+          ],
+          "kind": "insertion"
+        }
+      ],
+      "counts": [
+        [
+          "insertion",
+          1
+        ],
+        [
+          "deletion",
+          1
+        ]
+      ]
+    }
+  ],
+  "stamp": {
+    "author": "Jane Doe",
+    "date": "2026-10-06T09:30:00Z"
+  },
+  "text": "dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3/n0 replace p4: deletion #0, insertion #1/np4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days./nchecked 1 unit./n",
+  "tracked": true,
+  "validation": {
+    "carried": [],
+    "carried_total": 0,
+    "notes": [],
+    "parts": 1,
+    "units": 1
+  },
+  "warnings": []
+}
+
+```
+
+A working copy is written by the replace, and refuses -o and --in-place.
+
+```console
+$ stetdoc unpack contract.docx
+wrote contract.stet: document.md
+base 5737b772923cf8d3:0:5737b772923cf8d3
+next: stetdoc view contract.stet
+
+$ stetdoc replace contract.stet "English law" "the law of New York" --author "Jane Doe"
+replace "English law" with "the law of New York": once, at p5
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:dbe1a8673934033e
+0 replace p5: deletion #0, insertion #1
+p5 This Agreement is governed by {--English law--}{#0 JD}{++the law of New York++}{#1 JD}.
+checked 1 unit.
+
+$ stetdoc replace contract.stet "thirty" "sixty" --in-place --author "Jane Doe"
+? 2
+error[invalid_payload]: --in-place writes a .docx back to itself, and contract.stet is a working copy, which an edit always writes.
+next: Drop --in-place, and run stetdoc pack after the edit to write the .docx.
+
+$ stetdoc comment contract.stet "New York" "Confirm with counsel." --author "Jane Doe"
+comment on "New York": once, at p5
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:2:5a13a73d3a03e7e2
+0 comment p5: c2 added
+p5 This Agreement is governed by {--English law--}{#0 JD}{++the law of {c2}New York{/c2}++}{#1 JD}.
+checked 1 unit.
+
+```

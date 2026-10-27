@@ -211,3 +211,15 @@ impl TextMap {
         (units == offset).then_some(chars)
     }
 }
+
+/// The text with curly quotes folded to straight ones: the second try of a `find` that matched nothing exactly takes
+/// them as the same, for agents that type straight quotes into documents that use curly ones.
+pub fn fold_quotes(text: &str) -> String {
+    text.chars()
+        .map(|c| match c {
+            '\u{2018}' | '\u{2019}' => '\'',
+            '\u{201C}' | '\u{201D}' => '"',
+            other => other,
+        })
+        .collect()
+}

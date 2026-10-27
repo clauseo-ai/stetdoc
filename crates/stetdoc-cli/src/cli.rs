@@ -38,6 +38,10 @@ pub enum Command {
     Inspect(InspectArgs),
     /// Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place.
     Edit(EditArgs),
+    /// Replace text as tracked changes in one step: each OLD, found once in the document as it reads now, becomes NEW.
+    Replace(ReplaceArgs),
+    /// Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now.
+    Comment(CommentArgs),
     /// Write a redline of the differences between two documents as tracked changes.
     Compare(CompareArgs),
     /// Validate, and show every revision that pack would write, by author.
@@ -237,6 +241,66 @@ pub struct EditArgs {
     /// The batch's text when it comes from somewhere other than stdin or --ops: the MCP server's `batch` argument.
     #[arg(skip)]
     pub batch: Option<String>,
+}
+
+/// Where `replace` and `comment` look for their text, and where they write.
+#[derive(Debug, Args)]
+#[command(group(ArgGroup::new("within").args(["range", "clause"])))]
+pub struct FindArgs {
+    /// Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story.
+    #[arg(long, value_name = "REFS")]
+    pub range: Option<String>,
+    /// Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III".
+    #[arg(long, value_name = "CLAUSE")]
+    pub clause: Option<String>,
+    /// With a .docx, the .docx to write. It must not be the input: --in-place writes back to it.
+    #[arg(short, long, value_name = "DOCX")]
+    pub output: Option<PathBuf>,
+    /// With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs
+    /// no flag: the edit always writes it.
+    #[arg(long)]
+    pub in_place: bool,
+    /// Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it.
+    #[arg(long)]
+    pub dry_run: bool,
+    /// Follow the paragraph's quotes (match), or keep them as typed.
+    #[arg(long, value_enum, default_value_t = QuotesArg::Match)]
+    pub quotes: QuotesArg,
+    #[command(flatten)]
+    pub stamp: StampArgs,
+}
+
+/// `stetdoc replace`.
+#[derive(Debug, Args)]
+pub struct ReplaceArgs {
+    /// A working copy, or a .docx with -o or --in-place.
+    pub input: PathBuf,
+    /// OLD and NEW, as many pairs as you like, applied together or not at all. OLD is matched in the text as the final view
+    /// reads it, across formatting, with curly and straight quotes the same; it must be there once (see --all and
+    /// --expect). An empty NEW deletes OLD. Put -- before the pairs when a text starts with -.
+    #[arg(value_name = "OLD NEW", num_args = 2.., required = true)]
+    pub pairs: Vec<String>,
+    /// Replace every occurrence of each OLD, and say how many.
+    #[arg(long, conflicts_with = "expect")]
+    pub all: bool,
+    /// Replace every occurrence of each OLD, and only if there are exactly N of each.
+    #[arg(long, value_name = "N")]
+    pub expect: Option<u32>,
+    #[command(flatten)]
+    pub find: FindArgs,
+}
+
+/// `stetdoc comment`.
+#[derive(Debug, Args)]
+pub struct CommentArgs {
+    /// A working copy, or a .docx with -o or --in-place.
+    pub input: PathBuf,
+    /// The text to anchor the comment to, matched as replace matches OLD. It must be there once.
+    pub anchor: String,
+    /// The comment. A newline is a paragraph break of the comment.
+    pub text: String,
+    #[command(flatten)]
+    pub find: FindArgs,
 }
 
 /// What an edit does with quotes.

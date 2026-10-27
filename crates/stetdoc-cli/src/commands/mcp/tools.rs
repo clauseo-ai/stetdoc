@@ -20,6 +20,9 @@ const NOT_PROPERTIES: [&str; 3] = ["help", "version", "json"];
 /// The edit tool's property for the batch, which the CLI reads from stdin.
 pub const BATCH: &str = "batch";
 
+/// The replace tool's property for its OLD NEW pairs, an array of `{old, new}` objects that the CLI takes as positionals.
+const PAIRS: &str = "pairs";
+
 /// One tool.
 pub struct Tool {
     /// The tool's name: the command's words joined with `_`.
@@ -125,6 +128,25 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
             json!({
                 "type": "string",
                 "description": "The batch, as block text or JSON: what `stetdoc edit` reads from stdin. Its first line is `base:` with the token of the last view or receipt."
+            }),
+        );
+    }
+    if name == "replace" {
+        properties.insert(
+            PAIRS.into(),
+            json!({
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "old": { "type": "string", "description": "The text to replace, as the document reads now. It must be there once, unless all or expect says otherwise." },
+                        "new": { "type": "string", "description": "The text it becomes. Empty deletes it." }
+                    },
+                    "required": ["old", "new"],
+                    "additionalProperties": false
+                },
+                "description": "The replacements, applied together as tracked changes or not at all."
             }),
         );
     }
@@ -268,6 +290,18 @@ pub fn argv(
             batch = Some(scalar(key, value)?);
             continue;
         }
+        if tool.name == "replace" && key == PAIRS {
+            let index = tool
+                .args
+                .iter()
+                .position(|s| s.id == PAIRS)
+                .unwrap_or(usize::MAX);
+            for (old, new) in pairs(value)? {
+                positionals.push((index, old.into()));
+                positionals.push((index, new.into()));
+            }
+            continue;
+        }
         let Some((index, spec)) = tool.args.iter().enumerate().find(|(_, s)| s.id == *key) else {
             let known: Vec<&str> = tool.args.iter().map(|s| s.id.as_str()).collect();
             return Err(Failure::usage(
@@ -314,6 +348,29 @@ pub fn argv(
     Ok((argv, batch))
 }
 
+/// The OLD NEW pairs of the replace tool, from an array of `{old, new}` objects.
+fn pairs(value: &Value) -> Result<Vec<(String, String)>, Failure> {
+    let wrong = || {
+        Failure::usage(
+            "pairs is an array of objects, each with old and new as strings.",
+            "Pass pairs as [{\"old\": \"net 30\", \"new\": \"net 60\"}].",
+        )
+    };
+    let Value::Array(items) = value else {
+        return Err(wrong());
+    };
+    items
+        .iter()
+        .map(|item| {
+            let field = |name: &str| item.get(name).and_then(Value::as_str).map(str::to_string);
+            match (item.as_object().map(Map::len), field("old"), field("new")) {
+                (Some(2), Some(old), Some(new)) => Ok((old, new)),
+                _ => Err(wrong()),
+            }
+        })
+        .collect()
+}
+
 fn scalar(key: &str, value: &Value) -> Result<String, Failure> {
     match value {
         Value::String(s) => Ok(s.clone()),
@@ -341,6 +398,8 @@ mod tests {
                 "view",
                 "inspect",
                 "edit",
+                "replace",
+                "comment",
                 "compare",
                 "check",
                 "lookup",

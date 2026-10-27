@@ -198,13 +198,7 @@ pub(crate) fn follow_edit(
 
 /// The text with curly quotes folded to straight ones, for the second try of a `find` that matched nothing exactly.
 pub(crate) fn fold(text: &str) -> String {
-    text.chars()
-        .map(|c| match c {
-            '\u{2018}' | '\u{2019}' => '\'',
-            '\u{201C}' | '\u{201D}' => '"',
-            other => other,
-        })
-        .collect()
+    crate::wordml::fold_quotes(text)
 }
 
 #[cfg(test)]

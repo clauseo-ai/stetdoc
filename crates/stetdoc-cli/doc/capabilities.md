@@ -36,6 +36,7 @@ error codes:
   invalid_payload      exit 2
   not_found            exit 3
   ambiguous_match      exit 3
+  count_mismatch       exit 3
   stale_ref            exit 4
   stale_files          exit 4
   pending_edits        exit 4

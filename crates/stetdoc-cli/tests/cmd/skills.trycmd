@@ -55,6 +55,12 @@ A find text or string matches more than one place, so the target is not unique.
 
 Next: Add surrounding text to make the match unique, or target one block by its ref.
 
+## `count_mismatch` (exit 3)
+
+A find text matches a different number of times from the count the request expects, so nothing was applied.
+
+Next: Look at the places listed, then give the count they show or a narrower scope.
+
 ## `stale_ref` (exit 4)
 
 A ref names a block that was deleted, or belongs to a different ref namespace than the document, for example after reopening saved bytes.

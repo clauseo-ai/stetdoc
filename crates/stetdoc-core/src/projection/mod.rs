@@ -3,7 +3,7 @@
 //! **Owns.** The neutral model (`model`), the view pipeline (scope, mode, paging,
 //! budget), the `formats/` seam, and `files`, which turns readable files into a batch.
 //!
-//! **Interface.** `view`, `render_files`, `render_blocks`, `lookup`, `render_lookup`, `files::to_batch`, and
+//! **Interface.** `view`, `render_files`, `render_blocks`, `lookup`, `render_lookup`, `occurrences`, `files::to_batch`, and
 //! the `Format` trait with its registry (`stet/1` and `json/1`).
 //!
 //! **Invariants.**
@@ -48,6 +48,7 @@ mod model_inline;
 mod model_region;
 mod model_view;
 mod notes;
+mod occurrences;
 mod outline;
 mod page;
 mod receipt;
@@ -59,7 +60,7 @@ mod view;
 pub(crate) use {
     authors::authors, authors::note_ids, files::to_batch, ledger::LedgerFilter, ledger::changes_of,
     ledger::describe, ledger::family, ledger::story_name, lookup::lookup, lookup::render_lookup,
-    receipt::render_blocks, render::render_files, view::view,
+    occurrences::occurrences, receipt::render_blocks, render::render_files, view::view,
 };
 
 #[cfg(test)]

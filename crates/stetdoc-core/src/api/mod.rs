@@ -1,7 +1,7 @@
 //! The public data types. Data and docs only, no logic.
 //!
 //! **Owns.** Every type that crosses the core's public interface: the error vocabulary in [`error`], the input bounds
-//! in [`limits`], the view types in [`view`], the readable files in [`files`], the answer to a query in [`lookup`],
+//! in [`limits`], the view types in [`view`], the readable files in [`files`], the answer to a query in [`lookup`], the places a text is in [`occurrence`],
 //! what a check reports in [`check`], and the stamp and the options, the operations with the table
 //! that describes them, the batch and the edit, the receipt, the revisions, the inspection, the working copy and its
 //! write plan, and the capabilities. They derive `serde` and `schemars`, so the napi binding, `--json` output, the JSON
@@ -29,6 +29,7 @@ pub(crate) mod files;
 pub(crate) mod inspect;
 pub(crate) mod limits;
 pub(crate) mod lookup;
+pub(crate) mod occurrence;
 pub(crate) mod op;
 pub(crate) mod op_spec;
 pub(crate) mod options;

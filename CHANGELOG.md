@@ -35,6 +35,14 @@ released yet.
   `Edit::markup(Markup::Manual)`, and the receipt says the markup is manual and lists what each operation struck and
   underlined (`OpResult::marked`). `split`, `merge`, `row` and deleting a
   table are refused in a manual edit.
+- The MCP `edit` tool takes typed operations in `ops`: a list of objects, each with `op` and that operation's fields,
+  with the schema generated from the same table as `capabilities` and the operations reference. `batch` still takes text,
+  and the file the CLI's `--ops` names is now `ops_file`. Every MCP tool's description carries the rules a model needs
+  to call it right, for clients that never pass the server's instructions on, and no schema uses a union any more, so
+  Gemini's function declarations take them as they are.
+- A batch applied to a .docx may leave out its base, in the CLI and the MCP tool alike: the file is read and edited in one
+  process, as `replace` does, so its refs are read against the file as it is now. A bare JSON list of operations works
+  there too. A working copy still needs the base, and a batch without one is refused with where to find it.
 - An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
   cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
   and time per case, and arms to compare with no plugin or another plugin. See `docs/evals.md`.

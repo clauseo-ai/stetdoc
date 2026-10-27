@@ -12,8 +12,8 @@ Every command takes `--json`, which prints the result, or the error, as JSON on 
 | `stetdoc pack` | Compile the edits of a working copy into tracked changes, validate them and write the .docx |
 | `stetdoc view` | Show a document or a working copy: an outline of a large document, or a range, a search, the revisions, the comments |
 | `stetdoc inspect` | Show the effective formatting of a block and where each value comes from, or the styles, lists or sections |
-| `stetdoc edit` | Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place |
-| `stetdoc replace` | Replace text as tracked changes in one step: each OLD, found once in the document as it reads now, becomes NEW |
+| `stetdoc edit` | Apply a batch of operations, read from stdin or --ops, to a working copy or a .docx |
+| `stetdoc replace` | Replace text in one step, as tracked changes or, with --manual, as manual markup: each OLD, found once in the document as it reads now, becomes NEW |
 | `stetdoc comment` | Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now |
 | `stetdoc compare` | Write a redline of the differences between two documents as tracked changes |
 | `stetdoc check` | Validate, and show every revision that pack would write, by author |
@@ -262,7 +262,7 @@ comments: none on this block
 
 ## `stetdoc edit`
 
-Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place.
+Apply a batch of operations, read from stdin or --ops, to a working copy or a .docx.
 
 ```text
 stetdoc edit [OPTIONS] <INPUT>
@@ -271,7 +271,7 @@ stetdoc edit [OPTIONS] <INPUT>
 | Argument | Meaning |
 |---|---|
 | `<INPUT>` | A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. |
-| `--ops <FILE>` | The batch, as block text or JSON. Defaults to stdin; - is stdin too. |
+| `--ops <FILE>` | The batch, as block text or JSON. Defaults to stdin; - is stdin too. A batch for a .docx may leave out its base, and then its refs are read against the file as it is now. |
 | `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused. A working copy needs no flag: an edit always writes it. |
 | `--no-track` | Write plain changes, not tracked ones. Only for documents that are not under review. |
@@ -351,7 +351,7 @@ next: If this file was rewritten since that view or receipt, by an edit that wro
 
 ## `stetdoc replace`
 
-Replace text as tracked changes in one step: each OLD, found once in the document as it reads now, becomes NEW.
+Replace text in one step, as tracked changes or, with --manual, as manual markup: each OLD, found once in the document as it reads now, becomes NEW.
 
 ```text
 stetdoc replace [OPTIONS] <INPUT> <OLD NEW> <OLD NEW>...

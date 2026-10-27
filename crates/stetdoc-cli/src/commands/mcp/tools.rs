@@ -4,6 +4,7 @@
 //! The edit tool's list of operations comes from `capabilities()`, like the `capabilities` command.
 
 use super::confine::Root;
+use super::{describe, ops};
 use crate::cli::Cli;
 use crate::output::Failure;
 use clap::{Arg, ArgAction, CommandFactory, ValueHint};
@@ -17,8 +18,17 @@ const NOT_TOOLS: [&str; 2] = ["init", "mcp"];
 /// The arguments that are not properties: help, the version, and `--json`, which a tool always gets.
 const NOT_PROPERTIES: [&str; 3] = ["help", "version", "json"];
 
-/// The edit tool's property for the batch, which the CLI reads from stdin.
+/// The edit tool's property for the batch as text, which the CLI reads from stdin.
 pub const BATCH: &str = "batch";
+
+/// The edit tool's property for the operations as typed objects.
+const OPS: &str = "ops";
+
+/// The edit tool's property for the base token of `ops`.
+const BASE: &str = "base";
+
+/// The edit tool's property for `--ops FILE`, renamed so that `ops` can be the typed operations.
+const OPS_FILE: &str = "ops_file";
 
 /// The replace tool's property for its OLD NEW pairs, an array of `{old, new}` objects that the CLI takes as positionals.
 const PAIRS: &str = "pairs";
@@ -78,9 +88,12 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
     let mut args = Vec::new();
     let apart = conflicts(command);
     for arg in command.get_arguments() {
-        let id = arg.get_id().as_str().to_string();
+        let mut id = arg.get_id().as_str().to_string();
         if NOT_PROPERTIES.contains(&id.as_str()) {
             continue;
+        }
+        if name == "edit" && id == OPS {
+            id = OPS_FILE.to_string();
         }
         let spec = Spec {
             id: id.clone(),
@@ -109,32 +122,31 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
         .get_about()
         .map(ToString::to_string)
         .unwrap_or_default();
-    let mut description = format!(
-        "{}. Takes the arguments of `stetdoc {}` and returns the JSON it prints with --json.",
-        about.trim_end_matches('.'),
-        words.join(" ")
-    );
+    let mut description = about.trim_end_matches('.').to_string();
+    description.push('.');
+    let rules = describe::rules(&name);
+    if !rules.is_empty() {
+        description.push(' ');
+        description.push_str(rules);
+    }
     if name == "edit" {
-        let ops: Vec<String> = stetdoc_core::capabilities()
-            .ops
-            .into_iter()
-            .map(|op| op.name)
-            .collect();
-        description.push_str(&format!(
-            " Give the batch, as block text or JSON, in `batch`. Call skills_get first for the batch's syntax and rules. The \
-             operations: {}. skills_get with name operations has each one's fields.",
-            ops.join(", ")
-        ));
+        properties.insert(OPS.into(), ops::schema());
+        properties.insert(
+            BASE.into(),
+            json!({
+                "type": "string",
+                "description": "With ops, the base token of the view or receipt the refs come from. Required for a working copy; for a .docx, leave it out to read the refs from the file as it is now."
+            }),
+        );
         properties.insert(
             BATCH.into(),
             json!({
                 "type": "string",
-                "description": "The batch, as block text or JSON: what `stetdoc edit` reads from stdin. Its first line is `base:` with the token of the last view or receipt."
+                "description": "The batch as text instead of ops: block text or JSON, as `stetdoc edit` reads from stdin. Its first line is `base:` with the base token, which a .docx may leave out. skills_get with name operations has the syntax."
             }),
         );
     }
     if name == "replace" {
-        description.push_str(" Call skills_get first for the rules of its pairs.");
         properties.insert(
             PAIRS.into(),
             json!({
@@ -244,9 +256,8 @@ fn property(arg: &Arg, spec: &Spec) -> Value {
         Kind::Flag => json!({ "type": "boolean" }),
         Kind::Integer => json!({ "type": "integer", "minimum": 0 }),
         Kind::List => json!({ "type": "array", "items": { "type": "string" } }),
-        Kind::Repeat => json!({
-            "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
-        }),
+        // A list, not a union of a string and a list, which clients such as Gemini's do not take. A lone string still works.
+        Kind::Repeat => json!({ "type": "array", "items": { "type": "string" } }),
         Kind::Text => {
             let choices: Vec<String> = arg
                 .get_possible_values()
@@ -262,6 +273,9 @@ fn property(arg: &Arg, spec: &Spec) -> Value {
         }
     };
     let mut description = help;
+    if !description.is_empty() && !description.ends_with(['.', '?']) {
+        description.push('.');
+    }
     if spec.path {
         description.push_str(" A path.");
     }
@@ -291,12 +305,22 @@ pub fn argv(
     argv.extend(tool.path.iter().map(OsString::from));
     let mut positionals: Vec<(usize, OsString)> = Vec::new();
     let mut batch = None;
+    let mut typed = None;
+    let mut base = None;
     for (key, value) in arguments {
         if value.is_null() {
             continue;
         }
         if tool.name == "edit" && key == BATCH {
             batch = Some(scalar(key, value)?);
+            continue;
+        }
+        if tool.name == "edit" && key == OPS {
+            typed = Some(value);
+            continue;
+        }
+        if tool.name == "edit" && key == BASE {
+            base = Some(scalar(key, value)?);
             continue;
         }
         if tool.name == "replace" && key == PAIRS {
@@ -350,6 +374,22 @@ pub fn argv(
                 _ => positionals.push((index, value)),
             }
         }
+    }
+    match (typed, &batch, &base) {
+        (Some(_), Some(_), _) => {
+            return Err(Failure::usage(
+                "The edit tool takes ops or batch, and both were given.",
+                "Pass the operations once: in ops as objects, or in batch as text.",
+            ));
+        }
+        (Some(typed), None, _) => batch = Some(ops::batch(typed, base.as_deref())?),
+        (None, _, Some(_)) => {
+            return Err(Failure::usage(
+                "base goes with ops, and no ops were given.",
+                "Pass the operations in ops, or put the base line at the top of batch.",
+            ));
+        }
+        (None, _, None) => {}
     }
     positionals.sort_by_key(|(index, _)| *index);
     argv.push("--".into());
@@ -465,16 +505,35 @@ mod tests {
                 .unwrap()
                 .contains("replace")
         );
-        // The edit and replace tools point the agent to the skill for the batch syntax and the rules.
+        // The edit tool takes typed operations, generated from the operations table, beside the text batch.
+        let ops = &edit.listing["inputSchema"]["properties"]["ops"];
+        assert_eq!(ops["items"]["required"], serde_json::json!(["op"]));
+        assert_eq!(
+            ops["items"]["properties"]["op"]["enum"]
+                .as_array()
+                .unwrap()
+                .len(),
+            stetdoc_core::capabilities().ops.len()
+        );
+        assert_eq!(ops["items"]["properties"]["occurrence"]["type"], "integer");
+        assert!(edit.listing["inputSchema"]["properties"]["ops_file"].is_object());
+        // Each editing tool carries its rules, so a client that drops the server's instructions still has them.
         let replace = all.iter().find(|t| t.name == "replace").unwrap();
-        for listed in [&edit.listing, &replace.listing] {
-            assert!(
-                listed["description"]
-                    .as_str()
-                    .unwrap()
-                    .contains("Call skills_get first"),
-                "{listed}"
-            );
-        }
+        assert!(
+            replace.listing["description"]
+                .as_str()
+                .unwrap()
+                .contains("exactly once"),
+            "{}",
+            replace.listing
+        );
+        assert!(
+            edit.listing["description"]
+                .as_str()
+                .unwrap()
+                .contains("optional for a .docx"),
+            "{}",
+            edit.listing
+        );
     }
 }

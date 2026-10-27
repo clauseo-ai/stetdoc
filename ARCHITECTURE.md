@@ -501,7 +501,7 @@ cross-package transplants:
 | `view <docx\|dir>` | `open` or `resume` → `view`; a note on stderr when hand edits are pending |
 | `inspect <docx\|dir> <ref>` | `open` or `resume` → `inspect` |
 | `edit <dir>` | `resume` (refuses with `pending_edits` while hand edits are pending) → `edit(Edit::ops)`, with the batch naming the base token → `export` → `write_plan` |
-| `edit <docx> -o <out>` | `open` → `edit(Edit::ops)`, with the batch required to name the base token → `save` |
+| `edit <docx> -o <out>` | `open` → `edit(Edit::ops)`, with the batch's base token, or the opened document's when the batch names none → `save` |
 | `edit <docx> --in-place` | as with `-o`, then an atomic write back to the input, refused with `stale_target` when the file changed since it was opened |
 | `check <dir\|docx>` | `open` or `resume` → `check_pending(pending files, stamp, strict)`: the dry run of the pending files, the revisions already there by author, `check`, and the exit status |
 | `pack <dir>` | `resume` → `edit(Edit::files(pending))` → `save` → `export` → `write_plan` with the pending files consumed. An existing output that is neither the original nor a .docx this working copy packed is `stale_target`, unless `--force`. `--done` removes the working copy after a pack that succeeded |
@@ -510,7 +510,7 @@ cross-package transplants:
 | `capabilities` | `capabilities`, or `json_schema` with `--schema` |
 | `skills get [name]` | the embedded skill (`stetdoc-cli/skill/*.md`) with tables from `capabilities` and the command tree |
 | `init` | no core call: the skill stub for the agents picked or detected, and with `--project` the `AGENTS.md` block, written by `fsio` |
-| `mcp` | each tool runs its command's function in process; the tools are walked from the command tree |
+| `mcp` | each tool runs its command's function in process; the tools are walked from the command tree, each description carries the tool's rules (`mcp/describe.rs`), and the edit tool's typed `ops` are generated from `capabilities` (`mcp/ops.rs`) |
 
 Every command on a directory takes an advisory lock on `.stet/lock` first, and finishes or
 undoes an interrupted write (`WorkingCopy::recover`) before anything else. The author comes from

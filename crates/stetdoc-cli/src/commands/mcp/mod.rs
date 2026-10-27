@@ -7,6 +7,8 @@
 //! with `isError` and the failure's message and next step. Stdout carries protocol messages only: logs go to stderr.
 
 mod confine;
+mod describe;
+mod ops;
 mod tools;
 
 use crate::cli::{Cli, Command, McpArgs};
@@ -32,8 +34,8 @@ const TTL_MS: u64 = 3_600_000;
 
 const INSTRUCTIONS: &str = "stetdoc reads and edits Word documents (.docx) and writes every edit as a real tracked change. \
 Before you work on a .docx, call skills_get and follow what it returns. The tools take the arguments of the stetdoc \
-commands; the edit tool takes its batch in `batch`, and the replace and comment tools change or comment on text found \
-once in the document in one call. Never read or edit a .docx any other way (unzip, the XML, python-docx), \
+commands; the edit tool takes typed operations in `ops` or a text batch in `batch`, and the replace and comment tools \
+change or comment on text found once in the document in one call. Never read or edit a .docx any other way (unzip, the XML, python-docx), \
 and if these tools stop working, tell the user rather than work around them.";
 
 /// Runs the server until stdin closes, and returns the exit status.
@@ -290,8 +292,8 @@ impl Server {
                     .is_none_or(|p| p == std::path::Path::new("-")) =>
                 {
                     return Err(Failure::usage(
-                        "No batch: the edit tool takes its operations in `batch`, or a file in `ops`.",
-                        "Pass the batch's text in `batch`, starting with the base line of the last view or receipt.",
+                        "No operations: the edit tool takes them in `ops`, as text in `batch`, or from a file in `ops_file`.",
+                        "Pass the operations in `ops`, such as [{\"op\": \"replace\", \"ref\": \"p4\", \"find\": \"thirty\", \"with\": \"sixty\"}].",
                     ));
                 }
                 None => {}

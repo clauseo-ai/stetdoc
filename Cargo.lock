@@ -1040,6 +1040,7 @@ version = "1.0.0-dev"
 dependencies = [
  "clap",
  "dunce",
+ "insta",
  "jiff",
  "serde",
  "serde_json",

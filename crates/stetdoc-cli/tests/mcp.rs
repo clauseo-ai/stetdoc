@@ -3,86 +3,12 @@
 
 use serde_json::{Value, json};
 use std::fs;
-use std::io::{BufRead, BufReader, Write};
-use std::path::Path;
-use std::process::{Child, ChildStdin, ChildStdout, Command, Stdio};
+use std::io::{BufRead, Write};
 use stetdoc_testkit::fixtures::contract;
 
-struct Server {
-    child: Child,
-    stdin: ChildStdin,
-    stdout: BufReader<ChildStdout>,
-    next: u64,
-}
+mod mcp_client;
 
-impl Server {
-    fn start(cwd: &Path, args: &[&str]) -> Server {
-        Server::spawn(cwd, &[&["--author", "Clauseo"], args].concat(), true)
-    }
-
-    fn spawn(cwd: &Path, args: &[&str], with_author: bool) -> Server {
-        let mut command = Command::new(env!("CARGO_BIN_EXE_stetdoc"));
-        if !with_author {
-            command.env_remove("STETDOC_AUTHOR");
-        }
-        let mut child = command
-            .arg("mcp")
-            .args(args)
-            .current_dir(cwd)
-            .env("XDG_CONFIG_HOME", cwd.join("no-config"))
-            .env("STETDOC_DATE", "2026-10-06T09:30:00")
-            .stdin(Stdio::piped())
-            .stdout(Stdio::piped())
-            .stderr(Stdio::null())
-            .spawn()
-            .expect("run stetdoc mcp");
-        let stdin = child.stdin.take().unwrap();
-        let stdout = BufReader::new(child.stdout.take().unwrap());
-        Server {
-            child,
-            stdin,
-            stdout,
-            next: 0,
-        }
-    }
-
-    fn send(&mut self, message: &Value) {
-        writeln!(self.stdin, "{message}").unwrap();
-        self.stdin.flush().unwrap();
-    }
-
-    fn request(&mut self, method: &str, params: Value) -> Value {
-        self.next += 1;
-        let id = self.next;
-        self.send(&json!({ "jsonrpc": "2.0", "id": id, "method": method, "params": params }));
-        let mut line = String::new();
-        self.stdout.read_line(&mut line).unwrap();
-        let reply: Value = serde_json::from_str(&line).unwrap_or_else(|e| panic!("{e}: {line}"));
-        assert_eq!(reply["id"], id, "{reply}");
-        assert_eq!(reply["jsonrpc"], "2.0");
-        reply
-    }
-
-    fn call(&mut self, tool: &str, arguments: Value) -> Value {
-        let reply = self.request(
-            "tools/call",
-            json!({ "name": tool, "arguments": arguments }),
-        );
-        reply["result"].clone()
-    }
-}
-
-impl Drop for Server {
-    fn drop(&mut self) {
-        let _ = self.child.kill();
-        let _ = self.child.wait();
-    }
-}
-
-fn ok(result: &Value) -> &Value {
-    assert_eq!(result["isError"], false, "{result}");
-    &result["structuredContent"]
-}
+use mcp_client::{Server, ok};
 
 #[test]
 fn a_client_unpacks_edits_and_packs_a_tracked_change() {
@@ -387,8 +313,8 @@ fn the_view_tool_takes_one_find_or_a_list_and_lists_one_line_for_each_hit() {
         .unwrap()
         .clone();
     let find = &view["inputSchema"]["properties"]["find"];
-    assert_eq!(find["anyOf"][0]["type"], "string", "{find}");
-    assert_eq!(find["anyOf"][1]["type"], "array", "{find}");
+    // A list, and not a union, which some clients refuse; a lone string is still taken, as the test goes on to show.
+    assert_eq!(find["type"], "array", "{find}");
     assert_eq!(view["inputSchema"]["properties"]["context"]["default"], 0);
     // A list finds any of its texts, and each line says which it holds.
     let many = server.call(

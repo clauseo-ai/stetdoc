@@ -36,9 +36,10 @@ pub enum Command {
     View(ViewArgs),
     /// Show the effective formatting of a block and where each value comes from, or the styles, lists or sections.
     Inspect(InspectArgs),
-    /// Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place.
+    /// Apply a batch of operations, read from stdin or --ops, to a working copy or a .docx.
     Edit(EditArgs),
-    /// Replace text as tracked changes in one step: each OLD, found once in the document as it reads now, becomes NEW.
+    /// Replace text in one step, as tracked changes or, with --manual, as manual markup: each OLD, found once in the document
+    /// as it reads now, becomes NEW.
     Replace(ReplaceArgs),
     /// Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now.
     Comment(CommentArgs),
@@ -214,7 +215,8 @@ pub struct InspectArgs {
 pub struct EditArgs {
     /// A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where.
     pub input: PathBuf,
-    /// The batch, as block text or JSON. Defaults to stdin; - is stdin too.
+    /// The batch, as block text or JSON. Defaults to stdin; - is stdin too. A batch for a .docx may leave out its base, and
+    /// then its refs are read against the file as it is now.
     #[arg(long, value_name = "FILE")]
     pub ops: Option<PathBuf>,
     /// With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input:

@@ -30,6 +30,7 @@ serde_json.workspace = true
 sha2.workspace = true
 
 [dev-dependencies]
+insta.workspace = true
 stetdoc-testkit.workspace = true
 tempfile.workspace = true
 trycmd.workspace = true

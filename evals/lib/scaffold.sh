@@ -17,6 +17,8 @@ setup() {
     if [ ! -f "$src" ]; then echo "missing $src: run evals/fetch-fixtures.sh first" >&2; exit 1; fi
     if [ "$(sha256 "$src")" != "$want" ]; then echo "$src does not match fixtures.tsv: run evals/fetch-fixtures.sh" >&2; exit 1; fi
     cp "$src" "docs/$name.docx"
+    # The corpus cache stores documents read-only; a user's documents are writable.
+    chmod u+w "docs/$name.docx"
   done
   printf 'author = "Eval Reviewer"\n' > "$HOME/.config/stetdoc/config.toml"
   basename "$(cd "$(dirname "$0")" && pwd)" > "$state/case"

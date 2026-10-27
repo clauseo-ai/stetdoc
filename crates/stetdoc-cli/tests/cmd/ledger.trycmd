@@ -57,7 +57,7 @@ $ stetdoc view tracked.docx --revisions --budget 1
 #1 insert JD 2026-01-02 p1 "shall pay"
 {position: change:1..change:1 of changes (1 of 4 changes) · next: --after change:1 · about 41 tokens remain}
 
--- more: stetdoc view tracked.docx --revisions --budget 1 --after change:1
+-- more: this page stops at change:1, and about 41 tokens follow. Next page: stetdoc view tracked.docx --revisions --budget 1 --after change:1 (or add --all to see everything at once)
 
 $ stetdoc view tracked.docx --revisions --budget 1 --after change:1
 {stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:2..change:2}
@@ -67,7 +67,7 @@ $ stetdoc view tracked.docx --revisions --budget 1 --after change:1
 #2 delete EW 2026-01-03 p2 "gross"
 {position: change:2..change:2 of changes (1 of 4 changes) · next: --after change:2 · about 27 tokens remain}
 
--- more: stetdoc view tracked.docx --revisions --budget 1 --after change:2
+-- more: this page stops at change:2, and about 27 tokens follow. Next page: stetdoc view tracked.docx --revisions --budget 1 --after change:2 (or add --all to see everything at once)
 
 $ stetdoc view tracked.docx --revisions --kind bogus
 ? 2

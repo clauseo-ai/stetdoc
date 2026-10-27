@@ -155,7 +155,7 @@ impl Base {
                 let doc = open(&self.bytes)?;
                 let mine = RevisionFilter {
                     author: Some("Clauseo".to_string()),
-                    kind: None,
+                    ..RevisionFilter::default()
                 };
                 let has_mine = !doc.revisions(&mine).map_err(|e| e.to_string())?.is_empty();
                 Ok((

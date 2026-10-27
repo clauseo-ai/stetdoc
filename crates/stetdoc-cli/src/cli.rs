@@ -100,7 +100,7 @@ pub struct PackArgs {
 
 /// `stetdoc view`.
 #[derive(Debug, Args)]
-#[command(group(ArgGroup::new("scope").args(["outline", "range", "clause", "find", "revisions", "comments", "story"])))]
+#[command(group(ArgGroup::new("scope").args(["outline", "range", "clause", "revisions", "comments", "story"])))]
 pub struct ViewArgs {
     /// A .docx or a working copy. A working copy shows its last export, not edits that were not packed.
     pub input: PathBuf,
@@ -116,15 +116,19 @@ pub struct ViewArgs {
     /// The block a clause number resolves to, with the blocks under it, such as 12.3.
     #[arg(long, value_name = "NUMBER")]
     pub clause: Option<String>,
-    /// The blocks that contain this text, with their neighbours. Case-insensitive unless it has a capital letter.
-    #[arg(long, value_name = "TEXT")]
+    /// The blocks that contain this text, with their neighbours, paged like a range. Case-insensitive unless it has a
+    /// capital letter. With --range, only in that range; with --revisions, only the changes whose text contains it.
+    #[arg(long, value_name = "TEXT", conflicts_with_all = ["outline", "clause", "comments", "story"])]
     pub find: Option<String>,
     /// With --find, how many blocks to show on each side of a match.
     #[arg(long, value_name = "N", requires = "find", default_value_t = 1)]
     pub context: u8,
-    /// The tracked changes, one line each: their ids, kind, author, day, block and text.
+    /// The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters.
     #[arg(long)]
     pub revisions: bool,
+    /// With --revisions, the whole inserted and deleted text of each change (up to 1,000 characters), not 80.
+    #[arg(long, requires = "revisions")]
+    pub full: bool,
     /// The comment threads.
     #[arg(long)]
     pub comments: bool,
@@ -146,9 +150,12 @@ pub struct ViewArgs {
     /// How tracked changes appear.
     #[arg(long, value_enum, default_value_t = ModeArg::Redline)]
     pub mode: ModeArg,
-    /// The size of a page, in estimated tokens. 0 shows everything.
-    #[arg(long, value_name = "TOKENS", default_value_t = 8000)]
+    /// The size of a page, in estimated tokens (about 4 characters each). 0 shows everything.
+    #[arg(long, value_name = "TOKENS", default_value_t = stetdoc_core::Budget::DEFAULT)]
     pub budget: u32,
+    /// Everything on one page, however long: the same as --budget 0, and it wins over --budget.
+    #[arg(long)]
+    pub all: bool,
     /// Continue after this cursor, from the last line of the previous page.
     #[arg(long, value_name = "CURSOR")]
     pub after: Option<String>,

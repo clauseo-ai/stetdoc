@@ -3,7 +3,8 @@
 //! Everything here is read from what `styles` (the cascade and the source of each value), `numbering`, `index` and `wordml`
 //! already know, so this file formats and does not decide. A paragraph answers with its kind and story, its style, its number,
 //! its clause, every effective paragraph property with the level of the hierarchy that gave it, and the distinct run
-//! formattings with the characters each covers. The listings are in `inspect_lists.rs`.
+//! formattings with the characters each covers. Every block then lists its tracked changes and comments
+//! (`inspect_marks.rs`). The listings are in `inspect_lists.rs`.
 
 use super::Document;
 use crate::api::error::{ErrorCode, StetError};
@@ -224,7 +225,7 @@ fn block(
             "blocks in its cells"
         };
         out.add(what, children.to_string(), None);
-        return Ok(());
+        return super::inspect_marks::marks(parts, &story, tree, at, out);
     }
     let paragraph = story
         .paragraph(tree, at)
@@ -329,7 +330,7 @@ fn block(
         };
         out.add(format!("characters {from}..{to}"), value, None);
     }
-    Ok(())
+    super::inspect_marks::marks(parts, &story, tree, at, out)
 }
 
 /// `Heading 1 (Heading1)`: the name, and the id that an operation takes.

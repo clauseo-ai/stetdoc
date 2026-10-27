@@ -6,23 +6,25 @@
 //! until it is as full as the budget allows. A table that does not fit alone is cut between rows, and the
 //! cursor, which is the ref of the last block shown, says which row the next page starts at.
 
+mod outline;
+
 use super::appendix::appendix;
-use super::build::{Pick, Selection, StorySel, TopPick, project, story_warnings};
+use super::build::{Pick, Selection, StorySel, TopPick, project};
 use super::comments_view::comments_view;
 use super::formats::{Format, by_id};
 use super::ledger_view::ledger_view;
-use super::model::{Body, Margin, Outline, OutlineEntry, Output, Projection};
+use super::model::{Margin, Output, Projection};
 use super::notes::Notes;
-use super::outline::{Entry, Full, headings};
 use super::page::{estimate, fit, greedy, weight};
 use super::select::{
-    Item, Selected, Source, Start, clause_scope, find_scope, range_scope, start_after, story_scope,
+    Item, Selected, Source, Start, clause_scope, range_scope, start_after, story_scope,
 };
+use super::select_find::find_scope;
 use crate::api::error::{ErrorCode, StetError};
 use crate::api::view::{Cursor, FormatId, Mode, Position, Scope, StoryName, View, ViewSpec};
 use crate::refs::{BaseToken, BlockRef};
-use crate::state::{PartId, PartsView, State};
-use crate::wordml::{BlockKind, StoryKind};
+use crate::state::{PartsView, State};
+use crate::wordml::BlockKind;
 
 /// The tokens that the head of a page costs, about, for the first guess of how many blocks fit.
 const OVERHEAD: u32 = 80;
@@ -34,6 +36,8 @@ struct Cx<'a> {
     spec: &'a ViewSpec,
     format: &'static dyn Format,
     base: BaseToken,
+    /// The warning an outline that stands for the whole body carries in its head.
+    outline_note: Option<crate::api::view::Warning>,
 }
 
 /// A page that is built: its model, its text, and what it says about itself.
@@ -51,6 +55,7 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
         spec,
         format: by_id(spec.format.as_str())?,
         base: state.base_token(),
+        outline_note: None,
     };
     match &spec.scope {
         Scope::Auto => {
@@ -58,6 +63,11 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
             if cx.whole_fits(&selected)? {
                 cx.blocks(selected)
             } else {
+                let note = cx.outline_shown(&selected)?;
+                let cx = Cx {
+                    outline_note: Some(note),
+                    ..cx
+                };
                 cx.outline(None)
             }
         }
@@ -70,8 +80,26 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
             from,
             to.as_deref(),
         )?),
-        Scope::Find { needle, context } => {
-            cx.blocks(find_scope(&cx.parts, spec.mode, needle, *context)?)
+        Scope::Find {
+            needle,
+            context,
+            from,
+            to,
+        } => {
+            let within = match (from.as_deref(), to.as_deref()) {
+                (Some(from), to) => Some((from, to)),
+                (None, None) => None,
+                (None, Some(_)) => {
+                    return Err(StetError::new(
+                        ErrorCode::InvalidPayload,
+                        "a find within a range needs the ref it starts at, and only the ref it ends at was given.",
+                    )
+                    .with_next("Give the first ref of the range too, such as p40..p60."));
+                }
+            };
+            cx.blocks(find_scope(
+                &cx.parts, state, spec.mode, needle, *context, within,
+            )?)
         }
         Scope::Clause(text) => cx.blocks(clause_scope(&cx.parts, spec.mode, text)?),
         Scope::Revisions(filter) => ledger_view(cx.parts, spec, filter, cx.format, cx.base),
@@ -317,6 +345,16 @@ impl Cx<'_> {
                 (Some(a), Some(b)) => format!("{a}..{b}"),
                 _ => selected.name.to_string(),
             });
+        let mut scope = scope;
+        if selected.name == "find" {
+            // Which of the blocks that match this page shows, counted from the first.
+            let matching = |list: &[Item]| list.iter().filter(|i| i.matches > 0).count();
+            let before = matching(selected.items.get(..start.item).unwrap_or_default());
+            let here = matching(items);
+            if here > 0 && here < matching(&selected.items) {
+                scope.push_str(&format!(", showing {}..{}", before + 1, before + here));
+            }
+        }
         let after = start.item + items.len();
         let mut remaining: u32 = selected
             .items
@@ -414,169 +452,6 @@ impl Cx<'_> {
             position: page.position,
             next,
             warnings: page.warnings,
-        }
-    }
-
-    /// The outline of the body, to a depth, or to the deepest level that fits the budget.
-    fn outline(&self, depth: Option<u32>) -> Result<View, StetError> {
-        let list = self.parts.story_specs()?;
-        let part = list
-            .0
-            .iter()
-            .find(|s| s.kind == StoryKind::Body)
-            .and_then(|s| self.parts.id(&s.part))
-            .ok_or_else(|| StetError::new(ErrorCode::NotFound, "the document has no body."))?;
-        let source = Source::load(&self.parts, part, self.mode(), false)?;
-        let tree = self.parts.tree(part)?;
-        let mode = self.mode();
-        let first_text = |t: usize| -> String {
-            let Some(top) = source.tops.get(t) else {
-                return String::new();
-            };
-            (top.first..top.end)
-                .filter(|i| {
-                    source.story.blocks().get(*i).map(|e| e.kind) == Some(BlockKind::Paragraph)
-                })
-                .filter_map(|i| source.story.paragraph(tree, i))
-                .map(|p| p.text(mode))
-                .map(|t| t.split_whitespace().collect::<Vec<_>>().join(" "))
-                .find(|t| !t.is_empty())
-                .unwrap_or_default()
-        };
-        let bold = || self.parts.bold_lines(part, mode, false);
-        let scan = self.parts.scan(part, mode, false)?;
-        let full = headings(&scan, &source.tops, &bold, &first_text)?;
-        let deepest = full.deepest();
-        let budget = self.budget();
-        let measure = |d: u32, from: usize, n: Option<usize>| -> Result<(Page, usize), StetError> {
-            self.outline_page(&full, &source, part, d, from, n)
-        };
-        let chosen = match depth {
-            Some(d) => d.clamp(1, deepest),
-            None => {
-                let mut pick = 1;
-                for d in (1..=deepest).rev() {
-                    let (page, _) = measure(d, 0, None)?;
-                    if budget == 0 || estimate(&page.text) <= budget {
-                        pick = d;
-                        break;
-                    }
-                }
-                pick
-            }
-        };
-        let shown = full.shown(chosen);
-        let start = match &self.spec.after {
-            Some(c) => {
-                let (_, entry) = super::select::locate(&self.parts, self.state, c.as_str())?;
-                shown
-                    .iter()
-                    .position(|(e, _)| e.entry > entry)
-                    .unwrap_or(shown.len())
-            }
-            None => 0,
-        };
-        let left = shown.len().saturating_sub(start);
-        let guess = greedy(std::iter::repeat_n(30u32, left), budget, OVERHEAD);
-        let n = if left == 0 {
-            0
-        } else {
-            fit(left, budget, guess, &mut |n| {
-                Ok(estimate(&measure(chosen, start, Some(n))?.0.text))
-            })?
-        };
-        let (page, _) = measure(chosen, start, Some(n))?;
-        let next = (start + n < shown.len())
-            .then(|| page.position.last.clone())
-            .flatten()
-            .map(Cursor::new);
-        Ok(self.finish(page, next))
-    }
-
-    /// The page of an outline: the entries `from..from + n` of those down to `depth`.
-    fn outline_page(
-        &self,
-        full: &Full,
-        source: &Source,
-        part: PartId,
-        depth: u32,
-        from: usize,
-        n: Option<usize>,
-    ) -> Result<(Page, usize), StetError> {
-        let shown = full.shown(depth);
-        let end = n.map_or(shown.len(), |n| (from + n).min(shown.len()));
-        let slice = shown.get(from.min(end)..end).unwrap_or_default();
-        let entries: Vec<OutlineEntry> = slice
-            .iter()
-            .map(|(e, hidden)| self.outline_entry(source, e, *hidden))
-            .collect();
-        let first = entries.iter().find_map(|e| e.r#ref);
-        let last = entries.iter().rev().find_map(|e| e.r#ref);
-        let mut projection = project(
-            self.parts,
-            self.base,
-            self.mode(),
-            Output::View {
-                name: "outline".into(),
-            },
-            &Selection {
-                stories: Vec::new(),
-            },
-        )?;
-        projection
-            .head
-            .warnings
-            .extend(story_warnings(self.parts, self.mode(), part)?);
-        let remaining = u32::try_from(shown.len().saturating_sub(end))
-            .unwrap_or(u32::MAX)
-            .saturating_mul(30);
-        let position = Position {
-            scope: "outline".to_string(),
-            first: first.map(|r| r.to_string()),
-            last: last.map(|r| r.to_string()),
-            shown: u32::try_from(entries.len()).unwrap_or(u32::MAX),
-            total: u32::try_from(shown.len()).unwrap_or(u32::MAX),
-            remaining_tokens: remaining,
-        };
-        projection.head.position = Some(position.clone());
-        projection.body = Body::Outline(Outline {
-            source: full.source,
-            depth,
-            total: u32::try_from(full.entries.len()).unwrap_or(u32::MAX),
-            entries,
-        });
-        let warnings = projection.head.warnings.clone();
-        Ok((
-            Page {
-                text: self.render(&projection),
-                position,
-                warnings,
-            },
-            end - from.min(end),
-        ))
-    }
-
-    fn outline_entry(&self, source: &Source, e: &Entry, hidden: u32) -> OutlineEntry {
-        let tops = &source.tops;
-        let first = tops.get(e.top).and_then(|t| self.ref_at(source, t.first));
-        let last = e
-            .end
-            .checked_sub(1)
-            .and_then(|i| tops.get(i))
-            .and_then(|t| match &t.collapse {
-                Some(c) => self.ref_at(source, c.last),
-                None => self.ref_at(source, t.first),
-            });
-        OutlineEntry {
-            r#ref: self.ref_at(source, e.entry),
-            level: e.level,
-            label: e.label.clone(),
-            text: e.text.clone(),
-            blocks: e.blocks,
-            chars: e.chars,
-            first,
-            last,
-            hidden,
         }
     }
 }

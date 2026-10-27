@@ -53,6 +53,7 @@ fn by(author: Option<&str>, kind: Option<&str>) -> RevisionFilter {
     RevisionFilter {
         author: author.map(str::to_string),
         kind: kind.map(str::to_string),
+        ..RevisionFilter::default()
     }
 }
 

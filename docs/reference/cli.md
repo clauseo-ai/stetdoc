@@ -108,9 +108,10 @@ stetdoc view [OPTIONS] <INPUT>
 | `--depth <N>` | With --outline, the deepest heading level shown. |
 | `--range <REFS>` | The blocks from one ref to another, such as p40..p60, or from a ref to the end of its story. |
 | `--clause <NUMBER>` | The block a clause number resolves to, with the blocks under it, such as 12.3. |
-| `--find <TEXT>` | The blocks that contain this text, with their neighbours. Case-insensitive unless it has a capital letter. |
+| `--find <TEXT>` | The blocks that contain this text, with their neighbours, paged like a range. Case-insensitive unless it has a capital letter. With --range, only in that range; with --revisions, only the changes whose text contains it. |
 | `--context <N>` | With --find, how many blocks to show on each side of a match. Default `1`. |
-| `--revisions` | The tracked changes, one line each: their ids, kind, author, day, block and text. |
+| `--revisions` | The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters. |
+| `--full` | With --revisions, the whole inserted and deleted text of each change (up to 1,000 characters), not 80. |
 | `--comments` | The comment threads. |
 | `--author <NAME>` | With --revisions or --comments, only those by this author (a name or the code the view shows). |
 | `--kind <KIND>` | With --revisions, only this kind: insert, delete, move or format. |
@@ -118,7 +119,8 @@ stetdoc view [OPTIONS] <INPUT>
 | `--open` | With --comments, only open threads. |
 | `--story <STORY>` | One story whole. One of `body`, `notes`, `headers`, `comments`. |
 | `--mode <MODE>` | How tracked changes appear. One of `final`, `original`, `redline`. Default `redline`. |
-| `--budget <TOKENS>` | The size of a page, in estimated tokens. 0 shows everything. Default `8000`. |
+| `--budget <TOKENS>` | The size of a page, in estimated tokens (about 4 characters each). 0 shows everything. Default `3000`. |
+| `--all` | Everything on one page, however long: the same as --budget 0, and it wins over --budget. |
 | `--after <CURSOR>` | Continue after this cursor, from the last line of the previous page. |
 | `--no-notes` | Leave out the margin notes and the appendix of the notes and comments the page cites. |
 
@@ -132,7 +134,29 @@ $ stetdoc view contract.docx --find "thirty days" --context 0
 {summary: 1 section}
 p4 Payment is due within thirty days.
 {~ 1 match}
-{position: p4..p4 of find "thirty days" (1 of 1 blocks)}
+{position: p4..p4 of find "thirty days": 1 match in 1 block (1 of 1 blocks)}
+
+```
+
+A find pages like a range, and its last line counts the matches. With `--range` it looks only in that range. With
+`--revisions` it keeps the changes whose inserted or deleted text holds it, and `--full` shows each change's whole text.
+`--all` is `--budget 0`: everything on one page.
+
+```console
+$ stetdoc view contract.docx --find "days" --range p3..p5 --context 0
+{stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p4}
+{summary: 1 section}
+p4 Payment is due within thirty days.
+{~ 1 match}
+{position: p4..p4 of find "days" in p3..p5: 1 match in 1 block (1 of 1 blocks)}
+
+$ stetdoc view tracked.docx --revisions --find law --full
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:4..change:4}
+{authors: EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 1 change}
+#4 insert EW 2026-01-05 p4 "English law"
+{position: change:4..change:4 of changes with text "law" (1 of 1 changes)}
 
 ```
 
@@ -155,6 +179,20 @@ stetdoc inspect [OPTIONS] <INPUT> <TARGET>
 $ stetdoc inspect contract.docx p1
 block: p1 is a paragraph in the body story
 characters 0..67: plain
+tracked changes: none in this block: all of its text is the document's own, even text that looks like a revision
+comments: none on this block
+
+```
+
+A block lists its tracked changes and comments, or says it has none, so text that only looks like a change can be told
+from one.
+
+```console
+$ stetdoc inspect tracked.docx p2
+block: p2 is a paragraph in the body story
+characters 0..10: plain
+change #2: delete by Eric White on 2026-01-03, deletes "gross"
+comments: none on this block
 
 ```
 

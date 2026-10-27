@@ -53,11 +53,12 @@ mod page;
 mod receipt;
 mod render;
 mod select;
+mod select_find;
 mod view;
 
 pub(crate) use {
     authors::authors, authors::note_ids, files::to_batch, ledger::LedgerFilter, ledger::changes_of,
-    ledger::describe, ledger::story_name, lookup::lookup, lookup::render_lookup,
+    ledger::describe, ledger::family, ledger::story_name, lookup::lookup, lookup::render_lookup,
     receipt::render_blocks, render::render_files, view::view,
 };
 
@@ -71,6 +72,8 @@ mod testing_gen_blocks;
 mod tests_comments;
 #[cfg(test)]
 mod tests_draft;
+#[cfg(test)]
+mod tests_find;
 #[cfg(test)]
 mod tests_interface;
 #[cfg(test)]

@@ -315,3 +315,54 @@ fn an_edit_takes_the_servers_author_and_without_one_says_how_to_set_it() {
         "{receipt}"
     );
 }
+
+#[test]
+fn the_view_tool_finds_within_a_range_and_names_a_pair_it_refuses() {
+    let tmp = tempfile::tempdir().unwrap();
+    fs::write(tmp.path().join("contract.docx"), contract::package()).unwrap();
+    let mut server = Server::start(tmp.path(), &[]);
+    let within = server.call(
+        "view",
+        json!({ "input": "contract.docx", "find": "days", "range": "p3..p5", "context": 0 }),
+    );
+    let page = ok(&within);
+    assert_eq!(
+        page["position"]["scope"],
+        "find \"days\" in p3..p5: 1 match in 1 block"
+    );
+    let outside = server.call(
+        "view",
+        json!({ "input": "contract.docx", "find": "days", "range": "p1..p2" }),
+    );
+    assert_eq!(ok(&outside)["position"]["shown"], 0);
+    // The schema says which pairs go apart, and a call that sends one gets a next step that names both.
+    let list = server.request("tools/list", json!({}));
+    let view = list["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|t| t["name"] == "view")
+        .unwrap()
+        .clone();
+    let find = view["inputSchema"]["properties"]["find"]["description"]
+        .as_str()
+        .unwrap();
+    assert!(
+        find.contains("Cannot be used with `outline`, `clause`"),
+        "{find}"
+    );
+    assert_eq!(view["inputSchema"]["properties"]["budget"]["default"], 3000);
+    let refused = server.call(
+        "view",
+        json!({ "input": "contract.docx", "find": "days", "clause": "1" }),
+    );
+    assert_eq!(refused["isError"], true, "{refused}");
+    let next = refused["structuredContent"]["error"]["next"]
+        .as_str()
+        .unwrap();
+    assert!(
+        next.contains("`find`") && next.contains("`clause`"),
+        "{next}"
+    );
+    assert!(!next.contains("input schema lists"), "{next}");
+}

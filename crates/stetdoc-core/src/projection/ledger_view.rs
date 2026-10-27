@@ -54,7 +54,7 @@ pub(super) fn ledger_view(
     )?;
     let label = label_of(filter);
     let total = u32::try_from(kept.len()).unwrap_or(u32::MAX);
-    let page = |n: usize| page_of(format, &head, &kept, start, n, total, &label);
+    let page = |n: usize| page_of(format, &head, &kept, (start, n), total, &label, filter.full);
     let budget = spec.budget.0;
     let left = kept.len().saturating_sub(start);
     let guess = greedy(
@@ -98,6 +98,9 @@ fn label_of(filter: &RevisionFilter) -> String {
     if let Some(kind) = &filter.kind {
         label.push_str(&format!(" of kind {kind}"));
     }
+    if let Some(find) = &filter.find {
+        label.push_str(&format!(" with text {find:?}"));
+    }
     label
 }
 
@@ -123,10 +126,10 @@ fn page_of(
     format: &dyn Format,
     head: &Projection,
     kept: &[(usize, &RevisionInfo)],
-    start: usize,
-    n: usize,
+    (start, n): (usize, usize),
     total: u32,
     label: &str,
+    full: bool,
 ) -> Page {
     let end = (start + n).min(kept.len());
     let shown: Vec<RevisionInfo> = kept
@@ -153,6 +156,7 @@ fn page_of(
         body: Body::Ledger(ChangeList {
             total,
             changes: shown,
+            full,
         }),
         appendix: Vec::new(),
     };

@@ -116,7 +116,7 @@ fn a_unique_str_replace_commits_a_tracked_edit_and_shows_the_block() {
     let revisions = doc
         .revisions(&RevisionFilter {
             author: Some("Clauseo".into()),
-            kind: None,
+            ..RevisionFilter::default()
         })
         .unwrap();
     assert!(!revisions.is_empty());

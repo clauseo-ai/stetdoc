@@ -163,6 +163,8 @@ pub(crate) struct ChangeList {
     pub total: u32,
     /// The changes shown, as `Document::revisions` describes them.
     pub changes: Vec<crate::api::revision::RevisionInfo>,
+    /// Show the whole text of each change, and do not cut its line short.
+    pub full: bool,
 }
 
 /// A note or a comment that a page cites, with its text cut short.

@@ -17,6 +17,9 @@ use crate::wordml::{Story, StoryKind};
 /// The most characters of inserted or deleted text that a `RevisionInfo` carries.
 const TEXT_CUT: usize = 200;
 
+/// The most a `RevisionInfo` carries when the filter asks for the full text: all that the change carries.
+const FULL_CUT: usize = crate::revisions::changes::CHANGE_TEXT_LIMIT;
+
 /// The families a `kind` filter names, in the words `view --kind` takes.
 const FAMILIES: [&str; 4] = ["insert", "delete", "move", "format"];
 
@@ -74,31 +77,42 @@ pub(crate) fn story_name(kind: StoryKind) -> &'static str {
     }
 }
 
-/// Text cut at the limit, `None` for none, and whether it was cut.
-fn cut(text: &str, already: bool) -> (Option<String>, bool) {
+/// Text cut at `limit` characters, `None` for none, and whether it was cut.
+fn cut(text: &str, already: bool, limit: usize) -> (Option<String>, bool) {
     if text.is_empty() {
         return (None, already);
     }
     let mut chars = text.chars();
-    let head: String = chars.by_ref().take(TEXT_CUT).collect();
+    let head: String = chars.by_ref().take(limit).collect();
     let more = chars.next().is_some();
     (Some(head), more || already)
 }
 
-/// The public description of one change, which is in the story `kind` of `story`.
+/// The public description of one change, which is in the story `kind` of `story`, its text cut at 200 characters.
 pub(crate) fn describe(
     change: &Change,
     parts: &PartsView<'_>,
     story: &Story,
     kind: StoryKind,
 ) -> RevisionInfo {
+    describe_cut(change, parts, story, kind, TEXT_CUT)
+}
+
+/// `describe`, with the text cut at `limit` characters.
+fn describe_cut(
+    change: &Change,
+    parts: &PartsView<'_>,
+    story: &Story,
+    kind: StoryKind,
+    limit: usize,
+) -> RevisionInfo {
     let block: Option<String> = story
         .blocks()
         .get(change.blocks.start)
         .and_then(|entry| parts.ref_of(&story.key(entry)))
         .map(|r: BlockRef| r.to_string());
-    let (inserted, cut_in) = cut(&change.inserted, change.text_cut);
-    let (deleted, cut_out) = cut(&change.deleted, change.text_cut);
+    let (inserted, cut_in) = cut(&change.inserted, change.text_cut, limit);
+    let (deleted, cut_out) = cut(&change.deleted, change.text_cut, limit);
     RevisionInfo {
         ids: change.ids.clone(),
         kind: kind_of(change.kind),
@@ -135,9 +149,9 @@ pub(crate) fn changes_of(
         let story = parts.story(part)?;
         let tree = parts.tree(part)?;
         for change in changes(&story, tree, None) {
-            let shown = keep
-                .keeps(change.author.as_deref(), kind_of(change.kind))
-                .then(|| describe(&change, &parts, &story, spec.kind));
+            let shown = (keep.keeps(change.author.as_deref(), kind_of(change.kind))
+                && keep.holds(&change))
+            .then(|| describe_cut(&change, &parts, &story, spec.kind, keep.cut));
             out.push(Listed {
                 ids: change.ids.clone(),
                 shown,
@@ -153,6 +167,10 @@ pub(crate) struct LedgerFilter {
     author: Option<String>,
     /// The family of the one kind kept, when the filter names one.
     family: Option<&'static str>,
+    /// The text a kept change holds, lowercased when the match ignores case, and whether it does.
+    needle: Option<(String, bool)>,
+    /// How many characters of text a description carries.
+    cut: usize,
 }
 
 impl LedgerFilter {
@@ -191,7 +209,51 @@ impl LedgerFilter {
                 Some(name.unwrap_or_else(|| given.clone()))
             }
         };
-        Ok(LedgerFilter { author, family })
+        let needle = match filter.find.as_deref() {
+            None => None,
+            Some(given) if given.trim().is_empty() => {
+                return Err(StetError::new(
+                    ErrorCode::InvalidPayload,
+                    "a find in the changes needs some text to look for.",
+                )
+                .with_next("Give the text to find, or leave out the find."));
+            }
+            Some(given) => {
+                let fold = !given.chars().any(char::is_uppercase);
+                Some((
+                    if fold {
+                        given.to_lowercase()
+                    } else {
+                        given.to_string()
+                    },
+                    fold,
+                ))
+            }
+        };
+        let cut = if filter.full { FULL_CUT } else { TEXT_CUT };
+        Ok(LedgerFilter {
+            author,
+            family,
+            needle,
+            cut,
+        })
+    }
+
+    /// True if the change's inserted or deleted text holds the needle of the filter, or the filter has none. The text is
+    /// all the change carries, up to 1,000 characters each way, and not only what a description shows.
+    pub(crate) fn holds(&self, change: &Change) -> bool {
+        let Some((needle, fold)) = &self.needle else {
+            return true;
+        };
+        [change.inserted.as_str(), change.deleted.as_str()]
+            .into_iter()
+            .any(|text| {
+                if *fold {
+                    text.to_lowercase().contains(needle.as_str())
+                } else {
+                    text.contains(needle.as_str())
+                }
+            })
     }
 
     /// True if a change by `author` of `kind` is kept: by the author the filter names, and of the kind it names.

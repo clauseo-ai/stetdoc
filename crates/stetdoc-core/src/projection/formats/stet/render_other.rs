@@ -329,13 +329,13 @@ pub(super) fn ledger_lines(out: &mut String, p: &Projection, list: &ChangeList) 
     info.push('}');
     emit(out, &build(|b| b.atomic(&info)));
     for change in &list.changes {
-        emit(out, &build(|b| change_line(b, p, change)));
+        emit(out, &build(|b| change_line(b, p, change, list.full)));
     }
 }
 
 /// One change: its ids, its kind as a family, its author, its day, its block, its story when it is not the body, and
-/// the text it deletes and inserts, each cut short.
-fn change_line(b: &mut LineBuf, p: &Projection, change: &RevisionInfo) {
+/// the text it deletes and inserts, each cut short unless the list is `full`.
+fn change_line(b: &mut LineBuf, p: &Projection, change: &RevisionInfo, full: bool) {
     let ids: Vec<String> = change.ids.iter().map(|id| id.to_string()).collect();
     b.atomic(&format!("#{} {}", ids.join(","), family(change.kind)));
     let who = match p.head.author_named(change.author.as_deref()) {
@@ -353,8 +353,9 @@ fn change_line(b: &mut LineBuf, p: &Projection, change: &RevisionInfo) {
     if change.story != "body" {
         b.atomic(&format!(" in {}", change.story));
     }
-    let deleted = one_line(change.deleted.as_deref());
-    let inserted = one_line(change.inserted.as_deref());
+    let limit = if full { None } else { Some(LINE_TEXT) };
+    let deleted = one_line(change.deleted.as_deref(), limit, change.text_truncated);
+    let inserted = one_line(change.inserted.as_deref(), limit, change.text_truncated);
     match (deleted, inserted) {
         (Some(old), Some(new)) => {
             b.atomic(" ");
@@ -370,16 +371,23 @@ fn change_line(b: &mut LineBuf, p: &Projection, change: &RevisionInfo) {
     }
 }
 
-/// The text on one line, its white space collapsed and cut to `LINE_TEXT` characters with an ellipsis, or `None` for none.
-fn one_line(text: Option<&str>) -> Option<String> {
-    let text = text?.split_whitespace().collect::<Vec<_>>().join(" ");
+/// The text on one line, its white space collapsed and cut to `limit` characters with an ellipsis, or `None` for none.
+/// With no limit, a text that the description itself cut (`cut`, and the text is at the most a description carries)
+/// ends with an ellipsis too.
+fn one_line(text: Option<&str>, limit: Option<usize>, cut: bool) -> Option<String> {
+    let raw = text?;
+    let text = raw.split_whitespace().collect::<Vec<_>>().join(" ");
     if text.is_empty() {
         return None;
     }
-    if text.chars().count() <= LINE_TEXT {
+    let Some(limit) = limit else {
+        let at_most = cut && raw.chars().count() >= crate::revisions::changes::CHANGE_TEXT_LIMIT;
+        return Some(if at_most { format!("{text}…") } else { text });
+    };
+    if text.chars().count() <= limit {
         return Some(text);
     }
-    let head: String = text.chars().take(LINE_TEXT).collect();
+    let head: String = text.chars().take(limit).collect();
     Some(format!("{head}…"))
 }
 

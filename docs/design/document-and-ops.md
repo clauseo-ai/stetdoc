@@ -890,7 +890,8 @@ asked. The CLI also takes an advisory lock on `.stet/` for the whole of a write,
 - **`save`** is `state.to_package()?.write()`. It validates nothing, because every edit was validated before it committed (`ARCHITECTURE.md`),
   and an unedited document returns the input bytes exactly (law L1). `Saved { bytes, receipt }` carries
   `SaveReceipt { base, edited, sha256, revisions }`, with every revision of the saved document by author.
-- **`inspect`** takes `"p42"`, `"t3"`, `"r17"`, `"styles"`, `"numbering"` or `"sections"` (`document/inspect.rs` and `inspect_lists.rs`). A paragraph gives its kind and
+- **`inspect`** takes `"p42"`, `"t3"`, `"r17"`, `"styles"`, `"numbering"` or `"sections"` (`document/inspect.rs`, `inspect_marks.rs` and `inspect_lists.rs`). Every block then lists its tracked changes (ids, kind, author, day, text) and the
+  comments anchored in it, or says it has none, so text that only looks like a change can be told from one. A paragraph gives its kind and
   story, its style (name and id), its list and level with the number it shows, its clause (the full form, and whether it was composed across lists), then every
   effective paragraph property with the level of the hierarchy that gave it (default, table style, numbering, paragraph style, character style, direct, or the levels of a
   toggle), from `styles`'s `Cascade::effective` on the paragraph's `Site`, and the distinct run formattings with the characters of the **Final** text that each covers. `pStyle`,

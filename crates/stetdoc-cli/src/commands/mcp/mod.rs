@@ -255,10 +255,12 @@ impl Server {
         let cli = Cli::try_parse_from(argv).map_err(|e| {
             Failure::usage(
                 output::argument_message(&e),
-                format!(
-                    "Pass the arguments that the {} tool's input schema lists.",
-                    tool.name
-                ),
+                output::argument_next(&e, Some(&tool.name)).unwrap_or_else(|| {
+                    format!(
+                        "Pass the arguments that the {} tool's input schema lists.",
+                        tool.name
+                    )
+                }),
             )
         })?;
         let mut command = cli.command;

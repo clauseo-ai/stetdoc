@@ -38,7 +38,32 @@ json_struct!(RevisionInfo {
     ids => "ids", kind => "kind", author => "author", date => "date", block => "block",
     story => "story", inserted => "inserted", deleted => "deleted", text_truncated => "text_truncated"
 });
-json_struct!(ChangeList { total => "total", changes => "changes" });
+// `full` is written only when it is set, so that every other ledger reads as it did.
+impl ToJson for ChangeList {
+    fn to_json(&self) -> Json {
+        let mut fields = vec![
+            ("total".to_string(), self.total.to_json()),
+            ("changes".to_string(), self.changes.to_json()),
+        ];
+        if self.full {
+            fields.push(("full".to_string(), true.to_json()));
+        }
+        Json::Obj(fields)
+    }
+}
+
+impl FromJson for ChangeList {
+    fn from_json(value: &Json) -> Result<ChangeList, JsonError> {
+        let mut fields = Fields::of(value)?;
+        let out = ChangeList {
+            total: fields.take("total")?,
+            changes: fields.take("changes")?,
+            full: fields.take::<Option<bool>>("full")?.unwrap_or(false),
+        };
+        fields.done()?;
+        Ok(out)
+    }
+}
 json_struct!(ThreadList { total => "total", resolved => "resolved", threads => "threads" });
 json_struct!(ThreadEntry { root => "root", resolved => "resolved", comments => "comments" });
 json_struct!(ThreadComment {

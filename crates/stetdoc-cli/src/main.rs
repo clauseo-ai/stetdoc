@@ -69,7 +69,9 @@ fn argument_error(error: &clap::Error, json: bool) -> ExitCode {
     }
     let failure = Failure::usage(
         output::argument_message(error),
-        "Run stetdoc --help, or stetdoc COMMAND --help, for the arguments.",
+        output::argument_next(error, None).unwrap_or_else(|| {
+            "Run stetdoc --help, or stetdoc COMMAND --help, for the arguments.".to_string()
+        }),
     );
     ExitCode::from(output::print_failure(&failure, true))
 }

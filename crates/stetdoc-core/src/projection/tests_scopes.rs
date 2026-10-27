@@ -17,6 +17,8 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
             Scope::Find {
                 needle: "number 7 has".into(),
                 context: 1,
+                from: None,
+                to: None,
             },
             0,
         ),
@@ -24,13 +26,18 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
     .unwrap();
     assert_eq!(refs_on(&v.text), vec!["p6", "p7", "p8"]);
     assert!(v.text.contains("{~ 1 match}"), "{}", v.text);
-    assert_eq!(v.position.scope, "find \"number 7 has\"");
+    assert_eq!(
+        v.position.scope,
+        "find \"number 7 has\": 1 match in 1 block"
+    );
     let two = view(
         &state,
         &spec(
             Scope::Find {
                 needle: "number 1".into(),
                 context: 0,
+                from: None,
+                to: None,
             },
             0,
         ),
@@ -46,6 +53,8 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
             Scope::Find {
                 needle: "paragraph number 3 ".into(),
                 context: 0,
+                from: None,
+                to: None,
             },
             0,
         ),
@@ -58,6 +67,8 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
             Scope::Find {
                 needle: "paragraph Number 3 ".into(),
                 context: 0,
+                from: None,
+                to: None,
             },
             0,
         ),
@@ -71,6 +82,8 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
             Scope::Find {
                 needle: "   ".into(),
                 context: 0,
+                from: None,
+                to: None,
             },
             0,
         ),
@@ -98,6 +111,8 @@ fn find_looks_in_every_story_and_pages_across_them() {
             Scope::Find {
                 needle: "price".into(),
                 context: 0,
+                from: None,
+                to: None,
             },
             0,
         ),

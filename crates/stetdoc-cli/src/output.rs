@@ -128,6 +128,47 @@ pub fn argument_message(error: &clap::Error) -> String {
     message.trim_start_matches("error: ").to_string()
 }
 
+/// The next step of an argument error that names its arguments: two that cannot go together, or one that another needs.
+/// `tool` is the MCP tool the call was for, whose properties are the flags' names with `_` for `-`; without it the
+/// flags are named as the CLI spells them. `None` for any other error.
+pub fn argument_next(error: &clap::Error, tool: Option<&str>) -> Option<String> {
+    use clap::error::{ContextKind, ContextValue, ErrorKind};
+    let name = |shown: &str| -> String {
+        let flag = shown.split([' ', '=']).next().unwrap_or(shown);
+        match tool {
+            Some(_) => format!("`{}`", flag.trim_start_matches('-').replace('-', "_")),
+            None => flag.to_string(),
+        }
+    };
+    let names = |kind: ContextKind| -> Vec<String> {
+        match error.get(kind) {
+            Some(ContextValue::String(one)) => vec![name(one)],
+            Some(ContextValue::Strings(many)) => many.iter().map(|s| name(s)).collect(),
+            _ => Vec::new(),
+        }
+    };
+    match error.kind() {
+        ErrorKind::ArgumentConflict => {
+            let first = names(ContextKind::InvalidArg).into_iter().next()?;
+            let others = names(ContextKind::PriorArg);
+            let other = others.first()?;
+            Some(format!(
+                "{first} and {other} cannot be used together. Leave one of them out, or make two calls."
+            ))
+        }
+        ErrorKind::MissingRequiredArgument => {
+            let missing = names(ContextKind::InvalidArg);
+            (!missing.is_empty()).then(|| {
+                format!(
+                    "Add {}, which the other arguments need, or leave out the argument that needs it.",
+                    missing.join(" and ")
+                )
+            })
+        }
+        _ => None,
+    }
+}
+
 /// Prints a warning on stderr, for a diagnostic that does not stop the command.
 pub fn warn(message: &str) {
     eprintln!("{message}");

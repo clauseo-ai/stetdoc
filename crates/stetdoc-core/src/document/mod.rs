@@ -34,6 +34,7 @@ mod edit_files;
 mod export;
 mod inspect;
 mod inspect_lists;
+mod inspect_marks;
 mod receipt;
 mod receipt_text;
 mod write_plan;
@@ -185,6 +186,8 @@ mod tests_edit_review;
 mod tests_edit_toc;
 #[cfg(test)]
 mod tests_inspect;
+#[cfg(test)]
+mod tests_inspect_marks;
 #[cfg(test)]
 mod tests_scale;
 #[cfg(test)]

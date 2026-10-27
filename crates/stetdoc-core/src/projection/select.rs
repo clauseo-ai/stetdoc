@@ -93,7 +93,7 @@ pub(crate) struct Start {
     pub row: usize,
 }
 
-fn error(code: ErrorCode, message: impl Into<String>, next: &str) -> StetError {
+pub(super) fn error(code: ErrorCode, message: impl Into<String>, next: &str) -> StetError {
     StetError::new(code, message).with_next(next)
 }
 
@@ -308,90 +308,13 @@ pub(crate) fn range_scope(
 }
 
 /// How many times `needle` is in `haystack`, with the case folded when the needle has no capital.
-fn count(haystack: &str, needle: &str, fold: bool) -> u32 {
+pub(super) fn count(haystack: &str, needle: &str, fold: bool) -> u32 {
     let n = if fold {
         haystack.to_lowercase().matches(needle).count()
     } else {
         haystack.matches(needle).count()
     };
     u32::try_from(n).unwrap_or(u32::MAX)
-}
-
-/// The tops that hold the needle, with `context` tops on each side, in every story.
-pub(crate) fn find_scope(
-    parts: &PartsView<'_>,
-    mode: Mode,
-    needle: &str,
-    context: u8,
-) -> Result<Selected, StetError> {
-    if needle.trim().is_empty() {
-        return Err(error(
-            ErrorCode::InvalidPayload,
-            "a find needs some text to look for.",
-            "Give the text to find.",
-        ));
-    }
-    let fold = !needle.chars().any(char::is_uppercase);
-    let lowered = needle.to_lowercase();
-    let wanted = if fold { lowered.as_str() } else { needle };
-    let list = parts.story_specs()?;
-    let mut sources = Vec::new();
-    let mut items = Vec::new();
-    for spec in &list.0 {
-        let Some(part) = parts.id(&spec.part) else {
-            continue;
-        };
-        let source = Source::load(parts, part, mode, true)?;
-        let tree = parts.tree(part)?;
-        let mut hits: Vec<(usize, u32)> = Vec::new();
-        for (t, top) in source.tops.iter().enumerate() {
-            let mut matches = 0u32;
-            for i in top.first..top.end {
-                if source.story.blocks().get(i).map(|e| e.kind) != Some(BlockKind::Paragraph) {
-                    continue;
-                }
-                if let Some(p) = source.story.paragraph(tree, i) {
-                    let text: String = p
-                        .text(mode)
-                        .chars()
-                        .filter(|c| !matches!(c, '\u{1}'..='\u{6}' | '\u{c}' | '\u{e}'))
-                        .collect();
-                    matches = matches.saturating_add(count(&text, wanted, fold));
-                }
-            }
-            if matches > 0 {
-                hits.push((t, matches));
-            }
-        }
-        if hits.is_empty() {
-            continue;
-        }
-        let src = sources.len();
-        let tops = source.tops.len();
-        let reach = usize::from(context);
-        let mut next = 0usize;
-        for (t, _) in &hits {
-            let from = t.saturating_sub(reach).max(next);
-            let to = (t + reach + 1).min(tops);
-            for top in from..to {
-                let m = hits.iter().find(|(h, _)| *h == top).map_or(0, |(_, m)| *m);
-                items.push(Item {
-                    src,
-                    top,
-                    matches: m,
-                });
-            }
-            next = to.max(next);
-        }
-        sources.push(source);
-    }
-    Ok(Selected {
-        name: "find",
-        label: Some(format!("find {needle:?}")),
-        sources,
-        items,
-        focus: None,
-    })
 }
 
 /// The tops of one clause: its block, and the blocks under it up to the next clause of the same or a shallower

@@ -67,9 +67,15 @@ impl Default for FormatId {
 #[serde(transparent)]
 pub struct Budget(pub u32);
 
+impl Budget {
+    /// The default size of a page: 3,000 tokens, about 12 KB of text, so that a page stays well under what an agent's
+    /// tool result holds before it is cut or spilled to a file, even with two or three pages in one call.
+    pub const DEFAULT: u32 = 3_000;
+}
+
 impl Default for Budget {
     fn default() -> Budget {
-        Budget(8_000)
+        Budget(Budget::DEFAULT)
     }
 }
 
@@ -112,6 +118,12 @@ pub struct RevisionFilter {
     pub author: Option<String>,
     /// Only changes of this kind: `insert`, `delete`, `move` or `format`.
     pub kind: Option<String>,
+    /// Only changes whose inserted or deleted text contains this text. Case-insensitive unless it has an uppercase
+    /// letter, as a `Find` is.
+    pub find: Option<String>,
+    /// Carry the whole inserted and deleted text of each change, up to 1,000 characters, and not 200; a view shows it
+    /// all and does not cut each line to 80 characters.
+    pub full: bool,
 }
 
 /// Which comment threads a `Comments` view lists.
@@ -150,6 +162,12 @@ pub enum Scope {
         needle: String,
         /// How many blocks to show on each side of a match.
         context: u8,
+        /// Only the blocks from this ref on, as a `Range` starts.
+        #[serde(default)]
+        from: Option<String>,
+        /// With `from`, only the blocks up to this ref; without it, to the end of the story of `from`.
+        #[serde(default)]
+        to: Option<String>,
     },
     /// The tracked changes, as a ledger.
     Revisions(RevisionFilter),
@@ -279,11 +297,13 @@ pub enum WarningCode {
     CompareNotesDropped,
     /// A list of deleted content had no numbering part to go in.
     CompareListsDropped,
+    /// A view of the whole body showed its outline, because the body is more than one page.
+    OutlineShown,
 }
 
 impl WarningCode {
     /// Every code, in the order of the design's table.
-    pub const ALL: [WarningCode; 33] = [
+    pub const ALL: [WarningCode; 34] = [
         WarningCode::LooksHidden,
         WarningCode::HiddenText,
         WarningCode::NumberingApproximate,
@@ -317,6 +337,7 @@ impl WarningCode {
         WarningCode::CompareObjectsDropped,
         WarningCode::CompareNotesDropped,
         WarningCode::CompareListsDropped,
+        WarningCode::OutlineShown,
     ];
 
     /// The snake_case name used on the wire.
@@ -355,6 +376,7 @@ impl WarningCode {
             WarningCode::CompareObjectsDropped => "compare_objects_dropped",
             WarningCode::CompareNotesDropped => "compare_notes_dropped",
             WarningCode::CompareListsDropped => "compare_lists_dropped",
+            WarningCode::OutlineShown => "outline_shown",
         }
     }
 

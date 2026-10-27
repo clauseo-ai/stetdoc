@@ -119,7 +119,7 @@ shaped as it is.
 
 Two more facts shape the design. Measurements of agent tools say default output must
 fit Codex's 10,000-token cap and that skills are loaded 6% of the time without a hint, so a view is about
-8,000 tokens and the files carry their own rules. The corpus census says LAB documents are cleaner than
+3,000 tokens and the files carry their own rules. The corpus census says LAB documents are cleaner than
 Word's, so the Word-authored fixtures, not LAB, decide the hard cases for the model.
 
 ## 2. The interface at a glance
@@ -150,9 +150,10 @@ pub fn lookup(parts: PartsView, base: &str, query: &str, block: Option<BlockKey>
 pub struct ViewSpec { pub scope: Scope, pub mode: Mode, pub budget: Budget, pub after: Option<Cursor>,
                       pub format: FormatId, pub notes: bool /* margin notes and the appendix, default true */ }
 pub enum Scope { Auto, Outline { depth: Option<u8> }, Range { from: String, to: Option<String> },
-                 Clause(String), Find { needle: String, context: u8 }, Revisions(RevisionFilter),
+                 Clause(String), Find { needle: String, context: u8, from: Option<String>, to: Option<String> },
+                 Revisions(RevisionFilter /* author, kind, find, full */),
                  Comments(CommentFilter), Story(StoryName) }
-pub struct Budget(pub u32);                        // tokens by the estimate of 4.4; default 8,000; 0 means no limit
+pub struct Budget(pub u32);                        // tokens by the estimate of 4.4; default 3,000; 0 means no limit
 pub struct Cursor(String);                         // `p188` (after that block), `change:14`, `comment:7`; opaque to callers
 pub struct View { pub base: String, pub mode: Mode, pub text: String, pub position: Position,
                   pub next: Option<Cursor>, pub tokens: u32, pub warnings: Vec<Warning> }
@@ -170,7 +171,7 @@ pub struct Origin { pub file: String, pub line: u32, pub block: Option<String>,
 pub struct BlockRender { pub blocks: Vec<RenderedBlock>, pub warnings: Vec<Warning> }          // 8
 ```
 
-`ViewSpec::default()` is `Scope::Auto`, `Mode::Redline`, `Budget(8000)`, no cursor, the `stet/1` format, notes on.
+`ViewSpec::default()` is `Scope::Auto`, `Mode::Redline`, `Budget(3000)`, no cursor, the `stet/1` format, notes on.
 `View.text` is what the CLI prints. With the `json` format it is the JSON text, and a program parses it. `base`
 is the base token (`namespace:version:lineage`), and every view carries it, as the architecture requires.
 
@@ -419,6 +420,7 @@ code is.
 | `numbering_approximate` | a `Note` of `numbering` that reached the output: unsupported or out-of-range format (decimal shown, the tier-3 fallback), missing level, style-link cycle, an unresolved `numId`, `LISTNUM` mixed with numbered paragraphs, `w:numPr/w:ins` | The clause number may not match Word, and the agent will cite it |
 | `read_anomaly` | a `wordml` anomaly that changes what is shown: `ExtraBody` (a second `w:body` is not read), `UnknownElement` (skipped with its content), `NestedBlock`, `NoBranch`, `MisplacedElement`, `WrongRoot` | Content exists that the agent cannot see. `ExtraBody` is the one that matters most: it is how content hides |
 | `opaque_content` | an `Opaque` block: `altChunk`, unknown block element | Not shown, no ref |
+| `outline_shown` | a view of the whole body (`Auto`) that does not fit the budget shows its outline | Its next step names the range of the whole body and `--all`, so the agent reads the body without guessing a flag |
 | `unreferenced_note` | a note no reference points at | It is in `notes.md` and nowhere in the text |
 | `duplicate_number` | in `render_blocks` for a receipt: a paragraph's text starts with its own computed clause number | The agent typed a number Word also adds |
 | `looks_like_rewrite` | in `Planned.notes`: a new line that is not next to it has the same text as a deleted block (the agent dropped a ref and moved the text) | The edit is a deletion and an insertion, not a replacement |
@@ -574,12 +576,12 @@ in 14); an experiment arm can try `Final`.
 
 | Scope | What is selected | Notes |
 |---|---|---|
-| `Auto` (default) | the body story whole, if it fits the budget; otherwise the outline | The head says which other files exist (notes, headers, comments) and what `--story` shows them |
+| `Auto` (default) | the body story whole, if it fits the budget; otherwise the outline | The head says which other files exist (notes, headers, comments) and what `--story` shows them. An outline that stands for the body carries an `outline_shown` warning with the body's size and how to read it: the range of the whole body, or `--all` |
 | `Outline { depth }` | the headings of the body (4.3) | `depth` caps the level shown. With no depth the deepest level that fits the budget is chosen |
 | `Range { from, to }` | the blocks from ref `from` to ref `to` inclusive, or to the end of the story when `to` is absent | Both refs are in one story (`invalid_payload` otherwise), and `to` is not before `from`. A ref of a row or a cell paragraph widens the start to the table's line so a page always opens with its context. A ref inside a collapsed field (a table of contents) shows the paragraphs of every field in that view, which is how an agent expands one |
 | `Clause(text)` | the block that `index` resolves `text` to, and the blocks under it up to the next block of the same or a shallower clause depth | `ambiguous_match` with the candidates when it resolves to several (7.4). The blocks run to the next clause of the same or a shallower depth, and the page says which blocks cite the clause (`{~ cited by p57, p301}`) |
-| `Find { needle, context }` | every block of every story whose text in the mode contains `needle`, and `context` blocks each side | Smart case: case-insensitive unless the needle has an uppercase letter. The matched blocks are shown unchanged with a margin note giving the number of matches, so text copied from the view is exact. A hit inside a table shows the whole table, which is a unit like a paragraph (a big one is cut between rows as any page cuts it). A collapsed field is read in full, so a hit in a table of contents is a line of it. The blocks between two runs of results are one margin note, `{~ 8 blocks not shown}` |
-| `Revisions(filter)` | the changes that `revisions::changes` groups, by author code or name and kind | A ledger, not text (4.6). `Document::revisions` and this scope list the same changes through `projection::ledger`, and the cursor is the first id of the last change shown (`change:14`) |
+| `Find { needle, context, from, to }` | every block of every story whose text in the mode contains `needle`, and `context` blocks each side; with `from`, only within that range, context included | Smart case: case-insensitive unless the needle has an uppercase letter. The matched blocks are shown unchanged with a margin note giving the number of matches, so text copied from the view is exact. A hit inside a table shows the whole table, which is a unit like a paragraph (a big one is cut between rows as any page cuts it). A collapsed field is read in full, so a hit in a table of contents is a line of it. The blocks between two runs of results are one margin note, `{~ 8 blocks not shown}`. A find pages like a range, and the position's scope counts the matches and the blocks that hold them and says which of those blocks the page shows: `find "days": 44 matches in 38 blocks, showing 1..9` |
+| `Revisions(filter)` | the changes that `revisions::changes` groups, by author code or name, kind, and text the change inserts or deletes (`find`, smart case, over all the change carries) | A ledger, not text (4.6). `Document::revisions` and this scope list the same changes through `projection::ledger`, and the cursor is the first id of the last change shown (`change:14`). A line cuts each text to 80 characters; with `full` it shows all the change carries, up to 1,000 characters each way, still paged to the budget |
 | `Comments(filter)` | the threads, by the author of the root (code or name) and whether they are resolved | Built on `threads` (`Threads::of`, `thread_of`, `covered_text`): one entry per thread in the order of the roots, as 4.6 shows. The view is `view=threads`, the unit of the position line is `threads` and the cursor is the root of the last thread shown (`c7`; `comment:7` is read too). `Story(Comments)` still reads them one by one, and there a reply's line names the comment it answers and a resolved thread's comments say `resolved` |
 | `Story(name)` | one whole story: the body, the notes, the headers and footers, or the comments | `Auto` for that story |
 
@@ -649,9 +651,9 @@ tokens(s) = ceil(ascii_chars(s) / 4) + non_ascii_chars(s)
 
 English legal text is about four ASCII characters a token. A non-ASCII character is counted as a whole token,
 which is close for a curly quote or `§` and conservative for Devanagari and CJK, where a character can cost
-several. The estimate is of the whole `View.text`, head and appendix included. The default is 8,000 tokens, below
-Codex's 10,000-token output cap with room for the agent's own words, and well inside Claude Code's 25,000-token
-read page. A budget of 0 means no limit, which is what files and `--json` for a program that pages itself use.
+several. The estimate is of the whole `View.text`, head and appendix included. The default is 3,000 tokens, about 12 KB of text. A tool
+result over about 30,000 characters is cut or spilled to a file by Claude Code, and agents chain two or three views in one
+shell call, so a page leaves room for that, as well as for Codex's 10,000-token output cap with the agent's own words. A budget of 0 means no limit, which is what files and `--json` for a program that pages itself use.
 
 **Packing.** The page is built from a weight per top-level block (a quarter of its characters, plus 4 for each
 line it is rendered as), which gives a first guess of how many blocks fit. The page is then rendered and measured with
@@ -1887,12 +1889,14 @@ projection/
   build/warnings.rs    the warnings and their messages, de-duplicated                                               (~190)
   build/marks.rs       the three reads of an element that wordml does not offer: note kind, note references, auto   (~60)
   build/scan.rs        the sizes of the tops (from the index's lengths), the scan for sizes and heading facts, the bold lines   (~400)
-  select.rs            Scope into Items: story, range, find, clause, and the cursor into a Start; Source and its sizes   (~560)
+  select.rs            Scope into Items: story, range, clause, and the cursor into a Start; Source and its sizes        (~460)
+  select_find.rs       the Find scope: matches, context, the range it is limited to, the counts of its label          (~200)
   outline.rs           the heading sources, levels, what each covers, the page index                                (~330)
   page.rs              the estimate, the weight of a top, and the search for how many blocks fit                    (~110)
   appendix.rs          the notes and comments a page cites                                                          (~190)
   notes.rs             the margin notes from the index: mentions of a paragraph, `cited by` of a clause              (~110)
-  view.rs              view(): select, build, pack, appendix, render, for text pages and outlines                   (~595)
+  view.rs              view(): select, build, pack, appendix, render, for text pages                                (~460)
+  view/outline.rs      the outline as a page, and the outline_shown warning of a body too long for one              (~240)
   render.rs            files_model and render_files: the readable files of a state                                  (~40)
   receipt.rs           render_blocks: the blocks of a receipt, their anchors, neighbours and warnings                (~190)
   lookup.rs            lookup (the ref of a query resolved) and render_lookup (the text of an answer)               (~90)

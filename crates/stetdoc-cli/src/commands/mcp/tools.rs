@@ -71,6 +71,7 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
     let mut properties = Map::new();
     let mut required = Vec::new();
     let mut args = Vec::new();
+    let apart = conflicts(command);
     for arg in command.get_arguments() {
         let id = arg.get_id().as_str().to_string();
         if NOT_PROPERTIES.contains(&id.as_str()) {
@@ -86,7 +87,14 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
                 ValueHint::AnyPath | ValueHint::FilePath | ValueHint::DirPath
             ),
         };
-        properties.insert(id.clone(), property(arg, &spec));
+        let mut listed = property(arg, &spec);
+        if let Some(others) = apart.get(&id)
+            && let Some(Value::String(text)) = listed.get_mut("description")
+        {
+            let names: Vec<String> = others.iter().map(|o| format!("`{o}`")).collect();
+            text.push_str(&format!(" Cannot be used with {}.", names.join(", ")));
+        }
+        properties.insert(id.clone(), listed);
         if arg.is_required_set() {
             required.push(id);
         }
@@ -136,6 +144,48 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
         listing,
         args,
     }
+}
+
+/// For each argument, the arguments it cannot be used with, both ways round: those it or they name as conflicts, and the
+/// others of a group that takes one. The input schema says so in each property's description, and not with `oneOf`,
+/// which clients such as the Claude API refuse at the top of a tool's schema.
+fn conflicts(command: &clap::Command) -> std::collections::BTreeMap<String, Vec<String>> {
+    let mut apart: std::collections::BTreeMap<String, Vec<String>> = Default::default();
+    let mut add = |a: &str, b: &str| {
+        if a == b {
+            return;
+        }
+        for (x, y) in [(a, b), (b, a)] {
+            let list = apart.entry(x.to_string()).or_default();
+            if !list.iter().any(|n| n == y) {
+                list.push(y.to_string());
+            }
+        }
+    };
+    for arg in command.get_arguments() {
+        for other in command.get_arg_conflicts_with(arg) {
+            add(arg.get_id().as_str(), other.get_id().as_str());
+        }
+    }
+    for group in command.get_groups() {
+        if group.clone().is_multiple() {
+            continue;
+        }
+        let members: Vec<&str> = group.get_args().map(clap::Id::as_str).collect();
+        for a in &members {
+            for b in &members {
+                add(a, b);
+            }
+        }
+    }
+    let order: Vec<String> = command
+        .get_arguments()
+        .map(|a| a.get_id().as_str().to_string())
+        .collect();
+    for list in apart.values_mut() {
+        list.sort_by_key(|n| order.iter().position(|o| o == n));
+    }
+    apart
 }
 
 fn kind(arg: &Arg) -> Kind {
@@ -307,7 +357,28 @@ mod tests {
         let schema = &view.listing["inputSchema"];
         assert_eq!(schema["required"], serde_json::json!(["input"]));
         assert_eq!(schema["properties"]["budget"]["type"], "integer");
-        assert_eq!(schema["properties"]["budget"]["default"], 8000);
+        assert_eq!(schema["properties"]["budget"]["default"], 3000);
+        assert_eq!(schema["properties"]["all"]["type"], "boolean");
+        // A pair the CLI refuses is named in both descriptions, and a pair it takes is not.
+        let said = |name: &str| {
+            schema["properties"][name]["description"]
+                .as_str()
+                .unwrap()
+                .to_string()
+        };
+        assert!(
+            said("find").contains("Cannot be used with `outline`, `clause`, `comments`, `story`."),
+            "{}",
+            said("find")
+        );
+        assert!(said("clause").contains("`find`"), "{}", said("clause"));
+        assert!(!said("range").contains("`find`"), "{}", said("range"));
+        assert!(
+            !said("revisions").contains("`find`"),
+            "{}",
+            said("revisions")
+        );
+        assert!(!said("all").contains("Cannot"), "{}", said("all"));
         assert_eq!(schema["properties"]["outline"]["type"], "boolean");
         assert_eq!(
             schema["properties"]["mode"]["enum"],

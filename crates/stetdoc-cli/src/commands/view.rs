@@ -14,7 +14,17 @@ pub fn run(args: &ViewArgs) -> Result<Outcome, Failure> {
     let view = doc.view(&spec(args)?)?;
     let mut text = view.text.clone();
     if let Some(next) = &view.next {
-        text.push_str(&format!("\n-- more: {}\n", next_command(next.as_str())));
+        let tokens = view.position.remaining_tokens;
+        let left = if tokens >= 1000 {
+            format!("about {}K tokens", tokens / 1000)
+        } else {
+            format!("about {tokens} tokens")
+        };
+        text.push_str(&format!(
+            "\n-- more: this page stops at {}, and {left} follow. Next page: {} (or add --all to see everything at once)\n",
+            view.position.last.as_deref().unwrap_or(next.as_str()),
+            next_command(next.as_str())
+        ));
     }
     Ok(Outcome::of(&text, &view)?.with_notes(read.notes))
 }
@@ -34,18 +44,23 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
                 "Write --range p40..p60, or --range p40 for p40 to the end of its story.",
             ));
         }
-        Scope::Range { from, to }
+        match &args.find {
+            Some(needle) => Scope::Find {
+                needle: needle.clone(),
+                context: args.context,
+                from: Some(from),
+                to,
+            },
+            None => Scope::Range { from, to },
+        }
     } else if let Some(clause) = &args.clause {
         Scope::Clause(clause.clone())
-    } else if let Some(needle) = &args.find {
-        Scope::Find {
-            needle: needle.clone(),
-            context: args.context,
-        }
     } else if args.revisions {
         Scope::Revisions(RevisionFilter {
             author: args.author.clone(),
             kind: args.kind.clone(),
+            find: args.find.clone(),
+            full: args.full,
         })
     } else if args.comments {
         let resolved = match (args.resolved, args.open) {
@@ -57,6 +72,13 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
             author: args.author.clone(),
             resolved,
         })
+    } else if let Some(needle) = &args.find {
+        Scope::Find {
+            needle: needle.clone(),
+            context: args.context,
+            from: None,
+            to: None,
+        }
     } else if let Some(story) = args.story {
         Scope::Story(match story {
             StoryArg::Body => StoryName::Body,
@@ -80,7 +102,7 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
             ModeArg::Original => Mode::Original,
             ModeArg::Redline => Mode::Redline,
         },
-        budget: Budget(args.budget),
+        budget: Budget(if args.all { 0 } else { args.budget }),
         after: args.after.as_ref().map(Cursor::new),
         notes: !args.no_notes,
         ..ViewSpec::default()

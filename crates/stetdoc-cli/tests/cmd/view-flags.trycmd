@@ -1,0 +1,47 @@
+A view's flags that go together and those that do not. `--all` is `--budget 0` and wins over it. A find goes with a range
+or with the ledger; with a clause it is refused, and the next step names both flags. `--full` needs `--revisions`.
+
+```console
+$ stetdoc view tracked.docx --revisions --budget 1 --all
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=change:1..change:4}
+{authors: JD "Jane Doe" · EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 4 changes}
+#1 insert JD 2026-01-02 p1 "shall pay"
+#2 delete EW 2026-01-03 p2 "gross"
+#3 format JD 2026-01-04 p3
+#4 insert EW 2026-01-05 p4 "English law"
+{position: change:1..change:4 of changes (4 of 4 changes)}
+
+$ stetdoc view tracked.docx --revisions --find PAY
+{stet 1 view=ledger base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+{changes: 0 changes}
+{position: nothing of changes with text "PAY" (0 of 0 changes)}
+
+$ stetdoc view contract.docx --find days --clause 1 --json
+? 2
+{
+  "error": {
+    "code": "invalid_payload",
+    "message": "the argument '--find <TEXT>' cannot be used with '--clause <NUMBER>'",
+    "next": "--find and --clause cannot be used together. Leave one of them out, or make two calls."
+  }
+}
+
+$ stetdoc view tracked.docx --full --json
+? 2
+{
+  "error": {
+    "code": "invalid_payload",
+    "message": "the following required arguments were not provided: --revisions",
+    "next": "Add --revisions, which the other arguments need, or leave out the argument that needs it."
+  }
+}
+
+$ stetdoc view contract.docx --find days --range p9..p2
+? 2
+error[invalid_payload]: the end of the range comes before p9, and a range goes forward.
+next: Swap the two refs.
+
+```

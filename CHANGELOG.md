@@ -9,6 +9,17 @@ released yet.
 
 ### Added
 
+- `stetdoc view --find TEXT --range p40..p60` looks only in that range, in the CLI and the MCP view tool. A find pages like
+  a range, and its position line counts the matches: `find "days": 44 matches in 38 blocks, showing 1..9`.
+- `stetdoc view --revisions --find TEXT` lists only the changes whose inserted or deleted text contains it, and
+  `--revisions --full` shows the whole text of each change (up to 1,000 characters) and not 80, still paged.
+- `stetdoc view --all` is the same as `--budget 0`. A view of a body too long for one page shows its outline with an
+  `outline_shown` warning that names the range of the whole body and `--all`, and the `-- more:` line of a page says
+  where it stops, how much follows and the command for the next page.
+- `stetdoc inspect FILE p42` lists the block's tracked changes (ids, kind, author, text) and comments, or says it has
+  none, so text such as `[DELETED: ...]` in a document can be told from a real change.
+- The MCP view tool's schema names, in each property's description, the arguments it cannot be used with, and a call that
+  sends such a pair gets a next step that names both, in the MCP server and in the CLI's `--json` errors.
 - The CLI is published as the `stetdoc` crate, so `cargo install stetdoc` installs the `stetdoc` binary. The library is
   published as `stetdoc-core`.
 - `stetdoc view FILE --revisions` lists the tracked changes as a ledger, one line each: the ids, the kind (`insert`,
@@ -256,6 +267,8 @@ released yet.
 
 ### Changed
 
+- The default page of a view is 3,000 tokens (about 12 KB), not 8,000, in the CLI, the MCP view tool and
+  `Budget::default()`, so that one view, or two or three in one call, stays under what an agent's tool result holds.
 - The first view of a large document, and the first range with its margin notes, take about half the time they did: the
   text model is built only for the paragraphs that hold a note reference when the notes are numbered, a UTF-8 part's names and
   text are not checked again on every read, a revision is looked for by its name before its namespace, and mentions of

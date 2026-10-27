@@ -25,11 +25,13 @@ $ stetdoc view contract.docx --find thirty --context 0
 {summary: 1 section}
 p4 Payment is due within thirty days.
 {~ 1 match}
-{position: p4..p4 of find "thirty" (1 of 1 blocks)}
+{position: p4..p4 of find "thirty": 1 match in 1 block (1 of 1 blocks)}
 
 $ stetdoc inspect contract.docx p1
 block: p1 is a paragraph in the body story
 characters 0..67: plain
+tracked changes: none in this block: all of its text is the document's own, even text that looks like a revision
+comments: none on this block
 
 $ stetdoc lookup contract.docx Losses
 {stet 1 view=lookup base=5737b772923cf8d3:0:5737b772923cf8d3 query="Losses"}

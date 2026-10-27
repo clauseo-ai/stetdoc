@@ -866,6 +866,16 @@ export type Retired = {
 export type RevisionFilter = {
   /** Only changes by this author, by code or name. */
   author?: string | null;
+  /**
+   * Only changes whose inserted or deleted text contains this text. Case-insensitive unless it has an uppercase
+   * letter, as a `Find` is.
+   */
+  find?: string | null;
+  /**
+   * Carry the whole inserted and deleted text of each change, up to 1,000 characters, and not 200; a view shows it
+   * all and does not cut each line to 80 characters.
+   */
+  full?: boolean;
   /** Only changes of this kind: `insert`, `delete`, `move` or `format`. */
   kind?: string | null;
 };
@@ -926,8 +936,12 @@ export type Scope = "auto" | {
   find: {
     /** How many blocks to show on each side of a match. */
     context: number;
+    /** Only the blocks from this ref on, as a `Range` starts. */
+    from?: string | null;
     /** The text to find. Case-insensitive unless it has an uppercase letter. */
     needle: string;
+    /** With `from`, only the blocks up to this ref; without it, to the end of the story of `from`. */
+    to?: string | null;
   };
 } | {
   revisions: RevisionFilter;
@@ -1046,4 +1060,4 @@ export type Warning = {
   story?: string | null;
 };
 
-export type WarningCode = "looks_hidden" | "hidden_text" | "numbering_approximate" | "read_anomaly" | "opaque_content" | "unreferenced_note" | "duplicate_number" | "looks_like_rewrite" | "split_at_wrap" | "no_change" | "own_text_removed" | "property_change_folded" | "revision_removed_with_text" | "quotes_curled" | "quotes_straightened" | "find_matched_loosely" | "already_resolved" | "reply_to_resolved" | "anchor_emptied" | "comment_removed" | "compare_revisions_accepted" | "compare_paragraph_replaced" | "compare_not_redlined" | "compare_not_restored" | "compare_keys_merged" | "compare_table_replaced" | "compare_story_unmatched" | "compare_comments_dropped" | "compare_bookmarks_dropped" | "compare_hyperlinks_unlinked" | "compare_objects_dropped" | "compare_notes_dropped" | "compare_lists_dropped";
+export type WarningCode = "looks_hidden" | "hidden_text" | "numbering_approximate" | "read_anomaly" | "opaque_content" | "unreferenced_note" | "duplicate_number" | "looks_like_rewrite" | "split_at_wrap" | "no_change" | "own_text_removed" | "property_change_folded" | "revision_removed_with_text" | "quotes_curled" | "quotes_straightened" | "find_matched_loosely" | "already_resolved" | "reply_to_resolved" | "anchor_emptied" | "comment_removed" | "compare_revisions_accepted" | "compare_paragraph_replaced" | "compare_not_redlined" | "compare_not_restored" | "compare_keys_merged" | "compare_table_replaced" | "compare_story_unmatched" | "compare_comments_dropped" | "compare_bookmarks_dropped" | "compare_hyperlinks_unlinked" | "compare_objects_dropped" | "compare_notes_dropped" | "compare_lists_dropped" | "outline_shown";

@@ -15,7 +15,7 @@ Everyday work needs only these:
 ```
 stetdoc view a.docx --find 'net 30' --find 'governing law'
 stetdoc replace a.docx 'net 30' 'net 45' 'thirty' 'sixty' -o a.redline.docx
-stetdoc comment a.redline.docx 'Liability Cap' 'Mutual?' --in-place
+stetdoc comment a.docx 'Liability Cap' 'Mutual?' -o a.commented.docx
 stetdoc compare old.docx new.docx -o redline.docx
 ```
 

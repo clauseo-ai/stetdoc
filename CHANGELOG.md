@@ -35,7 +35,8 @@ released yet.
   previous stub as one it wrote. The core skill makes `replace` the default way to change text and `comment` the way to
   comment, with batches for the rest, and the README shows the same flow.
 - The skill stub and the core skill tell the agent to report tracked changes it did not make, such as a colleague's edit
-  made since its last view, with who made them and what they change.
+  made since its last view, with who made them and what they change. Its comment example writes a new file, so an
+  agent copying it leaves the user's original untouched.
 - `stetdoc view --find TEXT --range p40..p60` looks only in that range, in the CLI and the MCP view tool. A find pages like
   a range, and its position line counts the matches: `find "days": 44 matches in 38 blocks, showing 1..9`.
 - `stetdoc view --revisions --find TEXT` lists only the changes whose inserted or deleted text contains it, and

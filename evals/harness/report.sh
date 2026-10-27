@@ -18,6 +18,8 @@ command -v stetdoc >/dev/null 2>&1 && have_stetdoc=yes
 
 # findings FILE: every finding of stetdoc check, counted by code and part.
 findings() { stetdoc check "$1" --all 2>&1 | sed -n 's/^  \([a-z_]*\) (\([^) ]*\).*/\1 \2/p' | sort | uniq -c | sed 's/^ */finding: /'; }
+# class_a FILE: the number of check findings Word would reject or repair (all but the lints below).
+class_a() { stetdoc check "$1" --all 2>&1 | grep -E '^  [a-z_]+ \(' | grep -vcE '^  (schema_non_canonical_order|empty_properties|para_id_missing) \(' || true; }
 # violations FILE: the number stetdoc check reports for FILE, or -1 when check fails.
 violations() {
   local out
@@ -54,13 +56,14 @@ if [ -n "${EVAL_STETDOC_METRICS:-}" ]; then echo "$m" >> "$EVAL_STETDOC_METRICS"
   echo "stetdoc-eval-report 1"
   echo "metrics: $m"
   echo "stetdoc-on-path: $have_stetdoc"
-  worst=0
+  worst=0 worst_a=0
   while read -r sum path; do
     if [ ! -e "$path" ]; then echo "deleted: $path"
     elif [ "$(sha256 "$path")" = "$sum" ]; then echo "unchanged: $path"
     else echo "changed: $path"; fi
     if [ "$have_stetdoc" = yes ] && [[ "$path" == *.docx ]]; then
       v=$(violations "$path"); [ "${v:-0}" -gt "$worst" ] && worst=$v
+      a=$(class_a "$path"); [ "${a:-0}" -gt "$worst_a" ] && worst_a=$a
     fi
   done < "$state/before.sha"
   # A working copy (NAME.stet/) counts once, as a leftover, not file by file.
@@ -75,9 +78,10 @@ if [ -n "${EVAL_STETDOC_METRICS:-}" ]; then echo "$m" >> "$EVAL_STETDOC_METRICS"
     echo
     echo "== $f"
     v=$(violations "$f"); v=${v:--1}
-    # Valid: no more violations than the inputs, or only stetdoc lints that Word accepts (a non-canonical
-    # element order, an empty property element, a missing paragraph id).
-    if [ "$v" -ge 0 ] && { [ "$v" -le "$worst" ] || ! findings "$f" | grep -qvE ' (schema_non_canonical_order|empty_properties|para_id_missing) '; }; then echo "valid: yes"; else echo "valid: no"; fi
+    # Valid: no more findings that Word would reject or repair than the inputs had. The lints Word accepts
+    # (a non-canonical element order, an empty property element, a missing paragraph id) do not count.
+    a=$(class_a "$f")
+    if [ "$v" -ge 0 ] && [ "${a:-0}" -le "$worst_a" ]; then echo "valid: yes"; else echo "valid: no"; fi
     echo "violations: $v (inputs at most $worst)"
     echo "-- check"; findings "$f"
     ledger=$(stetdoc view "$f" --revisions --full --all 2>&1)

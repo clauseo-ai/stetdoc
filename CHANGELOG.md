@@ -46,6 +46,8 @@ released yet.
 - A batch applied to a .docx may leave out its base, in the CLI and the MCP tool alike: the file is read and edited in one
   process, as `replace` does, so its refs are read against the file as it is now. A bare JSON list of operations works
   there too. A working copy still needs the base, and a batch without one is refused with where to find it.
+- The eval harness keeps each run's report and transcript, counts only check findings that Word would reject as invalid,
+  and its graders accept an edit made as a longer phrase and judge the stale case on any mention of the other author's change.
 - An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
   cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
   and time per case, and arms to compare with no plugin or another plugin. See `docs/evals.md`.

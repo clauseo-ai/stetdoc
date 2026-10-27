@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '^#[\d,]+ delete ER \S+ p145 \"[^\n]*(thirty|30)'
+pattern: '^#[\d,]+ delete ER \S+ p14[4-6] \"[^\n]*(thirty|30)'
 flags: m
 target: { source: file, path: .stetdoc-eval-report.txt }
 ---

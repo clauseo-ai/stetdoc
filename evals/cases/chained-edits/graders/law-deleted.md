@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '^#[\d,]+ delete ER \S+ p273 \"[^\n]*Singapore'
+pattern: '^#[\d,]+ delete ER \S+ p27[2-4] \"[^\n]*Singapore'
 flags: m
 target: { source: file, path: .stetdoc-eval-report.txt }
 ---

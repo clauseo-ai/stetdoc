@@ -16,6 +16,8 @@ sha256() { if command -v sha256sum >/dev/null; then sha256sum "$1"; else shasum 
 have_stetdoc=no
 command -v stetdoc >/dev/null 2>&1 && have_stetdoc=yes
 
+# findings FILE: every finding of stetdoc check, counted by code and part.
+findings() { stetdoc check "$1" --all 2>&1 | sed -n 's/^  \([a-z_]*\) (\([^) ]*\).*/\1 \2/p' | sort | uniq -c | sed 's/^ */finding: /'; }
 # violations FILE: the number stetdoc check reports for FILE, or -1 when check fails.
 violations() {
   local out
@@ -73,8 +75,11 @@ if [ -n "${EVAL_STETDOC_METRICS:-}" ]; then echo "$m" >> "$EVAL_STETDOC_METRICS"
     echo
     echo "== $f"
     v=$(violations "$f"); v=${v:--1}
-    if [ "$v" -ge 0 ] && [ "$v" -le "$worst" ]; then echo "valid: yes"; else echo "valid: no"; fi
+    # Valid: no more violations than the inputs, or only stetdoc lints that Word accepts (a non-canonical
+    # element order, an empty property element, a missing paragraph id).
+    if [ "$v" -ge 0 ] && { [ "$v" -le "$worst" ] || ! findings "$f" | grep -qvE ' (schema_non_canonical_order|empty_properties|para_id_missing) '; }; then echo "valid: yes"; else echo "valid: no"; fi
     echo "violations: $v (inputs at most $worst)"
+    echo "-- check"; findings "$f"
     ledger=$(stetdoc view "$f" --revisions --full --all 2>&1)
     n=$(sed -n 's/^{summary: \([0-9][0-9]*\) tracked change.*/\1/p' <<<"$ledger" | head -1)
     echo "remaining-revisions: ${n:-0}"
@@ -83,4 +88,12 @@ if [ -n "${EVAL_STETDOC_METRICS:-}" ]; then echo "$m" >> "$EVAL_STETDOC_METRICS"
     echo "-- final text"; stetdoc view "$f" --mode final --all 2>&1
   done
 } > "$report" 2>&1
+# Keep the report and the session transcript next to the metrics, as evidence for each run.
+if [ -n "${EVAL_STETDOC_METRICS:-}" ]; then
+  keep="$(dirname "$EVAL_STETDOC_METRICS")/reports"; mkdir -p "$keep"
+  name="$(cat "$state/case" 2>/dev/null)-$(basename "${PWD%/home/cwd}")"
+  cp "$report" "$keep/$name.txt" 2>/dev/null
+  t=$(jq -r '.transcript_path // empty' <<<"$input" 2>/dev/null)
+  [ -n "$t" ] && [ -f "$t" ] && cp "$t" "$keep/$name.transcript.jsonl" 2>/dev/null
+fi
 exit 0

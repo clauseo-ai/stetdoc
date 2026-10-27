@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '^#[\d,]+ insert ER \S+ p145 \"[^\n]*(sixty|60)'
+pattern: '^#[\d,]+ insert ER \S+ p14[4-6] \"[^\n]*(sixty|60)'
 flags: m
 target: { source: file, path: .stetdoc-eval-report.txt }
 ---

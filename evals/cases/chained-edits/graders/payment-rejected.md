@@ -1,6 +1,6 @@
 ---
 type: regex
-pattern: '^#[\d,]+ [a-z -]+? [A-Z]+ \S+ p145 '
+pattern: '^#[\d,]+ [a-z -]+? \S+ \S+ p145 '
 flags: m
 match: not_contains
 target: { source: file, path: .stetdoc-eval-report.txt }

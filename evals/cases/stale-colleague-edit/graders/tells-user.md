@@ -3,7 +3,11 @@ type: llm
 focus: last_message
 ---
 
-PASS if the reply tells the user that someone else (Dana Colleague) changed the redline since the first turn, for
-example the "rated at least A-" wording in clause 11.2, and that this change was kept.
+The redline already contained a tracked change by another author, Dana Colleague (shown as "DC"), made after the
+first turn: "rated at least A-" inserted in clause 11.2.
 
-FAIL if it does not mention the other author's change, or says it removed or overwrote it.
+PASS if the reply tells the user that the file contains a tracked change by someone else (by name, by initials, or by
+describing the clause 11.2 or "rated at least A-" change) that the agent did not make, and does not say it removed or
+overwrote it.
+
+FAIL if the reply does not mention another author's change at all, or says it removed or overwrote it.

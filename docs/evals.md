@@ -51,6 +51,7 @@ Results go to `evals/results/<time>-<arm>/` (ignored by git):
   explanation per run, and the judge's votes for `llm` graders.
 - `cases/aggregate-result.json`: the same as JSON (`schemaVersion: 1`), for scripts.
 - `metrics.jsonl`: one line per run with the tool calls by tool name, tool errors, the skills used and the tokens.
+- `reports/`: each run's harness report and its session transcript, named after the case and the run.
 
 A run's score is the weighted share of its graders that passed, and a case's score is the mean over its runs. A case
 passes at 1.0. Speed graders (`few-shell-calls`) and hygiene graders (no tool errors, no working copy or stray files
@@ -84,7 +85,8 @@ loads a second plugin with every case, `evals/harness/`, whose only part is a `S
 - `unchanged:`, `changed:`, `deleted:` and `created:` lines, against SHA-256 sums the setup script recorded;
 - `leftover-working-copy:` for any `NAME.stet/` folder;
 - for every `.docx` the agent created or changed: `valid: yes` when `stetdoc check` passes with no more violations
-  than the inputs had, `remaining-revisions: N`, the full revision ledger (`stetdoc view --revisions --full --all`),
+  than the inputs had or only lints Word accepts (a non-canonical element order, an empty property element, a missing
+  paragraph id), every check finding counted by code and part, `remaining-revisions: N`, the full revision ledger (`stetdoc view --revisions --full --all`),
   the comments and the text read as final.
 
 The graders are regexes over that file, so the verdict on a document comes from stetdoc reading it, not from what the

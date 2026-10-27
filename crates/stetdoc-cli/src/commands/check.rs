@@ -13,7 +13,7 @@ const SHOWN_FINDINGS: usize = 20;
 
 /// Runs `check`.
 pub fn run(args: &CheckArgs) -> Result<Outcome, Failure> {
-    match Source::of(&args.input) {
+    match Source::of(&args.input)? {
         Source::Docx(path) => {
             let doc = target::open_docx(&path)?;
             outcome(&doc.check_pending(None, None, args.strict)?, args.all)

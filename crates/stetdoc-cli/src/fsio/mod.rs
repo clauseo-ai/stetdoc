@@ -8,6 +8,15 @@ use std::io::{IsTerminal, Read, Write};
 use std::path::{Path, PathBuf};
 use stetdoc_core::{ErrorCode, StetError};
 
+/// Refuses a path that is not there, with the message `view` gives for a missing file. A command checks its inputs with this
+/// before it sniffs their type, so a missing path is never reported as the wrong kind of file.
+pub fn present(path: &Path) -> Result<(), Failure> {
+    match fs::metadata(path) {
+        Err(e) if e.kind() == std::io::ErrorKind::NotFound => Err(missing(path, &e)),
+        _ => Ok(()),
+    }
+}
+
 /// Reads a whole file of at most `max` bytes. A missing file is `not_found`, a larger one `limit_exceeded`.
 pub fn read_file(path: &Path, max: u64) -> Result<Vec<u8>, Failure> {
     let meta = fs::metadata(path).map_err(|e| missing(path, &e))?;

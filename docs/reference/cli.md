@@ -259,7 +259,7 @@ stetdoc edit [OPTIONS] <INPUT>
 | `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused. A working copy needs no flag: an edit always writes it. |
 | `--no-track` | Write plain changes, not tracked ones. Only for documents that are not under review. |
-| `--dry-run` | Validate and show the receipt, and write nothing. |
+| `--dry-run` | Validate and show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
 | `--scope <REFS>` | Refuse the whole batch if it changes anything outside these refs and ranges, such as p12,p40..p60. |
 | `--quotes <QUOTES>` | Follow the paragraph's quotes (match), or keep them as typed. One of `match`, `as-typed`. Default `match`. |
 | `--offsets <OFFSETS>` | What offsets count: Unicode scalar values, or UTF-16 units as JavaScript does. One of `scalar`, `utf16`. Default `scalar`. |
@@ -295,9 +295,11 @@ checked 1 unit.
 ```
 
 The same batch on a .docx writes another .docx with `-o`, or the same one with `--in-place`, and `--dry-run` writes nothing.
+A dry run needs neither flag, and with either one it ignores it.
 
 ```console
 $ stetdoc edit contract.docx -o edited.docx --author "Jane Doe" --ops batch.txt --dry-run
+--dry-run writes nothing, so -o is ignored.
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.

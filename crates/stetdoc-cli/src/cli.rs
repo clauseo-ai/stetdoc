@@ -227,7 +227,7 @@ pub struct EditArgs {
     /// Write plain changes, not tracked ones. Only for documents that are not under review.
     #[arg(long)]
     pub no_track: bool,
-    /// Validate and show the receipt, and write nothing.
+    /// Validate and show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it.
     #[arg(long)]
     pub dry_run: bool,
     /// Refuse the whole batch if it changes anything outside these refs and ranges, such as p12,p40..p60.

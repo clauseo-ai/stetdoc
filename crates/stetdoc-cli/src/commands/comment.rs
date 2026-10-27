@@ -27,7 +27,6 @@ pub fn run(args: &CommentArgs) -> Result<Outcome, Failure> {
         output: args.find.output.as_ref(),
         in_place: args.find.in_place,
         dry_run: args.find.dry_run,
-        dry_run_needs_output: false,
     };
     apply(&at, &args.find.stamp, |doc, stamp| {
         let scope = find::scope(&args.find)?;

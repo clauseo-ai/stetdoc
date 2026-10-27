@@ -8,6 +8,8 @@ use stetdoc_core::{CompareOptions, FormatId, Limits};
 
 /// Runs `compare`.
 pub fn run(args: &CompareArgs) -> Result<Outcome, Failure> {
+    fsio::present(&args.original)?;
+    fsio::present(&args.revised)?;
     let working_copies: Vec<&std::path::Path> = [&args.original, &args.revised]
         .into_iter()
         .filter(|p| p.is_dir())

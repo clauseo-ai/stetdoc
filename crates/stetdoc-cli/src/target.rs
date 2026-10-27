@@ -15,13 +15,15 @@ pub enum Source {
 }
 
 impl Source {
-    /// A directory is a working copy, anything else a package.
-    pub fn of(path: &Path) -> Source {
-        if path.is_dir() {
+    /// A directory is a working copy, anything else a package. A path that is not there is `not_found`, whatever it was
+    /// meant to be.
+    pub fn of(path: &Path) -> Result<Source, Failure> {
+        fsio::present(path)?;
+        Ok(if path.is_dir() {
             Source::Dir(path.to_path_buf())
         } else {
             Source::Docx(path.to_path_buf())
-        }
+        })
     }
 }
 
@@ -48,7 +50,7 @@ pub struct Read {
 /// Opens a package, or locks, recovers and resumes a working copy. A working copy answers from its last export, so pending
 /// hand edits get a note.
 pub fn open_read(path: &Path) -> Result<Read, Failure> {
-    match Source::of(path) {
+    match Source::of(path)? {
         Source::Docx(path) => Ok(Read {
             doc: open_docx(&path)?,
             notes: Vec::new(),

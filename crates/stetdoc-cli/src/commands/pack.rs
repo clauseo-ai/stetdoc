@@ -10,6 +10,7 @@ use stetdoc_core::{Edit, ErrorCode, Limits, StetError, WorkingCopy, WriteOptions
 
 /// Runs `pack`.
 pub fn run(args: &PackArgs) -> Result<Outcome, Failure> {
+    fsio::present(&args.dir)?;
     let (workdir, notes) = Workdir::open(&args.dir)?;
     let (mut doc, disk) = workdir.resume()?;
     let pending = disk.pending_files()?;

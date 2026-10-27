@@ -10,7 +10,7 @@ use stetdoc_core::{WorkingCopy, WriteOptions};
 
 /// Runs `unpack`.
 pub fn run(args: &UnpackArgs) -> Result<Outcome, Failure> {
-    match (Source::of(&args.input), args.refresh) {
+    match (Source::of(&args.input)?, args.refresh) {
         (Source::Docx(path), false) => unpack(&path, args.output.as_deref()),
         (Source::Dir(dir), true) => refresh(&dir),
         (Source::Docx(path), true) => Err(Failure::usage(

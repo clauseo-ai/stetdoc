@@ -424,3 +424,116 @@ fn a_written_file_that_numbers_its_blocks_again_gets_no_base_and_a_next_step() {
         "{receipt}"
     );
 }
+
+/// The files in a folder, without the config folder that a command may create for itself.
+fn without_config(dir: &Path) -> Vec<String> {
+    names(dir)
+        .into_iter()
+        .filter(|n| n != "no-config")
+        .collect()
+}
+
+#[test]
+fn a_dry_run_of_a_docx_needs_neither_output_nor_in_place_and_writes_nothing() {
+    let tmp = with_contract();
+    let cwd = tmp.path();
+    let before = fs::read(cwd.join("contract.docx")).unwrap();
+    let batch = format!(
+        "base: {}\n---\n@replace\nref: p4\nfind: thirty\nwith: sixty\n",
+        base(cwd, "contract.docx")
+    );
+    let out = stetdoc(
+        cwd,
+        &["edit", "contract.docx", "--dry-run", "--author", "Jane Doe"],
+        &batch,
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let shown = text(&out.stdout);
+    assert!(
+        shown.starts_with("dry run: nothing was applied."),
+        "{shown}"
+    );
+    assert!(shown.contains("{++sixty++}"), "{shown}");
+    assert_eq!(fs::read(cwd.join("contract.docx")).unwrap(), before);
+    assert_eq!(without_config(cwd), ["contract.docx"]);
+}
+
+#[test]
+fn a_dry_run_with_output_or_in_place_ignores_it_and_says_so() {
+    let batch_for = |cwd: &Path| {
+        format!(
+            "base: {}\n---\n@replace\nref: p4\nfind: thirty\nwith: sixty\n",
+            base(cwd, "contract.docx")
+        )
+    };
+    let flags: [(&[&str], &str); 3] = [
+        (&["-o", "edited.docx"], "-o is"),
+        (&["--in-place"], "--in-place is"),
+        (
+            &["-o", "edited.docx", "--in-place"],
+            "-o and --in-place are",
+        ),
+    ];
+    for (given, phrase) in flags {
+        let tmp = with_contract();
+        let cwd = tmp.path();
+        let before = fs::read(cwd.join("contract.docx")).unwrap();
+        let mut args = vec!["edit", "contract.docx"];
+        args.extend_from_slice(given);
+        args.extend_from_slice(&["--dry-run", "--author", "Jane Doe"]);
+        let out = stetdoc(cwd, &args, &batch_for(cwd));
+        assert_eq!(
+            out.status.code(),
+            Some(0),
+            "{given:?}: {}",
+            text(&out.stderr)
+        );
+        let shown = text(&out.stdout);
+        let first = shown.lines().next().unwrap_or_default();
+        assert_eq!(
+            first,
+            format!("--dry-run writes nothing, so {phrase} ignored."),
+            "{given:?}"
+        );
+        assert!(shown.contains("dry run: nothing was applied."), "{shown}");
+        assert_eq!(fs::read(cwd.join("contract.docx")).unwrap(), before);
+        assert_eq!(without_config(cwd), ["contract.docx"], "{given:?}");
+    }
+}
+
+#[test]
+fn replace_and_comment_dry_runs_take_output_or_in_place_and_write_nothing() {
+    let commands: [(&str, &[&str]); 2] = [
+        ("replace", &["thirty", "sixty"]),
+        ("comment", &["thirty", "Check the number."]),
+    ];
+    for (verb, operands) in commands {
+        for given in [&["-o", "edited.docx"][..], &["--in-place"][..]] {
+            let tmp = with_contract();
+            let cwd = tmp.path();
+            let before = fs::read(cwd.join("contract.docx")).unwrap();
+            let mut args = vec![verb, "contract.docx"];
+            args.extend_from_slice(operands);
+            args.extend_from_slice(given);
+            args.extend_from_slice(&["--dry-run", "--author", "Jane Doe"]);
+            let out = stetdoc(cwd, &args, "");
+            assert_eq!(
+                out.status.code(),
+                Some(0),
+                "{verb} {given:?}: {}",
+                text(&out.stderr)
+            );
+            let shown = text(&out.stdout);
+            assert!(
+                shown.contains("dry run: nothing was applied."),
+                "{verb}: {shown}"
+            );
+            assert_eq!(
+                fs::read(cwd.join("contract.docx")).unwrap(),
+                before,
+                "{verb}"
+            );
+            assert_eq!(without_config(cwd), ["contract.docx"], "{verb} {given:?}");
+        }
+    }
+}

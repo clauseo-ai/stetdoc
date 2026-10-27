@@ -557,3 +557,44 @@ fn replace_and_comment_take_pairs_and_an_anchor_in_one_call() {
     );
     assert!(ok(&view)["text"].as_str().unwrap().contains("Agreed."));
 }
+
+#[test]
+fn a_dry_run_writes_nothing_whether_or_not_it_is_given_an_output_or_in_place() {
+    let tmp = tempfile::tempdir().unwrap();
+    fs::write(tmp.path().join("contract.docx"), contract::package()).unwrap();
+    let before = fs::read(tmp.path().join("contract.docx")).unwrap();
+    let mut server = Server::start(tmp.path(), &[]);
+    let base = ok(&server.call("unpack", json!({ "input": "contract.docx" })))["base"]
+        .as_str()
+        .unwrap()
+        .to_string();
+    let batch =
+        format!("base: {base}\n---\n@replace\nref: p4\nfind: thirty days\nwith: sixty days\n");
+    let flags = [
+        json!({}),
+        json!({ "output": "edited.docx" }),
+        json!({ "in_place": true }),
+        json!({ "output": "edited.docx", "in_place": true }),
+    ];
+    for extra in flags {
+        let mut arguments = json!({ "input": "contract.docx", "batch": batch, "dry_run": true });
+        arguments
+            .as_object_mut()
+            .unwrap()
+            .extend(extra.as_object().unwrap().clone());
+        let result = server.call("edit", arguments.clone());
+        assert_eq!(ok(&result)["dry_run"], true, "{arguments}");
+        let text = result["content"][0]["text"].as_str().unwrap();
+        assert!(text.contains("dry run: nothing was applied."), "{text}");
+        assert_eq!(fs::read(tmp.path().join("contract.docx")).unwrap(), before);
+        assert!(!tmp.path().join("edited.docx").exists(), "{arguments}");
+    }
+    let pairs = json!([{ "old": "thirty", "new": "sixty" }]);
+    let replaced = server.call(
+        "replace",
+        json!({ "input": "contract.docx", "pairs": pairs, "dry_run": true, "output": "edited.docx" }),
+    );
+    ok(&replaced);
+    assert_eq!(fs::read(tmp.path().join("contract.docx")).unwrap(), before);
+    assert!(!tmp.path().join("edited.docx").exists());
+}

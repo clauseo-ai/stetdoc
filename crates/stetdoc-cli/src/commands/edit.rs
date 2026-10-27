@@ -13,7 +13,6 @@ pub fn run(args: &EditArgs) -> Result<Outcome, Failure> {
         output: args.output.as_ref(),
         in_place: args.in_place,
         dry_run: args.dry_run,
-        dry_run_needs_output: true,
     };
     apply(&at, &args.stamp, |_, stamp| {
         Ok(Made::plain(build(args, stamp)?))

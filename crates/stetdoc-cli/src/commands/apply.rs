@@ -21,11 +21,9 @@ pub struct Where<'a> {
     pub output: Option<&'a PathBuf>,
     /// With a .docx, write back to it.
     pub in_place: bool,
-    /// Write nothing.
+    /// Write nothing. A dry run of a .docx needs neither -o nor --in-place, and one that has either accepts it and ignores
+    /// it, so that no pair of hints can send an agent round in a loop.
     pub dry_run: bool,
-    /// A dry run of a .docx still names where it would write, as `edit` has always asked. `replace` and `comment` take a
-    /// dry run with or without -o or --in-place.
-    pub dry_run_needs_output: bool,
 }
 
 /// What a command made from the opened document.
@@ -55,9 +53,17 @@ pub fn apply(
     stamp: &StampArgs,
     make: impl FnOnce(&Document, Stamp) -> Result<Made, Failure>,
 ) -> Result<Outcome, Failure> {
-    match Source::of(at.input) {
+    match Source::of(at.input)? {
         Source::Docx(path) => apply_docx(at, &path, stamp, make),
         Source::Dir(path) => apply_dir(at, &path, stamp, make),
+    }
+}
+
+/// Joins two head lines, one per line, when there are any.
+fn join_head(first: Option<String>, second: Option<String>) -> Option<String> {
+    match (first, second) {
+        (Some(a), Some(b)) => Some(format!("{a}\n{b}")),
+        (a, b) => a.or(b),
     }
 }
 
@@ -114,24 +120,36 @@ fn apply_dir(
     Ok(finish(outcome, made.head, made.extra))
 }
 
-/// Where an edit of a .docx writes: another file, the input (`None`), or, for a dry run, nothing.
+/// Where an edit of a .docx writes: another file, the input (`None`), or nothing, for a dry run.
 enum Target {
     File(PathBuf),
     InPlace,
     Nothing,
 }
 
+/// The line that says a dry run ignored -o or --in-place, or `None` when it had neither.
+fn ignored_output(at: &Where<'_>) -> Option<String> {
+    if !at.dry_run {
+        return None;
+    }
+    let flags = match (at.output.is_some(), at.in_place) {
+        (true, true) => "-o and --in-place are",
+        (true, false) => "-o is",
+        (false, true) => "--in-place is",
+        (false, false) => return None,
+    };
+    Some(format!("--dry-run writes nothing, so {flags} ignored."))
+}
+
 fn docx_target(at: &Where<'_>, path: &Path) -> Result<Target, Failure> {
+    if at.dry_run {
+        return Ok(Target::Nothing);
+    }
     match (at.output, at.in_place) {
         (Some(_), true) => Err(Failure::usage(
             "-o and --in-place both say where to write, and an edit writes one .docx.",
             "Pass -o to write another file, or --in-place to write back to the input.",
         )),
-        (None, true) if at.dry_run && at.dry_run_needs_output => Err(Failure::usage(
-            "--dry-run writes nothing, and --in-place says to write the input.",
-            "Drop --in-place to see the receipt, then run the edit again with --in-place and without --dry-run.",
-        )),
-        (_, _) if at.dry_run && !at.dry_run_needs_output => Ok(Target::Nothing),
         (None, true) => Ok(Target::InPlace),
         (Some(output), false) => {
             if fsio::same_file(output, path) {
@@ -141,11 +159,7 @@ fn docx_target(at: &Where<'_>, path: &Path) -> Result<Target, Failure> {
                 ));
             }
             fsio::check_output(output, &[path], &[])?;
-            Ok(if at.dry_run {
-                Target::Nothing
-            } else {
-                Target::File(output.clone())
-            })
+            Ok(Target::File(output.clone()))
         }
         (None, false) => Err(Failure::usage(
             format!(
@@ -173,9 +187,10 @@ fn apply_docx(
     let receipt = doc.edit(made.edit)?;
     let written = match target {
         Target::Nothing => {
+            let head = join_head(ignored_output(at), made.head);
             return Ok(finish(
                 Outcome::of(&receipt.text, &receipt)?,
-                made.head,
+                head,
                 made.extra,
             ));
         }

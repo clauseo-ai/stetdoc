@@ -121,8 +121,8 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
             .map(|op| op.name)
             .collect();
         description.push_str(&format!(
-            " Give the batch, as block text or JSON, in `batch`. The operations: {}. The skills_get tool with name \
-             operations has each one's fields.",
+            " Give the batch, as block text or JSON, in `batch`. Call skills_get first for the batch's syntax and rules. The \
+             operations: {}. skills_get with name operations has each one's fields.",
             ops.join(", ")
         ));
         properties.insert(
@@ -134,6 +134,7 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
         );
     }
     if name == "replace" {
+        description.push_str(" Call skills_get first for the rules of its pairs.");
         properties.insert(
             PAIRS.into(),
             json!({
@@ -464,5 +465,16 @@ mod tests {
                 .unwrap()
                 .contains("replace")
         );
+        // The edit and replace tools point the agent to the skill for the batch syntax and the rules.
+        let replace = all.iter().find(|t| t.name == "replace").unwrap();
+        for listed in [&edit.listing, &replace.listing] {
+            assert!(
+                listed["description"]
+                    .as_str()
+                    .unwrap()
+                    .contains("Call skills_get first"),
+                "{listed}"
+            );
+        }
     }
 }

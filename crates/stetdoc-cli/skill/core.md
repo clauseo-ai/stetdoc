@@ -70,8 +70,8 @@ copy to clean up. This is the default: the user's original stays as it was.
 `--in-place` (with MCP, `in_place: true`) writes the result back to the file it read. Use it only when the user asks you to
 update that file, or the file is one this task already wrote (such as the redline from your first edit). It writes
 atomically and refuses with `stale_target` if someone wrote the file meanwhile (view again and rewrite the batch). Never
-write to a temporary file and move it over the original. `--in-place` does not combine with `--dry-run` or `-o`, and is
-refused on a working copy, which an edit always updates itself.
+write to a temporary file and move it over the original. With `--dry-run`, `-o` and `--in-place` are accepted and
+ignored, since a dry run writes nothing. `--in-place` is refused on a working copy, which an edit always updates itself.
 
 A written .docx numbers its blocks again when it is opened, and the receipt says what to do next. Its `base` is the
 written file's, so the next batch on that file can start from it. When the edit added or removed blocks, the receipt has

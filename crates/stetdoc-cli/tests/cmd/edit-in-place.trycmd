@@ -1,4 +1,4 @@
---in-place is for a .docx. It is refused with -o, with --dry-run and on a working copy, and -o naming the input points to it.
+--in-place is for a .docx. It is refused with -o, and on a working copy. A dry run accepts it, writes nothing and says so, and -o naming the input points to --in-place.
 
 ```console
 $ stetdoc edit contract.docx -o contract.docx --author "Jane Doe" --ops batch.txt
@@ -12,9 +12,11 @@ error[invalid_payload]: -o and --in-place both say where to write, and an edit w
 next: Pass -o to write another file, or --in-place to write back to the input.
 
 $ stetdoc edit contract.docx --in-place --dry-run --author "Jane Doe" --ops batch.txt
-? 2
-error[invalid_payload]: --dry-run writes nothing, and --in-place says to write the input.
-next: Drop --in-place to see the receipt, then run the edit again with --in-place and without --dry-run.
+--dry-run writes nothing, so --in-place is ignored.
+dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
+0 replace p4: deletion #0, insertion #1
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+checked 1 unit.
 
 $ stetdoc unpack contract.docx
 wrote contract.stet: document.md

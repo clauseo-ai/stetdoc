@@ -316,6 +316,9 @@ released yet.
 
 ### Changed
 
+- The MCP `edit` and `replace` tools' descriptions say to call `skills_get` first for the batch syntax and the rules.
+- `stetdoc edit --dry-run` on a .docx with `-o` or `--in-place` writes nothing, and says so on its first line, instead of
+  refusing the flag. A dry run needs neither flag, as `replace` and `comment` already allowed.
 - `stetdoc view --find` lists one line for each paragraph that matches: its ref, its clause number, and about 100
   characters of its exact text around the match, under a line for each top-level clause, with a tip that names the
   clause to view whole when a clause heading matches. `--context N` (N of 1 or more) shows the blocks whole, as before.
@@ -354,6 +357,12 @@ released yet.
   clauses are found in one pass over the words. Views, receipts and peak memory are unchanged.
 
 ### Fixed
+
+- `stetdoc edit FILE.docx --dry-run` works with neither `-o` nor `--in-place`, so the two refusals no longer send an agent
+  round in a loop. The MCP `edit` tool's `dry_run` takes the same path.
+- A missing input path is `not_found` with the message `view` gives, for every command that takes one (`replace`,
+  `comment`, `edit`, `pack`, `check`, `inspect`, `lookup`, `view`, `unpack` and `compare`). Before, `replace` and `comment`
+  said the file was a .docx that needed `-o`, and `pack` said a folder was not a working copy.
 
 - The random law L2 allows a table next to a removed block to gain, in its first or last paragraph, the comment markers
   that the removal hoists there (design `revisions.md`, 3.6.5). It failed on `floattable-anchorpos.docx`, where deleting a

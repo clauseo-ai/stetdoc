@@ -25,9 +25,11 @@ checked 1 unit.
 ```
 
 The same batch on a .docx writes another .docx with `-o`, or the same one with `--in-place`, and `--dry-run` writes nothing.
+A dry run needs neither flag, and with either one it ignores it.
 
 ```console
 $ stetdoc edit contract.docx -o edited.docx --author "Jane Doe" --ops batch.txt --dry-run
+--dry-run writes nothing, so -o is ignored.
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.

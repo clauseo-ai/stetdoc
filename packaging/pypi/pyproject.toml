@@ -1,0 +1,46 @@
+# The Python distribution of the stetdoc command-line tool: `pip install stetdoc`, `pipx install stetdoc` and
+# `uvx stetdoc` put the native `stetdoc` binary on the PATH. The wheels hold only the Rust binary (maturin's `bin`
+# bindings, as ruff ships), so nothing runs Python after the install. See packaging/README.md, channel 4.
+#
+# The version is not written here: maturin reads it from crates/stetdoc-cli/Cargo.toml, which takes it from
+# [workspace.package], and turns `1.0.0-dev` style versions into their PEP 440 form. `node packaging/scripts/stamp.mjs
+# --check` fails if a static version appears here.
+#
+# Build a wheel for this machine: cd packaging/pypi && maturin build --release --locked (the release workflow uses
+# `--profile dist` and a `--target`). `--locked` is not set here, because the sdist holds only the crates the CLI needs,
+# so a build from it must trim Cargo.lock. The license files are symbolic links to the ones at the repository root.
+[build-system]
+requires = ["maturin>=1.9,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "stetdoc"
+description = "Edit Word documents as tracked changes, for people and AI agents. The stetdoc command-line tool."
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT OR Apache-2.0"
+license-files = ["LICENSE-MIT", "LICENSE-APACHE", "NOTICE"]
+authors = [{ name = "Clauseo" }]
+keywords = ["docx", "word", "tracked-changes", "redline", "ai-agents", "mcp"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Legal Industry",
+  "Operating System :: MacOS",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Rust",
+  "Topic :: Office/Business :: Office Suites",
+  "Topic :: Text Processing :: Markup :: XML",
+]
+dynamic = ["version"]
+
+[project.urls]
+Homepage = "https://github.com/clauseo-ai/stetdoc"
+Repository = "https://github.com/clauseo-ai/stetdoc"
+Changelog = "https://github.com/clauseo-ai/stetdoc/blob/main/CHANGELOG.md"
+
+[tool.maturin]
+bindings = "bin"
+manifest-path = "../../crates/stetdoc-cli/Cargo.toml"

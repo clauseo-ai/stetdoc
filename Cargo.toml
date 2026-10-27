@@ -21,6 +21,11 @@ stetdoc-testkit = { path = "crates/stetdoc-testkit" }
 miniz_oxide = { version = "0.9", default-features = false, features = ["with-alloc"] }
 memchr = "2"
 
+# The CLI's global allocator. Against the system allocator it made the release binary about 7% faster on macOS over the
+# engine-bench documents (view, and replace with 1 and 20 pairs; packaging/README.md), with the same peak memory, and musl's
+# allocator, which the static Linux build would use, is slower than macOS's. Only the binary uses it, never the library.
+mimalloc = { version = "0.1", default-features = false }
+
 # Snapshot tests.
 insta = "1"
 # Markdown link checks and Rust source scans in `xtask`.
@@ -88,3 +93,12 @@ debug-assertions = false
 # half a minute; optimised, two seconds. The xtask check and tests run it.
 [profile.dev.package.xtask]
 opt-level = 3
+# The profile of the shipped binaries: the release workflow builds the CLI, the napi addon and the Python wheels with
+# `--profile dist`. Fat LTO and one codegen unit let the optimiser inline across crates, and `strip` drops the symbols.
+# It keeps unwinding (no `panic = "abort"`): `stetdoc mcp` and the napi addon catch a panic and turn it into an error.
+# Everyday `--release` builds stay fast, because this profile is opt-in. The numbers are in packaging/README.md.
+[profile.dist]
+inherits = "release"
+lto = "fat"
+codegen-units = 1
+strip = true

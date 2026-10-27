@@ -4,7 +4,7 @@
 //! targets, smoke-tests them and attaches the archives and the npm tarballs to a draft GitHub release. Nothing publishes to a
 //! registry. This check keeps the hand-written parts in step: every package carries the workspace version, the main package
 //! depends on exactly the seven target packages and has no install script, each target package declares the platform it
-//! runs on, and the workflow builds every target. A test runs it, so `cargo xtask check` fails on drift.
+//! runs on, the workflow builds every target, and the Python distribution builds the CLI's binary into a wheel for each. A test runs it, so `cargo xtask check` fails on drift.
 
 use crate::repo::Repo;
 use serde_json::Value;
@@ -84,6 +84,27 @@ const INSTALL_SCRIPTS: [&str; 4] = ["preinstall", "install", "postinstall", "pre
 const SKILL: &str = "skills/stetdoc/SKILL.md";
 const CLAUDE_MARKETPLACE: &str = ".claude-plugin/marketplace.json";
 const CODEX_MARKETPLACE: &str = ".agents/plugins/marketplace.json";
+/// The Python distribution: maturin builds the CLI's binary into the wheels (see packaging/README.md).
+const PYPROJECT: &str = "packaging/pypi/pyproject.toml";
+/// The lines the pyproject must hold, each with why. The version is left to maturin, which reads the workspace's.
+const PYPROJECT_LINES: [(&str, &str); 4] = [
+    (
+        "name = \"stetdoc\"",
+        "the distribution is named stetdoc, so `uvx stetdoc` finds it",
+    ),
+    (
+        "bindings = \"bin\"",
+        "the wheel holds the binary, so nothing runs Python after the install",
+    ),
+    (
+        "manifest-path = \"../../crates/stetdoc-cli/Cargo.toml\"",
+        "the wheel is built from the CLI crate",
+    ),
+    (
+        "dynamic = [\"version\"]",
+        "maturin takes the version from the workspace",
+    ),
+];
 
 /// One plugin: its folder under `plugins/`, its manifest, and the other files it must hold, all relative to the folder.
 struct Plugin {
@@ -125,7 +146,9 @@ pub fn run(args: &[&str]) -> std::process::ExitCode {
     match args {
         ["check"] => match check(&repo) {
             Ok(problems) if problems.is_empty() => {
-                println!("the npm packages and {WORKFLOW} agree with the workspace");
+                println!(
+                    "the npm packages, the Python distribution and {WORKFLOW} agree with the workspace"
+                );
                 std::process::ExitCode::SUCCESS
             }
             Ok(problems) => {
@@ -287,7 +310,50 @@ pub fn check(repo: &Repo) -> Result<Vec<String>, String> {
         }
     }
     problems.extend(plugin_problems(repo));
+    problems.extend(pypi_problems(repo, &workflow));
     Ok(problems)
+}
+
+/// Every disagreement between the Python distribution, the CLI crate and the `pypi` job of the workflow.
+fn pypi_problems(repo: &Repo, workflow: &str) -> Vec<String> {
+    let mut problems = Vec::new();
+    match repo.read(PYPROJECT) {
+        Ok(text) => {
+            for (line, why) in PYPROJECT_LINES {
+                if !text.lines().any(|l| l.trim() == line) {
+                    problems.push(format!(
+                        "{PYPROJECT}: lacks the line {line}. Add it: {why}."
+                    ));
+                }
+            }
+        }
+        Err(e) => problems.push(format!("{PYPROJECT}: {e}. Add the Python distribution.")),
+    }
+    // The job runs from its `pypi:` line to the next job, a line indented by two spaces.
+    let job: String = workflow
+        .lines()
+        .skip_while(|l| *l != "  pypi:")
+        .enumerate()
+        .take_while(|(i, l)| {
+            *i == 0 || !(l.starts_with("  ") && !l.starts_with("   ") && l.ends_with(':'))
+        })
+        .map(|(_, l)| format!("{l}\n"))
+        .collect();
+    if job.is_empty() {
+        problems.push(format!(
+            "{WORKFLOW}: no pypi job. Add the job that builds the Python wheels."
+        ));
+        return problems;
+    }
+    for target in &TARGETS {
+        if !job.contains(target.triple) {
+            problems.push(format!(
+                "{WORKFLOW}: the pypi job builds no wheel for {} ({}). Add it to the job's matrix.",
+                target.npm, target.triple
+            ));
+        }
+    }
+    problems
 }
 
 /// Every disagreement among the plugins, their skill copies and the two marketplaces that index them.
@@ -470,6 +536,33 @@ mod tests {
             "{problems}"
         );
         assert!(!problems.contains("plugins/claude/skills"), "{problems}");
+    }
+
+    #[test]
+    fn a_pypi_job_missing_a_target_or_a_pyproject_line_is_named() {
+        let real = Repo::discover().unwrap();
+        let workflow = real.read(WORKFLOW).unwrap();
+        let pyproject = real.read(PYPROJECT).unwrap();
+        let (_dir, repo) = crate::repo::testutil::repo(&[(
+            PYPROJECT,
+            &pyproject.replace("bindings = \"bin\"", "bindings = \"pyo3\""),
+        )]);
+        // Drop the musl x64 wheel from the pypi job only: the cli job still names the triple.
+        let job_start = workflow.find("  pypi:").unwrap();
+        let (head, tail) = workflow.split_at(job_start);
+        let tail = tail.replacen("x86_64-unknown-linux-musl", "gone", 1);
+        let problems = pypi_problems(&repo, &format!("{head}{tail}")).join("\n");
+        assert!(
+            problems.contains("lacks the line bindings = \"bin\""),
+            "{problems}"
+        );
+        assert!(
+            problems.contains("builds no wheel for linux-x64-musl (x86_64-unknown-linux-musl)"),
+            "{problems}"
+        );
+        assert!(!problems.contains("linux-x64-gnu"), "{problems}");
+        let problems = pypi_problems(&repo, &workflow.replace("  pypi:", "  wheels:")).join("\n");
+        assert!(problems.contains("no pypi job"), "{problems}");
     }
 
     #[test]

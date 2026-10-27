@@ -7,10 +7,13 @@ repository has a GitHub remote. A maintainer runs those steps. The release workf
 ## Placeholders and the version
 
 - The repository is `clauseo-ai/stetdoc` on GitHub. That name appears in `install.sh` (the `REPO` line), the Homebrew
-  formula, the npm packages, the plugin manifests under `plugins/` and `mcp-registry/server.json`. A search for
+  formula, the npm packages, `packaging/pypi/pyproject.toml`, the plugin manifests under `plugins/` and `mcp-registry/server.json`. A search for
   `clauseo-ai/stetdoc` finds them all, if it ever moves.
-- The version lives in `[workspace.package]` in the root `Cargo.toml`. Every other version string is a copy.
-  `node packaging/scripts/stamp.mjs --check` lists the copies that disagree, and `--write` fixes them. The release
+- The version lives in `[workspace.package]` in the root `Cargo.toml`. Every other version string is a copy, except
+  the Python distribution's, which maturin reads from the crate at build time (a `1.0.0-dev` workspace builds
+  `1.0.0.dev0` wheels, the PEP 440 form).
+  `node packaging/scripts/stamp.mjs --check` lists the copies that disagree, and `--write` fixes them. It also
+  fails if `packaging/pypi/pyproject.toml` declares a static version. The release
   workflow runs `--write` before it packs anything. Before tagging a release, also run `--write` and commit, so the
   channels that install from git (the plugins) carry the same version.
 
@@ -60,8 +63,12 @@ repository-based channels work from the repository at its default branch, so a m
 
 ### 3. npm: the CLI
 
-- Files: `packaging/npm/stetdoc/` holds the package `stetdoc` with `bin/stetdoc.js`, a launcher that runs the binary of
-  the platform. The seven packages `packaging/npm/stetdoc/targets/<target>/` are `@stetdoc/cli-<target>`, one per target,
+- Files: `packaging/npm/stetdoc/` holds the package `stetdoc` with `bin/stetdoc`, a Node launcher that runs the binary of
+  the platform (found by `lib/platform.js`), and `lib/install.js`, a `postinstall` step that replaces the launcher with the
+  binary itself, as esbuild does. The step copies a file npm already installed, downloads nothing, writes only inside the
+  package and never fails the install. With `--ignore-scripts`, a package manager that blocks install scripts (pnpm 10,
+  Bun, and npm 11.20 already warns that `allowScripts` will gate them), on Windows, or when the binary does not print
+  `stetdoc <version>`, the launcher stays and works the same, more slowly (see "Launch cost" below). The seven packages `packaging/npm/stetdoc/targets/<target>/` are `@stetdoc/cli-<target>`, one per target,
   and the main package lists them as `optionalDependencies`. `scripts/pack.mjs` copies the binaries in.
 - Release fills: the `npm-cli` job unpacks the `cli` archives and writes eight tarballs, `stetdoc-cli-<version>.tgz` and
   one `stetdoc-cli-<target>-<version>.tgz` per target. The main tarball is renamed because the napi addon's main package
@@ -69,11 +76,32 @@ repository-based channels work from the repository at its default branch, so a m
 - Publish: publish the seven target packages first, then the main one, from the draft's tarballs, with
   `npm publish <tarball> --access public`. Then `npx stetdoc mcp` works anywhere.
 
-### 4. Claude Code: plugin and marketplace
+### 4. PyPI: the CLI
+
+- Files: `packaging/pypi/` holds `pyproject.toml`, the package's `README.md` (its PyPI page) and symbolic links to the
+  three license files. maturin builds the `stetdoc` binary of `crates/stetdoc-cli` into a wheel with `bindings = "bin"`,
+  as ruff does, so the wheel holds the native binary and nothing runs Python after the install. The pyproject sits here
+  rather than at the crate or the root because `manifest-path` lets it point at the crate, which keeps the root free of
+  Python files (see above) and the crate free of packaging. maturin needs the license files inside the pyproject's folder,
+  hence the links. The sdist carries the CLI's crates and a trimmed workspace, so `pip` can build it with a Rust toolchain
+  where no wheel fits.
+- Release fills: the `pypi` job builds one wheel per target with `PyO3/maturin-action` (the Linux wheels in its
+  manylinux and musllinux containers), installs the wheels a runner can run and runs `stetdoc --version`, and
+  `pypi-sdist` builds the sdist. All of them go into the draft release, named `stetdoc-<pep440 version>-*.whl` and
+  `stetdoc-<pep440 version>.tar.gz`. The version comes from the workspace, as above.
+- Publish: download the wheels and the sdist from the draft into an empty folder, then `uv publish dist/*` (or
+  `twine upload dist/*`) with a PyPI API token for the project. A trusted publisher for this repository's
+  `release.yml` would avoid the token, but the workflow publishes nothing, so a token is the route for now.
+- Install: `uv tool install stetdoc`, `pipx install stetdoc` or `pip install stetdoc`. `uvx stetdoc mcp` runs the
+  server without installing.
+- Local build: `cd packaging/pypi && maturin build --release --locked` writes a wheel for this machine to `target/wheels`
+  at the repository root.
+
+### 5. Claude Code: plugin and marketplace
 
 - Files: `.claude-plugin/marketplace.json` at the root, and `plugins/claude/` with `.claude-plugin/plugin.json`, the
   guard hook (`hooks/hooks.json` and `hooks/docx-guard.sh`) and the skill copy. The skill runs `stetdoc`, so the binary must
-  be on the PATH (from channel 1, 2 or 3). The hook needs only `sh` and `awk`.
+  be on the PATH (from channel 1, 2, 3 or 4). The hook needs only `sh` and `awk`.
 - Release fills: nothing. The version comes from the stamp script.
 - Check: `claude plugin validate .` (the marketplace) and `claude plugin validate plugins/claude` (the plugin) both pass.
   The validator does not check that a marketplace's source folder exists, so `cargo xtask release check` does.
@@ -83,7 +111,7 @@ repository-based channels work from the repository at its default branch, so a m
   https://code.claude.com/docs/en/plugins/marketplace-reference.md, https://code.claude.com/docs/en/plugins/publish.md,
   https://code.claude.com/docs/en/plugin-marketplaces
 
-### 5. Cursor: plugin
+### 6. Cursor: plugin
 
 - Files: `plugins/cursor/` with `.cursor-plugin/plugin.json` (no `$schema`, because Cursor's schema rejects unknown top-level
   keys), `mcp.json` and the skill copy.
@@ -91,7 +119,7 @@ repository-based channels work from the repository at its default branch, so a m
   by hand. Local test: copy `plugins/cursor/` to `~/.cursor/plugins/local/stetdoc/` and reload the window.
 - Sources: https://cursor.com/docs/reference/plugins, https://raw.githubusercontent.com/cursor/plugins/main/schemas/plugin.schema.json
 
-### 6. OpenAI: Codex and ChatGPT
+### 7. OpenAI: Codex and ChatGPT
 
 - Files: `plugins/openai/` with `plugin.json` (portable format, with its `$schema`), `mcp.json` and the skill copy, and
   `.agents/plugins/marketplace.json` at the root, which points at `./plugins/openai`.
@@ -103,7 +131,7 @@ repository-based channels work from the repository at its default branch, so a m
 - Sources: https://developers.openai.com/plugins/build/plugins, https://developers.openai.com/plugins/deploy/submission.md,
   https://developers.openai.com/codex/skills
 
-### 7. MCP Registry
+### 8. MCP Registry
 
 - Files: `mcp-registry/server.json` (the schema is `https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json`).
   Its package is `stetdoc` from npm, run with `npx stetdoc mcp` over stdio. `packaging/npm/stetdoc/package.json` carries
@@ -115,7 +143,7 @@ repository-based channels work from the repository at its default branch, so a m
 - Sources: https://modelcontextprotocol.io/registry/quickstart, https://modelcontextprotocol.io/registry/package-types,
   https://modelcontextprotocol.io/registry/faq.md
 
-### 8. OpenClaw ClawHub: skill
+### 9. OpenClaw ClawHub: skill
 
 - No manifest. ClawHub takes the skill folder as it is: `skills/stetdoc/SKILL.md` is the whole skill.
 - Publish: `clawhub login`, then from the repository root:
@@ -123,7 +151,7 @@ repository-based channels work from the repository at its default branch, so a m
   Omit `--owner` to publish as yourself. The `--dry-run` form for skills is unverified.
 - Sources: https://docs.openclaw.ai/clawhub/publishing, https://docs.openclaw.ai/clawhub/skill-format
 
-### 9. Hermes Skills Hub: skill
+### 10. Hermes Skills Hub: skill
 
 - No manifest. Hermes takes a folder with `SKILL.md`, and the frontmatter of `skills/stetdoc/SKILL.md` already fits.
 - Publish to a GitHub repository, from the repository root:
@@ -133,10 +161,38 @@ repository-based channels work from the repository at its default branch, so a m
 - Sources: https://hermes-agent.nousresearch.com/docs/user-guide/features/skills,
   https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills
 
-### 10. Agent Skills standard
+### 11. Agent Skills standard
 
 `skills/stetdoc/SKILL.md` follows https://agentskills.io/specification: `name` is `stetdoc`, the same as its directory,
 and `description` is under 1024 characters. The `skills-ref validate` tool named in that spec was not run.
+
+## Launch cost and which channel to recommend
+
+An agent may call `stetdoc` dozens of times in one task, so the cost of starting it matters. The median of 20 runs of
+`stetdoc --version` on an M-series Mac mini (macOS, Node 26, npm 11.20, uv 0.13, loaded by other builds, so the numbers
+are rough; detail in the packaging report):
+
+| How it starts | Median |
+| --- | --- |
+| The binary (Homebrew, install script, `uv tool install`, `pipx`) | 4.8 ms |
+| A pip venv's `bin/stetdoc` (the wheel's binary) | 5.5 ms |
+| `npm install -g` with the install step (the launcher replaced by the binary) | 5.9 ms |
+| `uvx --from <wheel> stetdoc` | 29 ms |
+| `npm install -g` with `--ignore-scripts` (the Node launcher) | 106 ms |
+| `npx stetdoc`, with the install step | 135 ms |
+| `npx stetdoc`, with the Node launcher | 278 ms |
+
+So recommend a binary on the PATH (Homebrew, the install script, `uv tool install stetdoc` or `pipx install stetdoc`)
+to agents that run the command many times. `npx stetdoc mcp` is right for the MCP server: it starts once per session, and
+npx needs no install step. `npx stetdoc` for each command costs a tenth of a second or more per call.
+
+The shipped binaries are built with the `dist` profile of the root `Cargo.toml` (fat LTO, one codegen unit, stripped),
+and the CLI allocates through mimalloc. Against the default release profile with the system allocator, on the same
+machine: the binary is 7.4 MB instead of 9.9 MB; the engine benchmarks (`cargo xtask bench --filter document_ --input
+contract-300p`) ran 8% faster as a geometric mean, every one of them faster; and the CLI over the engine-bench documents
+(view, and replace with 1 and 20 pairs) ran about 2% faster from the profile and about 7% more from mimalloc. A rebuild
+of the core and the CLI takes 68 s instead of 18 s, which is why `dist` is opt-in and everyday `--release` builds keep
+the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch panics.
 
 ## Decisions and open questions
 
@@ -164,6 +220,16 @@ and `description` is under 1024 characters. The `skills-ref validate` tool named
 - `packaging/scripts/fill-formula.mjs` filled the template from four checksum files.
 - `release.yml` passes `actionlint`. The unpack step of `npm-cli` was run locally against fake archives, Windows zip included.
 
-Not verified: a real release run, a real tap or npm install from the registry, the Homebrew `on_*` blocks on macOS, the
+- PyPI (on macOS arm64): `maturin build --profile dist --locked` built the wheel, `uvx --from <wheel> stetdoc --version`
+  and `stetdoc skills get core` ran through it, `pip install <wheel>` into a fresh venv put a working `stetdoc` in its
+  `bin`, and the sdist built a working wheel with `uv build --wheel`.
+- npm (on macOS arm64): `pack.mjs` packed the tarballs from the `dist` binary, and `npm install` of the main and the
+  darwin-arm64 tarballs into a scratch project worked both ways: by default `bin/stetdoc` became the native binary, and with
+  `--ignore-scripts` the launcher stayed. In both, `npx stetdoc --version` printed the version and `npx stetdoc mcp`
+  answered `initialize` and `tools/list` with the twelve tools.
+- The `dist` napi addon passed `test/smoke.mts` (66 checks) under Node 26.
+- The filled Homebrew formula passed `ruby -c`. `brew audit` takes only a tapped formula, and no tap was made.
+
+Not verified: a real release run, the `pypi` job and maturin-action's containers, a real tap or npm install from the registry, the Homebrew `on_*` blocks on macOS, the
 MCP registry schema check (no validator was available), whether `mcp-publisher` reads `server.json` from the current
 directory, and the Hermes and OpenClaw listing rules beyond their docs.

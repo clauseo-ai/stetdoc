@@ -1,0 +1,24 @@
+#!/usr/bin/env node
+// Runs the stetdoc command of this platform with the same arguments, the same standard input and output, and the same
+// exit status, so `npx stetdoc mcp` is the MCP server over stdio. It makes no network calls.
+//
+// This file is the fallback. When npm runs install scripts, lib/install.js replaces it with the native binary itself,
+// so a call to `stetdoc` starts no Node process at all. With --ignore-scripts, on Windows, or when that step fails,
+// this launcher stays and starts the binary on each call.
+"use strict";
+
+const { spawnSync } = require("node:child_process");
+const { binaryPath } = require("../lib/platform.js");
+
+const binary = binaryPath();
+if (binary instanceof Error) {
+  process.stderr.write(`${binary.message}\n`);
+  process.exit(1);
+}
+const result = spawnSync(binary, process.argv.slice(2), { stdio: "inherit" });
+if (result.error) {
+  process.stderr.write(`stetdoc could not start: ${result.error.message}\n`);
+  process.exit(1);
+}
+if (result.signal) process.kill(process.pid, result.signal);
+process.exit(result.status ?? 1);

@@ -24,11 +24,18 @@ Once releases exist, any of these works.
 | Channel | Command | Notes |
 | --- | --- | --- |
 | Homebrew | `brew install clauseo-ai/stetdoc/stetdoc` | macOS and Linux, from the tap `clauseo-ai/homebrew-stetdoc` |
+| PyPI | `uv tool install stetdoc` | Or `pipx install stetdoc`, or `pip install stetdoc`. The wheel holds the native binary, so no Python runs after the install. `uvx stetdoc` runs it without installing |
 | npm | `npx stetdoc --version` | Runs the binary for your platform without installing it. `npm install -g stetdoc` puts it on the PATH |
 | Install script | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | macOS and Linux. Checks the SHA-256 and installs to `~/.local/bin`, or `$STETDOC_INSTALL_DIR` |
 | Cargo | `cargo install --path crates/stetdoc-cli` | Works today, from a checkout |
 
-[`packaging/README.md`](../packaging/README.md) says how each channel is built and published.
+An agent may run `stetdoc` dozens of times in one task, so pick a channel that puts the binary itself on the PATH:
+Homebrew, the install script, or `uv tool install` / `pipx`. Each call then starts in about 5 ms. Through `npx` each call
+also starts Node and npm, about a tenth of a second or more, so keep `npx stetdoc mcp` for the MCP server, which starts
+once per session. `npm install -g stetdoc` replaces its Node launcher with the binary when npm runs install scripts, and
+keeps the launcher (about 0.1 s per call) when it does not.
+
+[`packaging/README.md`](../packaging/README.md) says how each channel is built and published, and has the measurements.
 
 Every revision needs an author. `stetdoc init` sets it once (see below).
 

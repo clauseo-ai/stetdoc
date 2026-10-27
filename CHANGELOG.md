@@ -16,6 +16,13 @@ released yet.
   `stetdoc view FILE --clause 4.01 --clause 4.02`: the result is the union of the clauses' blocks in document order, each
   once. `Scope::Clause` holds a list, and JSON takes one clause as a string or several as a list
   ([decision 0012](docs/decisions/0012-clause-scopes.md)).
+- A Python distribution of the CLI in `packaging/pypi/`: maturin builds the native `stetdoc` binary into a wheel per
+  release target (`bindings = "bin"`), so `uv tool install stetdoc`, `pipx install stetdoc`, `pip install stetdoc` and
+  `uvx stetdoc` run it with no Python at run time. The release workflow's `pypi` and `pypi-sdist` jobs attach the wheels
+  and the sdist to the draft release, and `cargo xtask release check` and `stamp.mjs --check` keep them in step.
+- The npm package `stetdoc` replaces its Node launcher with the platform's binary in a `postinstall` step, as esbuild does,
+  so a call through `npm install -g stetdoc` starts in about 6 ms instead of about 100 ms. It copies a file npm already
+  installed and downloads nothing. With `--ignore-scripts` and on Windows the launcher stays.
 - The skill stub and `stetdoc skills get core` teach the default output (`NAME.edited.docx`, then `--in-place` on it),
   `--manual` markup and when to use it, reporting tracked changes by others, `--ignore-case`, `comment --all` and
   `--expect`, `view --revisions --context N`, table hits, and the MCP edit tool's typed `ops`.
@@ -366,6 +373,11 @@ released yet.
   manual markup or no Track Changes, and never `view --all` on a long document: page with `-- more:` or narrow with `--find`
   or `--range`. `skills get core` is shorter, so every part of the skill fits in one tool output (under 25 KB), and the stub
   stays near 450 tokens. The previous stub is `skill/earlier/stub-8.md`.
+- The released binaries, the npm addon and the wheels are built with a new `dist` profile (fat LTO, one codegen unit,
+  stripped), and the CLI allocates through mimalloc: the macOS binary is 7.4 MB instead of 9.9 MB, the engine benchmarks run
+  about 8% faster, and CLI calls about 9% faster. `cargo build --release` is unchanged.
+- `docs/agents.md` and `packaging/README.md` recommend a binary on the PATH (Homebrew, the install script, `uv tool install`)
+  for agents that call `stetdoc` many times, and `npx stetdoc mcp` for the MCP server.
 - A find hit or an occurrence names a clause only when its paragraph is that clause or its own text. A recital after the
   parties "(1)" and "(2)" names no clause and sits under its heading (`{in p15 "RECITALS"}`), and a paragraph after a
   list item such as (g) names the clause the list is in (`{§14.1}`, not `{§14.1(g)}`). A bare label keeps its noun:

@@ -33,6 +33,11 @@ use output::Failure;
 use std::process::ExitCode;
 use stetdoc_core::{ErrorCode, ExitClass, StetError};
 
+/// The binary allocates through mimalloc, which made it about 7% faster than the system allocator (see the root
+/// Cargo.toml). The library leaves the allocator to its host.
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 fn main() -> ExitCode {
     // `--json` is read before parsing too, so that an argument error and a crash are JSON when JSON was asked for.
     let json = std::env::args().skip(1).any(|a| a == "--json");

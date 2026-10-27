@@ -23,17 +23,18 @@
     "agents"
   ],
   "bin": {
-    "stetdoc": "bin/stetdoc.js"
+    "stetdoc": "bin/stetdoc"
   },
-  "main": "bin/stetdoc.js",
   "files": [
     "bin/",
+    "lib/",
     "README.md"
   ],
   "engines": {
     "node": ">=18"
   },
   "scripts": {
+    "postinstall": "node lib/install.js",
     "pack": "node scripts/pack.mjs"
   },
   "optionalDependencies": {

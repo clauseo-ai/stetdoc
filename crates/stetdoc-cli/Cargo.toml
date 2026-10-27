@@ -23,6 +23,7 @@ path = "src/main.rs"
 [dependencies]
 stetdoc-core.workspace = true
 clap.workspace = true
+mimalloc.workspace = true
 dunce.workspace = true
 jiff.workspace = true
 serde.workspace = true

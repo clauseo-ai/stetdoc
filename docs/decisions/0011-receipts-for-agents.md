@@ -1,4 +1,4 @@
-# 0009. Receipts name others' changes, an edit of a .docx writes beside it, and a find may ignore case
+# 0011. Receipts name others' changes, an edit of a .docx writes beside it, and a find may ignore case
 
 - **Date:** 2026-10-27
 - **Status:** accepted on 2026-10-27

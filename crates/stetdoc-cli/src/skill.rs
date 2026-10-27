@@ -23,7 +23,10 @@ const EARLIER: [&str; 1] = [include_str!("../skill/earlier/stub-1.md")];
 
 /// The stubs earlier builds wrote with a version line, each with the `{{version}}` placeholder on it. A file is matched
 /// against them with its version line normalised, as against the current stub.
-const EARLIER_VERSIONED: [&str; 1] = [include_str!("../skill/earlier/stub-2.md")];
+const EARLIER_VERSIONED: [&str; 2] = [
+    include_str!("../skill/earlier/stub-2.md"),
+    include_str!("../skill/earlier/stub-3.md"),
+];
 
 /// The key of the front-matter line that carries the version.
 const VERSION_KEY: &str = "stetdoc-version:";

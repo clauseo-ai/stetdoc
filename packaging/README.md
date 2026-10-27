@@ -23,7 +23,7 @@ that folder. Two marketplace indexes must sit at the repository root, because th
 | --- | --- | --- |
 | `.claude-plugin/marketplace.json` | Claude Code | The marketplace is the repository root. Its plugin entry points at `./plugins/claude` ([marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference.md)). |
 | `.agents/plugins/marketplace.json` | Codex, ChatGPT desktop | The repository marketplace is read from `$REPO_ROOT/.agents/plugins/`, and its plugins live in `./plugins/<name>` ([OpenAI plugins](https://developers.openai.com/plugins/build/plugins)). |
-| `plugins/claude/` | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/icon.png` (the listing icon, a placeholder for now), `.mcp.json` and `skills/stetdoc/SKILL.md`. |
+| `plugins/claude/` | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/icon.png` (the listing icon, a placeholder for now), `hooks/hooks.json` with `hooks/docx-guard.sh`, and `skills/stetdoc/SKILL.md`. No MCP entry: in Claude Code the skill and the `stetdoc` command are the route. |
 | `plugins/cursor/` | Cursor | `.cursor-plugin/plugin.json`, `mcp.json` and `skills/stetdoc/SKILL.md`. Cursor needs no index file for a plugin to load. |
 | `plugins/openai/` | Codex, ChatGPT desktop | `plugin.json` (portable format), `mcp.json` and `skills/stetdoc/SKILL.md`. |
 
@@ -31,8 +31,11 @@ Each plugin folder holds its own copy of `skills/stetdoc/SKILL.md`, because a pl
 copies must match the source: `cargo xtask release check` fails when one differs, and `cp skills/stetdoc/SKILL.md
 plugins/<name>/skills/stetdoc/SKILL.md` fixes it. The source is the one that `cargo xtask docs` writes.
 
-There is no `.mcp.json` at the root. Claude Code reads a project's root `.mcp.json` and would ask every contributor to
-approve the stetdoc server, so the MCP entry lives in `plugins/claude/.mcp.json`, which loads only with the plugin.
+There is no `.mcp.json` at the root or in `plugins/claude/`. Claude Code reads a project's root `.mcp.json` and would ask
+every contributor to approve the stetdoc server. The Claude Code plugin carries no MCP server either: Claude Code hides MCP
+tools behind its tool search, so with both an agent switched between the tools and the command, and the server is the same
+binary, so it is no backup when the command is missing. The plugin carries a guard hook instead (see
+[docs/agents.md](../docs/agents.md#the-claude-code-guard-hook)).
 
 ## Channels
 
@@ -68,8 +71,9 @@ repository-based channels work from the repository at its default branch, so a m
 
 ### 4. Claude Code: plugin and marketplace
 
-- Files: `.claude-plugin/marketplace.json` at the root, and `plugins/claude/` with `.claude-plugin/plugin.json`, `.mcp.json`
-  and the skill copy. The MCP entry runs `stetdoc mcp`, so the binary must be on the PATH (from channel 1, 2 or 3).
+- Files: `.claude-plugin/marketplace.json` at the root, and `plugins/claude/` with `.claude-plugin/plugin.json`, the
+  guard hook (`hooks/hooks.json` and `hooks/docx-guard.sh`) and the skill copy. The skill runs `stetdoc`, so the binary must
+  be on the PATH (from channel 1, 2 or 3). The hook needs only `sh` and `awk`.
 - Release fills: nothing. The version comes from the stamp script.
 - Check: `claude plugin validate .` (the marketplace) and `claude plugin validate plugins/claude` (the plugin) both pass.
   The validator does not check that a marketplace's source folder exists, so `cargo xtask release check` does.
@@ -142,7 +146,7 @@ and `description` is under 1024 characters. The `skills-ref validate` tool named
    day of the change, so they looked free. The scope `@stetdoc` did not exist on npm (`npm org ls stetdoc` found no scope),
    so a maintainer must create it before any `@stetdoc/*` package can be published. Check again before publishing, because a
    404 is not a reservation.
-2. **The Claude plugin** is `plugins/claude/` and holds only the skill, the manifest and the MCP entry, not the repository.
+2. **The Claude plugin** is `plugins/claude/` and holds only the skill, the manifest, the icon and the guard hook, not the repository.
 3. **The author** is `Clauseo` in every manifest, as in the napi package and the Cargo manifests.
 
 ## What was verified

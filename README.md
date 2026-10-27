@@ -32,24 +32,37 @@ One `stetdoc` binary and a skill that works in any agent with a shell. Until the
 repository with `cargo install --path crates/stetdoc-cli`.
 
 ```
-export STETDOC_AUTHOR="Jane Doe"          # every revision has an author (or save yours once with stetdoc init)
+export STETDOC_AUTHOR="Jane Doe"   # every revision has an author (or save yours once with stetdoc init)
+stetdoc view contract.docx --find 'net 30' --find 'governing law'   # each hit: ref, clause, exact text
+stetdoc replace contract.docx 'net 30' 'net 45' -o contract.redline.docx   # each OLD found once, all pairs or none
+stetdoc comment contract.redline.docx 'Liability Cap' 'Is this mutual?' --in-place
+stetdoc compare old.docx new.docx -o redline.docx   # a redline of any two versions
+```
+
+`replace` matches OLD in the text as it reads, across formatting. Text that is missing or there more than once is
+refused with every place listed; `--clause 11.1` or `--range p40..p60` narrows the search, and `--all` or `--expect N`
+replaces every occurrence. For longer work, unpack a working copy and edit its readable files:
+
+```
 stetdoc unpack contract.docx             # writes contract.stet/: readable files and a hidden complement
-stetdoc view contract.stet               # the body, or an outline of a large one; --range, --find, --revisions
 $EDITOR contract.stet/document.md        # edit the text after each ref with any tool
 stetdoc check contract.stet              # the redline that pack will write, validated
 stetdoc pack contract.stet               # writes contract.edited.docx with real tracked changes
 ```
 
-Agents can also send operations, which keep document text out of arguments:
+For anything else, such as inserting paragraphs, accepting or rejecting revisions or formatting, agents send a batch of
+operations:
 
 ```
 stetdoc edit contract.stet <<'EOF'
 base: 5737b772923cf8d3:0:5737b772923cf8d3
 ---
-@replace
+@insert
 ref: p4
-find: thirty days
-with: sixty days
+place: after
+paragraphs: <<END
+A new paragraph after p4.
+END
 EOF
 ```
 
@@ -70,8 +83,8 @@ tools rather than a shell, `stetdoc mcp` serves the same commands over the Model
 prints how to register it with each agent. Install the skill with the MCP server, so an agent whose server fails to
 start stops rather than editing the XML.
 
-In Claude Code 2.1.275 or later, one line installs the plugin, which carries the skill and the MCP server (the binary
-must still be on the PATH):
+In Claude Code 2.1.275 or later, one line installs the plugin, which carries the skill and a hook that stops Claude from
+unzipping a .docx or rewriting its XML (the binary must still be on the PATH; Claude Code uses it rather than MCP):
 
 ```
 /plugin install stetdoc --marketplace clauseo-ai/stetdoc

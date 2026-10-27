@@ -85,29 +85,31 @@ const SKILL: &str = "skills/stetdoc/SKILL.md";
 const CLAUDE_MARKETPLACE: &str = ".claude-plugin/marketplace.json";
 const CODEX_MARKETPLACE: &str = ".agents/plugins/marketplace.json";
 
-/// One plugin: its folder under `plugins/`, its manifest and its MCP config, both relative to the folder.
+/// One plugin: its folder under `plugins/`, its manifest, and the other files it must hold, all relative to the folder.
 struct Plugin {
     folder: &'static str,
     manifest: &'static str,
-    mcp: &'static str,
+    files: &'static [&'static str],
 }
 
-/// The three plugins. Each manifest and MCP file is the format its tool's docs name (see packaging/README.md).
+/// The three plugins. Each manifest, MCP config and hook file is the format its tool's docs name (see
+/// packaging/README.md). The Claude Code plugin carries the guard hook and no MCP server: Claude Code uses the
+/// `stetdoc` command.
 const PLUGINS: [Plugin; 3] = [
     Plugin {
         folder: "plugins/claude",
         manifest: ".claude-plugin/plugin.json",
-        mcp: ".mcp.json",
+        files: &["hooks/hooks.json", "hooks/docx-guard.sh"],
     },
     Plugin {
         folder: "plugins/cursor",
         manifest: ".cursor-plugin/plugin.json",
-        mcp: "mcp.json",
+        files: &["mcp.json"],
     },
     Plugin {
         folder: "plugins/openai",
         manifest: "plugin.json",
-        mcp: "mcp.json",
+        files: &["mcp.json"],
     },
 ];
 
@@ -306,11 +308,11 @@ fn plugin_problems(repo: &Repo) -> Vec<String> {
                 "{copy}: missing. Copy {SKILL} there: cp {SKILL} {copy}"
             )),
         }
-        for file in [plugin.manifest, plugin.mcp] {
+        for file in std::iter::once(&plugin.manifest).chain(plugin.files) {
             let path = format!("{}/{file}", plugin.folder);
             if !repo.exists(&path) {
                 problems.push(format!(
-                    "{path}: missing. Each plugin folder holds its manifest and its MCP config."
+                    "{path}: missing. Each plugin folder holds its manifest and the files packaging/README.md lists for it."
                 ));
             }
         }
@@ -443,7 +445,9 @@ mod tests {
                 format!("{}/{}", plugin.folder, plugin.manifest),
                 "{}".into(),
             ));
-            files.push((format!("{}/{}", plugin.folder, plugin.mcp), "{}".into()));
+            for file in plugin.files {
+                files.push((format!("{}/{file}", plugin.folder), "{}".into()));
+            }
         }
         files.push((
             "plugins/cursor/skills/stetdoc/SKILL.md".into(),

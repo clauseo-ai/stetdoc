@@ -21,6 +21,7 @@ unchanged .cmx2/skills/stetdoc/SKILL.md (cmx2)
 unchanged AGENTS.md
 
 $ stetdoc init --project --agent claude-code --mcp
+note: Claude Code can also block other ways into a .docx, such as unzip or python-docx, with the guard hook the stetdoc plugin carries. To add it to this install, see https://github.com/clauseo-ai/stetdoc/blob/main/docs/agents.md#the-claude-code-guard-hook
 note: no author is saved, and every revision needs one. Run stetdoc init --author "Your Name", or set STETDOC_AUTHOR, before you edit.
 wrote .claude/skills/stetdoc/SKILL.md (Claude Code)
 unchanged AGENTS.md

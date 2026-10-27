@@ -7,26 +7,22 @@ metadata:
 
 # stetdoc
 
-stetdoc edits .docx files with real Word tracked changes.
+stetdoc edits .docx files as Word tracked changes.
 
-- With stetdoc's MCP tools (a tool name containing `stetdoc`), call `skills_get` first and follow it.
-- Otherwise use the `stetdoc` command as below. For more than this, run `stetdoc skills get core` and follow it.
+In Claude Code, use the `stetdoc` command. Elsewhere, with stetdoc's MCP tools, call `skills_get` first and follow it.
+Everyday work needs only these:
 
 ```
-stetdoc unpack a.docx  # writes a.stet/
-stetdoc view a.stet --find "net 30"  # or --range p40..p60
-stetdoc edit a.stet <<'EOF'
-base: <copied from the last view>
----
-@replace
-ref: p4
-find: thirty days
-with: sixty days
-EOF
-stetdoc check a.stet
-stetdoc pack a.stet -o a.redline.docx --done  # removes a.stet/
+stetdoc view a.docx --find 'net 30' --find 'governing law'
+stetdoc replace a.docx 'net 30' 'net 45' 'thirty' 'sixty' -o a.redline.docx
+stetdoc comment a.redline.docx 'Liability Cap' 'Mutual?' --in-place
 stetdoc compare old.docx new.docx -o redline.docx
 ```
 
-If neither works (no stetdoc tools, and `stetdoc` is not found), tell the user stetdoc is not installed, and stop. Never
-read or edit the .docx another way (unzip, XML, python-docx), and do not offer to.
+Each OLD must occur once: if several places are listed, use a longer OLD or `--clause 11.1`. `--all` replaces every
+one; an empty NEW deletes. Keep the user's original unchanged unless asked: write with `-o`, and use `--in-place` only
+on a file this task wrote or the user asked to update. For anything else (adding paragraphs, accepting or rejecting
+revisions, formatting), run `stetdoc skills get core`.
+
+If `stetdoc` is not found, tell the user it is not installed, and stop. Never read or edit a .docx another way (unzip,
+XML, python-docx).

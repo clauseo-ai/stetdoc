@@ -331,6 +331,13 @@ fn an_empty_skill_md_or_an_earlier_stub_is_replaced() {
     for path in [&agents, &cmx2, &claude, &grok] {
         assert_eq!(fs::read_to_string(path).unwrap(), stub());
     }
+    // So is the stub that sent agents with MCP tools to `skills_get` before it carried the everyday commands.
+    let previous =
+        fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("skill/earlier/stub-3.md"))
+            .unwrap();
+    fs::write(&grok, previous.replace("{{version}}", "1.0.0-dev")).unwrap();
+    w.ok(&["--project", "--agent", "grok"]);
+    assert_eq!(fs::read_to_string(&grok).unwrap(), stub());
 }
 
 #[test]

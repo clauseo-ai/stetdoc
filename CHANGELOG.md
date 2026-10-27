@@ -25,6 +25,15 @@ released yet.
 - `stetdoc view --find` takes several texts (`--find payment --find "Due Date"`) and finds blocks that hold any of them. Each
   line says which texts it holds and how often, and the position line counts each text. The MCP view tool's `find` takes
   one string or a list, and `Scope::Find` has `needles` (JSON still reads `needle` and one string).
+- The Claude Code plugin carries a guard hook, `plugins/claude/hooks/docx-guard.sh`, that blocks tool calls reading or
+  writing a .docx another way: an archive tool, a script or a .docx library on a Word file, a conversion, an in-place edit
+  of an unzipped part, and the Write and Edit tools on a Word file. It allows every `stetdoc` command, needs only `sh` and
+  `awk`, and tells the agent to use stetdoc or say it is not installed. `docs/agents.md` lists what it blocks and shows
+  how to add it to a skill install, and `stetdoc init --agent claude-code` points there.
+- The skill stub carries the everyday commands (`view --find`, `replace`, `comment` and `compare`), so a simple task needs
+  no `stetdoc skills get core`. In Claude Code it sends the agent straight to the command. `stetdoc init` replaces the
+  previous stub as one it wrote. The core skill makes `replace` the default way to change text and `comment` the way to
+  comment, with batches for the rest, and the README shows the same flow.
 - `stetdoc view --find TEXT --range p40..p60` looks only in that range, in the CLI and the MCP view tool. A find pages like
   a range, and its position line counts the matches: `find "days": 44 matches in 38 blocks, showing 1..9`.
 - `stetdoc view --revisions --find TEXT` lists only the changes whose inserted or deleted text contains it, and
@@ -308,6 +317,9 @@ released yet.
   characters of its exact text around the match, under a line for each top-level clause, with a tip that names the
   clause to view whole when a clause heading matches. `--context N` (N of 1 or more) shows the blocks whole, as before.
   On a 75,000-character contract, `--find days` went from 11.5 KB for the first 9 of 38 hits to 5.3 KB for all 38.
+- The Claude Code plugin no longer registers the MCP server. In Claude Code the skill and the `stetdoc` command are the
+  route: Claude Code keeps MCP tools behind its tool search, so with both an agent switched between surfaces, and the
+  server is the same binary, so it was no fallback. The Cursor and Codex plugins keep it.
 
 - The receipt of a command that writes a .docx (`edit -o`, `edit --in-place`, `compare`) carries the base of the written
   file, which opens in a new ref namespace, so the next batch on it can start from the receipt. When the edit added or

@@ -1,9 +1,10 @@
 # Use stetdoc with your agent
 
-stetdoc is one binary and one skill. The skill teaches an agent to unpack a `.docx`, edit the readable files or send
-operations, check the redline and pack it back with real tracked changes. Any agent with a shell can use it that way.
+stetdoc is one binary and one skill. The skill teaches an agent to find text in a `.docx` with `stetdoc view --find`,
+change it with `stetdoc replace`, comment with `stetdoc comment`, and use a batch of operations or a working copy for
+the rest, all as real tracked changes. Any agent with a shell can use it that way.
 Agents that take tools rather than a shell can use `stetdoc mcp`, which serves the same commands over the Model Context
-Protocol.
+Protocol. Claude Code uses the command and the skill, not MCP.
 
 This page covers installing the binary, installing the skill with one command, and then each agent: where the skill
 goes, how to register the MCP server if the agent uses one, and how to check that the agent sees it. Each section links
@@ -42,9 +43,10 @@ In a terminal, `init` asks which agents to install for. Otherwise it installs fo
 names them instead, such as `--agent claude-code,codex` or `--agent all`. `--dry-run` lists what it would write and
 changes nothing. Running it again is safe: a file with the same bytes is left as it is.
 
-The stub is short. It carries a quick reference that covers a simple task, and tells the agent to run `stetdoc skills
-get core` for anything more, which prints the full skill embedded in the binary, so the skill always matches the version
-you run. With stetdoc's MCP tools, the stub sends the agent to the `skills_get` tool instead.
+The stub is short. It carries the everyday commands (find, replace, comment, compare), which cover a simple task, and
+tells the agent to run `stetdoc skills get core` for anything more, which prints the full skill embedded in the binary,
+so the skill always matches the version you run. In Claude Code the stub sends the agent straight to the command. In
+another agent with stetdoc's MCP tools, it sends the agent to the `skills_get` tool instead.
 
 ```
 stetdoc init --list        # each agent, whether it is detected, its skill folder, and the stetdoc version there
@@ -115,7 +117,8 @@ removed. Without `--agent`, every agent's folder is tried and the others are lef
 ### A note on MCP
 
 Install the skill together with the MCP server, or a plugin that carries both, rather than the server alone. The skill
-tells the agent which surface to use: the MCP tools when they are there, else the `stetdoc` command. When neither works,
+tells the agent which surface to use: the `stetdoc` command in Claude Code, elsewhere the MCP tools when they are there,
+else the command. When neither works,
 it tells the agent to say that stetdoc is not installed and stop. Without the skill, an agent whose MCP server fails to
 start has nothing that keeps it away from the package, and in testing it fell back to unzipping the .docx and reading its
 XML with its own scripts.
@@ -129,8 +132,10 @@ place of `stetdoc mcp` once the npm package is published.
 
 - **Skill:** `~/.claude/skills/stetdoc/SKILL.md`, or `.claude/skills/stetdoc/SKILL.md` in a project. `stetdoc init
   --agent claude-code` writes it.
-- **Or the plugin**, which carries the skill and the MCP entry together (the binary must still be on the PATH). In a
-  session of Claude Code 2.1.275 or later, one line installs it:
+- **Or the plugin**, which carries the skill and the [guard hook](#the-claude-code-guard-hook) (the binary must still be
+  on the PATH). It has no MCP server: in Claude Code the command and the skill are the route. Claude Code keeps MCP tools
+  behind its tool search, so with both an agent switched between them and the command, and the server is the same binary,
+  so it is no fallback when the command is missing. In a session of Claude Code 2.1.275 or later, one line installs it:
 
   ```
   /plugin install stetdoc --marketplace clauseo-ai/stetdoc
@@ -143,11 +148,62 @@ place of `stetdoc mcp` once the npm package is published.
   claude plugin install stetdoc@stetdoc
   ```
 
-- **MCP:** `claude mcp add --scope user stetdoc -- stetdoc mcp`. Use `--scope project` for a project.
-- **Check:** type `/stetdoc` in a session to load the skill. `claude mcp list` shows the server as connected, and `/mcp`
-  shows it in a session.
-- Docs: [skills](https://code.claude.com/docs/en/skills), [MCP](https://code.claude.com/docs/en/mcp),
+- **MCP:** not needed, and the command works better. If you want it anyway: `claude mcp add --scope user stetdoc --
+  stetdoc mcp`, or `--scope project` for a project.
+- **Check:** type `/stetdoc` in a session to load the skill. `/hooks` lists the plugin's PreToolUse hook.
+- Docs: [skills](https://code.claude.com/docs/en/skills), [hooks](https://code.claude.com/docs/en/hooks),
   [plugins](https://code.claude.com/docs/en/plugins).
+
+### The Claude Code guard hook
+
+When stetdoc is missing, or its view does not answer a question, an agent may reach for the package itself: unzip the
+.docx and read or rewrite `word/document.xml` with a script. Such an edit is not a tracked change, and it can break the
+file. The plugin carries a PreToolUse hook, `plugins/claude/hooks/docx-guard.sh`, that blocks those tool calls and tells
+the agent to use stetdoc, or to tell the user stetdoc is not installed. It needs only `sh` and `awk`, never stetdoc.
+
+It blocks:
+
+- an archive tool (`unzip`, `zip`, `zipinfo`, `ditto`, `tar`, `bsdtar`, `7z`, `jar`, `unar`, `Expand-Archive` and
+  the like) in a command that names a .docx, .docm, .dotx or .dotm file;
+- a script (`python`, `node`, `ruby`, `perl`, `php`, `osascript` and the like) run on such a file, and zip code
+  (`zipfile`, `JSZip`, `adm-zip`, `Archive::Zip`, `java.util.zip`) in a command that names one;
+- a library that reads or writes .docx files directly, used or installed: `python-docx` (`import docx`), `docx2python`,
+  `docx2txt`, `mammoth`, `docxtpl`, the `docx` npm package, `docxtemplater`, Apache POI, Open XML SDK and Aspose;
+- a conversion with `textutil`, `pandoc`, `soffice` or `libreoffice` in a command that names a Word file;
+- copying a Word file to a `.zip` name, `sed -i` or `perl -i` on a Word file or an unzipped part, and `dd` or `xxd` on a
+  Word file;
+- reading or writing an unzipped part (`word/*.xml`, `document.xml`, `[Content_Types].xml`) with a script, `sed`, `awk`,
+  `cat`, `xmllint` or a redirection;
+- the Write, Edit, MultiEdit and NotebookEdit tools on a Word file or an unzipped part, and a script written to `/tmp` that
+  takes a Word file apart.
+
+It allows every `stetdoc` command, whatever its arguments or here-document say, and commands that only list, copy, move,
+hash or open a Word file (`ls`, `cp`, `mv`, `shasum`, `open`, `file`, `rm`). `git` and `gh` commands are not checked,
+because their messages are prose. When it is unsure, it allows: it reads the command, not what a script file holds, so a
+script written earlier inside the project and run without naming a Word file passes. `STETDOC_GUARD=off` in Claude Code's
+environment turns it off.
+
+Without the plugin, add the hook to a skill install: save the script, then add it to `~/.claude/settings.json` (or a
+project's `.claude/settings.json`). `stetdoc init --agent claude-code` points here.
+
+```
+mkdir -p ~/.claude/hooks
+curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
+  https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/plugins/claude/hooks/docx-guard.sh
+```
+
+```json
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell|Write|Edit|MultiEdit|NotebookEdit",
+        "hooks": [{ "type": "command", "command": "sh ~/.claude/hooks/stetdoc-docx-guard.sh", "timeout": 30 }]
+      }
+    ]
+  }
+}
+```
 
 ## Codex
 

@@ -41,6 +41,9 @@ pub enum Scope {
 /// The folder several agents share, the Agent Skills convention, under the home folder and in a project alike.
 pub const SHARED: &str = ".agents/skills/stetdoc";
 
+/// Where a Claude Code user without the plugin finds its guard hook, which blocks other ways into a .docx.
+const GUARD_NOTE: &str = "Claude Code can also block other ways into a .docx, such as unzip or python-docx, with the guard hook the stetdoc plugin carries. To add it to this install, see https://github.com/clauseo-ai/stetdoc/blob/main/docs/agents.md#the-claude-code-guard-hook";
+
 const SERVER_JSON: &str = r#"{ "command": "stetdoc", "args": ["mcp"] }"#;
 
 /// Every agent, in the order `--list` and the prompt show them.
@@ -54,7 +57,7 @@ pub const AGENTS: [Agent; 12] = [
         project: Some(".claude/skills/stetdoc"),
         also_user: &[],
         also_project: &[],
-        note: |_| None,
+        note: |_| Some(GUARD_NOTE),
         mcp: |scope| match scope {
             Scope::User => "claude mcp add --scope user stetdoc -- stetdoc mcp".into(),
             Scope::Project => "claude mcp add --scope project stetdoc -- stetdoc mcp".into(),

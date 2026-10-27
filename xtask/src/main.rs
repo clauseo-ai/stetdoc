@@ -22,6 +22,8 @@ mod errors;
 mod exceptions;
 mod findingspec;
 mod fuzz;
+#[cfg(test)]
+mod guard_hook;
 mod layering;
 mod links;
 mod opspec;

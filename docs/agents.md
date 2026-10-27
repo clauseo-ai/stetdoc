@@ -60,6 +60,7 @@ This is the real output of `stetdoc init --agent all --mcp --dry-run` in an empt
 ```
 would write ~/.claude/skills/stetdoc/SKILL.md (Claude Code)
 would write ~/.agents/skills/stetdoc/SKILL.md (Codex, Cursor, OpenCode, OpenClaw, Gemini CLI, GitHub Copilot CLI, Amp)
+would write ~/.gemini/config/skills/stetdoc/SKILL.md (Antigravity CLI)
 would write ~/.hermes/skills/stetdoc/SKILL.md (Hermes Agent)
 would write ~/.grok/skills/stetdoc/SKILL.md (Grok Build)
 would write ~/.config/cmx2/skills/stetdoc/SKILL.md (cmx2)
@@ -73,6 +74,7 @@ Register `stetdoc mcp` with each agent (init edits no agent's config):
   OpenCode: in ~/.config/opencode/opencode.json: { "mcp": { "stetdoc": { "type": "local", "command": ["stetdoc", "mcp"], "enabled": true } } }
   OpenClaw: openclaw mcp add stetdoc --command stetdoc --arg mcp (or in ~/.openclaw/openclaw.json: { "mcp": { "servers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } } })
   Gemini CLI: in ~/.gemini/settings.json: { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } }
+  Antigravity CLI: agy mcp add stetdoc stetdoc mcp (or in ~/.gemini/config/mcp_config.json: { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } })
   GitHub Copilot CLI: in ~/.copilot/mcp-config.json: { "mcpServers": { "stetdoc": { "type": "local", "command": "stetdoc", "args": ["mcp"], "tools": ["*"] } } }
   Amp: amp mcp add stetdoc -- stetdoc mcp
   Hermes Agent: in ~/.hermes/config.yaml: mcp_servers: { stetdoc: { command: stetdoc, args: [mcp] } }
@@ -299,7 +301,40 @@ document to it and download the result. Docs: [computer and apps](https://docs.x
   `stetdoc_<tool>`. Ask a session which skills it has to see the stub.
 - Docs: `cmx2 mcp --help`. These folders were read from cmx2 0.8.11.
 
-## Gemini CLI
+## Antigravity CLI
+
+Antigravity CLI (`agy`) is Google's terminal agent, which replaced Gemini CLI. `init` detects it by `agy` on the PATH,
+or by `~/.gemini/antigravity-cli` or `~/.gemini/antigravity`.
+
+- **Skill:** `~/.gemini/config/skills/stetdoc/SKILL.md`, or `.agents/skills/stetdoc/SKILL.md` in a workspace.
+  Antigravity CLI, the Antigravity app and the Antigravity IDE all read `~/.gemini/config/skills`. The CLI's own docs name
+  `~/.gemini/antigravity-cli/skills` too, which only the CLI and the IDE read. Antigravity CLI 1.4.8 does not read
+  `~/.agents/skills`, as a test showed. It reads `AGENTS.md` and `GEMINI.md` alike, so `stetdoc init --project`'s block in `AGENTS.md`
+  reaches it.
+- **MCP:** in `~/.gemini/config/mcp_config.json`, which the CLI, the app and the IDE share:
+
+  ```json
+  { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } }
+  ```
+
+  `agy mcp add stetdoc stetdoc mcp` writes the same entry. For a stetdoc server you host yourself (see
+  [self-hosting the MCP server](self-hosting-mcp.md)), give its address as `serverUrl`, not `url`, which Antigravity
+  ignores (`agy mcp add --header "Authorization: Bearer TOKEN" stetdoc https://stetdoc.example.com/mcp` writes it):
+
+  ```json
+  { "mcpServers": { "stetdoc": { "serverUrl": "https://stetdoc.example.com/mcp", "headers": { "Authorization": "Bearer TOKEN" } } } }
+  ```
+
+  The docs also name a workspace file, `.agents/mcp_config.json`, but Antigravity CLI reads it and then ignores its
+  servers ([antigravity-cli#60](https://github.com/google-antigravity/antigravity-cli/issues/60)), so
+  `init --project --mcp` prints the global file too.
+- **Check:** `/skills` in a session lists the skills and where each comes from. `/mcp` opens the MCP manager.
+- Docs: [skills](https://antigravity.google/docs/skills), [MCP](https://antigravity.google/docs/mcp), read on 2026-10-27.
+
+## Gemini CLI (retired)
+
+Google retired Gemini CLI on 18 June 2026 in favour of Antigravity CLI (see above). `init` keeps it for those who still
+run it, and says so when it is picked. Install for Antigravity with `stetdoc init --agent antigravity`.
 
 - **Skill:** `~/.agents/skills/stetdoc/SKILL.md` (Gemini CLI reads it as an alias of `~/.gemini/skills`), or
   `.agents/skills/stetdoc/SKILL.md` in a workspace.

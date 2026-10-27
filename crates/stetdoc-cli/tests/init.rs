@@ -438,3 +438,63 @@ fn an_agent_that_reads_two_written_folders_is_told_and_agents_say_what_they_need
         stderr(&project)
     );
 }
+
+#[test]
+fn antigravity_reads_its_global_folder_and_a_projects_shared_folder_and_is_told_its_mcp_file() {
+    let w = World::new();
+    w.command("agy");
+    let out = w.ok(&["--mcp"]);
+    assert_eq!(
+        fs::read_to_string(skill(&w.home, ".gemini/config")).unwrap(),
+        stub(),
+        "agy on PATH detects Antigravity CLI: {}",
+        stderr(&out)
+    );
+    let text = stdout(&out);
+    assert!(
+        text.contains("wrote ~/.gemini/config/skills/stetdoc/SKILL.md (Antigravity CLI)"),
+        "{text}"
+    );
+    assert!(
+        text.contains(r#"Antigravity CLI: agy mcp add stetdoc stetdoc mcp (or in ~/.gemini/config/mcp_config.json: { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } })"#),
+        "{text}"
+    );
+    assert!(
+        !w.home.join(".agents").exists(),
+        "Antigravity does not read ~/.agents/skills"
+    );
+
+    let project = w.ok(&["--project", "--agent", "antigravity", "--mcp"]);
+    assert!(
+        skill(&w.project, ".agents").is_file(),
+        "{}",
+        stderr(&project)
+    );
+    assert!(
+        stdout(&project).contains("in ~/.gemini/config/mcp_config.json"),
+        "the workspace file is ignored by Antigravity, so a project gets the global one too"
+    );
+}
+
+#[test]
+fn an_antigravity_folder_detects_it_and_gemini_cli_is_said_to_be_retired() {
+    let w = World::new();
+    fs::create_dir_all(w.home.join(".gemini/antigravity-cli")).unwrap();
+    let list = stdout(&w.ok(&["--list", "--json"]));
+    let json: serde_json::Value = serde_json::from_str(&list).unwrap();
+    let agents = json["agents"].as_array().unwrap();
+    let detected = |id: &str| {
+        agents.iter().find(|a| a["id"] == id).unwrap()["detected"]
+            .as_bool()
+            .unwrap()
+    };
+    assert!(detected("antigravity"), "{list}");
+
+    let out = w.ok(&["--agent", "gemini"]);
+    assert!(
+        stderr(&out).contains("retired Gemini CLI on 18 June 2026")
+            && stderr(&out).contains("--agent antigravity"),
+        "{}",
+        stderr(&out)
+    );
+}

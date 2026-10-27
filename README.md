@@ -76,7 +76,7 @@ package. Every block has a stable short ref such as `p42`. Every write to a work
 process waits for the first.
 
 **For agents.** `stetdoc init` installs the skill stub in your home folder for the agents you pick (Claude Code, Codex,
-Cursor, OpenCode, Gemini CLI, Copilot, Amp, OpenClaw, Hermes, Grok Build, cmx2, Factory), or for the ones it detects;
+Cursor, OpenCode, Antigravity CLI, Gemini CLI, Copilot, Amp, OpenClaw, Hermes, Grok Build, cmx2, Factory), or for the ones it detects;
 `stetdoc init --project` installs it in a project and adds a short block to `AGENTS.md`. `--list` shows what is installed
 and `--remove` takes it out. The full skill is embedded in the binary: `stetdoc skills get core`. For agents that take
 tools rather than a shell, `stetdoc mcp` serves the same commands over the Model Context Protocol, and `stetdoc init --mcp`

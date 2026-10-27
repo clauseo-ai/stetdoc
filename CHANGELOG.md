@@ -9,6 +9,12 @@ released yet.
 
 ### Added
 
+- `stetdoc init --agent antigravity` installs the skill for Antigravity CLI (`agy`), which replaced Gemini CLI: in
+  `~/.gemini/config/skills/stetdoc` (read by its CLI, app and IDE) or a project's `.agents/skills/stetdoc`. It is detected
+  by `agy` on the PATH or `~/.gemini/antigravity-cli`, and `--mcp` prints `agy mcp add stetdoc stetdoc mcp`. Picking
+  Gemini CLI now notes that Google retired it.
+- The skill stub tells the agent to write each output next to its input in the user's folder, never in a temporary
+  folder, and, when `stetdoc` is missing, not to offer another way into the .docx.
 - An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
   cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
   and time per case, and arms to compare with no plugin or another plugin. See `docs/evals.md`.

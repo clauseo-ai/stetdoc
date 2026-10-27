@@ -41,6 +41,6 @@ removed the stetdoc block from AGENTS.md
 $ stetdoc init --agent nobody
 ? 2
 error[invalid_payload]: nobody is not an agent stetdoc installs for.
-next: Name one or more of: claude-code, codex, cursor, opencode, openclaw, gemini, copilot, amp, hermes, grok, cmx2, factory, or all.
+next: Name one or more of: claude-code, codex, cursor, opencode, openclaw, gemini, antigravity, copilot, amp, hermes, grok, cmx2, factory, or all.
 
 ```

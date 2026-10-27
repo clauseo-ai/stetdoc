@@ -44,10 +44,13 @@ pub const SHARED: &str = ".agents/skills/stetdoc";
 /// Where a Claude Code user without the plugin finds its guard hook, which blocks other ways into a .docx.
 const GUARD_NOTE: &str = "Claude Code can also block other ways into a .docx, such as unzip or python-docx, with the guard hook the stetdoc plugin carries. To add it to this install, see https://github.com/clauseo-ai/stetdoc/blob/main/docs/agents.md#the-claude-code-guard-hook";
 
+/// What a Gemini CLI user is told: Google retired it, and Antigravity CLI replaces it.
+const GEMINI_RETIRED: &str = "Google retired Gemini CLI on 18 June 2026. If you have moved to Antigravity CLI (agy), install for it with --agent antigravity.";
+
 const SERVER_JSON: &str = r#"{ "command": "stetdoc", "args": ["mcp"] }"#;
 
 /// Every agent, in the order `--list` and the prompt show them.
-pub const AGENTS: [Agent; 12] = [
+pub const AGENTS: [Agent; 13] = [
     Agent {
         id: "claude-code",
         name: "Claude Code",
@@ -134,10 +137,28 @@ pub const AGENTS: [Agent; 12] = [
         project: Some(SHARED),
         also_user: &[],
         also_project: &[],
-        note: |_| None,
+        note: |_| Some(GEMINI_RETIRED),
         mcp: |scope| {
             let file = pick(scope, "~/.gemini/settings.json", ".gemini/settings.json");
             format!(r#"in {file}: {{ "mcpServers": {{ "stetdoc": {SERVER_JSON} }} }}"#)
+        },
+    },
+    Agent {
+        id: "antigravity",
+        name: "Antigravity CLI",
+        bins: &["agy"],
+        homes: &[".gemini/antigravity-cli", ".gemini/antigravity"],
+        user: Some(".gemini/config/skills/stetdoc"),
+        project: Some(SHARED),
+        also_user: &[],
+        also_project: &[],
+        note: |_| None,
+        // Antigravity loads MCP servers from the global file only: it reads a workspace's .agents/mcp_config.json and
+        // ignores it (google-antigravity/antigravity-cli#60), so both scopes point at the global file.
+        mcp: |_| {
+            format!(
+                r#"agy mcp add stetdoc stetdoc mcp (or in ~/.gemini/config/mcp_config.json: {{ "mcpServers": {{ "stetdoc": {SERVER_JSON} }} }})"#
+            )
         },
     },
     Agent {

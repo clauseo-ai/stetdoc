@@ -232,6 +232,7 @@ check refuses one), so the harness writes a `contract.docx` and a `revised.docx`
   |---|---|---|---|
   | `codex`, `cursor`, `opencode`, `openclaw`, `gemini`, `copilot`, `amp` | `~/.agents/skills/stetdoc` | `.agents/skills/stetdoc` | `codex`, `cursor-agent` or `cursor`, `opencode`, `openclaw`, `gemini`, `copilot`, `amp` on `PATH`; `~/.codex`, `~/.cursor`, `~/.config/opencode`, `~/.openclaw`, `~/.gemini`, `~/.copilot`, `~/.config/amp` |
   | `claude-code` | `~/.claude/skills/stetdoc` | `.claude/skills/stetdoc` | `claude`; `~/.claude` |
+  | `antigravity` (Antigravity CLI, which replaced Gemini CLI) | `~/.gemini/config/skills/stetdoc`, which its CLI, app and IDE all read | `.agents/skills/stetdoc` | `agy`; `~/.gemini/antigravity-cli`, `~/.gemini/antigravity` |
   | `hermes` | `~/.hermes/skills/stetdoc` | `.hermes/skills/stetdoc`; it reads `.agents/skills` too after `hermes skills trust`, which init notes | `hermes`; `~/.hermes` |
   | `grok` (Grok Build) | `~/.grok/skills/stetdoc` | `.grok/skills/stetdoc` | `grok`; `~/.grok` |
   | `cmx2` | `~/.config/cmx2/skills/stetdoc` | `.cmx2/skills/stetdoc` | `cmx2`; `~/.config/cmx2` |

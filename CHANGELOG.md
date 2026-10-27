@@ -288,6 +288,18 @@ released yet.
 
 ### Changed
 
+- The receipt of a command that writes a .docx (`edit -o`, `edit --in-place`, `compare`) carries the base of the written
+  file, which opens in a new ref namespace, so the next batch on it can start from the receipt. When the edit added or
+  removed blocks, the written file numbers them again: the receipt then has no base (`null` in JSON) and a `next:` line
+  that says to view the file. Before, the receipt's base was refused as `stale_ref` on the written file.
+- The `next` of a `stale_ref` for a batch from another namespace says that a file rewritten since the view or receipt has
+  new refs, and to view it again.
+- `compare` ends its receipt with `next: stetdoc view OUT --revisions`, which lists the redline's changes without unpacking.
+- A batch's `ids` reads `[57, 58]` and `#57, #58` as well as `57, 58`, and a value that is not a number is refused with a
+  message that says `ids` is a comma-separated list of whole numbers.
+- The agent skill says to view a .docx directly rather than unpack it to read, to use `--in-place` only on a file the user
+  asked to update or that the task wrote, and how to take the next base after writing a .docx.
+
 - The default page of a view is 3,000 tokens (about 12 KB), not 8,000, in the CLI, the MCP view tool and
   `Budget::default()`, so that one view, or two or three in one call, stays under what an agent's tool result holds.
 - A receipt of `edit`, `pack` or `compare` counts the problems that were already in the input on one line, such as

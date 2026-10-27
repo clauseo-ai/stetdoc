@@ -346,3 +346,81 @@ fn a_receipt_counts_the_problems_already_there_and_check_all_lists_them() {
     );
     assert!(!receipt.contains("empty_properties"), "{receipt}");
 }
+
+/// The base on the head line of a receipt, if it has one.
+fn receipt_base(receipt: &str) -> Option<String> {
+    let head = receipt.lines().next()?;
+    head.rsplit_once(". base ")
+        .map(|(_, b)| b.trim().to_string())
+}
+
+#[test]
+fn in_place_edits_chain_from_the_receipts_base() {
+    let tmp = with_contract();
+    let cwd = tmp.path();
+    let first = format!(
+        "base: {}\n---\n@replace\nref: p4\nfind: thirty\nwith: sixty\n",
+        base(cwd, "contract.docx")
+    );
+    let out = stetdoc(cwd, &["edit", "contract.docx", "--in-place"], &first);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let receipt = text(&out.stdout);
+    let next = receipt_base(&receipt).unwrap_or_else(|| panic!("no base: {receipt}"));
+    assert_eq!(
+        next,
+        base(cwd, "contract.docx"),
+        "the base is the written file's"
+    );
+
+    // A second and a third batch, each from the receipt before it, with no view in between.
+    let second = format!("base: {next}\n---\n@comment\nref: p5\ntext: Check the law.\n");
+    let out = stetdoc(cwd, &["edit", "contract.docx", "--in-place"], &second);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let next = receipt_base(&text(&out.stdout)).unwrap();
+    let third = format!("base: {next}\n---\n@replace\nref: p5\nfind: English\nwith: New York\n");
+    let out = stetdoc(
+        cwd,
+        &["--json", "edit", "contract.docx", "--in-place"],
+        &third,
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert_eq!(json["receipt"]["base"], base(cwd, "contract.docx"));
+    let shown = text(&stetdoc(cwd, &["view", "contract.docx", "--range", "p4..p5"], "").stdout);
+    assert!(
+        shown.contains("{++sixty++}") && shown.contains("{++New York++}"),
+        "{shown}"
+    );
+}
+
+#[test]
+fn a_written_file_that_numbers_its_blocks_again_gets_no_base_and_a_next_step() {
+    let tmp = with_contract();
+    let cwd = tmp.path();
+    let batch = format!(
+        "base: {}\n---\n@insert\nref: p4\nplace: after\nparagraphs: A new clause.\n",
+        base(cwd, "contract.docx")
+    );
+    let out = stetdoc(
+        cwd,
+        &["--json", "edit", "contract.docx", "-o", "edited.docx"],
+        &batch,
+    );
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    let json: serde_json::Value = serde_json::from_slice(&out.stdout).unwrap();
+    assert!(json["receipt"]["base"].is_null(), "{json}");
+    assert!(
+        json["next"]
+            .as_str()
+            .unwrap()
+            .starts_with("stetdoc view edited.docx ("),
+        "{json}"
+    );
+    let receipt =
+        text(&stetdoc(cwd, &["edit", "contract.docx", "-o", "again.docx"], &batch).stdout);
+    assert_eq!(receipt_base(&receipt), None, "{receipt}");
+    assert!(
+        receipt.contains("\nnext: stetdoc view again.docx ("),
+        "{receipt}"
+    );
+}

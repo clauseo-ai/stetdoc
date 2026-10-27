@@ -412,6 +412,14 @@ fn edit_writes_a_docx_in_place_and_pack_done_removes_the_working_copy() {
         json!({ "input": "contract.docx", "in_place": true, "batch": batch }),
     );
     assert_eq!(ok(&edited)["output"], "contract.docx");
+    // The receipt's base is the written file's, so a second in-place batch chains from it without a view.
+    let next = ok(&edited)["receipt"]["base"].as_str().unwrap().to_string();
+    let second = format!("base: {next}\n---\n@comment\nref: p4\ntext: Agreed.\n");
+    let chained = server.call(
+        "edit",
+        json!({ "input": "contract.docx", "in_place": true, "batch": second }),
+    );
+    ok(&chained);
     let view = server.call(
         "view",
         json!({ "input": "contract.docx", "range": "p4..p4" }),

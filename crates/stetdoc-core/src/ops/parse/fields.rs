@@ -79,8 +79,16 @@ pub(super) fn add(
             };
             let mut numbers = Vec::new();
             for line in &lines {
-                for token in line.split([',', ' ', '\t']).filter(|t| !t.is_empty()) {
-                    numbers.push(number(name, token)?);
+                // `57, 58`, `57 58`, the JSON-like `[57, 58]` and the view's `#57, #58` all read as the same list.
+                for token in line
+                    .split([',', ' ', '\t', '[', ']', '#'])
+                    .filter(|t| !t.is_empty())
+                {
+                    numbers.push(number(name, token).map_err(|_| {
+                        bad(format!(
+                            "`{name}` is a comma-separated list of whole numbers, such as `{name}: 57, 58`, and `{token}` is not one."
+                        ))
+                    })?);
                 }
             }
             extend(map, name, numbers.into_iter());

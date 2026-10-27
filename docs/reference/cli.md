@@ -278,12 +278,14 @@ checked 1 unit.
 leaves the old document or the new one, and only if no one wrote the file during the edit (`stale_target` otherwise).
 A symbolic link is written through and stays a link. A hard link is broken, because the rename puts a new file at the
 path. The permissions are kept, the owner is not, and a read-only file is refused. On Unix the folder is synced after the
-rename; other systems cannot sync a folder, so there the rename is as durable as the file system makes it. The saved
-document opens in a new ref namespace, so the next batch takes its base from a new view.
+rename; other systems cannot sync a folder, so there the rename is as durable as the file system makes it. A saved
+document opens in a new ref namespace, so the receipt's base is the written file's: the next batch can start from
+it without a view. When the edit added or removed blocks, the written file numbers them again, so the receipt has no
+base and its `next` says to view the file. A batch from before the write is stale, as the second command shows.
 
 ```console
 $ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
-applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
 checked 1 unit.
@@ -292,7 +294,7 @@ wrote contract.docx
 $ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
 ? 4
 error[stale_ref]: This batch was written for another document (namespace 5737b772923cf8d3, not 745747bfd39463c1). Refs do not carry over when a file is reopened. View the document again. (operation 0)
-next: View the document again to get fresh refs, then rewrite the batch.
+next: If this file was rewritten since that view or receipt, by an edit that wrote it or by someone else, its refs are new: view it again, then rewrite the batch from what it shows.
 
 ```
 
@@ -318,10 +320,11 @@ stetdoc compare [OPTIONS] --output <DOCX> <ORIGINAL> <REVISED>
 
 ```console
 $ stetdoc compare contract.docx revised.docx -o redline.docx --author "Jane Doe"
-compared: 3 revisions, tracked as Jane Doe 2026-10-06T09:30:00Z. base 3953ae684513612a:1:b1378820043c0bb8
+compared: 3 revisions, tracked as Jane Doe 2026-10-06T09:30:00Z. base 8785d09e0fdbb2b7:0:8785d09e0fdbb2b7
 Jane Doe: insertion 2, deletion 1
 checked 2 units.
 wrote redline.docx
+next: stetdoc view redline.docx --revisions
 
 ```
 

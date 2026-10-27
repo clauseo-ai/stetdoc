@@ -2,7 +2,7 @@
   "error": {
     "code": "stale_ref",
     "message": "This batch was written for another document (namespace 0000000000000000, not 5737b772923cf8d3). Refs do not carry over when a file is reopened. View the document again.",
-    "next": "View the document again to get fresh refs, then rewrite the batch.",
+    "next": "If this file was rewritten since that view or receipt, by an edit that wrote it or by someone else, its refs are new: view it again, then rewrite the batch from what it shows.",
     "op_index": 0
   }
 }

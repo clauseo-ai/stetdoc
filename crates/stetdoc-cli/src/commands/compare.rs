@@ -29,15 +29,20 @@ pub fn run(args: &CompareArgs) -> Result<Outcome, Failure> {
     let compared = stetdoc_core::compare(original, revised, &options)?;
     let saved = compared.document.save()?;
     fsio::write_atomic(&args.output, &saved.bytes)?;
+    // A .docx can be viewed without unpacking it, and the ledger is what an agent wants of a redline.
+    let hint = format!("stetdoc view {} --revisions", args.output.display());
+    let told = super::written::retell(
+        &compared.document,
+        &compared.receipt,
+        &saved.bytes,
+        &args.output,
+        Some(hint),
+    )?;
     let json = serde_json::json!({
         "output": args.output.display().to_string(),
-        "receipt": to_json(&compared.receipt)?,
+        "receipt": told.receipt,
         "saved": to_json(&saved.receipt)?,
+        "next": told.next,
     });
-    let text = format!(
-        "{}\nwrote {}\n",
-        compared.receipt.text.trim_end(),
-        args.output.display()
-    );
-    Ok(Outcome::new(text, json))
+    Ok(Outcome::new(told.text, json))
 }

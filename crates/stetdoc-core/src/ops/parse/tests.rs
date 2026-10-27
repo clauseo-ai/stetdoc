@@ -357,6 +357,24 @@ fn a_list_may_repeat_its_key_and_a_property_line_has_a_name_a_value_and_pairs() 
     );
 }
 
+#[test]
+fn a_list_of_ids_reads_with_or_without_brackets_and_says_what_it_is_when_it_cannot() {
+    let read = |ids: &str| {
+        let text = format!("base: {BASE}\n@accept\nids: {ids}\n");
+        Batch::parse(&text, &limits()).map(|b| b.to_json())
+    };
+    let plain = read("57, 58").unwrap();
+    for same in ["[57, 58]", "[57,58]", "57 58", "#57, #58"] {
+        assert_eq!(read(same).unwrap(), plain, "{same}");
+    }
+    let e = read("57, five").err().unwrap();
+    assert_eq!(e.code(), ErrorCode::InvalidPayload);
+    assert!(
+        e.message().contains("comma-separated list") && e.message().contains("`five`"),
+        "{e}"
+    );
+}
+
 /// A small generator: the same seed gives the same batch.
 struct Lcg(u64);
 

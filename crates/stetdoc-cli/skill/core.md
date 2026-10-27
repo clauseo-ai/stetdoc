@@ -53,13 +53,23 @@ change is a marker in braces followed by its id, such as `{++new text++}{#38 A}`
 document text that someone typed, not a revision. When in doubt, `stetdoc inspect contract.stet p95` lists the block's
 tracked changes and comments, or says it has none.
 
-## Editing a .docx without a working copy
+## Reading and editing a .docx without a working copy
+
+To read a .docx, view it directly: `stetdoc view contract.docx`, `--revisions`, `--find` and the rest work on a .docx as on a
+working copy. Unpack only to edit the files.
 
 `stetdoc edit contract.docx -o contract.redline.docx` applies a batch to a .docx and writes another file, with no working
-copy to clean up. To update the same file, pass `--in-place` (with MCP, `in_place: true`): it writes atomically and
-refuses with `stale_target` if someone wrote the file meanwhile (view again and rewrite the batch). Never write to a
-temporary file and move it over the original. After an in-place edit, view again before the next batch. `--in-place`
-does not combine with `--dry-run` or `-o`, and is refused on a working copy, which an edit always updates itself.
+copy to clean up. This is the default: the user's original stays as it was.
+
+`--in-place` (with MCP, `in_place: true`) writes the result back to the file it read. Use it only when the user asks you to
+update that file, or the file is one this task already wrote (such as the redline from your first edit). It writes
+atomically and refuses with `stale_target` if someone wrote the file meanwhile (view again and rewrite the batch). Never
+write to a temporary file and move it over the original. `--in-place` does not combine with `--dry-run` or `-o`, and is
+refused on a working copy, which an edit always updates itself.
+
+A written .docx numbers its blocks again when it is opened, and the receipt says what to do next. Its `base` is the
+written file's, so the next batch on that file can start from it. When the edit added or removed blocks, the receipt has
+no base and a `next: stetdoc view ...` line instead: view the file, then write the next batch from that view.
 
 ## Receipts and problems already in the document
 
@@ -123,8 +133,8 @@ EOF
 `view --revisions` lists tracked changes with their ids and authors, one line each and cut to 80 characters, and
 `view --comments` the threads. `--revisions --full` shows each change's whole text (up to 1000 characters), and
 `--revisions --find TEXT` lists only the changes whose text contains it (ignoring case unless TEXT has a capital). Then `accept` or
-`reject` by `ids`, by `author` or `all`, and `comment`, `reply`, `resolve`. `stetdoc compare original.docx revised.docx -o
-redline.docx` writes a redline of two versions.
+`reject` by `ids` (`ids: 57, 58`), by `author` or `all`, and `comment`, `reply`, `resolve`. `stetdoc compare original.docx revised.docx -o
+redline.docx` writes a redline of two versions, and `stetdoc view redline.docx --revisions` lists its changes.
 
 Before you accept or reject in bulk by a rule that can be read more than one way, such as "reject the changes to amounts"
 (a new amount, or only a changed one?), decide which reading you take and say it to the user, or ask them first when the

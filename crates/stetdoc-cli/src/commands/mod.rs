@@ -13,6 +13,7 @@ mod pack;
 mod skills;
 mod unpack;
 mod view;
+mod written;
 
 use crate::cli::Command;
 use crate::output::{Failure, Outcome};

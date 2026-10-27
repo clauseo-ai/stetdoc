@@ -235,7 +235,11 @@ impl RefTable {
                  not carry over when a file is reopened. View the document again.",
                 base.namespace(),
                 self.namespace
-            )));
+            ))
+            .with_next(
+                "If this file was rewritten since that view or receipt, by an edit that wrote it or by someone else, \
+                 its refs are new: view it again, then rewrite the batch from what it shows.",
+            ));
         }
         if base.version() > self.version() {
             return Err(stale(format!(

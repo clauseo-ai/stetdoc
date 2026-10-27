@@ -103,14 +103,15 @@ fn edit_docx(args: &EditArgs, path: &std::path::Path) -> Result<Outcome, Failure
             path.to_path_buf()
         }
     };
+    let told = super::written::retell(&doc, &receipt, &saved.bytes, &written, None)?;
     let json = serde_json::json!({
         "output": written.display().to_string(),
         "in_place": output.is_none(),
-        "receipt": to_json(&receipt)?,
+        "receipt": told.receipt,
         "saved": to_json(&saved.receipt)?,
+        "next": told.next,
     });
-    let text = format!("{}\nwrote {}\n", receipt.text.trim_end(), written.display());
-    Ok(Outcome::new(text, json))
+    Ok(Outcome::new(told.text, json))
 }
 
 /// The `Edit` the flags and the batch ask for.

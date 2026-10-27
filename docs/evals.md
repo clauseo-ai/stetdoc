@@ -134,6 +134,9 @@ Other limits:
   stetdoc was on `PATH`.
 - A multi-turn case can only resume a recorded conversation (`context.history_file`); nothing can change the files
   between two live turns. `stale-colleague-edit` therefore records the first turn in `history.jsonl` and makes the
-  first turn's redline and the colleague's edit in its setup script.
+  first turn's redline and the colleague's edit in its setup script. Claude Code resumes that history from a session file it
+  writes into the case directory and appends each run to, so the setup script deletes it first, and two runs of this
+  case at the same time (`-j` above 1) share one conversation: run it with `--case stale-colleague-edit -j 1` when
+  its result matters.
 - Tokens are not in Claude Code's result, which is why the harness reads them from the transcript.
 - `no-xml-tools` sees the `Bash` tool only; an agent that read the package with another tool would get past it.

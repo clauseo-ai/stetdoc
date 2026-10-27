@@ -2,3 +2,5 @@
 /results/
 /cases/results/
 /without-stetdoc/results/
+# claude plugin eval resumes a history file by writing the session, named by its id, into the case directory.
+/cases/*/*-*-*-*-*.jsonl

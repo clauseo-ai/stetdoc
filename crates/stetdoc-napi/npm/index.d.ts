@@ -37,6 +37,8 @@ export interface EditRequest {
   author: string;
   date: string;
   untracked?: boolean;
+  /** "manual" keeps old text struck through and underlines new text, with no revision; "manual_color" adds red and blue. */
+  markup?: "revisions" | "manual" | "manual_color";
   scope?: string[];
   dryRun?: boolean;
   quotes?: "match" | "as_typed";

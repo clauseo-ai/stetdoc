@@ -6,7 +6,7 @@
 
 use super::scope::ScopeSet;
 use crate::api::files::Origin as FileOrigin;
-use crate::api::options::{OffsetUnit, Quotes};
+use crate::api::options::{Markup, OffsetUnit, Quotes};
 use crate::api::view::Warning;
 use crate::comments::CommentEffect;
 use crate::revisions::outcome::{Effect, Origin, Outcome};
@@ -30,6 +30,8 @@ pub(super) struct Done {
     pub side_effects: Vec<SideEffect>,
     /// What a comment operation did to comments.
     pub comments: Vec<CommentEffect>,
+    /// With manual markup, what it struck through and underlined, in the order of the text.
+    pub marked: Vec<Marked>,
     /// True when the operation changed the document through calls whose effects it does not hold: a comment written, a note
     /// deleted.
     pub changed: bool,
@@ -45,12 +47,25 @@ impl Done {
     }
 }
 
+/// One change of manual markup: the paragraph, the old text struck through and the new text underlined after it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Marked {
+    /// The paragraph.
+    pub block: BlockKey,
+    /// The old text, kept and struck through.
+    pub struck: String,
+    /// The new text, underlined.
+    pub underlined: String,
+}
+
 /// What an edit asks of `apply`, besides the batch.
 pub(crate) struct Context<'a> {
     /// The author and the date. Tracked edits write them into every revision.
     pub stamp: &'a RevStamp,
     /// False for an untracked edit: the same calls, on a compiler that writes no revision.
     pub tracked: bool,
+    /// How text changes show. Manual markup comes with `tracked` false.
+    pub markup: Markup,
     /// What to do with the quotes of typed text.
     pub quotes: Quotes,
     /// The unit that the offsets of the batch count.
@@ -101,6 +116,8 @@ pub(crate) struct OpApplied {
     pub warnings: Vec<Warning>,
     /// For the first operation of a run of `accept` and `reject`, the index into `Applied::resolutions`.
     pub resolution: Option<usize>,
+    /// With manual markup, what it struck through and underlined.
+    pub marked: Vec<Marked>,
 }
 
 /// What a whole batch did.

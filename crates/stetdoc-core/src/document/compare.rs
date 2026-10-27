@@ -263,6 +263,7 @@ fn receipt_of(
         base: document.base(),
         dry_run: false,
         tracked: true,
+        markup: crate::api::options::Markup::Revisions,
         stamp: Stamp::new(stamp.author(), stamp.date()),
         operations: Vec::new(),
         revisions: AuthorRevisions::group(&revisions),

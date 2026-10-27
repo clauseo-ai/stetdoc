@@ -10,7 +10,8 @@
 //! **Invariants.**
 //! - A batch applies completely or not at all: the first failure ends it, and `document` drops the transaction.
 //! - Dispatch is an exhaustive match over `Op`, so the compiler points to every place a new operation must be handled.
-//! - Every operation compiles through `revisions::Compiler`, and `ops` adds nothing of its own to the document.
+//! - Every operation compiles through `revisions::Compiler`, and `ops` adds nothing of its own to the document. Manual markup
+//!   (`manual.rs`) is untracked calls of the same compiler: struck old text, underlined new text, no revision.
 //! - The two syntaxes of a batch end in the same `Batch`, and every field of every operation is described once, in
 //!   `api::op_spec`. A field that the table does not list is refused in JSON and in block text.
 //! - Every error raised here carries the index of the operation that raised it. For an edit of files `document` turns the index
@@ -27,6 +28,7 @@
 mod comments;
 mod context;
 mod insert;
+mod manual;
 mod parse;
 mod planned;
 mod props;
@@ -133,6 +135,9 @@ fn dispatch(
     base: &BaseToken,
     op: &Op,
 ) -> Result<Done, StetError> {
+    if cx.markup.is_manual() && matches!(op, Op::Split(_) | Op::Merge(_) | Op::Row(_)) {
+        return Err(manual::refuse(&format!("`{}`", label(op))));
+    }
     match op {
         Op::Replace(o) => text::replace(compiler, cx, base, o),
         Op::Insert(o) => insert::insert(compiler, cx, base, o),
@@ -280,6 +285,7 @@ pub(crate) fn apply(
                     changed,
                     warnings: done.warnings,
                     resolution: None,
+                    marked: done.marked,
                 });
             }
             let outcome = compiler

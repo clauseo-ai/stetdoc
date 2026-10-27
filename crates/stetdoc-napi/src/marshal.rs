@@ -5,7 +5,7 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde::de::DeserializeOwned;
 use std::panic::{AssertUnwindSafe, catch_unwind};
-use stetdoc_core::{ErrorCode, OffsetUnit, Quotes, ReadableFiles, StetError};
+use stetdoc_core::{ErrorCode, Markup, OffsetUnit, Quotes, ReadableFiles, StetError};
 
 /// The prefix of the message of a thrown `StetError`, which `npm/index.js` looks for.
 const PREFIX: &str = "stetdoc:";
@@ -93,6 +93,9 @@ pub(crate) struct EditRequest {
     /// Write no revisions.
     #[serde(default)]
     pub untracked: bool,
+    /// How text changes show: revisions, or manual markup (strikethrough and underline, no revision).
+    #[serde(default)]
+    pub markup: Markup,
     /// The scope guard.
     #[serde(default)]
     pub scope: Vec<String>,

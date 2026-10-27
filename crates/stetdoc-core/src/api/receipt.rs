@@ -8,6 +8,7 @@
 
 use super::check::{CheckReport, Finding};
 use super::files::{Origin, RenderedBlock};
+use super::options::Markup;
 use super::revision::{ChangeKind, RevisionInfo};
 use super::stamp::Stamp;
 use super::view::Warning;
@@ -216,8 +217,24 @@ pub struct OpResult {
     /// For a comment operation, the comment, such as `c12`.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub comment: Option<String>,
+    /// With manual markup, what it struck through and underlined, in the order of the text.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub marked: Vec<ManualMark>,
     /// Things worth saying about this operation.
     pub warnings: Vec<Warning>,
+}
+
+/// One change of manual markup: the old text it struck through and the new text it underlined after it. Either may be empty:
+/// a deletion underlines nothing and an insertion strikes nothing.
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct ManualMark {
+    /// The ref of the paragraph, or none for a paragraph that a dry run shows as new.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub block: Option<String>,
+    /// The old text, kept and struck through.
+    pub struck: String,
+    /// The new text, underlined.
+    pub underlined: String,
 }
 
 /// The receipt of an edit.
@@ -229,6 +246,9 @@ pub struct Receipt {
     pub dry_run: bool,
     /// False for an untracked edit.
     pub tracked: bool,
+    /// How the edit showed the text it changed. Manual markup is direct formatting and no revision: tell the reader so.
+    #[serde(default, skip_serializing_if = "Markup::is_revisions")]
+    pub markup: Markup,
     /// The author, and the date as written into the document.
     pub stamp: Stamp,
     /// One result for each operation, in order.

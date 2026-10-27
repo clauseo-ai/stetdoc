@@ -142,7 +142,9 @@ fn make(args: &ReplaceArgs, doc: &Document, stamp: Stamp) -> Result<Made, Failur
             }
         })
         .collect();
-    let edit = find::shape(Edit::ops(Batch::new(doc.base(), ops), stamp), &args.find);
+    let markup = super::edit::markup(args.manual, args.manual_color);
+    let edit =
+        find::shape(Edit::ops(Batch::new(doc.base(), ops), stamp), &args.find).markup(markup);
     let head: Vec<String> = found
         .iter()
         .map(|(_, old, new, hits)| {

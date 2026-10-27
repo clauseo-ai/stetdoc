@@ -73,6 +73,7 @@ pub(super) fn insert(
         .then(|| target::quote_context(c.tx(), &anchor));
     // Each paragraph after the first goes after the one before it, so the run carries its neighbours.
     let mut run = InsertRun::default();
+    let mut made_all: Vec<BlockKey> = Vec::new();
     for paragraph in &op.paragraphs {
         let style = match &paragraph.style {
             Some(typed) => Some(style_id(c.tx(), typed)?),
@@ -102,8 +103,15 @@ pub(super) fn insert(
         })?;
         done.effects.push(effect);
         // Each next paragraph goes after the one before it, as repeated Enters would put it.
+        made_all.push(made.clone());
         at = made;
         place = Place::After;
+    }
+    // Manual markup underlines the new paragraphs, once they are all in.
+    for made in &made_all {
+        if let Some(effect) = super::manual::underline_new(c, cx, made, &mut done.marked)? {
+            done.effects.push(effect);
+        }
     }
     Ok(done)
 }

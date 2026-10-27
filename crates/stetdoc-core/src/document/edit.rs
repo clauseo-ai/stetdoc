@@ -81,7 +81,8 @@ impl Document {
         // 5. Apply.
         let cx = Context {
             stamp: &stamp,
-            tracked: edit.tracked,
+            tracked: edit.tracked && !edit.markup.is_manual(),
+            markup: edit.markup,
             quotes: edit.quotes,
             // An edit of files is planned in scalar values, and a UTF-16 count that the caller set is for batches (H11).
             unit: match edit.source {
@@ -127,7 +128,8 @@ impl Document {
             parts,
             base,
             dry_run,
-            tracked: edit.tracked,
+            tracked: edit.tracked && !edit.markup.is_manual(),
+            markup: edit.markup,
             stamp: shown.clone(),
             applied: &applied,
             format: &self.format,

@@ -4,7 +4,7 @@ use super::apply::{Made, Where, apply};
 use crate::cli::{EditArgs, OffsetsArg, QuotesArg};
 use crate::fsio;
 use crate::output::{Failure, Outcome};
-use stetdoc_core::{Batch, Edit, Limits, OffsetUnit, Quotes, Stamp};
+use stetdoc_core::{Batch, Edit, Limits, Markup, OffsetUnit, Quotes, Stamp};
 
 /// Runs `edit`.
 pub fn run(args: &EditArgs) -> Result<Outcome, Failure> {
@@ -17,6 +17,15 @@ pub fn run(args: &EditArgs) -> Result<Outcome, Failure> {
     apply(&at, &args.stamp, |_, stamp| {
         Ok(Made::plain(build(args, stamp)?))
     })
+}
+
+/// The markup that --manual and --manual-color ask for. --manual-color alone is enough.
+pub fn markup(manual: bool, color: bool) -> Markup {
+    match (manual, color) {
+        (_, true) => Markup::ManualColor,
+        (true, false) => Markup::Manual,
+        (false, false) => Markup::Revisions,
+    }
 }
 
 /// The `Edit` the flags and the batch ask for.
@@ -39,6 +48,7 @@ pub fn build(args: &EditArgs, stamp: Stamp) -> Result<Edit, Failure> {
     if args.no_track {
         edit = edit.untracked();
     }
+    edit = edit.markup(markup(args.manual, args.manual_color));
     let scope: Vec<String> = args
         .scope
         .iter()

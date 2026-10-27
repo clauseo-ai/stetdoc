@@ -275,6 +275,8 @@ stetdoc edit [OPTIONS] <INPUT>
 | `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused. A working copy needs no flag: an edit always writes it. |
 | `--no-track` | Write plain changes, not tracked ones. Only for documents that are not under review. |
+| `--manual` | Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not Track Changes. A deletion is struck text only, an insertion underlined text only. |
+| `--manual-color` | As --manual, with deleted text also red and new text also blue. |
 | `--dry-run` | Validate and show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
 | `--scope <REFS>` | Refuse the whole batch if it changes anything outside these refs and ranges, such as p12,p40..p60. |
 | `--quotes <QUOTES>` | Follow the paragraph's quotes (match), or keep them as typed. One of `match`, `as-typed`. Default `match`. |
@@ -361,6 +363,8 @@ stetdoc replace [OPTIONS] <INPUT> <OLD NEW> <OLD NEW>...
 | `<OLD NEW>` | OLD and NEW, as many pairs as you like, applied together or not at all. OLD is matched in the text as the final view reads it, across formatting, with curly and straight quotes the same; it must be there once (see --all and --expect). An empty NEW deletes OLD. Put -- before the pairs when a text starts with -. |
 | `--all` | Replace every occurrence of each OLD, and say how many. |
 | `--expect <N>` | Replace every occurrence of each OLD, and only if there are exactly N of each. |
+| `--manual` | Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not Track Changes. A deletion is struck text only, an insertion underlined text only. |
+| `--manual-color` | As --manual, with deleted text also red and new text also blue. |
 | `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
 | `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
 | `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |

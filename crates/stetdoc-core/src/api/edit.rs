@@ -2,7 +2,7 @@
 
 use super::batch::Batch;
 use super::files::ReadableFiles;
-use super::options::{OffsetUnit, Quotes};
+use super::options::{Markup, OffsetUnit, Quotes};
 use super::stamp::Stamp;
 
 /// Where the operations of an edit come from.
@@ -27,6 +27,7 @@ pub struct Edit {
     pub(crate) dry_run: bool,
     pub(crate) quotes: Quotes,
     pub(crate) unit: OffsetUnit,
+    pub(crate) markup: Markup,
 }
 
 impl Edit {
@@ -39,6 +40,7 @@ impl Edit {
             dry_run: false,
             quotes: Quotes::default(),
             unit: OffsetUnit::default(),
+            markup: Markup::default(),
         }
     }
 
@@ -56,6 +58,15 @@ impl Edit {
     #[must_use]
     pub fn untracked(mut self) -> Edit {
         self.tracked = false;
+        self
+    }
+
+    /// How the edit shows the text it changes. `Markup::Manual` and `Markup::ManualColor` write no revision: a `replace` or a
+    /// `delete` keeps the old text, struck through, and an insertion is underlined, as direct formatting; every other
+    /// operation applies untracked, and `split`, `merge` and `row`, which manual markup cannot show, are refused.
+    #[must_use]
+    pub fn markup(mut self, markup: Markup) -> Edit {
+        self.markup = markup;
         self
     }
 

@@ -229,6 +229,14 @@ pub struct EditArgs {
     /// Write plain changes, not tracked ones. Only for documents that are not under review.
     #[arg(long)]
     pub no_track: bool,
+    /// Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as
+    /// plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not
+    /// Track Changes. A deletion is struck text only, an insertion underlined text only.
+    #[arg(long)]
+    pub manual: bool,
+    /// As --manual, with deleted text also red and new text also blue.
+    #[arg(long)]
+    pub manual_color: bool,
     /// Validate and show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it.
     #[arg(long)]
     pub dry_run: bool,
@@ -295,6 +303,14 @@ pub struct ReplaceArgs {
     /// Replace every occurrence of each OLD, and only if there are exactly N of each.
     #[arg(long, value_name = "N")]
     pub expect: Option<u32>,
+    /// Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as
+    /// plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not
+    /// Track Changes. A deletion is struck text only, an insertion underlined text only.
+    #[arg(long)]
+    pub manual: bool,
+    /// As --manual, with deleted text also red and new text also blue.
+    #[arg(long)]
+    pub manual_color: bool,
     #[command(flatten)]
     pub find: FindArgs,
 }

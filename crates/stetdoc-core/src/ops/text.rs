@@ -4,6 +4,7 @@
 //! here touches the document by itself.
 
 use super::context::{Context, Done};
+use super::manual;
 use super::quotes;
 use super::target::{self, Within, warning};
 use crate::api::error::{ErrorCode, StetError};
@@ -12,6 +13,7 @@ use crate::api::options::Quotes;
 use crate::api::view::{Mode, Warning, WarningCode};
 use crate::refs::BaseToken;
 use crate::revisions::compiler::Compiler;
+use crate::revisions::outcome::Effect;
 use crate::state::Tx;
 use crate::wordml::{BlockKey, BlockKind, MARK_DELETED};
 
@@ -142,12 +144,12 @@ pub(super) fn replace(
         (&old, &op.with, before),
         &mut done.warnings,
     );
-    let effect = c.replace_text(&key, found.range, &with)?;
-    if effect.is_empty() {
+    let effects = manual::text(c, cx, &key, found.range, &with, &mut done.marked)?;
+    if effects.iter().all(Effect::is_empty) {
         done.warnings
             .push(no_change(c.tx(), &key, &format!("replace {}", op.r#ref)));
     }
-    done.effects.push(effect);
+    done.effects.extend(effects);
     Ok(done)
 }
 
@@ -170,7 +172,7 @@ pub(super) fn delete(
     };
     let (kind, _) = target::kind_of(c.tx(), &key)?;
     let mut done = Done::naming(&[&key]);
-    let effect = match kind {
+    let effects = match kind {
         BlockKind::Row => {
             return Err(invalid(format!(
                 "{} is a table row. Delete it with `row`, action delete.",
@@ -187,9 +189,11 @@ pub(super) fn delete(
                     ),
                 ));
             }
-            c.delete_block(&key)?
+            manual::delete_block(c, cx, &key, &op.r#ref, &mut done.marked)?
         }
-        BlockKind::Paragraph if within.is_whole() => c.delete_block(&key)?,
+        BlockKind::Paragraph if within.is_whole() => {
+            manual::delete_block(c, cx, &key, &op.r#ref, &mut done.marked)?
+        }
         BlockKind::Paragraph => {
             let para = target::paragraph(c.tx(), &key, &op.r#ref)?;
             let found = target::range(c.tx(), &para, &op.r#ref, &within, cx.unit)?;
@@ -201,14 +205,14 @@ pub(super) fn delete(
                     "`find` matched only after curly and straight quotes were treated as equal.",
                 ));
             }
-            c.replace_text(&key, found.range, "")?
+            manual::text(c, cx, &key, found.range, "", &mut done.marked)?
         }
     };
-    if effect.is_empty() {
+    if effects.iter().all(Effect::is_empty) {
         done.warnings
             .push(no_change(c.tx(), &key, &format!("delete {}", op.r#ref)));
     }
-    done.effects.push(effect);
+    done.effects.extend(effects);
     Ok(done)
 }
 
@@ -295,23 +299,42 @@ fn delete_through(
     let mut effects = Vec::new();
     // The first paragraph: whole when the range starts at 0, else its tail.
     if start == 0 {
-        effects.push(c.delete_block(first)?);
+        effects.extend(manual::delete_block(
+            c,
+            cx,
+            first,
+            &op.r#ref,
+            &mut done.marked,
+        )?);
     } else if start < p1.len {
-        effects.push(c.replace_text(first, start..p1.len, "")?);
+        effects.extend(manual::text(
+            c,
+            cx,
+            first,
+            start..p1.len,
+            "",
+            &mut done.marked,
+        )?);
     }
     // The paragraphs between go whole.
     for key in blocks.iter().skip(1).take(blocks.len().saturating_sub(2)) {
-        effects.push(c.delete_block(key)?);
+        effects.extend(manual::delete_block(
+            c,
+            cx,
+            key,
+            "a paragraph of the range",
+            &mut done.marked,
+        )?);
         done.targets.push(key.clone());
     }
     // The last: whole when the range reaches its end, else its head.
     if end >= p2.len {
-        effects.push(c.delete_block(&last)?);
+        effects.extend(manual::delete_block(c, cx, &last, to, &mut done.marked)?);
     } else if end > 0 {
-        effects.push(c.replace_text(&last, 0..end, "")?);
+        effects.extend(manual::text(c, cx, &last, 0..end, "", &mut done.marked)?);
     }
-    // What is left of the two ends is one paragraph.
-    if start > 0 && end < p2.len {
+    // What is left of the two ends is one paragraph. Manual markup keeps the struck text, so the two stay apart.
+    if start > 0 && end < p2.len && !cx.markup.is_manual() {
         effects.push(c.merge_blocks(first, &last)?);
     }
     if effects.iter().all(|e| e.is_empty()) {
@@ -349,16 +372,16 @@ fn delete_in_one(
         )));
     }
     let mut done = Done::naming(&[key]);
-    let effect = if start == 0 && end >= para.len {
-        c.delete_block(key)?
+    let effects = if start == 0 && end >= para.len {
+        manual::delete_block(c, cx, key, &op.r#ref, &mut done.marked)?
     } else {
-        c.replace_text(key, start..end, "")?
+        manual::text(c, cx, key, start..end, "", &mut done.marked)?
     };
-    if effect.is_empty() {
+    if effects.iter().all(Effect::is_empty) {
         done.warnings
             .push(no_change(c.tx(), key, &format!("delete {}", op.r#ref)));
     }
-    done.effects.push(effect);
+    done.effects.extend(effects);
     Ok(done)
 }
 

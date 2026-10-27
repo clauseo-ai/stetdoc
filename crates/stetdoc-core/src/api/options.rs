@@ -44,6 +44,33 @@ pub enum Quotes {
     AsTyped,
 }
 
+/// How an edit shows the text it changes.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum Markup {
+    /// Word revisions: tracked changes, or no marks at all for an untracked edit.
+    #[default]
+    Revisions,
+    /// Manual markup, for a reader who asked for a redline without Track Changes. Deleted text stays in the document, struck
+    /// through, and new text goes in underlined, as direct run formatting, and the edit writes no revision. The rest of the
+    /// edit is untracked.
+    Manual,
+    /// Manual markup in colour: deleted text is also red and new text also blue, the colours of a law firm's blackline.
+    ManualColor,
+}
+
+impl Markup {
+    /// True for `Revisions`, the default, which a receipt leaves out of its JSON.
+    pub fn is_revisions(&self) -> bool {
+        *self == Markup::Revisions
+    }
+
+    /// True for either kind of manual markup.
+    pub fn is_manual(&self) -> bool {
+        !self.is_revisions()
+    }
+}
+
 /// The unit that the offsets of a batch count.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Default, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]

@@ -388,6 +388,22 @@ export type Lookup = {
   text?: string;
 };
 
+/**
+ * One change of manual markup: the old text it struck through and the new text it underlined after it. Either may be empty:
+ * a deletion underlines nothing and an insertion strikes nothing.
+ */
+export type ManualMark = {
+  /** The ref of the paragraph, or none for a paragraph that a dry run shows as new. */
+  block?: string | null;
+  /** The old text, kept and struck through. */
+  struck: string;
+  /** The new text, underlined. */
+  underlined: string;
+};
+
+/** How an edit shows the text it changes. */
+export type Markup = "revisions" | "manual" | "manual_color";
+
 /** How tracked changes appear in a view. */
 export type Mode = "final" | "original" | "redline";
 
@@ -711,6 +727,8 @@ export type OpResult = {
   folded: FoldedEntry[];
   /** The zero-based index of the operation. */
   index: number;
+  /** With manual markup, what it struck through and underlined, in the order of the text. */
+  marked?: ManualMark[];
   /** Its name. */
   op: string;
   /** For an edit of files, the file and line it came from. */
@@ -816,6 +834,8 @@ export type Receipt = {
   comments: CommentEffect[];
   /** True for a dry run, which changed nothing. */
   dry_run: boolean;
+  /** How the edit showed the text it changed. Manual markup is direct formatting and no revision: tell the reader so. */
+  markup?: Markup;
   /** Moved paragraphs, which only compare lists. Empty for an edit. */
   moves: MoveEntry[];
   /** One result for each operation, in order. */

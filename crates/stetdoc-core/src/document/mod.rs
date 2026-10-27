@@ -194,6 +194,8 @@ mod tests_edit_files;
 #[cfg(test)]
 mod tests_edit_foreign;
 #[cfg(test)]
+mod tests_edit_manual;
+#[cfg(test)]
 mod tests_edit_ops;
 #[cfg(test)]
 mod tests_edit_props;

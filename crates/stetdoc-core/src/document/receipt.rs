@@ -10,7 +10,7 @@ use super::receipt_text;
 use crate::api::error::StetError;
 use crate::api::files::Origin;
 use crate::api::receipt::{
-    AuthorRevisions, CommentEffect as CommentEntry, FoldedEntry, OpResult, Receipt,
+    AuthorRevisions, CommentEffect as CommentEntry, FoldedEntry, ManualMark, OpResult, Receipt,
     RemovedOwnEntry, Resolution, ResolvedCount, Retired, Validation,
 };
 use crate::api::stamp::Stamp;
@@ -34,6 +34,8 @@ pub(super) struct Inputs<'a> {
     pub dry_run: bool,
     /// False for an untracked edit.
     pub tracked: bool,
+    /// How text changes show.
+    pub markup: crate::api::options::Markup,
     /// The author, and the date as written.
     pub stamp: Stamp,
     /// What the batch did.
@@ -314,6 +316,19 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
                 .iter()
                 .find(|(at, _)| *at == Some(index))
                 .map(|(_, e)| format!("c{}", e.id)),
+            marked: op
+                .marked
+                .iter()
+                .map(|m| ManualMark {
+                    block: i
+                        .names
+                        .get(&m.block)
+                        .cloned()
+                        .or_else(|| parts.ref_of(&m.block).map(|r| r.to_string())),
+                    struck: m.struck.clone(),
+                    underlined: m.underlined.clone(),
+                })
+                .collect(),
             warnings,
         });
     }
@@ -337,6 +352,7 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
         base: i.base.to_string(),
         dry_run: i.dry_run,
         tracked: i.tracked,
+        markup: i.markup,
         stamp: i.stamp.clone(),
         operations,
         revisions: AuthorRevisions::group(&infos),

@@ -28,6 +28,13 @@ released yet.
   places where the text is in another case. `Document::occurrences_ignoring_case` finds the same way.
 - `comment` takes `--all` and `--expect N`, one comment on each place, as `replace` does.
 
+- Manual markup: `stetdoc replace --manual` and `stetdoc edit --manual` keep the old text, struck through, and add the new
+  text underlined, as plain formatting with no tracked changes, for a reader who asks for a redline without Track
+  Changes. A deletion is struck text only and an insertion underlined text only. `--manual-color` also makes deleted
+  text red and new text blue. The MCP replace and edit tools take `manual` and `manual_color`, the core has
+  `Edit::markup(Markup::Manual)`, and the receipt says the markup is manual and lists what each operation struck and
+  underlined (`OpResult::marked`). `split`, `merge`, `row` and deleting a
+  table are refused in a manual edit.
 - An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
   cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
   and time per case, and arms to compare with no plugin or another plugin. See `docs/evals.md`.

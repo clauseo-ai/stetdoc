@@ -248,6 +248,10 @@ rejects the batch.
 or applied directly.
 *Avoid:* tracked mode (mode means view mode).
 
+**Manual markup.** An untracked edit that shows its text changes as direct formatting: the old
+text stays, struck through, and the new text is underlined, with no revision. What a reader
+means by a redline "without Track Changes".
+
 **Receipt.** The result of applying or checking a batch: what changed, where, as which
 revisions, the new state version, and warnings.
 

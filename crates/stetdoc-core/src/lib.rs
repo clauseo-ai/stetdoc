@@ -98,10 +98,10 @@ pub use api::op::{
     SetOp, SplitOp, StyleOp,
 };
 pub use api::op_spec::{FieldKind, FieldSpec, OPS, OpSpec};
-pub use api::options::{CompareOptions, OffsetUnit, OpenOptions, Quotes};
+pub use api::options::{CompareOptions, Markup, OffsetUnit, OpenOptions, Quotes};
 pub use api::receipt::{
-    AuthorRevisions, ChangeEntry, CheckResult, CommentEffect, FoldedEntry, MoveEntry, OpResult,
-    Receipt, RemovedOwnEntry, Resolution, ResolvedCount, Retired, Validation,
+    AuthorRevisions, ChangeEntry, CheckResult, CommentEffect, FoldedEntry, ManualMark, MoveEntry,
+    OpResult, Receipt, RemovedOwnEntry, Resolution, ResolvedCount, Retired, Validation,
 };
 pub use api::revision::{ChangeKind, RevisionInfo};
 pub use api::stamp::Stamp;

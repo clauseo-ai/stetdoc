@@ -4,7 +4,7 @@
 //! carried. It is deterministic and token-lean, and it lives in this one file so that the format experiments can change its
 //! wording without touching the data.
 
-use crate::api::receipt::{OpResult, Receipt};
+use crate::api::receipt::{ManualMark, OpResult, Receipt};
 use crate::api::revision::ChangeKind;
 
 /// What a change is called in a line of a receipt.
@@ -37,9 +37,41 @@ fn plural(n: usize, one: &str, many: &str) -> String {
     format!("{n} {}", if n == 1 { one } else { many })
 }
 
+/// The longest text a receipt line quotes of manual markup; the JSON has all of it.
+const QUOTED: usize = 60;
+
+/// A text quoted for a receipt line, cut in the middle when it is long.
+fn quoted(text: &str) -> String {
+    let n = text.chars().count();
+    if n <= QUOTED {
+        return format!("{text:?}");
+    }
+    let head: String = text.chars().take(QUOTED / 2).collect();
+    let tail: String = text.chars().skip(n - QUOTED / 2).collect();
+    format!("{:?}", format!("{head}…{tail}"))
+}
+
+/// One change of manual markup, in words: `p4: struck "thirty", underlined "sixty"`.
+fn marked(m: &ManualMark, with_block: bool) -> String {
+    let mut said = Vec::new();
+    if !m.struck.is_empty() {
+        said.push(format!("struck {}", quoted(&m.struck)));
+    }
+    if !m.underlined.is_empty() {
+        said.push(format!("underlined {}", quoted(&m.underlined)));
+    }
+    match m.block.as_ref().filter(|_| with_block) {
+        Some(block) => format!("{block}: {}", said.join(", ")),
+        None => said.join(", "),
+    }
+}
+
 /// What one operation did, in words.
-fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, tracked: bool) -> String {
+fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -> String {
+    let tracked = r.tracked;
     let mut parts: Vec<String> = comment.into_iter().collect();
+    let several = op.blocks.len() + op.added.len() > 1;
+    parts.extend(op.marked.iter().map(|m| marked(m, several)));
     parts.extend(op.revisions.iter().map(|c| match c.ids.first() {
         Some(id) => format!("{} #{id}", kind_word(c.kind)),
         None => kind_word(c.kind).to_string(),
@@ -103,7 +135,9 @@ fn comment_said(r: &Receipt, op: &OpResult) -> Option<String> {
 pub(super) fn compose(r: &Receipt) -> String {
     let mut out = String::new();
     let ops = plural(r.operations.len(), "operation", "operations");
-    let who = if r.tracked {
+    let who = if r.markup.is_manual() {
+        "as manual markup: old text kept and struck through, new text underlined, and no tracked changes. Each operation says what it struck and underlined; the text of a block below runs old and new together. Tell the reader this is a manual redline, not Track Changes".to_string()
+    } else if r.tracked {
         format!("tracked as {} {}", r.stamp.author, r.stamp.date)
     } else {
         "untracked".to_string()
@@ -139,7 +173,7 @@ pub(super) fn compose(r: &Receipt) -> String {
             "{} {}{at}{from}: {}\n",
             op.index,
             op.op,
-            summary(op, comment_said(r, op), r.dry_run, r.tracked)
+            summary(op, comment_said(r, op), r.dry_run, r)
         ));
     }
     for block in &r.blocks {

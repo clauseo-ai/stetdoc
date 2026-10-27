@@ -293,6 +293,7 @@ fn build_edit(request: EditRequest, limits: &Limits) -> Result<Edit, StetError> 
     if request.untracked {
         edit = edit.untracked();
     }
+    edit = edit.markup(request.markup);
     if !request.scope.is_empty() {
         edit = edit.scope(request.scope);
     }

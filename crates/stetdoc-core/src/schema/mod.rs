@@ -116,7 +116,8 @@
 //!   `xtask/src/codegen/supplement/rules.rs`, each entry with its reason and reference, and
 //!   generation stops when a rule matches nothing. The schema leaves the children of `w:rPr`
 //!   unordered, and Word writes them in the SDK's order, so a departure is
-//!   `ViolationKind::NonCanonicalOrder`, not a schema violation.
+//!   `ViolationKind::NonCanonicalOrder`, not a schema violation. The Open XML SDK validator counts it
+//!   as one, so `check` counts it too, and an edit must not add one (`check::keys`).
 //! - Files under `generated/` carry a header naming their generator and the pinned input, and
 //!   are never edited by hand. CI fails if they are stale or if the directory holds anything
 //!   else (`cargo xtask codegen --check`).

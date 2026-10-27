@@ -333,13 +333,6 @@ fn cases() -> Vec<Case> {
             codes: &[C::EmptyRevision],
         },
         Case {
-            name: "a run property out of canonical order",
-            clean: r#"<w:p><w:r><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#,
-            already: r#"<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#,
-            change: misordered_rpr_in_second_run,
-            codes: &[C::SchemaNonCanonicalOrder],
-        },
-        Case {
             name: "a revision id used twice",
             clean: r#"<w:p><w:ins w:id="1" w:author="a" w:date="2024-01-01T00:00:00Z"><w:r><w:t>a</w:t></w:r></w:ins></w:p><w:p><w:ins w:id="2" w:author="a" w:date="2024-01-01T00:00:00Z"><w:r><w:t>b</w:t></w:r></w:ins></w:p>"#,
             already: r#"<w:p><w:ins w:id="1" w:author="a" w:date="2024-01-01T00:00:00Z"><w:r><w:t>a</w:t></w:r></w:ins></w:p><w:p><w:ins w:id="1" w:author="a" w:date="2024-01-01T00:00:00Z"><w:r><w:t>b</w:t></w:r></w:ins></w:p><w:p><w:ins w:id="3" w:author="a" w:date="2024-01-01T00:00:00Z"><w:r><w:t>c</w:t></w:r></w:ins></w:p>"#,
@@ -373,6 +366,26 @@ fn v5_a_change_that_adds_a_finding_to_a_clean_unit_is_refused_and_one_that_adds_
             case.name
         );
     }
+}
+
+#[test]
+fn a_run_property_out_of_order_is_counted_so_another_copy_is_new_even_where_the_unit_had_one() {
+    // The Open XML SDK counts each out-of-order w:rPr as a schema error, and the compiler writes every container it creates in
+    // order, so one more than the origin had is new, whether or not the origin had the key.
+    let clean = said(
+        &state(r#"<w:p><w:r><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#),
+        misordered_rpr_in_second_run,
+    );
+    refused(&clean);
+    assert_eq!(clean.new, [C::SchemaNonCanonicalOrder]);
+    let one =
+        r#"<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#;
+    let another = said(&state(one), misordered_rpr_in_second_run);
+    refused(&another);
+    assert_eq!(another.new, [C::SchemaNonCanonicalOrder]);
+    // An edit that keeps the count carries the one that was there.
+    let kept = said(&state(one), |t| retext(t, 1, "edited"));
+    assert!(accepted(&kept).carried_total >= 1);
 }
 
 #[test]

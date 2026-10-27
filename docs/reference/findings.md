@@ -12,7 +12,7 @@
 | `schema_unexpected_child` | A known element that the content model does not allow in this parent. |
 | `schema_unknown_element` | An element in a namespace the schema does not know, which the part does not list in mc:Ignorable. |
 | `schema_out_of_order` | An element that is allowed in its parent but not after what precedes it, or a second copy of one that may occur once. |
-| `schema_non_canonical_order` | In a property container that the schema leaves unordered, a child is not in the order Word writes. |
+| `schema_non_canonical_order` | In a property container that the schema leaves unordered, a child is not in the order Word writes. Word reads it, and the Open XML SDK validator counts it as a schema error. |
 | `schema_missing_child` | The content of an element ends before a required child. |
 | `schema_must_understand` | mc:MustUnderstand names a namespace that Word does not understand. |
 | `schema_unexpected_text` | Character data in an element that has element-only content. |

@@ -156,6 +156,22 @@ impl<'s> Tx<'s> {
             .collect()
     }
 
+    /// The names of the staged trees this transaction edited that are clones of the base's trees, in part order: not a part
+    /// that `add_part` wrote or rewrote. A node of such a tree whose id is at least the base tree's `node_count` was made by the
+    /// transaction.
+    pub(crate) fn edited_clones(&self) -> Vec<Arc<str>> {
+        let fresh = |id: &PartId| {
+            self.added
+                .as_ref()
+                .is_some_and(|a| a.fresh.contains_key(id))
+        };
+        self.staged
+            .iter()
+            .filter(|(id, s)| s.changed() && !fresh(id))
+            .filter_map(|(id, _)| self.index.name(*id).cloned())
+            .collect()
+    }
+
     /// The generation of the set of parts: it moves with every call of `add_part`.
     pub(super) fn package_epoch(&self) -> u64 {
         self.base.package_epoch + self.added.as_ref().map_or(0, |a| a.calls)

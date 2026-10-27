@@ -7,31 +7,25 @@ use super::rules::scan_unit;
 use super::units::{Layout, Unit, UnitKind, layout_of};
 use crate::schema::{PartKind, ctx_at, validate_unit};
 use crate::xml::{NodeId, SpanTree};
-use std::collections::BTreeMap;
 
 /// What was found in one unit.
 #[derive(Debug, Default)]
 pub(super) struct Examined {
-    /// Every key, once.
+    /// Every key, with how many times it occurs.
     pub(super) keys: KeySet,
     /// The findings, in the order of the schema's report and then the Word rules' scan. A schema
     /// report lists at most `schema::MAX_DETAILS` of its violations, and the keys are complete.
     pub(super) found: Vec<Found>,
-    /// How many times each key occurs.
-    counts: BTreeMap<Key, usize>,
 }
 
 impl Examined {
     /// How many findings have this key.
     pub(super) fn instances(&self, key: &Key) -> usize {
-        self.counts.get(key).copied().unwrap_or(0)
+        self.keys.count(key)
     }
 
     fn count(&mut self, key: Key, n: usize) {
-        if n > 0 {
-            self.keys.insert(key.clone());
-            *self.counts.entry(key).or_default() += n;
-        }
+        self.keys.add(key, n);
     }
 }
 

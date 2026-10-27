@@ -106,7 +106,7 @@ finding_codes! {
     SchemaNonCanonicalOrder {
         wire: "schema_non_canonical_order",
         class: Violation,
-        doc: "In a property container that the schema leaves unordered, a child is not in the order Word writes.",
+        doc: "In a property container that the schema leaves unordered, a child is not in the order Word writes. Word reads it, and the Open XML SDK validator counts it as a schema error.",
     }
     SchemaMissingChild {
         wire: "schema_missing_child",

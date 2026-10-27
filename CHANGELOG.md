@@ -439,6 +439,13 @@ released yet.
 
 ### Fixed
 
+- A run that an edit creates or cuts off (new text, the rest of a split run, a comment's anchor, a new row, compare's
+  runs) gets its run properties in the order Word writes, even when the run it copies from has them out of order. Before,
+  each copy repeated the defect, and the Open XML SDK validator counted every copy as a new schema error (33 new errors
+  in one counter-redline of a credit support annex). The runs the document had keep their bytes, including the part of a
+  split run that stays where it was. `check` now counts a property out of the order Word writes
+  (`schema_non_canonical_order`) as a problem the edit added when a block has more of them than before; the ones the
+  input had are still reported as already there.
 - `stetdoc edit FILE.docx --dry-run` works with neither `-o` nor `--in-place`, so the two refusals no longer send an agent
   round in a loop. The MCP `edit` tool's `dry_run` takes the same path.
 - A missing input path is `not_found` with the message `view` gives, for every command that takes one (`replace`,

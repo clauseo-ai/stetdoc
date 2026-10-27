@@ -50,7 +50,11 @@ pub fn compare(
     check_format(&options.format)?;
     let stamp = RevStamp::new(&options.stamp.author, &options.stamp.date)?;
     let prepared = compare::prepare(original, revised, &options.limits, &stamp)?;
-    let compare::Redline { tx, receipt: rc } = compare::redline(&prepared, &stamp)?;
+    let compare::Redline {
+        mut tx,
+        receipt: rc,
+    } = compare::redline(&prepared, &stamp)?;
+    crate::revisions::canonical::order_created(&mut tx)?;
     let told = declared_of(&prepared, &tx, &rc)?;
     let verified = check::edit_located(&tx, &told.declared).map_err(|refusal| refusal.error)?;
     let (next, _committed) = tx.commit()?;

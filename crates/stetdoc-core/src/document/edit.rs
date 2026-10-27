@@ -95,6 +95,9 @@ impl Document {
             notes: &notes,
         };
         let applied = ops::apply(batch, &mut tx, &cx).map_err(|e| envelope.locate(e))?;
+        // Every property container the operations copied is written in the order Word writes, so a copy never repeats a
+        // defect of the order of its source.
+        crate::revisions::canonical::order_created(&mut tx)?;
         #[cfg(test)]
         super::tests_tamper::tamper(&mut tx);
         // 6. The scope guard, first pass: what the operations declared.

@@ -198,6 +198,8 @@ mod tests_edit_manual;
 #[cfg(test)]
 mod tests_edit_ops;
 #[cfg(test)]
+mod tests_edit_order;
+#[cfg(test)]
 mod tests_edit_props;
 #[cfg(test)]
 mod tests_edit_reject;

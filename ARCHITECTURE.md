@@ -308,13 +308,13 @@ reading" file to exist.
 |---|---|---|---|
 | `api` | The public data types and the error vocabulary | `StetError`, `ErrorCode`, `ExitClass`, and the types of the public interface | `api/error.rs` |
 | `package` | ZIP container, part access, package-level byte preservation | `Package::{open, part, replace_part, add_part, add_external_relationship, opened_len, write}` | `package/mod.rs` |
-| `xml` | Span tree; XML-level byte identity | `SpanTree::{parse, root, edit, serialize}` | `xml/tree.rs` |
+| `xml` | Span tree; XML-level byte identity | `SpanTree::{parse, root, edit, serialize, node_count, created_since}` | `xml/tree.rs` |
 | `schema` | Word's element order and value types (generated), where a new child goes, and the violation set | `Ctx::order_of`, `ctx_at`, `insert_in_order`, `reorder`, `validate_part`, `validate_subtree`, `validate_unit`, `unit_root`, `walk_unit`, `read_children`, `is_unit_boundary`, `in_taken_branch`, `taken_branch`, `disposition`, `PartKind::from_relationship_type` | `schema/mod.rs` |
 | `wordml` | What WordprocessingML means: stories, blocks, definitions, the text model and its character-to-XML map | `Story::{scan, refresh, paragraph, block, sections, anchors, revisions, num_facts, table_site}`, `BlockKey`, `stories`, `Rels`, `Paragraph::{text, map}`, `TextMap::{locate, gap, offset_of, find_all}`, `Joined`, `StyleDefs`, `NumberingDefs` | `wordml/text_model.rs` |
 | `styles` | The cascade and hidden-text rules | `Cascade::{effective, hidden, looks_hidden}` | `styles/cascade.rs` |
 | `numbering` | Clause numbers | `StoryNumbers::{build, clause_number, full_context, notes_at}` | `numbering/counters.rs` |
 | `refs` | Ref allocation, namespaces, base tokens, stability | `RefTable::{resolve, allocate, tombstone, rebind, merge, persist, restore}`, `BaseToken` | `refs/table.rs` |
-| `state` | Committed state, staging and derived caches | `State`, `PartsView`, `Tx::{part_mut, add_relationship, touch, retire, rebind, merge, commit, discard}`, `State::{cascade, numbers, opened_bytes, opened_source}`, `PartsView::{content_type, cascade, numbers, sites, site, cascade_deps, numbers_deps}`, `SiteHandle` | `state/mod.rs` |
+| `state` | Committed state, staging and derived caches | `State`, `PartsView`, `Tx::{part_mut, add_relationship, touch, retire, rebind, merge, edited_clones, commit, discard}`, `State::{cascade, numbers, opened_bytes, opened_source}`, `PartsView::{content_type, cascade, numbers, sites, site, cascade_deps, numbers_deps}`, `SiteHandle` | `state/mod.rs` |
 | `revisions` | Every revision shape Word writes; accept and reject | `Compiler::{replace_text, set_props, insert_block, delete_block, split_block, merge_blocks, insert_row, place_markers, …}`, `resolve(tx, &mut ChangeIndex, &[Step])`, `changes` | `revisions/mod.rs` |
 | `comments` | Writing comments and deleting notes | `add`, `reply`, `set_resolved`, `edit`, `delete`, `reconcile`, `delete_note` | `comments/add.rs` |
 | `threads` | Comments, threads, anchors and the consistency of the comment parts | `Threads::{of, comments, threads, comment, thread_of, covered_text, counts}`, `audit` | `threads/read.rs` |

@@ -20,7 +20,7 @@ use crate::schema::validate_part;
 use crate::state::{Dep, PartsView, Tx};
 use crate::wordml::BlockKey;
 use crate::xml::SpanTree;
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 use std::sync::Arc;
 
 /// How much of the work to do. The shortcuts are exact, which a test shows by running without
@@ -242,8 +242,34 @@ fn units(
             let listed = examined.found.iter().filter(|f| f.key == *key).count();
             verdict.new_total += examined.instances(key).saturating_sub(listed);
         }
-        for found in examined.found {
-            if new.contains(&found.key) {
+        // A counted key that the origin has is new in the instances past the origin's count: the
+        // later ones in the unit, since which copy is the extra one cannot be told.
+        let mut seen: BTreeMap<&Key, usize> = BTreeMap::new();
+        let extra: Vec<bool> = examined
+            .found
+            .iter()
+            .map(|f| {
+                if new.contains(&f.key) || !f.key.is_counted() {
+                    return false;
+                }
+                let n = seen.entry(&f.key).or_insert(0);
+                *n += 1;
+                *n > allowed.count(&f.key)
+            })
+            .collect();
+        for key in examined
+            .keys
+            .iter()
+            .filter(|k| k.is_counted() && !new.contains(k))
+        {
+            let excess = examined.instances(key).saturating_sub(allowed.count(key));
+            let listed = seen
+                .get(key)
+                .map_or(0, |n| n.saturating_sub(allowed.count(key)));
+            verdict.new_total += excess.saturating_sub(listed);
+        }
+        for (found, extra) in examined.found.into_iter().zip(extra) {
+            if extra || new.contains(&found.key) {
                 verdict.add_new(Some(at), found);
             } else {
                 verdict.carry(Some(at), found);

@@ -141,7 +141,7 @@ fn reorder_into(
 }
 
 /// After a removal from a property container: puts the children in schema order if they are not.
-fn restore_order(tree: &mut SpanTree, container: NodeId) -> Result<(), StetError> {
+pub(super) fn restore_order(tree: &mut SpanTree, container: NodeId) -> Result<(), StetError> {
     let ctx = ctx_of(tree, container);
     if let Some(order) = reorder(ctx, &*tree, container, None) {
         let identity = order.iter().enumerate().all(|(i, e)| *e == Some(i));
@@ -197,7 +197,7 @@ pub(super) fn apply_edit(
 }
 
 /// The canonical form of an element: its name, its attributes in order of name, and its children.
-fn canon(n: &NodeRef<'_>) -> String {
+pub(super) fn canon(n: &NodeRef<'_>) -> String {
     let mut attrs: Vec<String> = n
         .attrs()
         .filter(|a| !a.is_namespace_declaration())

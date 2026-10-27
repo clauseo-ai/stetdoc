@@ -3,7 +3,7 @@
 //! **Owns.** The span tree: parsing, nodes that record byte spans in the part's original bytes,
 //! dirty tracking, the serializer and namespaces. Only this module serializes XML.
 //!
-//! **Interface.** `SpanTree::{parse, root, edit, serialize, edit_count}`. `parse` takes the part's name, which
+//! **Interface.** `SpanTree::{parse, root, edit, serialize, edit_count, node_count, created_since}`. `parse` takes the part's name, which
 //! starts every error message. `root`, `document` and `node_ref` give a `NodeRef`, which reads names,
 //! namespaces, attributes, text, children and siblings. `edit` returns an `Editor` with the changes:
 //! attributes, text, new elements, insert, detach, clone, and `bind_namespace`. `Bytes` is the

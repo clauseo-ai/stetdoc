@@ -9,7 +9,7 @@
 //! delete_block_with_mark, split_block, merge_blocks, insert_row, new_list_instance, place_markers,
 //! place_markers_beside, remove_markers, remove_markers_in_part, parts_mut, tracked,
 //! remove_unreferenced_notes, finish}`, and for compare `redline_paragraph`, `mark_inserted`, `place_deleted`,
-//! `set_snapshot`, `add_deleted_note`, `split_block_untracked` and `import_writer` (design `compare.md`, 6.1 and 20)
+//! `set_snapshot`, `add_deleted_note`, `split_block_untracked` and `import_writer`, and `canonical::order_created` (design `compare.md`, 6.1 and 20)
 //! over a `Tx`, with `Track`,
 //! `RevStamp`, `Effect` and `Outcome`; `resolve(tx, &mut ChangeIndex, &[Step])`;
 //! `changes(story, tree, range)`; `notes::remove_unreferenced_notes`; and `diff::edits`.
@@ -28,7 +28,10 @@
 //! - Every copy of properties, a run or a row loses its change-tracking elements and its section break. The
 //!   only exception is the halves of a carve, which keep a pending change under a new id.
 //! - Every child written into a property container goes through `schema::insert_in_order`, and every
-//!   removal is followed by `schema::reorder`.
+//!   removal is followed by `schema::reorder`. Every property container a transaction created (a copy of a
+//!   run's `w:rPr`, a cut run's, a row's, an imported one) is put in schema order before the transaction is
+//!   checked (`canonical::order_created`, which `document` calls), so a copy never repeats a defect of the order
+//!   of its source; a container the transaction did not create keeps its bytes.
 //! - Text with white space at an end says `xml:space="preserve"` unless an ancestor does (XML inherits it), and a text edit
 //!   never deletes a note's own number.
 //! - A replace is the word-level difference, cleaned, deletion before insertion, applied right to left over
@@ -53,6 +56,7 @@
 mod blocks;
 mod blocks_delete;
 mod blocks_insert;
+pub(crate) mod canonical;
 mod carve;
 pub(crate) mod changes;
 mod changes_marks;

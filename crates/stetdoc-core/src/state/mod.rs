@@ -7,7 +7,7 @@
 //! (with `content_type`),
 //! and `Tx::{part_mut, add_part, add_relationship, resolve, touch, retire, rebind, merge, mint_id,
 //! next_annotation_id, minted_annotation_ids, note_copied_annotation_id, copied_annotation_ids,
-//! commit, discard}`.
+//! changed_parts, edited_clones, commit, discard}`.
 //! `cascade` and `numbers` are cached accessors over `PartsView::derived` (`cascade.rs`), with
 //! `PartsView::{cascade_deps, numbers_deps}` as the lists they are cached under and `PartsView::{sites,
 //! site}` for the sites the cascade answers questions about (`sites.rs`).

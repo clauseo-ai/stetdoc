@@ -332,8 +332,8 @@ fn a_receipt_counts_the_problems_already_there_and_check_all_lists_them() {
     );
     assert!(!all.contains("more;"), "{all}");
 
-    // The edited paragraph's problem is carried, once for each run the edit splits it into: one line counts them, and
-    // none is listed.
+    // The edited paragraph's problem is carried once: the runs the edit splits off get their properties in order, so only
+    // the run the paragraph had keeps it. One line counts it, and none is listed.
     let batch = format!(
         "base: {}\n---\n@replace\nref: p1\nfind: text\nwith: words\n",
         base(cwd, "faulty.docx")
@@ -347,7 +347,7 @@ fn a_receipt_counts_the_problems_already_there_and_check_all_lists_them() {
     let receipt = text(&out.stdout);
     assert!(
         receipt.contains(
-            "checked 1 unit. 4 problems were already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
+            "checked 1 unit. 1 problem was already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
         ),
         "{receipt}"
     );

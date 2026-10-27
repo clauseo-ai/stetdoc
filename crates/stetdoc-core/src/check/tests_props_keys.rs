@@ -1,7 +1,8 @@
 //! A violation in a property container keeps its key wherever the container stands in the unit:
 //! the compiler copies a paragraph mark's `w:rPr` onto a new run and a `w:pPr` into the snapshot of
 //! a `w:pPrChange`, and a copy of a defect the unit had is carried (tdf91095, pandoc
-//! `trim_last_inline`, docxplate `issue.48`, officeimo Hamlet). A defect that is new is still new.
+//! `trim_last_inline`, docxplate `issue.48`, officeimo Hamlet). A defect that is new is still new, and a
+//! counted one (`schema_non_canonical_order`) is new when the unit has more of it than before.
 
 use super::tests::state;
 use super::tests_edit::{accepted, append, el, el_with, insert_first, nth, refused, said};
@@ -46,9 +47,13 @@ fn snapshot_ppr(t: &mut SpanTree) {
 }
 
 #[test]
-fn a_copy_of_the_marks_repeated_property_onto_a_run_is_carried() {
+fn a_verbatim_copy_of_the_marks_repeated_property_onto_a_run_is_new() {
+    // A repeat is `schema_non_canonical_order`, which is counted: the compiler drops an exact repeat from every container it
+    // creates (`revisions::canonical`), so a copy that keeps it adds one.
     let s = state(MARK_TWICE);
-    accepted(&said(&s, copy_mark_onto_run));
+    let said = said(&s, copy_mark_onto_run);
+    refused(&said);
+    assert_eq!(said.new, [C::SchemaNonCanonicalOrder], "{:?}", said.new);
 }
 
 #[test]

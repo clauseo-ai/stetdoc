@@ -125,10 +125,11 @@ fn a_moved_paragraph_is_listed_as_a_move_with_its_refs() {
 
 #[test]
 fn a_problem_of_the_originals_content_is_carried_into_the_redline() {
-    // The original's second paragraph has its run properties out of order, and the revised document deletes it: the redline holds a
-    // deleted copy with the problem, which was already there.
+    // The original's second paragraph has a run size that is not a number, and the revised document deletes it: the redline
+    // holds a deleted copy with the problem, which was already there. (A property out of order would not do: compare writes the
+    // copy's properties in order.)
     let faulty = format!(
-        "<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>",
+        "<w:p><w:r><w:rPr><w:sz w:val=\"big\"/></w:rPr><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>",
         long(2)
     );
     let a = Pkg::new(&format!("{}{faulty}{}", p(&long(1)), p(&long(3)))).bytes();
@@ -140,12 +141,13 @@ fn a_problem_of_the_originals_content_is_carried_into_the_redline() {
 
 const NORMAL: &str = r#"<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style>"#;
 
-/// A style whose `w:basedOn` comes before its `w:name`, out of the schema's order.
-const MISORDERED: &str = r#"<w:style w:type="paragraph" w:styleId="Quote"><w:basedOn w:val="Normal"/><w:name w:val="Quote"/></w:style>"#;
+/// A style whose `w:uiPriority` is not a number. (A definition out of the schema's order would not do: compare writes the copy
+/// it imports in order.)
+const MISORDERED: &str = r#"<w:style w:type="paragraph" w:styleId="Quote"><w:name w:val="Quote"/><w:basedOn w:val="Normal"/><w:uiPriority w:val="high"/></w:style>"#;
 
 #[test]
 fn an_imported_definition_and_a_copied_part_keep_the_problems_they_had() {
-    // The deleted paragraph uses a style that only the original has, and the style's definition is out of order.
+    // The deleted paragraph uses a style that only the original has, and the style's definition has a bad value.
     let quoted = format!(
         "<w:p><w:pPr><w:pStyle w:val=\"Quote\"/></w:pPr><w:r><w:t xml:space=\"preserve\">{}</w:t></w:r></w:p>",
         long(2)

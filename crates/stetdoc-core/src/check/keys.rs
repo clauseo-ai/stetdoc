@@ -3,13 +3,15 @@
 //! A schema violation has a `ViolationKey`. A Word rule, a package rule or a finding of the
 //! comment audit has a code and a subject: an element, an id, a name. A [`KeySet`] holds both
 //! kinds, and "no new violations" is `after.added_since(&before)` being empty. Counts play no
-//! part in the comparison: splitting a run clones its properties, and counting would refuse the
-//! clone of a problem the run already had.
+//! part in that comparison: splitting a run clones its properties, and counting would refuse the
+//! clone of a problem the run already had. The exception is a counted key ([`Key::is_counted`]):
+//! a child of a property container out of the order Word writes, which the compiler never copies
+//! (`revisions::canonical`), and which the Open XML SDK counts as a schema error each time.
 
 use crate::api::check::FindingCode;
 use crate::schema::{ViolationKey, ViolationKind, ViolationSet};
 use std::borrow::Cow;
-use std::collections::BTreeSet;
+use std::collections::BTreeMap;
 
 /// The elements the compiler renames and keeps the content of, with the name they had before:
 /// `w:t` becomes `w:delText` and `w:instrText` becomes `w:delInstrText` when a run is deleted, and
@@ -112,6 +114,16 @@ impl Key {
         })
     }
 
+    /// Whether an edit adds this problem when a unit has it more times than its origin, and not only
+    /// when the origin lacks it: a child of a property container that is not in the order Word
+    /// writes (`schema_non_canonical_order`). Word reads any order, but the Open XML SDK validator
+    /// counts every such container as a schema error, so a copy of one is a new error to it. The
+    /// compiler writes every container it creates in order (`revisions::canonical`), so a unit
+    /// never has more than its origin had.
+    pub(crate) fn is_counted(&self) -> bool {
+        matches!(self, Key::Schema(key) if key.kind == ViolationKind::NonCanonicalOrder)
+    }
+
     /// The key of a rule about `subject`.
     pub(crate) fn rule(code: FindingCode, subject: impl Into<String>) -> Key {
         Key::Rule {
@@ -147,24 +159,44 @@ pub(crate) fn schema_code(kind: ViolationKind) -> FindingCode {
     }
 }
 
-/// A set of keys, in key order so that anything made from it is the same every time.
+/// A set of keys, in key order so that anything made from it is the same every time, each with
+/// how many times it occurs. Membership is the test of "no new violations" for every key but a
+/// counted one ([`Key::is_counted`]), whose count is the test.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
-pub(crate) struct KeySet(BTreeSet<Key>);
+pub(crate) struct KeySet(BTreeMap<Key, usize>);
 
 impl KeySet {
-    /// The keys of a schema report.
+    /// The keys of a schema report, with their counts.
     pub(crate) fn of_schema(set: &ViolationSet) -> KeySet {
-        set.iter().map(|(key, _)| Key::schema(key)).collect()
+        let mut keys = KeySet::default();
+        for (key, n) in set.iter() {
+            keys.add(Key::schema(key), n as usize);
+        }
+        keys
     }
 
-    /// Adds a key. True if it was not there.
+    /// Adds one occurrence of a key. True if it was not there.
     pub(crate) fn insert(&mut self, key: Key) -> bool {
-        self.0.insert(key)
+        let n = self.0.entry(key).or_insert(0);
+        *n += 1;
+        *n == 1
+    }
+
+    /// Adds `n` occurrences of a key; none when `n` is 0.
+    pub(crate) fn add(&mut self, key: Key, n: usize) {
+        if n > 0 {
+            *self.0.entry(key).or_insert(0) += n;
+        }
     }
 
     /// Whether the key is in the set.
     pub(crate) fn contains(&self, key: &Key) -> bool {
-        self.0.contains(key)
+        self.0.contains_key(key)
+    }
+
+    /// How many times the key occurs.
+    pub(crate) fn count(&self, key: &Key) -> usize {
+        self.0.get(key).copied().unwrap_or(0)
     }
 
     /// How many keys there are.
@@ -179,31 +211,41 @@ impl KeySet {
 
     /// The keys, in order.
     pub(crate) fn iter(&self) -> impl Iterator<Item = &Key> {
-        self.0.iter()
+        self.0.keys()
     }
 
-    /// The keys that are here and not in `before`: the test of "no new violations".
+    /// The keys that are here and not in `before`: the test of "no new violations" for a key
+    /// that is not counted.
     pub(crate) fn added_since(&self, before: &KeySet) -> Vec<Key> {
         self.0
-            .iter()
+            .keys()
             .filter(|k| !before.contains(k))
             .cloned()
             .collect()
     }
 
-    /// The keys of both. The origin of a block that several blocks were merged into.
+    /// The keys of both, counts added. The origin of a block that several blocks were merged into
+    /// holds what each of them held.
     pub(crate) fn union(&self, other: &KeySet) -> KeySet {
-        KeySet(self.0.union(&other.0).cloned().collect())
+        let mut keys = self.clone();
+        keys.extend(other);
+        keys
     }
 
-    /// Adds the keys of `other`.
+    /// Adds the keys of `other`, counts added.
     pub(crate) fn extend(&mut self, other: &KeySet) {
-        self.0.extend(other.0.iter().cloned());
+        for (key, n) in &other.0 {
+            self.add(key.clone(), *n);
+        }
     }
 }
 
 impl FromIterator<Key> for KeySet {
     fn from_iter<I: IntoIterator<Item = Key>>(iter: I) -> KeySet {
-        KeySet(iter.into_iter().collect())
+        let mut keys = KeySet::default();
+        for key in iter {
+            keys.insert(key);
+        }
+        keys
     }
 }

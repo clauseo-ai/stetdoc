@@ -276,6 +276,20 @@ impl SpanTree {
         NodeRef { tree: self, id }
     }
 
+    /// How many nodes the tree has made, detached ones included. A clone starts at the count of
+    /// the tree it was cloned from.
+    pub fn node_count(&self) -> usize {
+        self.nodes.len()
+    }
+
+    /// The nodes made since the tree had `count` nodes ([`SpanTree::node_count`]), detached ones
+    /// included: ids only grow. Creating and cloning make nodes; moving and detaching do not.
+    pub fn created_since(&self, count: usize) -> impl Iterator<Item = NodeId> + '_ {
+        let end = u32::try_from(self.nodes.len()).unwrap_or(u32::MAX);
+        let start = u32::try_from(count).unwrap_or(u32::MAX);
+        (start..end).map(NodeId)
+    }
+
     /// True if any edit has been made.
     pub fn is_dirty(&self) -> bool {
         self.node(0).flags & F_SUBTREE_DIRTY != 0

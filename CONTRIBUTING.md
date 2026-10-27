@@ -287,6 +287,14 @@ and a line in the list in `bench/mod.rs`; ARCHITECTURE.md says which rows to tou
 no clock, so the clock, the inputs, the budgets and the table are in `stetdoc_testkit::bench`.
 [Decision 0003](docs/decisions/0003-benchmarks.md) says why it is built this way.
 
+### Evals of the Claude Code plugin
+
+`evals/run.sh` runs Claude Code with the plugin on real contracts (read, redline, comment, accept and reject, compare,
+a rename throughout, chained edits, a colleague's edit between turns, and stetdoc missing) and grades the documents
+it writes with stetdoc itself. It records turns, tokens, cost and time per case, so it is also the benchmark for a
+change to the CLI, the skill or the MCP server. Every run costs money (about $10 for the full suite), so it is not part
+of the check. [docs/evals.md](docs/evals.md) says how to run it and read the results.
+
 ## Review
 
 Every merge is reviewed before it lands. For work done by agents, the reviewer is a

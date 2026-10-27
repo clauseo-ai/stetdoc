@@ -1,0 +1,5 @@
+{
+  "name": "stetdoc-eval-no-plugin",
+  "version": "0.0.0",
+  "description": "Eval only: an empty plugin, the arm with no stetdoc plugin loaded. The stetdoc command stays on PATH."
+}

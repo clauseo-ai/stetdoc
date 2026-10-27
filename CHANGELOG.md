@@ -9,6 +9,9 @@ released yet.
 
 ### Added
 
+- An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
+  cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
+  and time per case, and arms to compare with no plugin or another plugin. See `docs/evals.md`.
 - `stetdoc view --find TEXT --range p40..p60` looks only in that range, in the CLI and the MCP view tool. A find pages like
   a range, and its position line counts the matches: `find "days": 44 matches in 38 blocks, showing 1..9`.
 - `stetdoc view --revisions --find TEXT` lists only the changes whose inserted or deleted text contains it, and

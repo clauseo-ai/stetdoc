@@ -1,0 +1,5 @@
+{
+  "name": "stetdoc-eval-harness",
+  "version": "0.0.0",
+  "description": "Eval only, never published: when the agent stops, writes .stetdoc-eval-report.txt in the workspace for the eval graders to read."
+}

@@ -1,0 +1,5 @@
+# name	sha256	path in harveyai/harvey-labs (MIT) at the commit corpus/sources.tsv pins
+credit-agreement	7bc285a3d60f0b8c7bf5d499529cba20bdbbc8f8e183decf575f22fae519f595	tasks/banking-finance/extract-conditions-precedent-from-credit-agreement/documents/credit-agreement.docx
+isda-confirmation-v1	3e029fb822b9c2a18d162caab8b8a1f3bfc9f9895fe06ef2a4ffad1f59d677fd	tasks/contracts/banking/isda-confirmation-term-negotiation/documents/tidemark-draft-confirmation.docx
+isda-confirmation-v2	0c32b671c703a5d8d7c9797fa94ca4dd18a1f1c4df2c28b290aec02da7dbddaa	tasks/contracts/banking/isda-confirmation-term-negotiation/documents/greenleaf-marked-confirmation.docx
+master-supply-agreement	9cdbabb37dc5e31b457c0b55b2e72410f4c79558b61e761d919cc02c05560268	tasks/arbitration-international-dispute-resolution/draft-statement-of-defense/documents/master-supply-agreement.docx

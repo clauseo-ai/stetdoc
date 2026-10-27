@@ -21,7 +21,7 @@ violations() {
   local out
   out=$(stetdoc check "$1" 2>&1) || { echo -1; return; }
   if grep -q '^Validation: no violations' <<<"$out"; then echo 0; else
-    sed -n 's/^Validation: \([0-9][0-9]*\) violations.*/\1/p' <<<"$out" | head -1
+    sed -n 's/^Validation: \([0-9][0-9]*\) violation.*/\1/p' <<<"$out" | head -1
   fi
 }
 
@@ -72,7 +72,7 @@ if [ -n "${EVAL_STETDOC_METRICS:-}" ]; then echo "$m" >> "$EVAL_STETDOC_METRICS"
     [ -n "$before" ] && [ "$before" = "$(sha256 "$f")" ] && continue
     echo
     echo "== $f"
-    v=$(violations "$f")
+    v=$(violations "$f"); v=${v:--1}
     if [ "$v" -ge 0 ] && [ "$v" -le "$worst" ]; then echo "valid: yes"; else echo "valid: no"; fi
     echo "violations: $v (inputs at most $worst)"
     ledger=$(stetdoc view "$f" --revisions --full --all 2>&1)

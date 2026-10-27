@@ -719,6 +719,14 @@ checked 3 units. 2 problems were already in the input, and no new one was added:
 A dry run says `dry run: nothing was applied. A new block has no ref until the edit is applied`, shows each new block as new with its anchor, and shows the rest as the real edit
 would. Its base is the current one, so the next batch can use it. An untracked edit says so and lists no revisions.
 
+The text is capped at about 11,000 bytes (`TEXT_CAP`), so that it fits in an agent's tool output whatever the size of the batch. A text that
+would be longer lists the operations that fit in 2,000 bytes, then `and N more operations, not listed here to keep this short`, with their
+numbers, the JSON receipt and `stetdoc view FILE --revisions` as the places to find them. It shows the blocks that fit in what is left, then
+`and N more blocks not shown here, from pK on`, which counts the 200-block cap's overflow too, with `stetdoc view FILE --range pK` and
+`stetdoc view FILE --revisions --context 1`. The head line, the warnings and what `check` said are always whole, and a block is never cut,
+so a receipt whose first block is longer than the cap is longer too. The cap reads the lengths of the strings the text is built from and
+adds no pass over the document. A compare receipt caps its moves the same way. The JSON is unchanged.
+
 ## 5. The working copy
 
 ### 5.1 Layout

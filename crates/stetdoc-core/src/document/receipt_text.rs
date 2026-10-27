@@ -1,8 +1,9 @@
 //! `Receipt.text`: the form an agent reads (design `document-and-ops.md` 4.3).
 //!
 //! A head line, one line for each operation, the blocks as the readable file will hold them, then the warnings and what `check`
-//! carried. It is deterministic and token-lean, and it lives in this one file so that the format experiments can change its
-//! wording without touching the data.
+//! carried. A text that would be longer than `TEXT_CAP` lists only the first operations and blocks and says where the rest are.
+//! It is deterministic and token-lean, and it lives in this one file so that the format experiments can change its wording
+//! without touching the data.
 
 use crate::api::receipt::{ManualMark, OpResult, Receipt};
 use crate::api::revision::ChangeKind;
@@ -131,9 +132,34 @@ fn comment_said(r: &Receipt, op: &OpResult) -> Option<String> {
     Some(format!("{id} {}", entry.action))
 }
 
-/// The text of a receipt.
-pub(super) fn compose(r: &Receipt) -> String {
-    let mut out = String::new();
+/// The most bytes the text of a receipt holds. A receipt that would be longer lists the first operations, shows the first blocks
+/// that fit and says how many it left out and where they are, so that it fits in an agent's tool output whatever the size of
+/// the batch. The head line, the warnings and what `check` said are always whole. A single block is never cut, so a receipt
+/// whose one block is longer than this is longer too. The JSON has every operation and up to 200 blocks.
+pub(super) const TEXT_CAP: usize = 11_000;
+
+/// The most bytes the operation lines take in a receipt that is cut, so that the blocks keep most of the room.
+const OPS_CAP: usize = 2_000;
+
+/// Room kept for the lines that say what a cut receipt left out.
+const LEFT_OUT_ROOM: usize = 600;
+
+/// How many of `items`, from the first, fit in `budget` bytes: at least one, when there is one.
+fn fitting(items: &[String], budget: usize) -> usize {
+    let mut used = 0;
+    let mut n = 0;
+    for item in items {
+        used += item.len();
+        if used > budget && n > 0 {
+            break;
+        }
+        n += 1;
+    }
+    n
+}
+
+/// The head line of a receipt: what was applied, how it was marked, and the base.
+fn head(r: &Receipt) -> String {
     let ops = plural(r.operations.len(), "operation", "operations");
     let who = if r.markup.is_manual() {
         "as manual markup: old text kept and struck through, new text underlined, and no tracked changes. Each operation says what it struck and underlined; the text of a block below runs old and new together. Tell the reader this is a manual redline, not Track Changes".to_string()
@@ -143,55 +169,132 @@ pub(super) fn compose(r: &Receipt) -> String {
         "untracked".to_string()
     };
     if r.dry_run {
-        out.push_str(&format!(
+        format!(
             "dry run: nothing was applied. A new block has no ref until the edit is applied. {ops}, {who}. base {}\n",
             r.base
-        ));
+        )
     } else if r.operations.iter().any(|o| o.changed) {
-        out.push_str(&format!("applied {ops}, {who}. base {}\n", r.base));
+        format!("applied {ops}, {who}. base {}\n", r.base)
     } else {
-        out.push_str(&format!(
+        format!(
             "applied {ops}, and none changed the document. base {}\n",
             r.base
-        ));
+        )
     }
-    for op in &r.operations {
-        let mut named: Vec<&str> = op.blocks.iter().map(String::as_str).collect();
-        named.extend(op.added.iter().map(String::as_str));
-        let at = if named.is_empty() {
-            String::new()
-        } else {
-            format!(" {}", named.join(", "))
-        };
-        // An edit of files says which line the operation came from, which is what the agent wrote.
-        let from = op
-            .origin
-            .as_ref()
-            .map(|o| format!(" ({} line {})", o.file, o.line))
-            .unwrap_or_default();
-        out.push_str(&format!(
-            "{} {}{at}{from}: {}\n",
-            op.index,
-            op.op,
-            summary(op, comment_said(r, op), r.dry_run, r)
-        ));
-    }
-    for block in &r.blocks {
-        if block.r#ref.is_none() {
-            match &block.anchor {
-                Some(anchor) => out.push_str(&format!("new, after {anchor}:\n")),
-                None => out.push_str("new:\n"),
-            }
+}
+
+/// The line of one operation.
+fn op_line(r: &Receipt, op: &OpResult) -> String {
+    let mut named: Vec<&str> = op.blocks.iter().map(String::as_str).collect();
+    named.extend(op.added.iter().map(String::as_str));
+    let at = if named.is_empty() {
+        String::new()
+    } else {
+        format!(" {}", named.join(", "))
+    };
+    // An edit of files says which line the operation came from, which is what the agent wrote.
+    let from = op
+        .origin
+        .as_ref()
+        .map(|o| format!(" ({} line {})", o.file, o.line))
+        .unwrap_or_default();
+    format!(
+        "{} {}{at}{from}: {}\n",
+        op.index,
+        op.op,
+        summary(op, comment_said(r, op), r.dry_run, r)
+    )
+}
+
+/// The lines of one block, as the readable file will hold it.
+fn block_lines(block: &crate::api::files::RenderedBlock) -> String {
+    let mut out = String::new();
+    if block.r#ref.is_none() {
+        match &block.anchor {
+            Some(anchor) => out.push_str(&format!("new, after {anchor}:\n")),
+            None => out.push_str("new:\n"),
         }
-        out.push_str(block.text.trim_end_matches('\n'));
-        out.push('\n');
     }
-    if r.blocks_omitted > 0 {
-        let n = r.blocks_omitted;
-        let word = if n == 1 { "block" } else { "blocks" };
-        out.push_str(&format!("and {n} more {word}.\n"));
+    out.push_str(block.text.trim_end_matches('\n'));
+    out.push('\n');
+    out
+}
+
+/// The line that says which operations a cut receipt did not list.
+fn ops_left_out(r: &Receipt, shown: usize) -> String {
+    let left = r.operations.len().saturating_sub(shown);
+    let first = r.operations.get(shown).map_or(0, |o| o.index);
+    let last = r.operations.last().map_or(0, |o| o.index);
+    let range = if left == 1 {
+        format!("operation {first} is")
+    } else {
+        format!("operations {first} to {last} are")
+    };
+    format!(
+        "and {}, not listed here to keep this short: {range} in the JSON receipt (--json), and `stetdoc view FILE --revisions` lists the revisions in the document, a page at a time.\n",
+        plural(left, "more operation", "more operations")
+    )
+}
+
+/// The line that says how many blocks a receipt did not show, and which command shows them.
+fn blocks_left_out(r: &Receipt, shown: usize) -> String {
+    let left = r.blocks.len().saturating_sub(shown) + r.blocks_omitted as usize;
+    let from = r.blocks.iter().skip(shown).find_map(|b| b.r#ref.as_deref());
+    let after = r
+        .blocks
+        .iter()
+        .take(shown)
+        .rev()
+        .find_map(|b| b.r#ref.as_deref());
+    let range = match (from, after) {
+        (Some(from), _) => format!(
+            ", from {from} on: `stetdoc view FILE --range {from}` shows the blocks from {from}, and"
+        ),
+        (None, Some(after)) => format!(
+            ", after {after}: `stetdoc view FILE --range {after}` shows the blocks from {after}, and"
+        ),
+        (None, None) => ":".to_string(),
+    };
+    format!(
+        "and {} not shown here{range} `stetdoc view FILE --revisions --context 1` shows every changed block, a page at a time.\n",
+        plural(left, "more block", "more blocks")
+    )
+}
+
+/// The text of a receipt. Under `TEXT_CAP` it lists every operation and shows every block it holds; over it, the first ones
+/// that fit, and says what it left out.
+pub(super) fn compose(r: &Receipt) -> String {
+    let mut out = head(r);
+    let lines: Vec<String> = r.operations.iter().map(|op| op_line(r, op)).collect();
+    let blocks: Vec<String> = r.blocks.iter().map(block_lines).collect();
+    let mut end = String::new();
+    tail(r, &mut end);
+    let size = |items: &[String]| items.iter().map(String::len).sum::<usize>();
+    let fits = out.len() + size(&lines) + size(&blocks) + end.len() <= TEXT_CAP;
+    let ops_shown = if fits {
+        lines.len()
+    } else {
+        fitting(&lines, OPS_CAP)
+    };
+    for line in lines.iter().take(ops_shown) {
+        out.push_str(line);
     }
-    tail(r, &mut out);
+    if ops_shown < lines.len() {
+        out.push_str(&ops_left_out(r, ops_shown));
+    }
+    let blocks_shown = if fits {
+        blocks.len()
+    } else {
+        let budget = TEXT_CAP.saturating_sub(out.len() + end.len() + LEFT_OUT_ROOM);
+        fitting(&blocks, budget)
+    };
+    for block in blocks.iter().take(blocks_shown) {
+        out.push_str(block);
+    }
+    if blocks_shown < blocks.len() || r.blocks_omitted > 0 {
+        out.push_str(&blocks_left_out(r, blocks_shown));
+    }
+    out.push_str(&end);
     out
 }
 
@@ -270,13 +373,24 @@ pub(super) fn compose_compared(r: &Receipt) -> String {
             counts.join(", ")
         ));
     }
-    for m in &r.moves {
+    let moves: Vec<String> = r
+        .moves
+        .iter()
+        .map(|m| format!("moved {} to {}: {}\n", m.from, m.to, m.text))
+        .collect();
+    let mut end = String::new();
+    tail(r, &mut end);
+    let budget = TEXT_CAP.saturating_sub(out.len() + end.len() + LEFT_OUT_ROOM);
+    let shown = fitting(&moves, budget);
+    for line in moves.iter().take(shown) {
+        out.push_str(line);
+    }
+    if shown < moves.len() {
         out.push_str(&format!(
-            "moved {} to {}: {}
-",
-            m.from, m.to, m.text
+            "and {} not listed here to keep this short: the JSON receipt (--json) has every one, and `stetdoc view FILE --revisions` lists them, a page at a time.\n",
+            plural(moves.len() - shown, "more move", "more moves")
         ));
     }
-    tail(r, &mut out);
+    out.push_str(&end);
     out
 }

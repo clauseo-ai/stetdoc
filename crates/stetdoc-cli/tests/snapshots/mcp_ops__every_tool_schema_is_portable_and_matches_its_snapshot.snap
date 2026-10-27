@@ -93,8 +93,11 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "integer"
         },
         "clause": {
-          "description": "The block a clause number resolves to, with the blocks under it, such as 12.3. Cannot be used with `outline`, `range`, `find`, `revisions`, `comments`, `story`.",
-          "type": "string"
+          "description": "The block a clause number resolves to, with the blocks under it, such as 12.3. Repeat it to view several clauses at once: their blocks in document order, each once. Cannot be used with `outline`, `range`, `find`, `revisions`, `comments`, `story`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "comments": {
           "description": "The comment threads. Cannot be used with `outline`, `range`, `clause`, `find`, `revisions`, `story`.",
@@ -608,8 +611,11 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "string"
         },
         "clause": {
-          "description": "Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or \"Article III\". Cannot be used with `range`.",
-          "type": "string"
+          "description": "Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or \"Article III\". Repeat it to look in several clauses. Cannot be used with `range`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "date": {
           "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
@@ -711,8 +717,11 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "string"
         },
         "clause": {
-          "description": "Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or \"Article III\". Cannot be used with `range`.",
-          "type": "string"
+          "description": "Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or \"Article III\". Repeat it to look in several clauses. Cannot be used with `range`.",
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
         },
         "date": {
           "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",

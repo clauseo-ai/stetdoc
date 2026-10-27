@@ -459,6 +459,32 @@ mod tests {
     }
 
     #[test]
+    fn clause_is_a_list_and_a_lone_string_still_works() {
+        let all = tools();
+        for name in ["view", "replace", "comment"] {
+            let tool = all.iter().find(|t| t.name == name).unwrap();
+            let clause = &tool.listing["inputSchema"]["properties"]["clause"];
+            assert_eq!(clause["type"], "array", "{name}: {clause}");
+            assert_eq!(clause["items"]["type"], "string", "{name}: {clause}");
+        }
+        let view = all.iter().find(|t| t.name == "view").unwrap();
+        let argv_of = |arguments: serde_json::Value| -> Vec<String> {
+            let (argv, _) = super::argv(view, arguments.as_object().unwrap(), None).unwrap();
+            argv.iter()
+                .map(|a| a.to_string_lossy().into_owned())
+                .collect()
+        };
+        let many = argv_of(serde_json::json!({ "input": "a.docx", "clause": ["4.01", "4.02"] }));
+        assert!(
+            many.contains(&"--clause=4.01".to_string())
+                && many.contains(&"--clause=4.02".to_string()),
+            "{many:?}"
+        );
+        let one = argv_of(serde_json::json!({ "input": "a.docx", "clause": "4.01" }));
+        assert!(one.contains(&"--clause=4.01".to_string()), "{one:?}");
+    }
+
+    #[test]
     fn a_schema_follows_the_flags() {
         let all = tools();
         let view = all.iter().find(|t| t.name == "view").unwrap();

@@ -26,7 +26,7 @@ fn clause(
     state: &crate::state::State,
     text: &str,
 ) -> Result<crate::api::view::View, crate::api::error::StetError> {
-    view(state, &spec(Scope::Clause(text.to_string()), 0))
+    view(state, &spec(Scope::Clause(vec![text.to_string()]), 0))
 }
 
 #[test]
@@ -161,7 +161,7 @@ fn a_find_and_a_clause_view_page_with_their_notes_and_still_follow_every_block_o
     let state = contract().state();
     for scope in [
         Scope::Story(StoryName::Body),
-        Scope::Clause("clause 2".into()),
+        Scope::Clause(vec!["clause 2".into()]),
         Scope::Find {
             needles: vec!["clause".into()],
             context: 1,

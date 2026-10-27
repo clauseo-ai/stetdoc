@@ -108,7 +108,7 @@ fn a_find_that_matches_a_clause_heading_says_how_to_view_that_clause_whole() {
         v.text
     );
     // The clause the tip names is one a clause view resolves.
-    let clause = view(&state, &spec(Scope::Clause("clause 1".into()), 0)).unwrap();
+    let clause = view(&state, &spec(Scope::Clause(vec!["clause 1".into()]), 0)).unwrap();
     assert_eq!(
         refs_on(&clause.text),
         vec!["p1", "p2", "p3"],

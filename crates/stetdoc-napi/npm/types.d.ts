@@ -1003,7 +1003,7 @@ export type Scope = "auto" | {
     to?: string | null;
   };
 } | {
-  clause: string;
+  clause: string | string[];
 } | {
   find: {
     /**

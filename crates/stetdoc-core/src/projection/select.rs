@@ -4,6 +4,11 @@
 //! field. A selection lists its items in the order of the stories and of the document, and a page is a run
 //! of them. A cursor names the last block a page showed, and the next page starts at the item after the one
 //! that holds it (design 4.2 and 4.5).
+//!
+//! A clause scope names one clause or several. One is its block and the blocks under it. Several are the union of
+//! theirs: each clause is resolved as one is, the items are put in the order of the stories and of the document and
+//! each top is kept once, so a clause and a clause inside it show the outer one's blocks. Every clause named is a
+//! focus, and so shows what cites it (decision 0012).
 
 use super::build::Top;
 use super::build::scan::{Scan, TopStat};
@@ -13,6 +18,7 @@ use crate::refs::{BlockKey, Claim};
 use crate::state::{PartId, PartsView, State};
 use crate::wordml::{BlockKind, Story, StoryKind};
 use std::cell::OnceCell;
+use std::collections::BTreeSet;
 use std::sync::Arc;
 
 /// One story that a selection takes blocks from.
@@ -67,8 +73,9 @@ pub(crate) struct Selected {
     pub sources: Vec<Source>,
     /// The items, in order.
     pub items: Vec<Item>,
-    /// The block the selection is about, when it is about one: the clause of a clause view.
-    pub focus: Option<BlockKey>,
+    /// The blocks the selection is about, each of which shows what cites it: the clause of a clause view, or each
+    /// clause of a view of several. Empty for the other scopes.
+    pub focus: Vec<BlockKey>,
 }
 
 impl Selected {
@@ -200,7 +207,7 @@ pub(crate) fn story_scope(
         label: None,
         sources,
         items,
-        focus: None,
+        focus: Vec::new(),
     })
 }
 
@@ -303,7 +310,7 @@ pub(crate) fn range_scope(
         label: None,
         sources: vec![source],
         items,
-        focus: None,
+        focus: Vec::new(),
     })
 }
 
@@ -410,7 +417,101 @@ pub(crate) fn clause_scope(
             })
             .collect(),
         sources: vec![source],
-        focus: Some(clause.block.clone()),
+        focus: vec![clause.block.clone()],
+    })
+}
+
+/// The tops of the clauses a clause scope names. One clause is `clause_scope` and nothing more. Several are the union
+/// of their tops, in the order of the stories and of the document, each once; the label names the clauses in that
+/// order, and each clause is a focus. A clause that does not resolve fails as it would alone, naming that clause.
+pub(crate) fn clauses_scope(
+    parts: &PartsView<'_>,
+    mode: Mode,
+    texts: &[String],
+) -> Result<Selected, StetError> {
+    let several = match texts {
+        [] => {
+            return Err(error(
+                ErrorCode::InvalidPayload,
+                "a clause scope names no clause.",
+                "Give a clause as `clause 4.2(a)`, `4.2(a)` or `Article III`, or several as a list.",
+            ));
+        }
+        [one] => return clause_scope(parts, mode, one),
+        several => several,
+    };
+    let picked = several
+        .iter()
+        .map(|text| clause_scope(parts, mode, text))
+        .collect::<Result<Vec<_>, _>>()?;
+    let order: Vec<PartId> = parts
+        .story_specs()?
+        .0
+        .iter()
+        .filter_map(|s| parts.id(&s.part))
+        .collect();
+    let rank = |part: PartId| order.iter().position(|p| *p == part).unwrap_or(usize::MAX);
+    // Each story once, with the tops the clauses take from it, and each clause with where it starts.
+    let mut stories: Vec<(Source, BTreeSet<usize>)> = Vec::new();
+    let mut named: Vec<(usize, usize, String)> = Vec::new();
+    let mut focus: Vec<BlockKey> = Vec::new();
+    let mut name = None;
+    for one in picked {
+        let Selected {
+            name: one_name,
+            label,
+            sources: one_sources,
+            items: one_items,
+            focus: one_focus,
+        } = one;
+        let start = one_items.first().map(|i| i.top).unwrap_or_default();
+        for (index, source) in one_sources.into_iter().enumerate() {
+            if index == 0
+                && let Some(label) = &label
+            {
+                let label = label.strip_prefix("clause ").unwrap_or(label).to_string();
+                named.push((rank(source.part), start, label));
+            }
+            let tops = one_items.iter().filter(|i| i.src == index).map(|i| i.top);
+            match stories.iter_mut().find(|(s, _)| s.part == source.part) {
+                Some((_, have)) => have.extend(tops),
+                None => {
+                    let tops = tops.collect();
+                    stories.push((source, tops));
+                }
+            }
+        }
+        name.get_or_insert(one_name);
+        for key in one_focus {
+            if !focus.contains(&key) {
+                focus.push(key);
+            }
+        }
+    }
+    stories.sort_by_key(|(s, _)| rank(s.part));
+    named.sort();
+    named.dedup_by(|a, b| a.2 == b.2);
+    let mut sources = Vec::with_capacity(stories.len());
+    let mut items = Vec::new();
+    for (src, (source, tops)) in stories.into_iter().enumerate() {
+        items.extend(tops.into_iter().map(|top| Item {
+            src,
+            top,
+            matches: 0,
+        }));
+        sources.push(source);
+    }
+    let labels: Vec<String> = named.into_iter().map(|(_, _, l)| l).collect();
+    let label = match labels.as_slice() {
+        [one] => format!("clause {one}"),
+        many => format!("clauses {}", many.join(", ")),
+    };
+    Ok(Selected {
+        name: name.unwrap_or("body"),
+        label: Some(label),
+        sources,
+        items,
+        focus,
     })
 }
 

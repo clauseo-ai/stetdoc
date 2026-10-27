@@ -195,8 +195,8 @@ class Document {
   /**
    * Every place a text is, matched as an edit's `find` matches it: in the Final text, exactly, or with curly and straight
    * quotes taken as the same when nothing matches exactly. `scope` is "auto" (the body, the notes and the headers and
-   * footers), `{ range: { from, to } }`, `{ clause: "11.1" }` or `{ story: "body" }`. Each hit names its block and its
-   * `occurrence`, so an edit against `base()` can target it.
+   * footers), `{ range: { from, to } }`, `{ clause: "11.1" }` (or several, `{ clause: ["11.1", "12.3"] }`) or
+   * `{ story: "body" }`. Each hit names its block and its `occurrence`, so an edit against `base()` can target it.
    */
   occurrences(text, scope = "auto") {
     return JSON.parse(call(() => this.#native.occurrences(String(text), JSON.stringify(scope))));

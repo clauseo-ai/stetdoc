@@ -74,6 +74,6 @@ pub(crate) fn changes_scope(
         label: Some(format!("{label}: {counted}")),
         sources,
         items,
-        focus: None,
+        focus: Vec::new(),
     })
 }

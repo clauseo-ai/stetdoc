@@ -363,7 +363,7 @@ fn a_receipt_shows_two_hundred_blocks_at_most_and_counts_the_rest() {
     for r in [&dry, &receipt] {
         assert_eq!((r.blocks.len(), r.blocks_omitted), (200, 50));
         assert_eq!(r.operations.len(), 250);
-        assert!(r.text.contains("\nand 50 more blocks.\n"), "{}", r.text);
+        assert!(r.text.len() <= super::receipt_text::TEXT_CAP, "{}", r.text);
     }
     // In document order, from the first block, and every operation is still counted whole.
     assert_eq!(receipt.blocks[0].r#ref.as_deref(), Some("p1"));
@@ -376,6 +376,77 @@ fn a_receipt_shows_two_hundred_blocks_at_most_and_counts_the_rest() {
             .map(|(_, n)| *n)
             .sum::<u32>(),
         500
+    );
+}
+
+#[test]
+fn the_text_of_a_receipt_for_hundreds_of_operations_is_capped_and_says_what_it_left_out() {
+    let ops: Vec<String> = (1..=300)
+        .map(|i| format!(r#"{{"op":"replace","ref":"p{i}","find":"Paragraph","with":"Clause"}}"#))
+        .collect();
+    let ops = ops.join(",");
+    let mut doc = many(300);
+    let b = batch(&doc, &ops);
+    let dry = doc.edit(Edit::ops(b, stamp()).dry_run()).unwrap();
+    let receipt = run(&mut doc, &ops);
+    for r in [&dry, &receipt] {
+        let text = &r.text;
+        assert!(
+            text.len() <= super::receipt_text::TEXT_CAP,
+            "{} bytes",
+            text.len()
+        );
+        // The head line and its base, the first operation and the first block are there.
+        let head = text.lines().next().unwrap();
+        assert!(
+            head.contains("300 operations") && head.ends_with(&format!("base {}", r.base)),
+            "{head}"
+        );
+        assert!(text.contains("\n0 replace p1: "), "{text}");
+        assert!(text.contains("\np1 {--Paragraph--}"), "{text}");
+        // What it left out, how much, and where it is.
+        let listed = text.lines().filter(|l| l.contains(" replace p")).count();
+        let more = format!("\nand {} more operations, not listed here", 300 - listed);
+        assert!(text.contains(&more), "{text}");
+        assert!(
+            text.contains(&format!(
+                "operations {listed} to 299 are in the JSON receipt (--json)"
+            )),
+            "{text}"
+        );
+        assert!(text.contains("`stetdoc view FILE --revisions`"), "{text}");
+        let shown = text
+            .lines()
+            .filter(|l| l.starts_with('p') && l.contains("{++Clause++}"))
+            .count();
+        let next = format!("p{}", shown + 1);
+        let blocks = format!(
+            "\nand {} more blocks not shown here, from {next} on: `stetdoc view FILE --range {next}`",
+            300 - shown
+        );
+        assert!(text.contains(&blocks), "{text}");
+        assert!(
+            text.contains("`stetdoc view FILE --revisions --context 1` shows every changed block"),
+            "{text}"
+        );
+        // The JSON still has every operation.
+        assert_eq!(r.operations.len(), 300);
+    }
+    // A batch that fits lists every operation and shows every block, and says nothing was left out.
+    let mut small = many(5);
+    let ops: Vec<String> = (1..=5)
+        .map(|i| format!(r#"{{"op":"replace","ref":"p{i}","find":"Paragraph","with":"Clause"}}"#))
+        .collect();
+    let r = run(&mut small, &ops.join(","));
+    assert_eq!(
+        r.text.lines().filter(|l| l.contains(" replace p")).count(),
+        5
+    );
+    assert_eq!(r.text.lines().filter(|l| l.starts_with('p')).count(), 5);
+    assert!(
+        !r.text.contains("not listed here") && !r.text.contains("not shown here"),
+        "{}",
+        r.text
     );
 }
 

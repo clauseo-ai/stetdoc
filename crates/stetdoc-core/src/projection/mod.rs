@@ -73,6 +73,8 @@ mod testing_gen;
 #[cfg(test)]
 mod testing_gen_blocks;
 #[cfg(test)]
+mod tests_clauses;
+#[cfg(test)]
 mod tests_comments;
 #[cfg(test)]
 mod tests_draft;

@@ -73,8 +73,8 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
                 to,
             }
         }
-    } else if let Some(clause) = &args.clause {
-        Scope::Clause(clause.clone())
+    } else if !args.clause.is_empty() {
+        Scope::Clause(args.clause.clone())
     } else if args.revisions {
         Scope::Revisions(RevisionFilter {
             author: args.author.clone(),

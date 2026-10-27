@@ -6,7 +6,7 @@
 //! a tracked deletion is listed apart, because an operation cannot target it.
 
 use super::place::{Placer, heading_text};
-use super::select::{Selected, clause_scope, range_scope, story_scope};
+use super::select::{Selected, clauses_scope, range_scope, story_scope};
 use crate::api::error::{ErrorCode, StetError};
 use crate::api::occurrence::{Occurrence, Occurrences};
 use crate::api::view::{Mode, Scope, StoryName};
@@ -46,7 +46,7 @@ pub(crate) fn occurrences(
             from,
             to.as_deref(),
         )?],
-        Scope::Clause(text) => vec![clause_scope(&parts, Mode::Final, text)?],
+        Scope::Clause(texts) => vec![clauses_scope(&parts, Mode::Final, texts)?],
         _ => {
             return Err(StetError::new(
                 ErrorCode::InvalidPayload,

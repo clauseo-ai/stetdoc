@@ -198,7 +198,7 @@ pub(crate) fn find_scope(
             label: Some(format!("find {what}{place}: {counted}")),
             sources,
             items,
-            focus: None,
+            focus: Vec::new(),
         },
         Found {
             needles: needles.given().map(str::to_string).collect(),

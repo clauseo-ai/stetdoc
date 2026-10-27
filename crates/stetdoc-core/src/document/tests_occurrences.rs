@@ -72,11 +72,18 @@ fn a_range_or_a_clause_limits_the_search() {
     assert_eq!(found.hits.len(), 1);
     assert_eq!(found.hits[0].block, "p2");
     let clause = doc
-        .occurrences("thirty days", &Scope::Clause("2".into()))
+        .occurrences("thirty days", &Scope::Clause(vec!["2".into()]))
         .unwrap();
     let blocks: Vec<&str> = clause.hits.iter().map(|h| h.block.as_str()).collect();
     assert_eq!(blocks, ["p5"], "{clause:?}");
     assert_eq!(clause.hits[0].clause.as_deref(), Some("2"));
+    // Several clauses are the union of their blocks.
+    let both = doc
+        .occurrences("e", &Scope::Clause(vec!["2".into(), "1".into()]))
+        .unwrap();
+    let mut blocks: Vec<&str> = both.hits.iter().map(|h| h.block.as_str()).collect();
+    blocks.dedup();
+    assert_eq!(blocks, ["p4", "p5"], "{both:?}");
 }
 
 #[test]

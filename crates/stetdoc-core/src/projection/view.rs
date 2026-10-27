@@ -18,7 +18,7 @@ use super::model::{Margin, Output, Projection, TermCount};
 use super::notes::Notes;
 use super::page::{estimate, fit, greedy, weight};
 use super::select::{
-    Item, Selected, Source, Start, clause_scope, range_scope, start_after, story_scope,
+    Item, Selected, Source, Start, clauses_scope, range_scope, start_after, story_scope,
 };
 use super::select_changes::changes_scope;
 use super::select_find::{Found, find_scope};
@@ -116,7 +116,7 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
                 cx.blocks(selected)
             }
         }
-        Scope::Clause(text) => cx.blocks(clause_scope(&cx.parts, spec.mode, text)?),
+        Scope::Clause(texts) => cx.blocks(clauses_scope(&cx.parts, spec.mode, texts)?),
         Scope::Revisions(filter) if filter.context > 0 => cx.blocks(changes_scope(
             &cx.parts,
             state,
@@ -271,14 +271,15 @@ impl Cx<'_> {
                 && let Some(top) = source.tops.get(item.top)
                 && top.collapse.is_none()
             {
-                if let Some(focus) = &selected.focus
-                    && source
+                for focus in &selected.focus {
+                    if source
                         .story
                         .index_of(focus.node())
                         .is_some_and(|e| top.first <= e && e < top.end)
-                    && let Some(note) = notes.cited_by(&self.parts, focus)
-                {
-                    pick.after.push(note);
+                        && let Some(note) = notes.cited_by(&self.parts, focus)
+                    {
+                        pick.after.push(note);
+                    }
                 }
                 for i in top.first..top.end {
                     if let Some(e) = source.story.blocks().get(i)

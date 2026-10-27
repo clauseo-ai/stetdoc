@@ -9,6 +9,13 @@ released yet.
 
 ### Added
 
+- The text of a receipt is capped at about 11,000 bytes, so `replace --all` or `comment --all` over hundreds of places
+  prints a receipt an agent can read whole: the first operations and blocks, how many it left out, and the `stetdoc view`
+  command that shows them. The head line, the base, the warnings and the check line stay whole, and the JSON is unchanged.
+- `--clause` may be given more than once on `view`, `replace` and `comment`, such as
+  `stetdoc view FILE --clause 4.01 --clause 4.02`: the result is the union of the clauses' blocks in document order, each
+  once. `Scope::Clause` holds a list, and JSON takes one clause as a string or several as a list
+  ([decision 0012](docs/decisions/0012-clause-scopes.md)).
 - The skill stub and `stetdoc skills get core` teach the default output (`NAME.edited.docx`, then `--in-place` on it),
   `--manual` markup and when to use it, reporting tracked changes by others, `--ignore-case`, `comment --all` and
   `--expect`, `view --revisions --context N`, table hits, and the MCP edit tool's typed `ops`.
@@ -355,6 +362,10 @@ released yet.
 
 ### Changed
 
+- The skill says to use `--manual` when the user, or a document or note they point to (such as a client email), asks for
+  manual markup or no Track Changes, and never `view --all` on a long document: page with `-- more:` or narrow with `--find`
+  or `--range`. `skills get core` is shorter, so every part of the skill fits in one tool output (under 25 KB), and the stub
+  stays near 450 tokens. The previous stub is `skill/earlier/stub-8.md`.
 - A find hit or an occurrence names a clause only when its paragraph is that clause or its own text. A recital after the
   parties "(1)" and "(2)" names no clause and sits under its heading (`{in p15 "RECITALS"}`), and a paragraph after a
   list item such as (g) names the clause the list is in (`{§14.1}`, not `{§14.1(g)}`). A bare label keeps its noun:

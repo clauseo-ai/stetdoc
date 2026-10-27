@@ -159,8 +159,14 @@ pub enum Scope {
         /// The last ref.
         to: Option<String>,
     },
-    /// The block a clause number resolves to, with the blocks under it.
-    Clause(String),
+    /// The blocks of one clause or of several: each clause number resolves to a block, which comes with the blocks
+    /// under it, and the view is the union of those blocks in document order, each once. JSON takes one string, as
+    /// `{"clause": "11.1"}`, or a list, as `{"clause": ["11.1", "12.3"]}`, and writes one clause as a string.
+    Clause(
+        #[serde(deserialize_with = "terms", serialize_with = "one_or_many")]
+        #[schemars(schema_with = "terms_schema")]
+        Vec<String>,
+    ),
     /// The blocks whose text contains any of the needles. With a `context` of 0, one line for each paragraph that
     /// matches: its ref, its clause and the text around the match. With more, the blocks whole, with their neighbours.
     Find {
@@ -475,6 +481,14 @@ fn terms<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<String>, D::E
         OneOrMany::One(one) => vec![one],
         OneOrMany::Many(many) => many,
     })
+}
+
+/// Writes a list of one as that string, and a longer one as a list, so that a scope read from one string writes it back.
+fn one_or_many<S: Serializer>(terms: &[String], serializer: S) -> Result<S::Ok, S::Error> {
+    match terms {
+        [one] => serializer.serialize_str(one),
+        many => many.serialize(serializer),
+    }
 }
 
 /// Reads the texts of a find in the ledger: nothing, one string or a list of them.

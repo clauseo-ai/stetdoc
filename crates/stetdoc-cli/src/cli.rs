@@ -122,9 +122,10 @@ pub struct ViewArgs {
     /// The blocks from one ref to another, such as p40..p60, or from a ref to the end of its story.
     #[arg(long, value_name = "REFS")]
     pub range: Option<String>,
-    /// The block a clause number resolves to, with the blocks under it, such as 12.3.
-    #[arg(long, value_name = "NUMBER")]
-    pub clause: Option<String>,
+    /// The block a clause number resolves to, with the blocks under it, such as 12.3. Repeat it to view several
+    /// clauses at once: their blocks in document order, each once.
+    #[arg(long, value_name = "NUMBER", action = clap::ArgAction::Append)]
+    pub clause: Vec<String>,
     /// The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged
     /// like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line
     /// then says which it holds. With --range, only in that range; with --revisions, only the changes whose text
@@ -266,8 +267,9 @@ pub struct FindArgs {
     #[arg(long, value_name = "REFS")]
     pub range: Option<String>,
     /// Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III".
-    #[arg(long, value_name = "CLAUSE")]
-    pub clause: Option<String>,
+    /// Repeat it to look in several clauses.
+    #[arg(long, value_name = "CLAUSE", action = clap::ArgAction::Append)]
+    pub clause: Vec<String>,
     /// With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input:
     /// --in-place writes back to it.
     #[arg(short, long, value_name = "DOCX")]

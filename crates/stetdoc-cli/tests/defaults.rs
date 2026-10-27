@@ -239,3 +239,48 @@ fn every_receipt_and_the_view_name_the_changes_another_author_made() {
     let ledger = text(&stetdoc(cwd, &["view", "rated.docx", "--revisions"]).stdout);
     assert!(!ledger.contains("did not make"), "{ledger}");
 }
+
+#[test]
+fn a_replace_of_three_hundred_places_prints_a_receipt_an_agent_can_read_whole() {
+    let tmp = tempfile::tempdir().unwrap();
+    let cwd = tmp.path();
+    let sentence = "The Issuer shall pay the Issuer's costs, and the Issuer shall keep its books where the Trustee can see them.";
+    let body: String = (1..=100)
+        .map(|i| format!("<w:p><w:r><w:t>{i}. {sentence}</w:t></w:r></w:p>"))
+        .collect();
+    let doc = parts::Doc::new().body(&body).bytes();
+    fs::write(
+        cwd.join("long.docx"),
+        Zip::new(parts::entries_doc(&doc)).build(),
+    )
+    .unwrap();
+
+    let out = stetdoc(
+        cwd,
+        &[
+            "replace",
+            "long.docx",
+            "the Issuer",
+            "the Company",
+            "--all",
+            "--ignore-case",
+            "-o",
+            "out.docx",
+        ],
+    );
+    let said = text(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    // Under the room an agent's tool output has, and still saying what happened and where the rest is.
+    assert!(said.len() < 12_500, "{} bytes", said.len());
+    assert!(
+        said.contains("applied 300 operations, tracked as Clauseo"),
+        "{said}"
+    );
+    assert!(said.contains(" more operations, not listed here"), "{said}");
+    assert!(said.contains(" more blocks not shown here"), "{said}");
+    assert!(
+        said.contains("`stetdoc view FILE --revisions --context 1`"),
+        "{said}"
+    );
+    assert!(said.contains("\nwrote out.docx\n"), "{said}");
+}

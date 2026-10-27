@@ -40,3 +40,14 @@ interface, so this records them.
   containers.
 - A script that relied on `replace` or `edit` of a .docx refusing without `-o` now gets a new file beside the input.
 - The others line costs one `revisions` pass over the document per command.
+
+## Amendment, 2026-10-27: the text of a receipt is capped
+
+A `replace --all` of 459 places in a 240-block indenture printed 153 KB, and a `comment --all` 172 KB. Claude Code moves a tool
+output over about 25 KB into a file the agent may not read, so such a receipt told the agent nothing. `Receipt.text` is now
+capped at about 11,000 bytes. When the whole text would be longer, it lists the first operations that fit in 2,000 bytes and says
+how many more there are, their numbers, and that the JSON receipt (`--json`) and `stetdoc view FILE --revisions` have them. It
+shows the first blocks that fit in the room left and says how many more there are, from which ref, and that
+`stetdoc view FILE --range REF` and `stetdoc view FILE --revisions --context 1` show them. The head line with its base, the
+warnings, what was retired and what `check` said stay whole. A block is never cut. A compare receipt caps its moves the same way.
+A text under the cap is as it was. The JSON, the `Receipt` struct and the public interface do not change.

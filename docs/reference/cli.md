@@ -126,7 +126,7 @@ stetdoc view [OPTIONS] <INPUT>
 | `--outline` | The headings only. |
 | `--depth <N>` | With --outline, the deepest heading level shown. |
 | `--range <REFS>` | The blocks from one ref to another, such as p40..p60, or from a ref to the end of its story. |
-| `--clause <NUMBER>` | The block a clause number resolves to, with the blocks under it, such as 12.3. |
+| `--clause <NUMBER>` | The block a clause number resolves to, with the blocks under it, such as 12.3. Repeat it to view several clauses at once: their blocks in document order, each once. |
 | `--find <TEXT>` | The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line then says which it holds. With --range, only in that range; with --revisions, only the changes whose text contains one of them. |
 | `--context <N>` | With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. With --revisions, show the blocks that hold the changes whole, as the redline shows them, with N blocks on each side, and not one line for each change. 0 is the one-line list. Default `0`. |
 | `--revisions` | The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters. |
@@ -366,7 +366,7 @@ stetdoc replace [OPTIONS] <INPUT> <OLD NEW> <OLD NEW>...
 | `--manual` | Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not Track Changes. A deletion is struck text only, an insertion underlined text only. |
 | `--manual-color` | As --manual, with deleted text also red and new text also blue. |
 | `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
-| `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
+| `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". Repeat it to look in several clauses. |
 | `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it. |
 | `--dry-run` | Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
@@ -500,7 +500,7 @@ stetdoc comment [OPTIONS] <INPUT> <ANCHOR> <TEXT>
 | `--all` | Comment on every occurrence of the anchor, one comment each, and say how many. |
 | `--expect <N>` | Comment on every occurrence of the anchor, and only if there are exactly N. |
 | `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
-| `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
+| `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". Repeat it to look in several clauses. |
 | `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it. |
 | `--dry-run` | Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |

@@ -35,18 +35,21 @@ pub fn scope(args: &FindArgs) -> Result<Scope, Failure> {
         }
         return Ok(Scope::Range { from, to });
     }
-    if let Some(clause) = &args.clause {
-        return Ok(Scope::Clause(clause.clone()));
+    if !args.clause.is_empty() {
+        return Ok(Scope::Clause(args.clause.clone()));
     }
     Ok(Scope::Auto)
 }
 
-/// The scope in words, for messages: ` in clause 11.1`, ` in p40..p60`, or ` in the document`.
+/// The scope in words, for messages: ` in clause 11.1`, ` in clauses 4.01, 4.02`, ` in p40..p60`, or ` in the document`.
 pub fn place_words(scope: &Scope) -> String {
     match scope {
         Scope::Range { from, to: Some(to) } => format!(" in {from}..{to}"),
         Scope::Range { from, to: None } => format!(" in {from} to the end of its story"),
-        Scope::Clause(clause) => format!(" in clause {clause}"),
+        Scope::Clause(clauses) => match clauses.as_slice() {
+            [one] => format!(" in clause {one}"),
+            many => format!(" in clauses {}", many.join(", ")),
+        },
         _ => " in the document".to_string(),
     }
 }

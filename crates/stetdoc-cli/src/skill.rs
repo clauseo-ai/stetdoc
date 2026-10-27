@@ -23,13 +23,14 @@ const EARLIER: [&str; 1] = [include_str!("../skill/earlier/stub-1.md")];
 
 /// The stubs earlier builds wrote with a version line, each with the `{{version}}` placeholder on it. A file is matched
 /// against them with its version line normalised, as against the current stub.
-const EARLIER_VERSIONED: [&str; 6] = [
+const EARLIER_VERSIONED: [&str; 7] = [
     include_str!("../skill/earlier/stub-2.md"),
     include_str!("../skill/earlier/stub-3.md"),
     include_str!("../skill/earlier/stub-4.md"),
     include_str!("../skill/earlier/stub-5.md"),
     include_str!("../skill/earlier/stub-6.md"),
     include_str!("../skill/earlier/stub-7.md"),
+    include_str!("../skill/earlier/stub-8.md"),
 ];
 
 /// The key of the front-matter line that carries the version.
@@ -217,4 +218,37 @@ fn limits(limits: &Limits) -> String {
         limits.max_op_text_bytes,
         limits.max_scope_refs
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// Claude Code keeps a tool output above about 25 KB in a file the sandbox may not let the agent read, so every part
+    /// of the skill, which an agent prints whole, must stay well under it.
+    const PART_LIMIT: usize = 24_000;
+
+    /// The stub is read on every invoke, so it stays near its token budget (about 450 tokens).
+    const STUB_LIMIT: usize = 1_800;
+
+    #[test]
+    fn every_part_of_the_skill_fits_one_tool_output() {
+        for name in NAMES {
+            let text = get(name).expect("a named part");
+            assert!(
+                text.len() < PART_LIMIT,
+                "skills get {name} is {} bytes, over {PART_LIMIT}",
+                text.len()
+            );
+        }
+    }
+
+    #[test]
+    fn the_stub_stays_within_its_budget() {
+        assert!(
+            stub().len() < STUB_LIMIT,
+            "the stub is {} bytes, over {STUB_LIMIT}",
+            stub().len()
+        );
+    }
 }

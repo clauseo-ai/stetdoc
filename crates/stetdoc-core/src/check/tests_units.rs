@@ -4,8 +4,8 @@
 
 use super::tests::{state, state_with};
 use super::tests_edit::{
-    MAIN, Said, accepted, append, base_node, detach, el, el_with, in_part, key, nth, refused,
-    retext, run_of, said, say, set_attr, transaction,
+    MAIN, MISORDERED_RPR, Said, accepted, append, base_node, detach, el, el_with, in_part, key,
+    nth, refused, retext, run_of, said, say, set_attr, transaction,
 };
 use super::{Checked, Declared, edit};
 use crate::api::check::FindingCode as C;
@@ -139,8 +139,7 @@ fn said_after(s: &State, change: impl FnOnce(&mut SpanTree)) -> Said {
 #[test]
 fn a_moved_paragraph_is_checked_again_because_its_parent_is_not_the_bases() {
     let s0 = state(&format!(
-        "{}{TABLE}",
-        "<w:p><w:r><w:rPr/><w:t>moved</w:t></w:r></w:p>"
+        "<w:p><w:r>{MISORDERED_RPR}<w:t>moved</w:t></w:r></w:p>{TABLE}"
     ));
     let said = said(&s0, |t| {
         let p = nth(t, "p", 0);
@@ -274,12 +273,14 @@ fn a_part_that_add_part_made_is_validated_whole_and_everything_in_it_is_new() {
     let said = say(&tx, &Declared::default());
     let v = accepted(&said).checked;
     assert_eq!(v.parts, 1, "{v:?}");
-    let faulty = r#"<w:comment w:id="0" w:author="a"><w:p><w:r><w:rPr/><w:t>note</w:t></w:r></w:p></w:comment>"#;
+    let faulty = format!(
+        r#"<w:comment w:id="0" w:author="a"><w:p><w:r>{MISORDERED_RPR}<w:t>note</w:t></w:r></w:p></w:comment>"#
+    );
     let mut tx = s.begin();
-    tx.add_part(comments_part(faulty)).expect("adds");
+    tx.add_part(comments_part(&faulty)).expect("adds");
     let said = say(&tx, &Declared::default());
     refused(&said);
-    assert_eq!(said.new, [C::EmptyProperties]);
+    assert_eq!(said.new, [C::SchemaNonCanonicalOrder]);
     // an empty comment is a Word-rule violation of the new part
     let mut tx = s.begin();
     tx.add_part(comments_part(r#"<w:comment w:id="0" w:author="a"/>"#))

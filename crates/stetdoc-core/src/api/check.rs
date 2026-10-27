@@ -215,8 +215,8 @@ finding_codes! {
     }
     EmptyProperties {
         wire: "empty_properties",
-        class: Violation,
-        doc: "A w:rPr or w:pPr that holds nothing, outside the snapshot of a property change.",
+        class: Note,
+        doc: "A w:rPr or w:pPr that holds nothing, outside the snapshot of a property change. The schema allows it, since every child is optional, so it is a note.",
     }
     PartWithoutContentType {
         wire: "part_without_content_type",

@@ -107,6 +107,7 @@ fn apply_dir(
         ));
     }
     let stamp = stamp::resolve(stamp)?;
+    let author = stamp.author.clone();
     let (workdir, notes) = Workdir::open(dir)?;
     let (mut doc, disk) = workdir.resume()?;
     disk.ensure_clean()?;
@@ -117,14 +118,58 @@ fn apply_dir(
         workdir.write(&next, Some(&disk), &WriteOptions::default())?;
     }
     let outcome = Outcome::of(&receipt.text, &receipt)?.with_notes(notes);
+    let outcome = tell_others(outcome, &doc, &author, dir)?;
     Ok(finish(outcome, made.head, made.extra))
 }
 
-/// Where an edit of a .docx writes: another file, the input (`None`), or nothing, for a dry run.
+/// Where an edit of a .docx writes: another file, the file stetdoc names beside the input, the input, or nothing, for a dry
+/// run.
 enum Target {
     File(PathBuf),
+    Default(PathBuf),
     InPlace,
     Nothing,
+}
+
+/// `contract.docx` is edited into `contract.edited.docx` beside it, as `pack` names its output, so an edit with neither -o nor
+/// --in-place never touches the input. When that file exists the edit goes to `contract.edited-2.docx`, then `-3`, and an
+/// input that is one of these names takes the next free one, so a chain of edits reads in order and nothing is overwritten.
+pub fn default_output(input: &Path) -> PathBuf {
+    (1..10_000)
+        .map(|n| edited_name(input, n))
+        .find(|candidate| {
+            candidate.symlink_metadata().is_err() && !fsio::same_file(candidate, input)
+        })
+        .unwrap_or_else(|| edited_name(input, 10_000))
+}
+
+/// The `n`th name of an edit of `input`: `contract.edited.docx` for 1, `contract.edited-2.docx` for 2, from `contract.docx` or
+/// from any of these names.
+fn edited_name(input: &Path, n: u32) -> PathBuf {
+    let stem = input
+        .file_stem()
+        .map(|s| s.to_string_lossy().into_owned())
+        .unwrap_or_default();
+    let base = match stem.rsplit_once(".edited") {
+        Some((base, "")) => base.to_string(),
+        Some((base, tail))
+            if tail
+                .strip_prefix('-')
+                .is_some_and(|n| !n.is_empty() && n.bytes().all(|b| b.is_ascii_digit())) =>
+        {
+            base.to_string()
+        }
+        _ => stem,
+    };
+    let extension = input
+        .extension()
+        .map_or_else(|| "docx".to_string(), |e| e.to_string_lossy().into_owned());
+    let name = if n == 1 {
+        format!("{base}.edited.{extension}")
+    } else {
+        format!("{base}.edited-{n}.{extension}")
+    };
+    input.with_file_name(name)
 }
 
 /// The line that says a dry run ignored -o or --in-place, or `None` when it had neither.
@@ -161,13 +206,11 @@ fn docx_target(at: &Where<'_>, path: &Path) -> Result<Target, Failure> {
             fsio::check_output(output, &[path], &[])?;
             Ok(Target::File(output.clone()))
         }
-        (None, false) => Err(Failure::usage(
-            format!(
-                "{} is a .docx, and an edit of a .docx needs to know where to write.",
-                path.display()
-            ),
-            "Name another file with -o, pass --in-place to write back to this one, or unpack the document and edit the working copy.",
-        )),
+        (None, false) => {
+            let output = default_output(path);
+            fsio::check_output(&output, &[path], &[])?;
+            Ok(Target::Default(output))
+        }
     }
 }
 
@@ -179,6 +222,7 @@ fn apply_docx(
 ) -> Result<Outcome, Failure> {
     let target = docx_target(at, path)?;
     let stamp = stamp::resolve(stamp)?;
+    let author = stamp.author.clone();
     let options = OpenOptions::default();
     let input = fsio::read_file(path, options.limits.max_archive_bytes)?;
     let digest = fsio::sha256_hex(&input);
@@ -188,15 +232,17 @@ fn apply_docx(
     let written = match target {
         Target::Nothing => {
             let head = join_head(ignored_output(at), made.head);
-            return Ok(finish(
-                Outcome::of(&receipt.text, &receipt)?,
-                head,
-                made.extra,
-            ));
+            let outcome = tell_others(Outcome::of(&receipt.text, &receipt)?, &doc, &author, path)?;
+            return Ok(finish(outcome, head, made.extra));
         }
-        Target::File(output) => output,
-        Target::InPlace => path.to_path_buf(),
+        Target::File(output) => (output, None),
+        Target::Default(output) => {
+            let said = defaulted(path, &output);
+            (output, Some(said))
+        }
+        Target::InPlace => (path.to_path_buf(), None),
     };
+    let (written, defaulted) = written;
     let saved = doc.save()?;
     if written == path {
         fsio::replace_atomic(path, &saved.bytes, &digest)?;
@@ -207,9 +253,53 @@ fn apply_docx(
     let json = serde_json::json!({
         "output": written.display().to_string(),
         "in_place": written == path,
+        "default_output": defaulted.is_some(),
         "receipt": told.receipt,
         "saved": to_json(&saved.receipt)?,
         "next": told.next,
     });
-    Ok(finish(Outcome::new(told.text, json), made.head, made.extra))
+    let mut outcome = Outcome::new(told.text, json);
+    if let Some(said) = defaulted {
+        outcome.text.push_str(&said);
+    }
+    let outcome = tell_others(outcome, &doc, &author, &written)?;
+    Ok(finish(outcome, made.head, made.extra))
+}
+
+/// The line after `wrote` when stetdoc named the output: the input is unchanged, and where the next edit goes.
+fn defaulted(input: &Path, output: &Path) -> String {
+    let first = edited_name(input, 1);
+    let skipped = if output == first || fsio::same_file(input, &first) {
+        String::new()
+    } else {
+        format!(
+            " {} already exists, so this edit went to a new file, which does not have the edits in {}.",
+            first.display(),
+            first.display()
+        )
+    };
+    format!(
+        "{} is unchanged.{skipped} Run the next edit on {} to build on this one, or pass -o FILE or --in-place to choose.\n",
+        input.display(),
+        output.display()
+    )
+}
+
+/// Adds the line about tracked changes that authors other than `author` made, when there are any, to the text and the JSON.
+pub fn tell_others(
+    mut outcome: Outcome,
+    doc: &Document,
+    author: &str,
+    file: &Path,
+) -> Result<Outcome, Failure> {
+    if let Some(others) = super::others::others(doc, Some(author), file)? {
+        if !outcome.text.ends_with('\n') {
+            outcome.text.push('\n');
+        }
+        outcome.text.push_str(&others.text);
+        if let Some(object) = outcome.json.as_object_mut() {
+            object.insert("others".to_string(), others.json);
+        }
+    }
+    Ok(outcome)
 }

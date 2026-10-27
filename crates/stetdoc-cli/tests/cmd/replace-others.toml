@@ -1,0 +1,4 @@
+# A receipt says which tracked changes in the document another author made, so the agent tells the user about them.
+bin.name = "stetdoc"
+args = ["replace", "tracked.docx", "Price", "Cost", "-o", "edited.docx", "--author", "Claude"]
+fs.sandbox = true

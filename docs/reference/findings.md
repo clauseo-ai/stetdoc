@@ -34,7 +34,6 @@
 | `row_without_cell` | A table row with no cell. |
 | `container_without_block` | A footnote, endnote or comment that holds no paragraph or table. |
 | `empty_revision` | A w:ins, w:del, w:moveFrom or w:moveTo that holds nothing. |
-| `empty_properties` | A w:rPr or w:pPr that holds nothing, outside the snapshot of a property change. |
 | `part_without_content_type` | A part that has neither an Override nor a Default for its extension in `[Content_Types].xml`. |
 | `relationship_target_missing` | An internal relationship whose target is not a part of the package. |
 | `relationship_id_duplicate` | Two relationships of one part have the same id. |
@@ -53,6 +52,7 @@
 
 | Code | What it means |
 |---|---|
+| `empty_properties` | A w:rPr or w:pPr that holds nothing, outside the snapshot of a property change. The schema allows it, since every child is optional, so it is a note. |
 | `unanchored` | A comment with no marker and no reference. |
 | `row_missing` | A comment with a paragraph id and no row in an extension part that exists. |
 | `para_id_missing` | A comment whose last paragraph has no w14:paraId, so it cannot be threaded. |

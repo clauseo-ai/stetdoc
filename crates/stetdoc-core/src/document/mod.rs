@@ -159,7 +159,17 @@ impl Document {
     /// notes and the headers and footers; `Range`, `Clause` and `Story` select as a view does, and any other scope is
     /// `invalid_payload`. Each hit names its paragraph's ref and its `occurrence`, so a batch against `base()` can target it.
     pub fn occurrences(&self, needle: &str, scope: &Scope) -> Result<Occurrences, StetError> {
-        projection::occurrences(&self.state, needle, scope)
+        projection::occurrences(&self.state, needle, scope, false)
+    }
+
+    /// The places of `occurrences`, with letters matched whatever their case, one character for one, so each hit's offsets
+    /// are those of the Final text and a batch can target them as it targets an exact hit.
+    pub fn occurrences_ignoring_case(
+        &self,
+        needle: &str,
+        scope: &Scope,
+    ) -> Result<Occurrences, StetError> {
+        projection::occurrences(&self.state, needle, scope, true)
     }
 
     /// The readable files, without the complement. They carry the base token and the format, and no `rendered` hashes: a caller

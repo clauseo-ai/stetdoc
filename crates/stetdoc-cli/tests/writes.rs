@@ -304,10 +304,13 @@ fn pack_done_keeps_the_working_copy_when_the_pack_fails() {
     assert!(!cwd.join("contract.edited.docx").exists());
 }
 
-/// A document whose paragraphs each have an empty `w:rPr`, a problem `check` reports and an edit never adds.
+/// A document whose paragraphs each have run properties out of Word's order, a problem `check` reports and an edit never
+/// adds.
 fn faulty(paragraphs: usize) -> Vec<u8> {
     let body: String = (0..paragraphs)
-        .map(|i| format!("<w:p><w:r><w:rPr/><w:t>Clause {i} text.</w:t></w:r></w:p>"))
+        .map(|i| {
+            format!("<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>Clause {i} text.</w:t></w:r></w:p>")
+        })
         .collect();
     let doc = parts::Doc::new().body(&body).bytes();
     Zip::new(parts::entries_doc(&doc)).build()
@@ -322,7 +325,11 @@ fn a_receipt_counts_the_problems_already_there_and_check_all_lists_them() {
     let check = text(&stetdoc(cwd, &["check", "faulty.docx"], "").stdout);
     assert!(check.contains("... 5 more; --all lists them."), "{check}");
     let all = text(&stetdoc(cwd, &["check", "faulty.docx", "--all"], "").stdout);
-    assert_eq!(all.matches("empty_properties").count(), 25, "{all}");
+    assert_eq!(
+        all.matches("schema_non_canonical_order").count(),
+        25,
+        "{all}"
+    );
     assert!(!all.contains("more;"), "{all}");
 
     // The edited paragraph's problem is carried, once for each run the edit splits it into: one line counts them, and
@@ -340,11 +347,41 @@ fn a_receipt_counts_the_problems_already_there_and_check_all_lists_them() {
     let receipt = text(&out.stdout);
     assert!(
         receipt.contains(
-            "checked 1 unit. 3 problems were already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
+            "checked 1 unit. 4 problems were already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
         ),
         "{receipt}"
     );
-    assert!(!receipt.contains("empty_properties"), "{receipt}");
+    assert!(!receipt.contains("schema_non_canonical_order"), "{receipt}");
+}
+
+#[test]
+fn an_empty_run_property_is_a_note_and_not_a_violation() {
+    // The schema allows an empty w:rPr, since every child of it is optional, so check passes with --strict and an edit of the
+    // paragraph counts no problem.
+    let tmp = tempfile::tempdir().unwrap();
+    let cwd = tmp.path();
+    let body = "<w:p><w:r><w:rPr/><w:t>Clause text.</w:t></w:r></w:p>";
+    let doc = parts::Doc::new().body(body).bytes();
+    fs::write(
+        cwd.join("empty.docx"),
+        Zip::new(parts::entries_doc(&doc)).build(),
+    )
+    .unwrap();
+    let out = stetdoc(cwd, &["check", "empty.docx", "--strict"], "");
+    let check = text(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "{check}");
+    assert!(
+        check.contains("Validation: no violations in 1 part, 1 note."),
+        "{check}"
+    );
+    let batch = format!(
+        "base: {}\n---\n@replace\nref: p1\nfind: text\nwith: words\n",
+        base(cwd, "empty.docx")
+    );
+    let out = stetdoc(cwd, &["edit", "empty.docx", "--dry-run"], &batch);
+    let receipt = text(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
+    assert!(!receipt.contains("problem"), "{receipt}");
 }
 
 /// The base on the head line of a receipt, if it has one.

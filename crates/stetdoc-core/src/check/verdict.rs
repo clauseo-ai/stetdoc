@@ -2,7 +2,7 @@
 
 use super::document::{SchemaPart, block_ref};
 use super::found::Found;
-use crate::api::check::Finding;
+use crate::api::check::{Class, Finding};
 use crate::api::error::{ErrorCode, StetError};
 use crate::schema::{is_unit_boundary, unit_root};
 use crate::state::PartsView;
@@ -70,14 +70,21 @@ pub(super) struct Verdict {
 }
 
 impl Verdict {
-    /// A violation that the edit adds.
+    /// A finding that the edit adds: a violation, or a note when its code is one (`empty_properties`), which blocks nothing.
     pub(super) fn add_new(&mut self, part: Option<usize>, found: Found) {
+        if found.code.class() == Class::Note {
+            self.note(part, found);
+            return;
+        }
         self.new_total += 1;
         self.new.push(Reported { part, found });
     }
 
-    /// A problem that the edit's origin had.
+    /// A problem that the edit's origin had. A note is legal, so it is no problem and is not carried.
     pub(super) fn carry(&mut self, part: Option<usize>, found: Found) {
+        if found.code.class() == Class::Note {
+            return;
+        }
         self.carried_total += 1;
         self.carried.push(Reported { part, found });
     }

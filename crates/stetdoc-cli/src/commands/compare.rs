@@ -46,5 +46,11 @@ pub fn run(args: &CompareArgs) -> Result<Outcome, Failure> {
         "saved": to_json(&saved.receipt)?,
         "next": told.next,
     });
-    Ok(Outcome::new(told.text, json))
+    let author = options.stamp.author.clone();
+    super::apply::tell_others(
+        Outcome::new(told.text, json),
+        &compared.document,
+        &author,
+        &args.output,
+    )
 }

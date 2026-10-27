@@ -34,6 +34,8 @@ working copy contract.stet is at base 5737b772923cf8d3:1:6a07baa2d488eeb5. It st
 
 $ stetdoc view contract.edited.docx --range p4..p4
 {stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=redline common-style="Normal" range=p4..p4}
+2 tracked changes by Jane Doe already in the document: #0 delete p4 "thirty", #1 insert p4 "sixty".
+If you did not make them, tell the user about them.
 {authors: JD "Jane Doe"}
 {summary: 2 tracked changes (JD 2) · 1 section}
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.

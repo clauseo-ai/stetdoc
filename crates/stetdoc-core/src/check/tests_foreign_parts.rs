@@ -4,7 +4,7 @@
 
 use super::keys::Key;
 use super::tests::{W, state, state_with};
-use super::tests_edit::{MAIN, accepted, refused, say};
+use super::tests_edit::{MAIN, MISORDERED_RPR, accepted, refused, say};
 use super::tests_units::comments_part;
 use super::{Declared, part_keys, unit_keys};
 use crate::api::check::FindingCode as C;
@@ -105,8 +105,10 @@ fn an_imported_definition_brings_the_keys_its_element_had_in_the_original() {
 
 #[test]
 fn a_part_copied_whole_brings_the_keys_of_the_part_it_was_copied_from() {
-    let faulty = r#"<w:comment w:id="0" w:author="a"><w:p><w:r><w:rPr/><w:t>note</w:t></w:r></w:p></w:comment>"#;
-    // The original has the comments part with an empty run property.
+    let faulty = format!(
+        r#"<w:comment w:id="0" w:author="a"><w:p><w:r>{MISORDERED_RPR}<w:t>note</w:t></w:r></w:p></w:comment>"#
+    );
+    // The original has the comments part with a run property out of canonical order.
     let xml = format!(r#"<w:comments xmlns:w="{W}">{faulty}</w:comments>"#);
     let original = state_with(
         "<w:p><w:r><w:t>a</w:t></w:r></w:p>",
@@ -114,13 +116,13 @@ fn a_part_copied_whole_brings_the_keys_of_the_part_it_was_copied_from() {
     );
     let keys = part_keys(&original.parts(), "word/comments.xml").expect("keys");
     assert!(
-        keys.contains(&Key::rule(C::EmptyProperties, "rPr")),
+        keys.iter().any(|k| k.code() == C::SchemaNonCanonicalOrder),
         "{keys:?}"
     );
     // The redline gets a copy of the part: its problem is carried, and a problem the original lacked is new.
     let s = state("<w:p><w:r><w:t>a</w:t></w:r></w:p>");
     let mut tx = s.begin();
-    tx.add_part(comments_part(faulty)).expect("adds");
+    tx.add_part(comments_part(&faulty)).expect("adds");
     refused(&say(&tx, &Declared::default()));
     let declared = Declared {
         parts: vec![(Arc::from("word/comments.xml"), keys.clone())],

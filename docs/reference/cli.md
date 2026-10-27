@@ -270,9 +270,9 @@ stetdoc edit [OPTIONS] <INPUT>
 
 | Argument | Meaning |
 |---|---|
-| `<INPUT>` | A working copy, or a .docx with -o or --in-place. |
+| `<INPUT>` | A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. |
 | `--ops <FILE>` | The batch, as block text or JSON. Defaults to stdin; - is stdin too. |
-| `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
+| `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused. A working copy needs no flag: an edit always writes it. |
 | `--no-track` | Write plain changes, not tracked ones. Only for documents that are not under review. |
 | `--dry-run` | Validate and show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
@@ -357,16 +357,17 @@ stetdoc replace [OPTIONS] <INPUT> <OLD NEW> <OLD NEW>...
 
 | Argument | Meaning |
 |---|---|
-| `<INPUT>` | A working copy, or a .docx with -o or --in-place. |
+| `<INPUT>` | A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. |
 | `<OLD NEW>` | OLD and NEW, as many pairs as you like, applied together or not at all. OLD is matched in the text as the final view reads it, across formatting, with curly and straight quotes the same; it must be there once (see --all and --expect). An empty NEW deletes OLD. Put -- before the pairs when a text starts with -. |
 | `--all` | Replace every occurrence of each OLD, and say how many. |
 | `--expect <N>` | Replace every occurrence of each OLD, and only if there are exactly N of each. |
 | `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
 | `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
-| `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
+| `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it. |
 | `--dry-run` | Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
 | `--quotes <QUOTES>` | Follow the paragraph's quotes (match), or keep them as typed. One of `match`, `as-typed`. Default `match`. |
+| `--ignore-case` | Match letters whatever their case, so "net 30" also finds "Net 30". Without it the case must be the document's. |
 | `--author <NAME>` | The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default. |
 | `--date <DATE>` | The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock. |
 
@@ -375,16 +376,19 @@ stetdoc replace [OPTIONS] <INPUT> <OLD NEW> <OLD NEW>...
 `replace` changes text in one step. It reads the document, finds each OLD in the text as the final view reads it, and
 applies every pair as tracked changes in one edit, all or nothing. There is no base to copy: stetdoc finds and edits in
 the same run, so nothing can change between the two. OLD is matched across formatting, with curly and straight quotes
-the same, and it must be in the document once.
+the same, and it must be in the document once. A .docx is written to NAME.edited.docx beside it, and the input is left
+as it was, unless `-o FILE` names the output or `--in-place` writes back to the input. When NAME.edited.docx exists, the
+edit goes to NAME.edited-2.docx, and so on, and the receipt says so.
 
 ```console
-$ stetdoc replace contract.docx "thirty days" "sixty days" -o edited.docx --author "Jane Doe"
+$ stetdoc replace contract.docx "thirty days" "sixty days" --author "Jane Doe"
 replace "thirty days" with "sixty days": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
 checked 1 unit.
-wrote edited.docx
+wrote contract.edited.docx
+contract.docx is unchanged. Run the next edit on contract.edited.docx to build on this one, or pass -o FILE or --in-place to choose.
 
 ```
 
@@ -403,6 +407,27 @@ $ stetdoc replace contract.docx "ninety days" "sixty days" -o edited.docx --auth
 ? 3
 error[not_found]: "ninety days" is not in the document as it reads now.
 next: Nothing was applied. Write OLD exactly as the document reads now (stetdoc view FILE --find WORD shows it), or widen --range or --clause.
+
+```
+
+OLD is matched with its case. When it is there only in another case, the refusal says where, and `--ignore-case`
+matches letters whatever their case.
+
+```console
+$ stetdoc replace contract.docx "payment is due" "Payment falls due" -o edited.docx --author "Jane Doe"
+? 3
+error[not_found]: "payment is due" is not in the document as it reads now.
+Ignoring case, it is there once:
+  p4 [Payment is due] within thirty days.
+next: Nothing was applied. Run it again with --ignore-case to match the places listed, or write OLD in the document's case.
+
+$ stetdoc replace contract.docx "payment is due" "Payment falls due" --ignore-case -o edited.docx --author "Jane Doe"
+replace "payment is due" with "Payment falls due": once, at p4
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 8e37edb10d183515:0:8e37edb10d183515
+0 replace p4: deletion #0, insertion #1
+p4 Payment {--is--}{#0 JD}{++falls++}{#1 JD} due within thirty days.
+checked 1 unit.
+wrote edited.docx
 
 ```
 
@@ -465,15 +490,18 @@ stetdoc comment [OPTIONS] <INPUT> <ANCHOR> <TEXT>
 
 | Argument | Meaning |
 |---|---|
-| `<INPUT>` | A working copy, or a .docx with -o or --in-place. |
-| `<ANCHOR>` | The text to anchor the comment to, matched as replace matches OLD. It must be there once. |
+| `<INPUT>` | A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. |
+| `<ANCHOR>` | The text to anchor the comment to, matched as replace matches OLD. It must be there once (see --all and --expect). |
 | `<TEXT>` | The comment. A newline is a paragraph break of the comment. |
+| `--all` | Comment on every occurrence of the anchor, one comment each, and say how many. |
+| `--expect <N>` | Comment on every occurrence of the anchor, and only if there are exactly N. |
 | `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
 | `--clause <CLAUSE>` | Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III". |
-| `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
+| `-o, --output <DOCX>` | With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. |
 | `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it. |
 | `--dry-run` | Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it. |
 | `--quotes <QUOTES>` | Follow the paragraph's quotes (match), or keep them as typed. One of `match`, `as-typed`. Default `match`. |
+| `--ignore-case` | Match letters whatever their case, so "net 30" also finds "Net 30". Without it the case must be the document's. |
 | `--author <NAME>` | The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default. |
 | `--date <DATE>` | The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock. |
 
@@ -481,6 +509,9 @@ stetdoc comment [OPTIONS] <INPUT> <ANCHOR> <TEXT>
 
 `comment` adds a comment in one step: it finds ANCHOR in the text as the final view reads it, as `replace` finds OLD,
 and anchors the comment to it. ANCHOR must be there once, and `--range` or `--clause` limits where it is looked for.
+`--all` puts the same comment on every place, `--expect N` does so only when there are exactly N, and `--ignore-case`
+matches letters whatever their case, as for `replace`. Without `-o` or `--in-place`, a .docx is written to
+NAME.edited.docx beside it.
 
 ```console
 $ stetdoc comment contract.docx "thirty days" "Can we agree sixty?" -o commented.docx --author "Jane Doe"
@@ -496,7 +527,17 @@ $ stetdoc comment contract.docx "Supplier" "Which one?" -o commented.docx --auth
 error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
   p1 The [Supplier] shall indemnify the Customer,…
   p2 …sses” means any loss, and the [Supplier]’s liability.
-next: Nothing was applied. Make the anchor longer so it matches once, or limit the search with --range or --clause.
+next: Nothing was applied. Make the anchor longer so it matches once, limit the search with --range or --clause, or pass --all to comment on every one.
+
+$ stetdoc comment contract.docx "Supplier" "Which one?" --all -o commented.docx --author "Jane Doe"
+comment on "Supplier": 2 times, in 2 blocks: p1, p2
+applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base cfe4d86f3f81d849:0:cfe4d86f3f81d849
+0 comment p1: c0 added
+1 comment p2: c1 added
+p1 The {c0}Supplier{/c0} shall indemnify the Customer, and shall pay on demand.
+p2 “Losses” means any loss, and the {c1}Supplier{/c1}’s liability.
+checked 2 units.
+wrote commented.docx
 
 ```
 

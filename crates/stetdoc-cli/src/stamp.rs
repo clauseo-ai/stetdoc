@@ -39,6 +39,12 @@ pub fn resolve(args: &StampArgs) -> Result<Stamp, Failure> {
     Ok(Stamp::new(author, date))
 }
 
+/// The author a command that writes revisions would use when given no `--author`, or `None` when none is configured: what
+/// a command that writes nothing (`view`) takes as the current author.
+pub fn author() -> Option<String> {
+    env(AUTHOR_VAR).or_else(config::author)
+}
+
 fn env(name: &str) -> Option<String> {
     std::env::var(name).ok().filter(|v| !v.trim().is_empty())
 }

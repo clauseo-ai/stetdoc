@@ -12,6 +12,7 @@ mod init;
 mod inspect;
 mod lookup;
 pub mod mcp;
+mod others;
 mod pack;
 mod replace;
 mod skills;

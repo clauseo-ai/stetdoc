@@ -1,4 +1,4 @@
-# An edit of a .docx needs -o, or --in-place to write back to it.
+# An edit of a .docx with neither -o nor --in-place writes NAME.edited.docx beside it and leaves the input as it was.
 bin.name = "stetdoc"
 args = ["edit", "contract.docx", "--author", "Jane Doe"]
 stdin = """
@@ -9,5 +9,5 @@ ref: p4
 find: thirty
 with: sixty
 """
-status.code = 2
+status.code = 0
 fs.sandbox = true

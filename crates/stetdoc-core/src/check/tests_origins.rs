@@ -2,11 +2,10 @@
 //! other unit had, if the edit says where the content came from. Without the declaration it is
 //! refused exactly when the origin had a problem, which is the safe direction.
 
-use super::keys::Key;
 use super::tests::state;
 use super::tests_edit::{
-    MAIN, Said, accepted, append, base_node, el, insert_first, key, nth, refused, run_of, say,
-    set_attr, transaction_with,
+    MAIN, MISORDERED_RPR, Said, accepted, append, base_node, el, insert_first, key, misordered_rpr,
+    nth, refused, run_of, say, set_attr, transaction_with,
 };
 use super::{Declared, Origin, edit, unit_keys};
 use crate::api::check::FindingCode as C;
@@ -16,8 +15,9 @@ use crate::wordml::BlockKey;
 use crate::xml::{NodeId, SpanTree};
 use std::sync::Arc;
 
-/// A paragraph whose only run has an empty properties element.
-const FAULTY: &str = "<w:p><w:r><w:rPr/><w:t>a</w:t></w:r></w:p>";
+/// A paragraph whose only run has its properties out of canonical order, a schema violation. (An
+/// empty properties element is a note, so it would not be a problem to carry or to refuse.)
+const FAULTY: &str = "<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>a</w:t></w:r></w:p>";
 const CLEAN: &str = "<w:p><w:r><w:t>a</w:t></w:r></w:p>";
 
 fn declare(block: NodeId, from: &[NodeId]) -> Declared {
@@ -65,7 +65,7 @@ fn a_copy_may_keep_the_problem_of_the_paragraph_it_was_copied_from() {
     });
     assert!(accepted(&with).carried_total >= 1);
     refused(&without);
-    assert_eq!(without.new, [C::EmptyProperties]);
+    assert_eq!(without.new, [C::SchemaNonCanonicalOrder]);
     // a copy of a paragraph with no problem has nothing to excuse
     let s = state(CLEAN);
     let (with, without) = judge(&s, |t| {
@@ -78,7 +78,9 @@ fn a_copy_may_keep_the_problem_of_the_paragraph_it_was_copied_from() {
 
 #[test]
 fn the_second_half_of_a_split_takes_the_problem_of_the_paragraph_it_came_from() {
-    let s = state("<w:p><w:r><w:t>a</w:t></w:r><w:r><w:rPr/><w:t>b</w:t></w:r></w:p>");
+    let s = state(&format!(
+        "<w:p><w:r><w:t>a</w:t></w:r><w:r>{MISORDERED_RPR}<w:t>b</w:t></w:r></w:p>"
+    ));
     let (with, without) = judge(&s, |t| {
         let p = nth(t, "p", 0);
         let second = el(t, "p");
@@ -91,13 +93,15 @@ fn the_second_half_of_a_split_takes_the_problem_of_the_paragraph_it_came_from() 
     // the first half keeps the element and so its own origin: the paragraph before the edit
     accepted(&with);
     refused(&without);
-    assert_eq!(without.new, [C::EmptyProperties]);
+    assert_eq!(without.new, [C::SchemaNonCanonicalOrder]);
 }
 
 #[test]
 fn the_survivor_of_a_merge_keeps_the_problems_of_both_paragraphs() {
-    let body = "<w:p><w:r><w:rPr/><w:t>a</w:t></w:r></w:p><w:p><w:r><w:t xml:space=\"default\"> b</w:t></w:r></w:p>";
-    let s = state(body);
+    let body = format!(
+        "<w:p><w:r>{MISORDERED_RPR}<w:t>a</w:t></w:r></w:p><w:p><w:r><w:t xml:space=\"default\"> b</w:t></w:r></w:p>"
+    );
+    let s = state(&body);
     let merge = |t: &mut SpanTree| {
         let (first, second) = (nth(t, "p", 0), nth(t, "p", 1));
         let r = nth(t, "r", 1);
@@ -125,9 +129,9 @@ fn the_survivor_of_a_merge_keeps_the_problems_of_both_paragraphs() {
     refused(&kept);
     assert_eq!(kept.new, [C::EdgeSpaceWithoutPreserve]);
     // two paragraphs with the same kind of problem need no declaration
-    let same = state(
-        "<w:p><w:r><w:rPr/><w:t>a</w:t></w:r></w:p><w:p><w:r><w:rPr/><w:t>b</w:t></w:r></w:p>",
-    );
+    let same = state(&format!(
+        "<w:p><w:r>{MISORDERED_RPR}<w:t>a</w:t></w:r></w:p><w:p><w:r>{MISORDERED_RPR}<w:t>b</w:t></w:r></w:p>"
+    ));
     let (_, without) = judge(&same, |t| {
         let (first, second) = merge(t);
         declare(first, &[second])
@@ -151,7 +155,7 @@ fn each_paragraph_of_a_cloned_row_declares_the_paragraph_it_copies() {
     });
     accepted(&with);
     refused(&without);
-    assert_eq!(without.new, [C::EmptyProperties]);
+    assert_eq!(without.new, [C::SchemaNonCanonicalOrder]);
 }
 
 fn named_p(t: &SpanTree, n: usize) -> NodeId {
@@ -241,7 +245,7 @@ fn a_block_from_another_package_brings_the_keys_it_had_there() {
     let theirs = key(nth(view.tree(id).expect("parses"), "p", 0));
     let keys = unit_keys(&view, &theirs).expect("keys");
     assert!(
-        keys.contains(&Key::rule(C::EmptyProperties, "rPr")),
+        keys.iter().any(|k| k.code() == C::SchemaNonCanonicalOrder),
         "{keys:?}"
     );
     // the redline imports a paragraph with the same problem as a new block
@@ -249,7 +253,7 @@ fn a_block_from_another_package_brings_the_keys_it_had_there() {
     let import = |t: &mut SpanTree| {
         let p = el(t, "p");
         let run = run_of(t, "imported");
-        let rpr = el(t, "rPr");
+        let rpr = misordered_rpr(t);
         insert_first(t, run, rpr);
         append(t, p, run);
         place(t, p);
@@ -285,7 +289,7 @@ fn a_declaration_never_hides_a_problem_in_a_unit_it_does_not_name() {
     let s = state(&format!("{FAULTY}{CLEAN}{CLEAN}"));
     let (tx, declared) = transaction_with(&s, |t| {
         let (first, second, third) = (nth(t, "p", 0), nth(t, "p", 1), nth(t, "p", 2));
-        let rpr = el(t, "rPr");
+        let rpr = misordered_rpr(t);
         let r = nth(t, "r", 1);
         let at = t.node_ref(r).first_child().map(|c| c.id());
         t.edit().insert_before(r, at, rpr).expect("inserts");
@@ -294,5 +298,5 @@ fn a_declaration_never_hides_a_problem_in_a_unit_it_does_not_name() {
     });
     let said = say(&tx, &declared);
     refused(&said);
-    assert_eq!(said.new, [C::EmptyProperties]);
+    assert_eq!(said.new, [C::SchemaNonCanonicalOrder]);
 }

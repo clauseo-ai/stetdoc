@@ -83,7 +83,7 @@ fn a_recital_after_numbered_parties_is_under_its_heading_and_in_no_clause() {
         v.text
     );
     assert!(v.text.contains("{in p3 \"RECITALS\"}"), "{}", v.text);
-    let found = occurrences(&state, "wish", &Scope::Auto).unwrap();
+    let found = occurrences(&state, "wish", &Scope::Auto, false).unwrap();
     assert_eq!(found.hits[0].clause, None, "{found:?}");
     assert_eq!(found.hits[0].heading.as_deref(), Some("RECITALS"));
 }
@@ -104,10 +104,10 @@ fn a_paragraph_after_a_list_is_in_the_clause_the_list_is_in() {
         "{}",
         war.text
     );
-    let found = occurrences(&state, "avoidance", &Scope::Auto).unwrap();
+    let found = occurrences(&state, "avoidance", &Scope::Auto, false).unwrap();
     assert_eq!(found.hits[0].clause.as_deref(), Some("1.1"), "{found:?}");
     assert_eq!(found.hits[0].heading, None);
-    let party = occurrences(&state, "ACME", &Scope::Auto).unwrap();
+    let party = occurrences(&state, "ACME", &Scope::Auto, false).unwrap();
     assert_eq!(party.hits[0].clause.as_deref(), Some("(1)"), "{party:?}");
 }
 

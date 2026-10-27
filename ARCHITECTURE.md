@@ -57,6 +57,7 @@ impl Document {
     pub fn revisions(&self, filter: &RevisionFilter) -> Result<Vec<RevisionInfo>, StetError>;
     pub fn lookup(&self, query: &str) -> Result<Lookup, StetError>;   // defined terms, cross-references
     pub fn occurrences(&self, needle: &str, scope: &Scope) -> Result<Occurrences, StetError>;   // where a text is, as `find` matches
+    pub fn occurrences_ignoring_case(&self, needle: &str, scope: &Scope) -> Result<Occurrences, StetError>;   // the same, any case
     pub fn check(&self) -> CheckReport;
     pub fn check_pending(&self, pending: Option<ReadableFiles>, stamp: Option<Stamp>, strict: bool)
         -> Result<CheckResult, StetError>;                       // everything `stetdoc check` prints, and its exit status

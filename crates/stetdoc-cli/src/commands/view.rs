@@ -26,7 +26,26 @@ pub fn run(args: &ViewArgs) -> Result<Outcome, Failure> {
             next_command(next.as_str())
         ));
     }
-    Ok(Outcome::of(&text, &view)?.with_notes(read.notes))
+    let mut outcome = Outcome::of(&text, &view)?.with_notes(read.notes);
+    // The ledger lists every change already, so only the other views say which changes others made.
+    if !args.revisions
+        && let Some(others) =
+            super::others::others(doc, crate::stamp::author().as_deref(), &args.input)?
+    {
+        outcome.text = with_others(&outcome.text, &others.text);
+        if let Some(object) = outcome.json.as_object_mut() {
+            object.insert("others".to_string(), others.json);
+        }
+    }
+    Ok(outcome)
+}
+
+/// The view's text with the lines about others' changes after its header line, where an agent reads them first.
+fn with_others(text: &str, others: &str) -> String {
+    match text.split_once('\n') {
+        Some((head, rest)) => format!("{head}\n{others}{rest}"),
+        None => format!("{text}\n{others}"),
+    }
 }
 
 /// The `ViewSpec` the flags ask for.

@@ -121,3 +121,53 @@ fn every_hit_is_a_target_of_a_batch_against_the_same_base() {
             .is_empty()
     );
 }
+
+#[test]
+fn ignoring_case_finds_any_case_at_the_offsets_of_the_final_text() {
+    let doc = doc();
+    assert!(
+        doc.occurrences("PAYMENT is", &Scope::Auto)
+            .unwrap()
+            .hits
+            .is_empty()
+    );
+    let found = doc
+        .occurrences_ignoring_case("PAYMENT is due within THIRTY days", &Scope::Auto)
+        .unwrap();
+    assert_eq!(found.hits.len(), 1, "{found:?}");
+    assert_eq!(
+        (
+            found.hits[0].block.as_str(),
+            found.hits[0].start,
+            found.hits[0].end
+        ),
+        ("p1", 0, 33)
+    );
+    // curly quotes still match straight ones, and text only in a deletion is still listed apart
+    let quoted = doc
+        .occurrences_ignoring_case("\"seller\"", &Scope::Auto)
+        .unwrap();
+    assert!(quoted.hits.len() == 1 && quoted.hits[0].loose, "{quoted:?}");
+    let deleted = doc
+        .occurrences_ignoring_case("NET 30", &Scope::Auto)
+        .unwrap();
+    assert!(
+        deleted.hits.is_empty() && deleted.deleted.len() == 1,
+        "{deleted:?}"
+    );
+    // the hit is a target a batch applies to
+    let mut doc = doc;
+    let op = Op::Replace(ReplaceOp {
+        r#ref: "p1".into(),
+        with: "Payment is due in".into(),
+        find: None,
+        occurrence: None,
+        start: Some(found.hits[0].start),
+        end: Some(21),
+    });
+    doc.edit(Edit::ops(
+        Batch::new(found.base.clone(), vec![op]),
+        Stamp::new("Clauseo", "2026-10-06T09:30:00Z"),
+    ))
+    .unwrap();
+}

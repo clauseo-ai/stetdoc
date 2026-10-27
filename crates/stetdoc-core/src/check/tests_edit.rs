@@ -5,7 +5,7 @@
 use super::edit::{Mode, collect, run};
 use super::tests::{W, named, state, state_with};
 use super::{Declared, Verified, edit};
-use crate::api::check::FindingCode as C;
+use crate::api::check::{Class, FindingCode as C};
 use crate::api::error::{ErrorCode, StetError};
 use crate::state::{State, Tx};
 use crate::wordml::BlockKey;
@@ -89,6 +89,20 @@ pub(super) fn retext(t: &mut SpanTree, n: usize, text: &str) {
     t.edit()
         .set_text(node.expect("a text node"), text)
         .expect("sets the text");
+}
+
+/// Run properties out of canonical order, as XML: `w:i` before `w:b`. A schema violation, where an
+/// empty properties element is only a note.
+pub(super) const MISORDERED_RPR: &str = "<w:rPr><w:i/><w:b/></w:rPr>";
+
+/// A new, detached `w:rPr` that is `MISORDERED_RPR`.
+pub(super) fn misordered_rpr(tree: &mut SpanTree) -> NodeId {
+    let rpr = el(tree, "rPr");
+    let i = el(tree, "i");
+    let b = el(tree, "b");
+    append(tree, rpr, i);
+    append(tree, rpr, b);
+    rpr
 }
 
 pub(super) fn append(tree: &mut SpanTree, parent: NodeId, child: NodeId) {
@@ -241,9 +255,9 @@ fn empty_ins(t: &mut SpanTree) {
     append(t, p, ins);
 }
 
-fn empty_rpr(t: &mut SpanTree) {
+fn misordered_rpr_in_second_run(t: &mut SpanTree) {
     let r = nth(t, "r", 1);
-    let rpr = el(t, "rPr");
+    let rpr = misordered_rpr(t);
     insert_first(t, r, rpr);
 }
 
@@ -319,11 +333,11 @@ fn cases() -> Vec<Case> {
             codes: &[C::EmptyRevision],
         },
         Case {
-            name: "an empty properties element",
+            name: "a run property out of canonical order",
             clean: r#"<w:p><w:r><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#,
-            already: r#"<w:p><w:r><w:rPr/><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#,
-            change: empty_rpr,
-            codes: &[C::EmptyProperties],
+            already: r#"<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#,
+            change: misordered_rpr_in_second_run,
+            codes: &[C::SchemaNonCanonicalOrder],
         },
         Case {
             name: "a revision id used twice",
@@ -362,6 +376,30 @@ fn v5_a_change_that_adds_a_finding_to_a_clean_unit_is_refused_and_one_that_adds_
 }
 
 #[test]
+fn an_empty_property_container_is_a_note_that_blocks_nothing() {
+    // the schema allows an empty w:rPr, so an edit that adds one is accepted, and the note is
+    // reported in the verification, not counted as a problem
+    let s = state(r#"<w:p><w:r><w:t>a</w:t></w:r><w:r><w:t>b</w:t></w:r></w:p>"#);
+    let added = said(&s, |t| {
+        let r = nth(t, "r", 1);
+        let rpr = el(t, "rPr");
+        insert_first(t, r, rpr);
+    });
+    let v = accepted(&added);
+    assert!(added.new.is_empty(), "{:?}", added.new);
+    assert_eq!(v.carried_total, 0);
+    assert_eq!(v.notes.len(), 1, "{:?}", v.notes);
+    assert_eq!(v.notes[0].code, C::EmptyProperties);
+    assert_eq!(v.notes[0].class, Class::Note);
+    // a note is not carried: a paragraph that already has one, and is edited, brings nothing
+    let s = state(r#"<w:p><w:r><w:rPr/><w:t>a</w:t></w:r></w:p>"#);
+    let edited = said(&s, |t| retext(t, 0, "edited"));
+    let v = accepted(&edited);
+    assert_eq!(v.carried_total, 0, "{:?}", v.carried);
+    assert!(v.carried.is_empty() && v.notes.is_empty(), "{v:?}");
+}
+
+#[test]
 fn the_refusal_names_the_first_findings_with_their_refs() {
     let s = state(
         r#"<w:p><w:r><w:t>a</w:t></w:r></w:p><w:p><w:r><w:t>b</w:t></w:r></w:p><w:p><w:r><w:t>c</w:t></w:r></w:p>"#,
@@ -369,7 +407,7 @@ fn the_refusal_names_the_first_findings_with_their_refs() {
     let tx = transaction(&s, |t| {
         for n in 0..3 {
             let r = nth(t, "r", n);
-            let rpr = el(t, "rPr");
+            let rpr = misordered_rpr(t);
             insert_first(t, r, rpr);
         }
         let p = nth(t, "p", 2);

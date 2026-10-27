@@ -8,12 +8,12 @@ use crate::api::edit::Edit;
 use crate::refs::Claim;
 
 const FAULTY_BODY: &str = concat!(
-    "<w:p><w:r><w:rPr/><w:t>First paragraph with an empty run property</w:t></w:r></w:p>",
-    "<w:p><w:pPr><w:rPr/></w:pPr><w:r><w:t>Second paragraph with an empty mark property</w:t></w:r></w:p>",
+    "<w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>First paragraph with a run property out of order</w:t></w:r></w:p>",
+    "<w:p><w:pPr><w:rPr><w:i/><w:b/></w:rPr></w:pPr><w:r><w:t>Second paragraph with a mark property out of order</w:t></w:r></w:p>",
     "<w:p><w:r><w:t> leading space and no preserve</w:t></w:r></w:p>",
     "<w:p><w:r><w:t>Fourth paragraph that is clean</w:t></w:r></w:p>",
     "<w:tbl><w:tblPr/><w:tblGrid><w:gridCol w:w=\"2000\"/></w:tblGrid>",
-    "<w:tr><w:tc><w:p><w:r><w:rPr/><w:t>cell one</w:t></w:r></w:p></w:tc></w:tr>",
+    "<w:tr><w:tc><w:p><w:r><w:rPr><w:i/><w:b/></w:rPr><w:t>cell one</w:t></w:r></w:p></w:tc></w:tr>",
     "<w:tr><w:tc><w:p><w:r><w:t>cell two</w:t></w:r></w:p></w:tc></w:tr></w:tbl>",
     "<w:p><w:r><w:t>Last paragraph</w:t></w:r></w:p>",
 );
@@ -52,17 +52,17 @@ fn check_reports_what_is_wrong_and_changes_nothing() {
     assert_eq!(
         at,
         [
-            (FindingCode::EmptyProperties, Some("p1")),
-            (FindingCode::EmptyProperties, Some("p2")),
+            (FindingCode::SchemaNonCanonicalOrder, Some("p1")),
+            (FindingCode::SchemaNonCanonicalOrder, Some("p2")),
+            (FindingCode::SchemaNonCanonicalOrder, Some("p5")),
             (FindingCode::EdgeSpaceWithoutPreserve, Some("p3")),
-            (FindingCode::EmptyProperties, Some("p5")),
         ]
     );
     assert_eq!(
         report.by_code,
         [
-            (FindingCode::EdgeSpaceWithoutPreserve, 1),
-            (FindingCode::EmptyProperties, 3)
+            (FindingCode::SchemaNonCanonicalOrder, 3),
+            (FindingCode::EdgeSpaceWithoutPreserve, 1)
         ]
     );
     // The same twice, and no byte of the document moved.
@@ -120,7 +120,7 @@ fn an_edit_is_never_refused_for_a_problem_the_input_already_had() {
     assert!(total >= 1);
     assert_eq!(
         receipt.validation.carried[0].code,
-        FindingCode::EmptyProperties
+        FindingCode::SchemaNonCanonicalOrder
     );
     assert_eq!(receipt.validation.carried[0].block.as_deref(), Some("p1"));
     let line =

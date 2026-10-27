@@ -50,6 +50,7 @@ fn make(args: &ReplaceArgs, doc: &Document, stamp: Stamp) -> Result<Made, Failur
         .collect();
     let several = pairs.len() > 1;
     let mut problems = Vec::new();
+    let mut case = false;
     let mut found = Vec::new();
     for (i, (old, new)) in pairs.iter().enumerate() {
         if old.is_empty() {
@@ -61,19 +62,24 @@ fn make(args: &ReplaceArgs, doc: &Document, stamp: Stamp) -> Result<Made, Failur
                 "Give the text to replace as the document reads. To add text, replace a word next to it with that word and the new text.",
             ));
         }
-        let hits = find::find(doc, old, &scope)?;
+        let hits = find::find(doc, old, &scope, &args.find)?;
         let label = if several {
             format!("pair {}: ", i + 1)
         } else {
             String::new()
         };
-        if let Some(problem) = find::problem(&hits, wanted, &scope, &label) {
-            problems.push(problem);
+        if let Some((code, mut text)) = find::problem(&hits, wanted, &scope, &label) {
+            if let Some(hint) = find::case_hint(doc, &hits, &scope, &args.find, &label)? {
+                case = true;
+                text.push('\n');
+                text.push_str(&hint);
+            }
+            problems.push((code, text));
         }
         found.push((i, (*old).clone(), (*new).clone(), hits));
     }
     if !problems.is_empty() {
-        return Err(find::refuse(problems, "OLD", true));
+        return Err(find::refuse(problems, "OLD", "change every one", case));
     }
     // Every place, grouped by paragraph in the order the paragraphs were first found, each group from its end to its start.
     let mut places: Vec<(String, u32, u32, usize)> = Vec::new();

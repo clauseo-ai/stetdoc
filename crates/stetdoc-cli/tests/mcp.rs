@@ -316,11 +316,10 @@ fn an_edit_takes_the_servers_author_and_without_one_says_how_to_set_it() {
         "edit",
         json!({ "input": "contract.stet", "batch": batch, "author": "Claude" }),
     );
-    let receipt = ok(&receipt).to_string();
-    assert!(
-        receipt.contains("Claude") && !receipt.contains("Mia Chen"),
-        "{receipt}"
-    );
+    // Mia Chen's changes are now another author's, and the receipt says so.
+    let receipt = ok(&receipt);
+    assert_eq!(receipt["stamp"]["author"], "Claude");
+    assert_eq!(receipt["others"]["by_author"][0]["author"], "Mia Chen");
 }
 
 #[test]

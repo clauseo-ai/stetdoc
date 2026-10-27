@@ -21,6 +21,12 @@ released yet.
 - The Node bindings have `Document.occurrences(text, scope?)`, typed with `Occurrences` and `Scope`.
 - `Occurrence` has `heading`: the nearest heading when the paragraph is in no clause, which the CLI prints as
   `(under "RECITALS")`.
+- Every receipt of `edit`, `replace`, `comment` and `compare`, and the head of every view but the ledger, says which
+  tracked changes in the document authors other than you made, in one or two lines: how many by whom, the first three
+  with their number, kind, ref and text, and "Tell the user about them." The JSON has them in `others`.
+- `replace` and `comment` take `--ignore-case` (the MCP tools' `ignore_case`), and a `not_found` refusal lists the
+  places where the text is in another case. `Document::occurrences_ignoring_case` finds the same way.
+- `comment` takes `--all` and `--expect N`, one comment on each place, as `replace` does.
 
 - An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
   cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
@@ -335,6 +341,10 @@ released yet.
   `{§Schedule 1}`.
 - A find hit in a table cell shows the other cells of its row (`{row: p36 "Greater than 4.25 to 1.00", p38 "2.25%"}`),
   and a compact find pages by hit line, so a table with many matching cells no longer comes on one page.
+- `edit`, `replace` and `comment` on a .docx with neither `-o` nor `--in-place` write `NAME.edited.docx` beside it,
+  the name `pack` uses, or `NAME.edited-2.docx` and so on when that exists, and say so. Before, they refused.
+- An empty `w:rPr` or `w:pPr` (`empty_properties`) is a note, not a violation: the schema allows it. `check` and
+  `check --strict` pass a document that has them, and a receipt no longer counts them as problems.
 
 - The MCP `edit` and `replace` tools' descriptions say to call `skills_get` first for the batch syntax and the rules.
 - `stetdoc edit --dry-run` on a .docx with `-o` or `--in-place` writes nothing, and says so on its first line, instead of

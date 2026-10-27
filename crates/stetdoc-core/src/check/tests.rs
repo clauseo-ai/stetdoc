@@ -125,8 +125,10 @@ fn a_document_reports_what_the_schema_and_the_word_rules_find() {
     ] {
         assert_eq!(count(&report, code), n, "{code:?} in {report:?}");
     }
+    // the empty property container is a note, which the schema allows, and the rest are violations
+    assert_eq!(report.notes, 1);
     assert_eq!(
-        report.violations,
+        report.violations + report.notes,
         report.by_code.iter().map(|(_, n)| n).sum::<usize>()
     );
     // a finding in a paragraph names the paragraph
@@ -159,7 +161,10 @@ fn counts_are_complete_and_the_list_is_capped() {
         count(&report, FindingCode::EmptyProperties),
         CheckReport::MAX_FINDINGS + 100
     );
-    assert_eq!(report.violations, CheckReport::MAX_FINDINGS + 100);
+    // an empty property container is a note: counted, capped, and not a violation
+    assert_eq!(report.notes, CheckReport::MAX_FINDINGS + 100);
+    assert_eq!(report.violations, 0);
+    assert!(report.ok);
     assert_eq!(report.findings.len(), CheckReport::MAX_FINDINGS);
 }
 

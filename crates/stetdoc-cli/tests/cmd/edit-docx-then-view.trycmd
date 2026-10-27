@@ -10,6 +10,8 @@ wrote edited.docx
 
 $ stetdoc view edited.docx --range p4..p4
 {stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=redline common-style="Normal" range=p4..p4}
+2 tracked changes by Jane Doe already in the document: #0 delete p4 "thirty", #1 insert p4 "sixty".
+If you did not make them, tell the user about them.
 {authors: JD "Jane Doe"}
 {summary: 2 tracked changes (JD 2) · 1 section}
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
@@ -17,6 +19,8 @@ p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
 
 $ stetdoc view edited.docx --range p4..p4 --mode final
 {stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=final common-style="Normal" range=p4..p4}
+2 tracked changes by Jane Doe already in the document: #0 delete p4 "thirty", #1 insert p4 "sixty".
+If you did not make them, tell the user about them.
 {summary: 2 tracked changes (JD 2) · 1 section}
 p4 Payment is due within sixty days.
 {position: p4..p4 of p4..p4 (1 of 1 blocks)}

@@ -1,4 +1,4 @@
-//! `stetdoc comment`: a comment anchored to a text, found once in the document as it reads now, in one edit built from
+//! `stetdoc comment`: a comment anchored to a text, found once (or at every place, with --all or --expect) in the document as it reads now, in one edit built from
 //! `Document::occurrences` and applied with `edit(Edit::ops)` as a `comment` operation on the paragraph's ref and offsets.
 
 use super::apply::{Made, Where, apply};
@@ -28,29 +28,52 @@ pub fn run(args: &CommentArgs) -> Result<Outcome, Failure> {
         in_place: args.find.in_place,
         dry_run: args.find.dry_run,
     };
+    let wanted = match (args.all, args.expect) {
+        (true, _) => Wanted::All,
+        (false, Some(n)) => Wanted::Exactly(n),
+        (false, None) => Wanted::One,
+    };
     apply(&at, &args.find.stamp, |doc, stamp| {
         let scope = find::scope(&args.find)?;
-        let found = find::find(doc, &args.anchor, &scope)?;
-        if let Some(problem) = find::problem(&found, Wanted::One, &scope, "") {
-            return Err(find::refuse(vec![problem], "the anchor", false));
+        let found = find::find(doc, &args.anchor, &scope, &args.find)?;
+        if let Some((code, mut text)) = find::problem(&found, wanted, &scope, "") {
+            let hint = find::case_hint(doc, &found, &scope, &args.find, "")?;
+            if let Some(hint) = &hint {
+                text.push('\n');
+                text.push_str(hint);
+            }
+            return Err(find::refuse(
+                vec![(code, text)],
+                "the anchor",
+                "comment on every one",
+                hint.is_some(),
+            ));
         }
-        let hit = found
+        if found.hits.is_empty() {
+            return Err(find::refuse(
+                Vec::new(),
+                "the anchor",
+                "comment on every one",
+                false,
+            ));
+        }
+        // One comment for each place, in document order. A comment adds no text, so no place moves another's offsets.
+        let ops: Vec<Op> = found
             .hits
-            .first()
-            .ok_or_else(|| find::refuse(Vec::new(), "the anchor", false))?;
-        let op = Op::Comment(CommentOp {
-            r#ref: hit.block.clone(),
-            text: args.text.clone(),
-            initials: None,
-            find: None,
-            occurrence: None,
-            start: Some(hit.start),
-            end: Some(hit.end),
-        });
-        let edit = find::shape(
-            Edit::ops(Batch::new(doc.base(), vec![op]), stamp),
-            &args.find,
-        );
+            .iter()
+            .map(|hit| {
+                Op::Comment(CommentOp {
+                    r#ref: hit.block.clone(),
+                    text: args.text.clone(),
+                    initials: None,
+                    find: None,
+                    occurrence: None,
+                    start: Some(hit.start),
+                    end: Some(hit.end),
+                })
+            })
+            .collect();
+        let edit = find::shape(Edit::ops(Batch::new(doc.base(), ops), stamp), &args.find);
         Ok(Made {
             edit,
             head: Some(format!(
@@ -60,7 +83,7 @@ pub fn run(args: &CommentArgs) -> Result<Outcome, Failure> {
             )),
             extra: vec![(
                 "found",
-                json!([{ "anchor": args.anchor, "count": 1, "hits": find::hits_json(&found)? }]),
+                json!([{ "anchor": args.anchor, "count": found.hits.len(), "hits": find::hits_json(&found)? }]),
             )],
         })
     })

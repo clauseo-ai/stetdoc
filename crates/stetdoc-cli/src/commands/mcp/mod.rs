@@ -308,6 +308,28 @@ impl Server {
             }
             _ => {}
         }
+        // An edit of a .docx with no output and no in_place writes NAME.edited.docx beside it, which must be in the root too.
+        if let Some(root) = &self.root {
+            let wants = match &command {
+                Command::Edit(a) => {
+                    Some((&a.input, a.output.is_none() && !a.in_place && !a.dry_run))
+                }
+                Command::Replace(a) => Some((
+                    &a.input,
+                    a.find.output.is_none() && !a.find.in_place && !a.find.dry_run,
+                )),
+                Command::Comment(a) => Some((
+                    &a.input,
+                    a.find.output.is_none() && !a.find.in_place && !a.find.dry_run,
+                )),
+                _ => None,
+            };
+            if let Some((input, true)) = wants
+                && input.is_file()
+            {
+                root.check(&super::apply::default_output(input))?;
+            }
+        }
         super::run(&command)
     }
 }

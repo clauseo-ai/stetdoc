@@ -19,10 +19,12 @@ const SIDE: usize = 30;
 
 /// Every place `needle` is in the paragraphs `scope` selects. `Scope::Auto` is the body, the notes and the headers and
 /// footers; `Range`, `Clause` and `Story` select as a view does; any other scope is `invalid_payload`.
+/// With `ignore_case`, letters match whatever their case, one character for one, so the offsets stay those of the Final text.
 pub(crate) fn occurrences(
     state: &State,
     needle: &str,
     scope: &Scope,
+    ignore_case: bool,
 ) -> Result<Occurrences, StetError> {
     if needle.is_empty() {
         return Err(
@@ -63,6 +65,7 @@ pub(crate) fn occurrences(
             &mut placer,
             selected,
             needle,
+            ignore_case,
             &mut hits,
             &mut deleted,
         )?;
@@ -81,10 +84,12 @@ fn scan(
     placer: &mut Placer<'_, '_>,
     selected: &Selected,
     needle: &str,
+    ignore_case: bool,
     hits: &mut Vec<Occurrence>,
     deleted: &mut Vec<Occurrence>,
 ) -> Result<(), StetError> {
     let folded_needle = fold_quotes(needle);
+    let lowered_needle = ignore_case.then(|| fold_case(needle));
     for item in &selected.items {
         let Some(source) = selected.sources.get(item.src) else {
             continue;
@@ -111,9 +116,15 @@ fn scan(
             let map = paragraph.map();
             let text = map.text(Mode::Final).into_owned();
             let mut loose = false;
-            let mut found = map.find_all(Mode::Final, needle);
+            let mut found = match &lowered_needle {
+                Some(lowered) => ranges(&fold_case(&text), lowered),
+                None => map.find_all(Mode::Final, needle),
+            };
             if found.is_empty() {
-                found = ranges(&fold_quotes(&text), &folded_needle);
+                found = match &lowered_needle {
+                    Some(lowered) => ranges(&fold_quotes(&fold_case(&text)), &fold_quotes(lowered)),
+                    None => ranges(&fold_quotes(&text), &folded_needle),
+                };
                 loose = true;
             }
             let place = placer.place(source.part, &source.story, entry)?;
@@ -134,7 +145,10 @@ fn scan(
                 loose,
             };
             if found.is_empty() {
-                let original = map.find_all(Mode::Original, needle);
+                let original = match &lowered_needle {
+                    Some(lowered) => ranges(&fold_case(&map.text(Mode::Original)), lowered),
+                    None => map.find_all(Mode::Original, needle),
+                };
                 if let Some(range) = original.first() {
                     let text = map.text(Mode::Original);
                     deleted.push(place(0, range, &text, false));
@@ -160,6 +174,20 @@ fn story_word(kind: Option<StoryKind>) -> &'static str {
         Some(StoryKind::Comments) => "comments",
         Some(StoryKind::Body) | None => "body",
     }
+}
+
+/// The text with each letter in lower case, one character for one: a letter whose lower case is more than one character
+/// stays as it is, so that a character offset in the result is the same offset in `text`.
+fn fold_case(text: &str) -> String {
+    text.chars()
+        .map(|c| {
+            let mut low = c.to_lowercase();
+            match (low.next(), low.next()) {
+                (Some(one), None) => one,
+                _ => c,
+            }
+        })
+        .collect()
 }
 
 /// The occurrences of `needle` in `text`, not overlapping, as character ranges.

@@ -212,12 +212,13 @@ pub struct InspectArgs {
 /// `stetdoc edit`.
 #[derive(Debug, Args)]
 pub struct EditArgs {
-    /// A working copy, or a .docx with -o or --in-place.
+    /// A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where.
     pub input: PathBuf,
     /// The batch, as block text or JSON. Defaults to stdin; - is stdin too.
     #[arg(long, value_name = "FILE")]
     pub ops: Option<PathBuf>,
-    /// With a .docx, the .docx to write. It must not be the input: --in-place writes back to it.
+    /// With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input:
+    /// --in-place writes back to it.
     #[arg(short, long, value_name = "DOCX")]
     pub output: Option<PathBuf>,
     /// With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is
@@ -257,7 +258,8 @@ pub struct FindArgs {
     /// Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or "Article III".
     #[arg(long, value_name = "CLAUSE")]
     pub clause: Option<String>,
-    /// With a .docx, the .docx to write. It must not be the input: --in-place writes back to it.
+    /// With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input:
+    /// --in-place writes back to it.
     #[arg(short, long, value_name = "DOCX")]
     pub output: Option<PathBuf>,
     /// With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs
@@ -270,6 +272,9 @@ pub struct FindArgs {
     /// Follow the paragraph's quotes (match), or keep them as typed.
     #[arg(long, value_enum, default_value_t = QuotesArg::Match)]
     pub quotes: QuotesArg,
+    /// Match letters whatever their case, so "net 30" also finds "Net 30". Without it the case must be the document's.
+    #[arg(long)]
+    pub ignore_case: bool,
     #[command(flatten)]
     pub stamp: StampArgs,
 }
@@ -277,7 +282,7 @@ pub struct FindArgs {
 /// `stetdoc replace`.
 #[derive(Debug, Args)]
 pub struct ReplaceArgs {
-    /// A working copy, or a .docx with -o or --in-place.
+    /// A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where.
     pub input: PathBuf,
     /// OLD and NEW, as many pairs as you like, applied together or not at all. OLD is matched in the text as the final view
     /// reads it, across formatting, with curly and straight quotes the same; it must be there once (see --all and
@@ -297,12 +302,18 @@ pub struct ReplaceArgs {
 /// `stetdoc comment`.
 #[derive(Debug, Args)]
 pub struct CommentArgs {
-    /// A working copy, or a .docx with -o or --in-place.
+    /// A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where.
     pub input: PathBuf,
-    /// The text to anchor the comment to, matched as replace matches OLD. It must be there once.
+    /// The text to anchor the comment to, matched as replace matches OLD. It must be there once (see --all and --expect).
     pub anchor: String,
     /// The comment. A newline is a paragraph break of the comment.
     pub text: String,
+    /// Comment on every occurrence of the anchor, one comment each, and say how many.
+    #[arg(long, conflicts_with = "expect")]
+    pub all: bool,
+    /// Comment on every occurrence of the anchor, and only if there are exactly N.
+    #[arg(long, value_name = "N")]
+    pub expect: Option<u32>,
     #[command(flatten)]
     pub find: FindArgs,
 }

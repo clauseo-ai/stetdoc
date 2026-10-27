@@ -115,17 +115,18 @@ pub fn problem(
 }
 
 /// The refusal for one or more problems, with the code of the first and a next step for it. `what` names the text, such
-/// as `OLD` or `the anchor`, and `all` says whether the command takes --all and --expect.
-pub fn refuse(problems: Vec<(ErrorCode, String)>, what: &str, all: bool) -> Failure {
+/// as `OLD` or `the anchor`, and `all` says what --all does, such as `change every one`. `case` says that a text not found
+/// is there in another case, which --ignore-case matches.
+pub fn refuse(problems: Vec<(ErrorCode, String)>, what: &str, all: &str, case: bool) -> Failure {
     let code = problems
         .first()
         .map_or(ErrorCode::NotFound, |(code, _)| *code);
     let next = match code {
-        ErrorCode::AmbiguousMatch if all => format!(
-            "Nothing was applied. Make {what} longer so it matches once, limit the search with --range or --clause, or pass --all to change every one."
-        ),
         ErrorCode::AmbiguousMatch => format!(
-            "Nothing was applied. Make {what} longer so it matches once, or limit the search with --range or --clause."
+            "Nothing was applied. Make {what} longer so it matches once, limit the search with --range or --clause, or pass --all to {all}."
+        ),
+        ErrorCode::NotFound if case => format!(
+            "Nothing was applied. Run it again with --ignore-case to match the places listed, or write {what} in the document's case."
         ),
         ErrorCode::CountMismatch => "Nothing was applied. Check the places listed, then pass the count they show with --expect, or limit the search with --range or --clause.".to_string(),
         _ => format!(
@@ -165,9 +166,53 @@ pub fn summary(found: &Occurrences) -> String {
     }
 }
 
-/// Finds a text in the scope.
-pub fn find(doc: &Document, needle: &str, scope: &Scope) -> Result<Occurrences, Failure> {
-    Ok(doc.occurrences(needle, scope)?)
+/// Finds a text in the scope, exactly or, with --ignore-case, whatever the case of its letters.
+pub fn find(
+    doc: &Document,
+    needle: &str,
+    scope: &Scope,
+    args: &FindArgs,
+) -> Result<Occurrences, Failure> {
+    if args.ignore_case {
+        Ok(doc.occurrences_ignoring_case(needle, scope)?)
+    } else {
+        Ok(doc.occurrences(needle, scope)?)
+    }
+}
+
+/// For a text that is not there exactly, the line that says where it is in another case, or `None` when it is not there
+/// in any case either, or the search already ignored case. It ends the refusal, so the agent can retry with --ignore-case.
+pub fn case_hint(
+    doc: &Document,
+    found: &Occurrences,
+    scope: &Scope,
+    args: &FindArgs,
+    label: &str,
+) -> Result<Option<String>, Failure> {
+    if args.ignore_case || !found.hits.is_empty() {
+        return Ok(None);
+    }
+    let loose = doc.occurrences_ignoring_case(&found.needle, scope)?;
+    let count = loose.hits.len();
+    if count == 0 {
+        return Ok(None);
+    }
+    // The refusal's next step says to pass --ignore-case, so the message only says where.
+    let shown: Vec<String> = loose.hits.iter().take(3).map(line).collect();
+    let more = if count > shown.len() {
+        format!("\n  and {} more", count - shown.len())
+    } else {
+        String::new()
+    };
+    Ok(Some(format!(
+        "{label}Ignoring case, it is there {}:\n{}{more}",
+        if count == 1 {
+            "once".to_string()
+        } else {
+            format!("{count} times")
+        },
+        shown.join("\n")
+    )))
 }
 
 /// The edit's options that the flags give.

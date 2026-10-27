@@ -95,6 +95,7 @@ fn only_the_notes_the_design_names_are_notes() {
     assert_eq!(
         notes,
         [
+            "empty_properties",
             "unanchored",
             "row_missing",
             "para_id_missing",
@@ -199,7 +200,7 @@ fn a_report_keeps_counts_for_everything_and_a_list_of_the_first_findings() {
     let mut builder = Builder::new();
     let n = CheckReport::MAX_FINDINGS + 5;
     for i in 0..n {
-        builder.add(finding(FindingCode::EmptyProperties, i));
+        builder.add(finding(FindingCode::TextInDeletion, i));
     }
     builder.add(finding(FindingCode::Unanchored, 0));
     let report = builder.finish();
@@ -208,7 +209,7 @@ fn a_report_keeps_counts_for_everything_and_a_list_of_the_first_findings() {
     assert_eq!(
         report.by_code,
         vec![
-            (FindingCode::EmptyProperties, n),
+            (FindingCode::TextInDeletion, n),
             (FindingCode::Unanchored, 1)
         ]
     );

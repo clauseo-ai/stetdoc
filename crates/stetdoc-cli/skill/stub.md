@@ -7,15 +7,26 @@ metadata:
 
 # stetdoc
 
-The `stetdoc` command reads and edits .docx files. Every edit becomes a Word tracked change with an author, and
-everything you do not touch stays byte-identical.
+stetdoc edits .docx files with real Word tracked changes.
 
-Its instructions are embedded in the binary, so they always match the installed version. Before you work on a .docx, run
+- With stetdoc's MCP tools (a tool name containing `stetdoc`), call `skills_get` first and follow it.
+- Otherwise use the `stetdoc` command as below. For more than this, run `stetdoc skills get core` and follow it.
 
 ```
-stetdoc skills get core
+stetdoc unpack a.docx  # writes a.stet/
+stetdoc view a.stet --find "net 30"  # or --range p40..p60
+stetdoc edit a.stet <<'EOF'
+base: <copied from the last view>
+---
+@replace
+ref: p4
+find: thirty days
+with: sixty days
+EOF
+stetdoc check a.stet
+stetdoc pack a.stet -o a.redline.docx --done  # removes a.stet/
+stetdoc compare old.docx new.docx -o redline.docx
 ```
 
-and follow what it prints. `stetdoc skills get operations` and `stetdoc skills get errors` are its references.
-
-If `stetdoc` is not found, tell the user it is not installed, and do not edit the .docx with other tools.
+If neither works (no stetdoc tools, and `stetdoc` is not found), tell the user stetdoc is not installed, and stop. Never
+read or edit the .docx another way (unzip, XML, python-docx), and do not offer to.

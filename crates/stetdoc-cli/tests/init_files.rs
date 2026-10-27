@@ -20,8 +20,10 @@ fn an_existing_agents_md_keeps_its_content_and_the_block_is_replaced_in_place() 
     );
 
     // An old block between other content is replaced where it is, and the rest is kept.
-    let old =
-        once.replace("Never edit a .docx with other tools.", "An older text.") + "\n## After\n";
+    let old = once.replace(
+        "if stetdoc is not installed, tell the user.",
+        "An older text.",
+    ) + "\n## After\n";
     fs::write(&path, &old).unwrap();
     w.ok(&["--project", "--agent", "codex"]);
     let again = fs::read_to_string(&path).unwrap();

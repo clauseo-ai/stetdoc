@@ -272,6 +272,7 @@ fn mcp_prints_how_to_register_the_server_and_edits_nothing() {
         "~/.cursor/mcp.json",
         "~/.config/opencode/opencode.json",
         "mcp_servers",
+        "keep the skill installed with it",
     ] {
         assert!(text.contains(line), "{line} in {text}");
     }
@@ -310,7 +311,8 @@ fn an_empty_skill_md_or_an_earlier_stub_is_replaced() {
     let agents = skill(&w.project, ".agents");
     let cmx2 = skill(&w.project, ".cmx2");
     let claude = skill(&w.project, ".claude");
-    for path in [&agents, &cmx2, &claude] {
+    let grok = skill(&w.project, ".grok");
+    for path in [&agents, &cmx2, &claude, &grok] {
         fs::create_dir_all(path.parent().unwrap()).unwrap();
     }
     fs::write(&agents, "").unwrap();
@@ -320,8 +322,13 @@ fn an_empty_skill_md_or_an_earlier_stub_is_replaced() {
     fs::write(&cmx2, earlier).unwrap();
     // A stub of another version differs only on its version line.
     fs::write(&claude, stub().replace(env!("CARGO_PKG_VERSION"), "0.0.1")).unwrap();
-    w.ok(&["--project", "--agent", "codex,cmx2,claude-code"]);
-    for path in [&agents, &cmx2, &claude] {
+    // An earlier stub with a version line is matched with any version on it.
+    let versioned =
+        fs::read_to_string(Path::new(env!("CARGO_MANIFEST_DIR")).join("skill/earlier/stub-2.md"))
+            .unwrap();
+    fs::write(&grok, versioned.replace("{{version}}", "0.9.0")).unwrap();
+    w.ok(&["--project", "--agent", "codex,cmx2,claude-code,grok"]);
+    for path in [&agents, &cmx2, &claude, &grok] {
         assert_eq!(fs::read_to_string(path).unwrap(), stub());
     }
 }
@@ -334,7 +341,7 @@ fn an_edited_stub_or_a_users_skill_named_stetdoc_is_never_replaced_or_removed() 
     for path in [&edited, &own] {
         fs::create_dir_all(path.parent().unwrap()).unwrap();
     }
-    let edited_text = stub().replace("and follow what it prints.", "and follow it. My own note.");
+    let edited_text = stub().replace("and stop.", "and stop. My own note.");
     let own_text = "---\nname: stetdoc\ndescription: my notes\n---\nPrivate.\n";
     fs::write(&edited, &edited_text).unwrap();
     fs::write(&own, own_text).unwrap();

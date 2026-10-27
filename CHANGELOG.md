@@ -20,6 +20,15 @@ released yet.
   none, so text such as `[DELETED: ...]` in a document can be told from a real change.
 - The MCP view tool's schema names, in each property's description, the arguments it cannot be used with, and a call that
   sends such a pair gets a next step that names both, in the MCP server and in the CLI's `--json` errors.
+- The agent guidance picks the surface and keeps agents away from the package. The skill stub sends an agent with
+  stetdoc's MCP tools to `skills_get`, and otherwise to the CLI, with a quick reference that covers a simple task. With
+  neither, the agent tells the user stetdoc is not installed and reads nothing another way. The core skill says how paging
+  works, that `[DELETED: ...]` without braces and an id is document text and not a revision, never to read the XML, to state
+  or ask which reading of an ambiguous rule it takes before resolving revisions in bulk (judging each change from
+  `--revisions --full` or `--find`), and to name the output and remove the working copy at the end with `pack --done`. It
+  documents `--all`, `--find` with `--range`, `inspect`'s list of a block's revisions, `edit --in-place` and the one-line
+  summary of problems already in the input. `stetdoc init --mcp`, `docs/agents.md` and the MCP server's instructions say to install the
+  skill with the server. The README gives the one-line Claude Code install, and the Claude Code plugin has an icon.
 - The CLI is published as the `stetdoc` crate, so `cargo install stetdoc` installs the `stetdoc` binary. The library is
   published as `stetdoc-core`.
 - `stetdoc view FILE --revisions` lists the tracked changes as a ledger, one line each: the ids, the kind (`insert`,

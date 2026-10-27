@@ -67,7 +67,15 @@ Cursor, OpenCode, Gemini CLI, Copilot, Amp, OpenClaw, Hermes, Grok Build, cmx2, 
 `stetdoc init --project` installs it in a project and adds a short block to `AGENTS.md`. `--list` shows what is installed
 and `--remove` takes it out. The full skill is embedded in the binary: `stetdoc skills get core`. For agents that take
 tools rather than a shell, `stetdoc mcp` serves the same commands over the Model Context Protocol, and `stetdoc init --mcp`
-prints how to register it with each agent.
+prints how to register it with each agent. Install the skill with the MCP server, so an agent whose server fails to
+start stops rather than editing the XML.
+
+In Claude Code 2.1.275 or later, one line installs the plugin, which carries the skill and the MCP server (the binary
+must still be on the PATH):
+
+```
+/plugin install stetdoc --marketplace clauseo-ai/stetdoc
+```
 
 ## Use it with your agent
 

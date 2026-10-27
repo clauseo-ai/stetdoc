@@ -42,8 +42,9 @@ In a terminal, `init` asks which agents to install for. Otherwise it installs fo
 names them instead, such as `--agent claude-code,codex` or `--agent all`. `--dry-run` lists what it would write and
 changes nothing. Running it again is safe: a file with the same bytes is left as it is.
 
-The stub is short. It tells the agent to run `stetdoc skills get core`, which prints the full skill embedded in the
-binary, so the skill always matches the version you run.
+The stub is short. It carries a quick reference that covers a simple task, and tells the agent to run `stetdoc skills
+get core` for anything more, which prints the full skill embedded in the binary, so the skill always matches the version
+you run. With stetdoc's MCP tools, the stub sends the agent to the `skills_get` tool instead.
 
 ```
 stetdoc init --list        # each agent, whether it is detected, its skill folder, and the stetdoc version there
@@ -62,7 +63,8 @@ would write ~/.grok/skills/stetdoc/SKILL.md (Grok Build)
 would write ~/.config/cmx2/skills/stetdoc/SKILL.md (cmx2)
 would write ~/.factory/skills/stetdoc/SKILL.md (Factory Droid)
 
-To use stetdoc as an MCP server as well, register `stetdoc mcp` with each agent (init edits no agent's config):
+To use stetdoc as an MCP server as well, keep the skill installed with it: without the skill, an agent whose MCP server fails to start may edit the .docx's XML itself.
+Register `stetdoc mcp` with each agent (init edits no agent's config):
   Claude Code: claude mcp add --scope user stetdoc -- stetdoc mcp
   Codex: codex mcp add stetdoc -- stetdoc mcp
   Cursor: in ~/.cursor/mcp.json: { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } }
@@ -112,6 +114,12 @@ removed. Without `--agent`, every agent's folder is tried and the others are lef
 
 ### A note on MCP
 
+Install the skill together with the MCP server, or a plugin that carries both, rather than the server alone. The skill
+tells the agent which surface to use: the MCP tools when they are there, else the `stetdoc` command. When neither works,
+it tells the agent to say that stetdoc is not installed and stop. Without the skill, an agent whose MCP server fails to
+start has nothing that keeps it away from the package, and in testing it fell back to unzipping the .docx and reading its
+XML with its own scripts.
+
 `stetdoc mcp` speaks MCP on stdin and stdout. Every snippet below runs it as a local stdio server. On your own machine
 the server finds the author you saved with `stetdoc init`, so the snippets need nothing more. To use another name for one
 agent, add `--author "Name"` after `mcp` in its snippet. Before the binary is on the PATH, `npx stetdoc mcp` works in
@@ -121,7 +129,14 @@ place of `stetdoc mcp` once the npm package is published.
 
 - **Skill:** `~/.claude/skills/stetdoc/SKILL.md`, or `.claude/skills/stetdoc/SKILL.md` in a project. `stetdoc init
   --agent claude-code` writes it.
-- **Or the plugin**, which carries the skill and the MCP entry together (the binary must still be on the PATH):
+- **Or the plugin**, which carries the skill and the MCP entry together (the binary must still be on the PATH). In a
+  session of Claude Code 2.1.275 or later, one line installs it:
+
+  ```
+  /plugin install stetdoc --marketplace clauseo-ai/stetdoc
+  ```
+
+  On any version, two commands from the shell do the same:
 
   ```
   claude plugin marketplace add clauseo-ai/stetdoc

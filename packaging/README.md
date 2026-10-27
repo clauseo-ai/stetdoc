@@ -23,7 +23,7 @@ that folder. Two marketplace indexes must sit at the repository root, because th
 | --- | --- | --- |
 | `.claude-plugin/marketplace.json` | Claude Code | The marketplace is the repository root. Its plugin entry points at `./plugins/claude` ([marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference.md)). |
 | `.agents/plugins/marketplace.json` | Codex, ChatGPT desktop | The repository marketplace is read from `$REPO_ROOT/.agents/plugins/`, and its plugins live in `./plugins/<name>` ([OpenAI plugins](https://developers.openai.com/plugins/build/plugins)). |
-| `plugins/claude/` | Claude Code | `.claude-plugin/plugin.json`, `.mcp.json` and `skills/stetdoc/SKILL.md`. |
+| `plugins/claude/` | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/icon.png` (the listing icon, a placeholder for now), `.mcp.json` and `skills/stetdoc/SKILL.md`. |
 | `plugins/cursor/` | Cursor | `.cursor-plugin/plugin.json`, `mcp.json` and `skills/stetdoc/SKILL.md`. Cursor needs no index file for a plugin to load. |
 | `plugins/openai/` | Codex, ChatGPT desktop | `plugin.json` (portable format), `mcp.json` and `skills/stetdoc/SKILL.md`. |
 

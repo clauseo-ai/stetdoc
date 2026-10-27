@@ -25,7 +25,8 @@ note: no author is saved, and every revision needs one. Run stetdoc init --autho
 wrote .claude/skills/stetdoc/SKILL.md (Claude Code)
 unchanged AGENTS.md
 
-To use stetdoc as an MCP server as well, register `stetdoc mcp` with each agent (init edits no agent's config):
+To use stetdoc as an MCP server as well, keep the skill installed with it: without the skill, an agent whose MCP server fails to start may edit the .docx's XML itself.
+Register `stetdoc mcp` with each agent (init edits no agent's config):
   Claude Code: claude mcp add --scope project stetdoc -- stetdoc mcp
 
 $ stetdoc init --project --remove --agent cursor

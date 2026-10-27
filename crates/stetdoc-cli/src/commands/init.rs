@@ -308,7 +308,8 @@ fn install(
     if args.mcp {
         let _ = writeln!(
             text,
-            "\nTo use stetdoc as an MCP server as well, register `stetdoc mcp` with each agent (init edits no agent's config):"
+            "\nTo use stetdoc as an MCP server as well, keep the skill installed with it: without the skill, an agent whose MCP server fails to start may edit the .docx's XML itself.\n\
+Register `stetdoc mcp` with each agent (init edits no agent's config):"
         );
         let mut mcp = Vec::new();
         for agent in &picked.agents {

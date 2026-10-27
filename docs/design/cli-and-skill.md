@@ -186,7 +186,9 @@ the crash and the next command is tested too. The step executor takes an injecte
 - `stetdoc skills get [name]` prints `core` (default), `operations` or `errors`. `--full` prints all three. `core` is short
   enough to load whole (about 4K tokens); the others are references the core skill points at.
 - `skills/stetdoc/SKILL.md`, the stub: YAML front matter (`name: stetdoc`, a description that says when to use it) and a body
-  that says to run `stetdoc skills get core` and follow it. `init` writes these exact bytes.
+  that picks the surface: with stetdoc's MCP tools, call `skills_get` first; otherwise use the CLI, with a quick reference
+  for a simple task and `stetdoc skills get core` for anything more; with neither, tell the user stetdoc is not installed
+  and stop, without reading the .docx another way. `init` writes these exact bytes.
 - `docs/reference/cli.md`: each command's usage, description and flags walked from the `clap` command, then its examples
   from `doc/<command>.md`, then the exit code table and the `--json` shapes.
 
@@ -246,8 +248,9 @@ check refuses one), so the harness writes a `contract.docx` and a `revised.docx`
   shared `.agents` folder and says so. Detection reads only `HOME` and `PATH`, so tests set both.
 - **The stub** carries the version that wrote it in its front matter (`metadata: stetdoc-version`). `--list` shows every
   agent, whether it is detected, its folder, and the version installed there (or `another skill` for a `SKILL.md` that is
-  not stetdoc's). A file counts as stetdoc's only when it is a stub some build wrote, unchanged: this stub with any version
-  on its version line, or an earlier stub (`skill/earlier/`) byte for byte. Anything else, an edited stub or a user's own
+  not stetdoc's). A file counts as stetdoc's only when it is a stub some build wrote, unchanged: this stub or an earlier
+  versioned stub (`skill/earlier/stub-2.md` on) with any version on its version line, or an earlier unversioned stub
+  (`skill/earlier/stub-1.md`) byte for byte. Anything else, an edited stub or a user's own
   skill named `stetdoc` included, and a `SKILL.md` that is a link, is replaced only with `--force` and never removed.
 - **`--remove`** deletes a skill folder only when it holds nothing but such an unchanged stub, and never its parent. A folder named with `--agent` that fails the test is refused and nothing is removed; without `--agent` every agent's
   folder is tried, the others are left with a note, and in a project the `AGENTS.md` block goes too.

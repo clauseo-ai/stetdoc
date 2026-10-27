@@ -32,7 +32,8 @@ const TTL_MS: u64 = 3_600_000;
 
 const INSTRUCTIONS: &str = "stetdoc reads and edits Word documents (.docx) and writes every edit as a real tracked change. \
 Before you work on a .docx, call skills_get and follow what it returns. The tools take the arguments of the stetdoc \
-commands; the edit tool takes its batch in `batch`.";
+commands; the edit tool takes its batch in `batch`. Never read or edit a .docx any other way (unzip, the XML, python-docx), \
+and if these tools stop working, tell the user rather than work around them.";
 
 /// Runs the server until stdin closes, and returns the exit status.
 pub fn serve(args: &McpArgs) -> u8 {

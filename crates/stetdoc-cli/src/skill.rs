@@ -21,11 +21,15 @@ pub fn stub() -> String {
 /// The stubs earlier builds wrote, before the stub carried its version. Each is matched byte for byte.
 const EARLIER: [&str; 1] = [include_str!("../skill/earlier/stub-1.md")];
 
+/// The stubs earlier builds wrote with a version line, each with the `{{version}}` placeholder on it. A file is matched
+/// against them with its version line normalised, as against the current stub.
+const EARLIER_VERSIONED: [&str; 1] = [include_str!("../skill/earlier/stub-2.md")];
+
 /// The key of the front-matter line that carries the version.
 const VERSION_KEY: &str = "stetdoc-version:";
 
-/// Whether a skill file is a stub some stetdoc build wrote, unchanged: this stub with any version on its version line, or
-/// an earlier stub byte for byte. A file that only says `name: stetdoc`, such as a user's own skill or an edited stub, is
+/// Whether a skill file is a stub some stetdoc build wrote, unchanged: this stub or an earlier versioned one with any
+/// version on its version line, or an earlier unversioned stub byte for byte. A file that only says `name: stetdoc`, such as a user's own skill or an edited stub, is
 /// not, so init never replaces or removes it without being told to.
 pub fn is_ours(text: &str) -> bool {
     let mut normal = String::with_capacity(text.len());
@@ -39,7 +43,7 @@ pub fn is_ours(text: &str) -> bool {
             normal.push_str(line);
         }
     }
-    normal == STUB || EARLIER.contains(&text)
+    normal == STUB || EARLIER_VERSIONED.contains(&normal.as_str()) || EARLIER.contains(&text)
 }
 
 /// Whether a skill file's front matter says `name: stetdoc`, as every stub does and a user's own skill may.

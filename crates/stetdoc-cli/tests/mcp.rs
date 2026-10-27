@@ -97,6 +97,13 @@ fn a_client_unpacks_edits_and_packs_a_tracked_change() {
     assert_eq!(init["result"]["protocolVersion"], "2025-06-18");
     assert_eq!(init["result"]["serverInfo"]["name"], "stetdoc");
     assert!(init["result"]["capabilities"]["tools"].is_object());
+    // The instructions send the agent to the skill, and away from the package's XML.
+    let instructions = init["result"]["instructions"].as_str().unwrap();
+    assert!(instructions.contains("call skills_get"), "{instructions}");
+    assert!(
+        instructions.contains("Never read or edit a .docx any other way"),
+        "{instructions}"
+    );
     server.send(&json!({ "jsonrpc": "2.0", "method": "notifications/initialized" }));
 
     let list = server.request("tools/list", json!({}));

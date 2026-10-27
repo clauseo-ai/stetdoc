@@ -12,7 +12,8 @@ const END: &str = "<!-- stetdoc:end -->";
 const BLOCK_BODY: &str = "## Word documents (.docx)
 
 This project uses `stetdoc` to read and edit .docx files with real tracked changes. Before you work on a .docx, run
-`stetdoc skills get core` and follow it. Never edit a .docx with other tools.";
+`stetdoc skills get core` (or, with stetdoc's MCP tools, call `skills_get`) and follow it. Never read or edit a .docx
+with other tools, such as unzip, the XML or python-docx, and if stetdoc is not installed, tell the user.";
 
 /// `AGENTS.md` with the block: replaced in place when it is there, appended when it is not. The block's lines end the way the
 /// file's do (CRLF when it has any), and every other line is kept byte for byte, mixed endings included.

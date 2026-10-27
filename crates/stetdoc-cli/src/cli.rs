@@ -36,7 +36,7 @@ pub enum Command {
     View(ViewArgs),
     /// Show the effective formatting of a block and where each value comes from, or the styles, lists or sections.
     Inspect(InspectArgs),
-    /// Apply a batch of operations, read from stdin or --ops, to a working copy or to a .docx with -o.
+    /// Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place.
     Edit(EditArgs),
     /// Write a redline of the differences between two documents as tracked changes.
     Compare(CompareArgs),
@@ -94,6 +94,10 @@ pub struct PackArgs {
     /// Write the edits as plain changes, not tracked ones. Only for documents that are not under review.
     #[arg(long)]
     pub no_track: bool,
+    /// Remove the working copy once the .docx is written and validated. When the pack fails, the working copy stays. Files
+    /// that stetdoc did not write stay too, and so does the folder that holds them.
+    #[arg(long)]
+    pub done: bool,
     #[command(flatten)]
     pub stamp: StampArgs,
 }
@@ -200,14 +204,19 @@ pub struct InspectArgs {
 /// `stetdoc edit`.
 #[derive(Debug, Args)]
 pub struct EditArgs {
-    /// A working copy, or a .docx with -o.
+    /// A working copy, or a .docx with -o or --in-place.
     pub input: PathBuf,
     /// The batch, as block text or JSON. Defaults to stdin; - is stdin too.
     #[arg(long, value_name = "FILE")]
     pub ops: Option<PathBuf>,
-    /// With a .docx, the .docx to write. A package is never edited in place.
+    /// With a .docx, the .docx to write. It must not be the input: --in-place writes back to it.
     #[arg(short, long, value_name = "DOCX")]
     pub output: Option<PathBuf>,
+    /// With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is
+    /// written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused.
+    /// A working copy needs no flag: an edit always writes it.
+    #[arg(long)]
+    pub in_place: bool,
     /// Write plain changes, not tracked ones. Only for documents that are not under review.
     #[arg(long)]
     pub no_track: bool,
@@ -270,6 +279,9 @@ pub struct CheckArgs {
     /// Fail (exit 5) on any violation, including ones already in the input.
     #[arg(long)]
     pub strict: bool,
+    /// List every finding the report keeps (the first 200), not only the first 20.
+    #[arg(long)]
+    pub all: bool,
     #[command(flatten)]
     pub stamp: StampArgs,
 }

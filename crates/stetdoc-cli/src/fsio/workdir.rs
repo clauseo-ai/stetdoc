@@ -114,6 +114,59 @@ impl Workdir {
         }
     }
 
+    /// Removes the working copy `next`, which is what is on disk now: in `.stet/` the entries it names and the files the CLI
+    /// keeps there, beside them its readable files, and the temporary files stetdoc writes for any of those; then each folder
+    /// when nothing else is in it. A link to the working copy is resolved first, so the folder it names is the one removed,
+    /// and the link goes too once that folder is gone. The manifest goes first, so that a removal that stops halfway leaves a
+    /// folder that is no longer a working copy, and never a complement whose readable files look deleted. Returns what stays
+    /// because stetdoc did not write it, as paths relative to the working copy.
+    pub fn remove(self, next: &WorkingCopy) -> Result<Removal, Failure> {
+        let shown = self.dir.clone();
+        let real = shown.canonicalize().map_err(|e| write_failed(&shown, &e))?;
+        let linked = shown
+            .symlink_metadata()
+            .is_ok_and(|m| m.file_type().is_symlink());
+        let stet = real.join(STET);
+        let manifest = stet.join(MANIFEST);
+        fs::remove_file(&manifest).map_err(|e| write_failed(&manifest, &e))?;
+        sync_dir(&stet).map_err(|e| write_failed(&stet, &e))?;
+        // The lock is released before its file goes, which a system that cannot remove an open file needs.
+        drop(self);
+        let mut known: Vec<String> = next
+            .complement
+            .entries
+            .iter()
+            .map(|(name, _)| name.clone())
+            .collect();
+        known.extend([MANIFEST, LOCK, PACKED, MARKER].map(String::from));
+        remove_known(&stet, &known)?;
+        let files: Vec<String> = next.files.iter().map(|(name, _)| name.clone()).collect();
+        remove_known(&real, &files)?;
+        let mut kept: Vec<String> = Vec::new();
+        if stet.exists() {
+            kept.extend(
+                super::list_dir(&stet)?
+                    .into_iter()
+                    .map(|n| format!("{STET}/{n}")),
+            );
+            if kept.is_empty() {
+                fs::remove_dir(&stet).map_err(|e| write_failed(&stet, &e))?;
+            }
+        }
+        kept.extend(super::list_dir(&real)?.into_iter().filter(|n| n != STET));
+        kept.sort();
+        if kept.is_empty() {
+            fs::remove_dir(&real).map_err(|e| write_failed(&shown, &e))?;
+            if linked {
+                fs::remove_file(&shown).map_err(|e| write_failed(&shown, &e))?;
+            }
+        }
+        Ok(Removal {
+            real: linked.then_some(real),
+            kept,
+        })
+    }
+
     /// The working copy's directory.
     pub fn dir(&self) -> &Path {
         &self.dir
@@ -334,6 +387,34 @@ impl Workdir {
             complement: Complement { entries },
         })
     }
+}
+
+/// What `Workdir::remove` did.
+pub struct Removal {
+    /// The folder that was removed, when the working copy was named through a link.
+    pub real: Option<PathBuf>,
+    /// What stays because stetdoc did not write it, relative to the working copy. Empty when the folder is gone.
+    pub kept: Vec<String>,
+}
+
+/// Removes, from `dir`, the regular files named in `names` and the temporary files stetdoc writes for them
+/// (`.NAME.PID.tmp`, from any process). Anything else stays.
+fn remove_known(dir: &Path, names: &[String]) -> Result<(), Failure> {
+    for (name, path) in regular_files(dir)? {
+        if names.contains(&name) || names.iter().any(|known| is_temp_of(&name, known)) {
+            fs::remove_file(&path).map_err(|e| write_failed(&path, &e))?;
+        }
+    }
+    Ok(())
+}
+
+/// Whether `name` is a temporary file that `write_atomic` makes for a file named `of`: `.{of}.{pid}.tmp`.
+fn is_temp_of(name: &str, of: &str) -> bool {
+    name.strip_prefix('.')
+        .and_then(|rest| rest.strip_prefix(of))
+        .and_then(|rest| rest.strip_prefix('.'))
+        .and_then(|rest| rest.strip_suffix(".tmp"))
+        .is_some_and(|pid| !pid.is_empty() && pid.bytes().all(|b| b.is_ascii_digit()))
 }
 
 /// The extensions of readable files, from the formats the core lists.

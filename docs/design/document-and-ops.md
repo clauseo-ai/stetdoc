@@ -702,7 +702,7 @@ that `reconcile` removed are listed with the comment they belonged to.
 ### 4.3 The text
 
 `Receipt.text` is the agent-facing form: a head line, one line for each operation, the blocks as the readable file will hold them, then the
-warnings and what `check` carried. It is deterministic and token-lean, and it lives in one file, `document/receipt_text.rs`, so that the format experiments
+warnings and a count of the problems that `check` carried (the JSON lists the first ten; the text only counts them). It is deterministic and token-lean, and it lives in one file, `document/receipt_text.rs`, so that the format experiments
 can change its wording without touching the data. The block lines are `projection`'s, in the working-copy format. An illustration of the layout:
 
 ```
@@ -712,7 +712,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T10:00:00Z. base 3f9a0c11d2b
 p42 The Supplier {--shall--}{++must++} indemnify the Customer. (the line as the file holds it)
 p57 ...
 warning quotes_curled p42: 2 straight quotes were curled to match the paragraph.
-checked 3 units. 0 problems were already there.
+checked 3 units. 2 problems were already in the input, and no new one was added: `stetdoc check --all` lists them.
 ```
 
 A dry run says `dry run: nothing was applied. A new block has no ref until the edit is applied`, shows each new block as new with its anchor, and shows the rest as the real edit

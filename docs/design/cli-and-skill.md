@@ -37,11 +37,12 @@ package. "Recover" means: lock, and if `.stet/writing` exists, run the recovery 
 |---|---|---|
 | `unpack <docx> [-o dir]` | `open` → `export` → `write_plan(None, default)` | the working copy, default `<stem>.stet/` beside the docx. An existing non-empty directory is refused |
 | `unpack <dir> --refresh` | recover → `resume` → `export` → `write_plan(disk, refresh)` | re-renders every readable file, discarding hand edits, only on this request (design 5.4) |
-| `pack <dir> [-o docx] [--force] [--author] [--date] [--no-track]` | recover → `resume` → `pending_files` → `edit(Edit::files(pending, stamp))` when pending → `save` → `export` → `write_plan(disk, consumed = the pending names)` | the docx (default `<stem>.edited.docx` beside the directory), then the working copy at the new base. An existing output is overwritten only when its SHA-256 is the original's or one recorded in `.stet/packed`; otherwise `stale_target` (exit 4), unless `--force` |
+| `pack <dir> [-o docx] [--force] [--done] [--author] [--date] [--no-track]` | recover → `resume` → `pending_files` → `edit(Edit::files(pending, stamp))` when pending → `save` → `export` → `write_plan(disk, consumed = the pending names)` | the docx (default `<stem>.edited.docx` beside the directory), then the working copy at the new base. An existing output is overwritten only when its SHA-256 is the original's or one recorded in `.stet/packed`; otherwise `stale_target` (exit 4), unless `--force`. The receipt says where the working copy stays; `--done` removes it after the .docx is written: the manifest first, then only the `.stet/` entries, readable files and `.NAME.PID.tmp` files stetdoc writes, then each folder that is empty. Anything else stays, with its folder, and is named. A working copy named through a link has the folder it links to removed, then the link. On any failure it stays |
 | `view <doc>` | `open` or recover → `resume` → `view(spec)` | nothing. A working copy with pending files adds a stderr note that the view shows the last export |
 | `inspect <doc> <target>` | `open` or `resume` → `inspect(target)` (`p42`, `t3`, `r17`, `styles`, `numbering`, `sections`) | nothing |
 | `edit <dir>` | recover → `resume` → `ensure_clean` → `Batch::parse` → `edit(Edit::ops(..))` → `export` → `write_plan(disk, default)` | the working copy. With `--dry-run`, nothing |
-| `edit <docx> -o <out>` | `open` → `Batch::parse` → `edit` → `save` | `<out>`. Without `-o` it is a usage error, because a package is never edited in place |
+| `edit <docx> -o <out>` | `open` → `Batch::parse` → `edit` → `save` | `<out>`, which must not be the input. Without `-o` or `--in-place` it is a usage error |
+| `edit <docx> --in-place` | `open` → `Batch::parse` → `edit` → `save` | the input, written through a temporary file beside it (created readable by its owner only), an fsync and a rename, with its permissions kept and the folder synced on Unix. A link is written through, a hard link is broken, the owner is not kept, and a read-only file is refused. If the file no longer holds the bytes that were opened, the write is refused with `stale_target` (exit 4) and the file is untouched. With `--dry-run` or `-o` it is a usage error |
 | `compare <original> <revised> -o <out>` | `compare(a, b, CompareOptions { stamp, .. })` → `document.save()` | `<out>`. Prints `Compared.receipt` |
 | `check <doc> [--strict]` | `open` or recover → `resume` → `pending_files` → `check_pending(pending, stamp, strict)` | nothing. Exits with `CheckResult::exit_status` |
 | `lookup <doc> <query>` | `open` or `resume` → `lookup(query)` | nothing |
@@ -71,7 +72,10 @@ the author rule below applies to it then. `pack` with nothing pending needs no s
   and, in a slim image without one, against the copy built into the binary. A zone that cannot be read gives UTC with a
   warning on stderr, so a wrong date is never silent.
 - **`edit`.** `--ops <file>` or stdin (`-` or no flag with stdin not a terminal). `--no-track`, `--dry-run`, `--scope <refs>`
-  (comma-separated, repeatable, ranges such as `p40..p60`), `--quotes match|as-typed`, `--offsets scalar|utf16`, `-o`.
+  (comma-separated, repeatable, ranges such as `p40..p60`), `--quotes match|as-typed`, `--offsets scalar|utf16`, `-o`,
+  `--in-place`.
+- **`check`.** `--strict`, and `--all`, which lists every finding the report keeps instead of the first 20. Receipts count the
+  problems that were already in the input on one line that names `stetdoc check --all`, and do not list them.
 - **`view`.** One scope at most: `--outline [--depth N]`, `--range p1..p40` (or `p40` to the end of the story), `--clause 12.3`,
   `--find <text> [--context N]`, `--revisions [--author A] [--kind K]`, `--comments [--author A] [--resolved|--open]`,
   `--story body|notes|headers|comments`. With none, `Scope::Auto`. Then `--mode final|original|redline`, `--budget N` (tokens,
@@ -95,7 +99,7 @@ the author rule below applies to it then. `pack` with nothing pending needs no s
 |---|---|
 | 0 | success, and `check` whose `exit_status` is 0 |
 | 1 | `unsupported`, `cross_block`, `readonly_region`, `scope_violation`, `io_error` |
-| 2 | `invalid_payload`; argument errors from `clap`; a missing author; `edit <docx>` without `-o` |
+| 2 | `invalid_payload`; argument errors from `clap`; a missing author; `edit <docx>` without `-o` or `--in-place` |
 | 3 | `not_found`, `ambiguous_match`; an input path that does not exist |
 | 4 | `stale_ref`, `stale_files`, `pending_edits`, `stale_target` (`pack` would overwrite a file it did not produce) |
 | 5 | `validation_failed`; `check --strict` with violations |
@@ -111,9 +115,9 @@ Text errors are `error[<code>]: <message>` with ` (operation N)` or ` (document.
 |---|---|
 | `view`, `inspect`, `lookup`, `edit`, `check`, `capabilities` | `View`, `Inspection`, `Lookup`, `Receipt`, `CheckResult`, `Capabilities` as the core serializes them |
 | `compare` | `{ "output": path, "receipt": Receipt, "saved": SaveReceipt }` |
-| `pack` | `{ "output": path, "receipt": Receipt or null, "saved": SaveReceipt, "working_copy": dir }` |
+| `pack` | `{ "output": path, "receipt": Receipt or null, "saved": SaveReceipt, "working_copy": dir, "working_copy_removed": bool }` |
 | `unpack` | `{ "working_copy": dir, "base": token, "files": [names] }` |
-| `edit <docx> -o` | `{ "output": path, "receipt": Receipt, "saved": SaveReceipt }` |
+| `edit <docx> -o` or `--in-place` | `{ "output": path, "in_place": bool, "receipt": Receipt, "saved": SaveReceipt }` |
 | `skills get` | `{ "name": name, "text": markdown }` |
 | `init` | `{ "written": [paths], "unchanged": [paths], "skipped": [paths] }` |
 

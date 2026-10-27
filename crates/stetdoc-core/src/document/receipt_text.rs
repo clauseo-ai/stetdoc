@@ -188,33 +188,13 @@ fn tail(r: &Receipt, out: &mut String) {
         if v.carried_total == 0 {
             out.push_str(&format!("checked {units}.\n"));
         } else {
+            // One line, not a list: a problem the input had is the same in every receipt, and the receipt is about what the
+            // edit did. A new problem never reaches a receipt, because it refuses the edit (`validation_failed`). The JSON
+            // keeps the first ones in `carried`.
             let was = plural(v.carried_total as usize, "problem was", "problems were");
-            out.push_str(&format!("checked {units}. {was} already there:\n"));
-            // The same finding twice in a row, as a split run copies one, is one line.
-            let mut lines: Vec<(String, usize)> = Vec::new();
-            for f in &v.carried {
-                let at = f
-                    .block
-                    .as_deref()
-                    .map(|b| format!(" {b}"))
-                    .unwrap_or_default();
-                let line = format!("  {}{at}: {}", f.code.as_str(), f.message);
-                match lines.last_mut() {
-                    Some((last, n)) if *last == line => *n += 1,
-                    _ => lines.push((line, 1)),
-                }
-            }
-            for (line, n) in lines {
-                if n > 1 {
-                    out.push_str(&format!("{line} ({n} times)\n"));
-                } else {
-                    out.push_str(&format!("{line}\n"));
-                }
-            }
-            if v.carried.len() < v.carried_total as usize {
-                let more = v.carried_total as usize - v.carried.len();
-                out.push_str(&format!("  and {more} more.\n"));
-            }
+            out.push_str(&format!(
+                "checked {units}. {was} already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
+            ));
         }
     }
     for f in &v.notes {

@@ -12,7 +12,7 @@ Every command takes `--json`, which prints the result, or the error, as JSON on 
 | `stetdoc pack` | Compile the edits of a working copy into tracked changes, validate them and write the .docx |
 | `stetdoc view` | Show a document or a working copy: an outline of a large document, or a range, a search, the revisions, the comments |
 | `stetdoc inspect` | Show the effective formatting of a block and where each value comes from, or the styles, lists or sections |
-| `stetdoc edit` | Apply a batch of operations, read from stdin or --ops, to a working copy or to a .docx with -o |
+| `stetdoc edit` | Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place |
 | `stetdoc compare` | Write a redline of the differences between two documents as tracked changes |
 | `stetdoc check` | Validate, and show every revision that pack would write, by author |
 | `stetdoc lookup` | Find a defined term, a cross-reference, or what refers to a clause |
@@ -61,6 +61,7 @@ stetdoc pack [OPTIONS] <DIR>
 | `-o, --output <DOCX>` | The .docx to write. Defaults to NAME.edited.docx beside the working copy. An existing file is overwritten only when it is the document the working copy came from or one it packed. |
 | `--force` | Overwrite the output even when it holds a document this working copy neither came from nor packed. |
 | `--no-track` | Write the edits as plain changes, not tracked ones. Only for documents that are not under review. |
+| `--done` | Remove the working copy once the .docx is written and validated. When the pack fails, the working copy stays. Files that stetdoc did not write stay too, and so does the folder that holds them. |
 | `--author <NAME>` | The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default. |
 | `--date <DATE>` | The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock. |
 
@@ -68,7 +69,8 @@ stetdoc pack [OPTIONS] <DIR>
 
 `pack` takes in the hand edits of a working copy, writes `NAME.edited.docx` beside it unless `-o` names another file, and
 brings the working copy up to date. It overwrites an existing file only when that file is the document the working copy
-came from or one it packed, so a newer version that someone else saved is never lost: `--force` overrides that.
+came from or one it packed, so a newer version that someone else saved is never lost: `--force` overrides that. The
+working copy stays beside the document until you delete the folder, or until a pack with `--done` succeeds and removes it.
 
 ```console
 $ stetdoc unpack contract.docx
@@ -79,17 +81,32 @@ next: stetdoc view contract.stet
 $ stetdoc pack contract.stet --author "Jane Doe"
 No hand edits were pending, so the document is written as of its last edit.
 wrote contract.edited.docx
-working copy contract.stet is at base 5737b772923cf8d3:0:5737b772923cf8d3
+working copy contract.stet is at base 5737b772923cf8d3:0:5737b772923cf8d3. It stays until you delete the folder, or pack again with --done to remove it.
 
 $ stetdoc pack contract.stet -o contract.docx --author "Jane Doe"
 No hand edits were pending, so the document is written as of its last edit.
 wrote contract.docx
-working copy contract.stet is at base 5737b772923cf8d3:0:5737b772923cf8d3
+working copy contract.stet is at base 5737b772923cf8d3:0:5737b772923cf8d3. It stays until you delete the folder, or pack again with --done to remove it.
 
 $ stetdoc pack contract.stet -o revised.docx --author "Jane Doe"
 ? 4
 error[stale_target]: revised.docx exists and is neither the document contract.stet came from nor one it packed, so packing would overwrite a version it has not seen.
 next: Unpack revised.docx again (or into a new folder) and redo the edits on it, pack to another path with -o, or pass --force to overwrite it.
+
+$ stetdoc pack contract.stet -o revised.docx --done --author "Jane Doe"
+? 4
+error[stale_target]: revised.docx exists and is neither the document contract.stet came from nor one it packed, so packing would overwrite a version it has not seen.
+next: Unpack revised.docx again (or into a new folder) and redo the edits on it, pack to another path with -o, or pass --force to overwrite it.
+
+$ stetdoc pack contract.stet --done --author "Jane Doe"
+No hand edits were pending, so the document is written as of its last edit.
+wrote contract.edited.docx
+removed the working copy contract.stet
+
+$ stetdoc view contract.stet
+? 3
+error[not_found]: There is no file at contract.stet.
+next: Check the path, and that the file is readable.
 
 ```
 
@@ -198,7 +215,7 @@ comments: none on this block
 
 ## `stetdoc edit`
 
-Apply a batch of operations, read from stdin or --ops, to a working copy or to a .docx with -o.
+Apply a batch of operations, read from stdin or --ops, to a working copy, or to a .docx with -o or --in-place.
 
 ```text
 stetdoc edit [OPTIONS] <INPUT>
@@ -206,9 +223,10 @@ stetdoc edit [OPTIONS] <INPUT>
 
 | Argument | Meaning |
 |---|---|
-| `<INPUT>` | A working copy, or a .docx with -o. |
+| `<INPUT>` | A working copy, or a .docx with -o or --in-place. |
 | `--ops <FILE>` | The batch, as block text or JSON. Defaults to stdin; - is stdin too. |
-| `-o, --output <DOCX>` | With a .docx, the .docx to write. A package is never edited in place. |
+| `-o, --output <DOCX>` | With a .docx, the .docx to write. It must not be the input: --in-place writes back to it. |
+| `--in-place` | With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused. A working copy needs no flag: an edit always writes it. |
 | `--no-track` | Write plain changes, not tracked ones. Only for documents that are not under review. |
 | `--dry-run` | Validate and show the receipt, and write nothing. |
 | `--scope <REFS>` | Refuse the whole batch if it changes anything outside these refs and ranges, such as p12,p40..p60. |
@@ -245,7 +263,7 @@ checked 1 unit.
 
 ```
 
-The same batch on a .docx writes another .docx, and `--dry-run` writes nothing.
+The same batch on a .docx writes another .docx with `-o`, or the same one with `--in-place`, and `--dry-run` writes nothing.
 
 ```console
 $ stetdoc edit contract.docx -o edited.docx --author "Jane Doe" --ops batch.txt --dry-run
@@ -253,6 +271,28 @@ dry run: nothing was applied. A new block has no ref until the edit is applied. 
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
 checked 1 unit.
+
+```
+
+`--in-place` writes the result back to the .docx it read: through a temporary file beside it and a rename, so a crash
+leaves the old document or the new one, and only if no one wrote the file during the edit (`stale_target` otherwise).
+A symbolic link is written through and stays a link. A hard link is broken, because the rename puts a new file at the
+path. The permissions are kept, the owner is not, and a read-only file is refused. On Unix the folder is synced after the
+rename; other systems cannot sync a folder, so there the rename is as durable as the file system makes it. The saved
+document opens in a new ref namespace, so the next batch takes its base from a new view.
+
+```console
+$ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
+applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
+0 replace p4: deletion #0, insertion #1
+p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
+checked 1 unit.
+wrote contract.docx
+
+$ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
+? 4
+error[stale_ref]: This batch was written for another document (namespace 5737b772923cf8d3, not 745747bfd39463c1). Refs do not carry over when a file is reopened. View the document again. (operation 0)
+next: View the document again to get fresh refs, then rewrite the batch.
 
 ```
 
@@ -297,6 +337,7 @@ stetdoc check [OPTIONS] <INPUT>
 |---|---|
 | `<INPUT>` | A working copy or a .docx. |
 | `--strict` | Fail (exit 5) on any violation, including ones already in the input. |
+| `--all` | List every finding the report keeps (the first 200), not only the first 20. |
 | `--author <NAME>` | The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default. |
 | `--date <DATE>` | The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock. |
 

@@ -366,3 +366,54 @@ fn the_view_tool_finds_within_a_range_and_names_a_pair_it_refuses() {
     );
     assert!(!next.contains("input schema lists"), "{next}");
 }
+
+#[test]
+fn edit_writes_a_docx_in_place_and_pack_done_removes_the_working_copy() {
+    let tmp = tempfile::tempdir().unwrap();
+    fs::write(tmp.path().join("contract.docx"), contract::package()).unwrap();
+    let mut server = Server::start(tmp.path(), &[]);
+
+    let listing = server.request("tools/list", json!({}));
+    let tools = listing["result"]["tools"].as_array().unwrap();
+    let schema = |name: &str| {
+        tools.iter().find(|t| t["name"] == name).unwrap()["inputSchema"]["properties"].clone()
+    };
+    assert_eq!(schema("edit")["in_place"]["type"], "boolean");
+    assert_eq!(schema("pack")["done"]["type"], "boolean");
+    assert_eq!(schema("check")["all"]["type"], "boolean");
+
+    let view = server.call(
+        "view",
+        json!({ "input": "contract.docx", "range": "p4..p4" }),
+    );
+    let base = ok(&view)["base"].as_str().unwrap().to_string();
+    let batch = format!("base: {base}\n---\n@replace\nref: p4\nfind: thirty\nwith: sixty\n");
+    let same = server.call(
+        "edit",
+        json!({ "input": "contract.docx", "output": "contract.docx", "batch": batch }),
+    );
+    assert_eq!(same["isError"], true, "{same}");
+    assert!(
+        same["structuredContent"]["error"]["next"]
+            .as_str()
+            .unwrap()
+            .contains("--in-place"),
+        "{same}"
+    );
+    let edited = server.call(
+        "edit",
+        json!({ "input": "contract.docx", "in_place": true, "batch": batch }),
+    );
+    assert_eq!(ok(&edited)["output"], "contract.docx");
+    let view = server.call(
+        "view",
+        json!({ "input": "contract.docx", "range": "p4..p4" }),
+    );
+    assert!(ok(&view)["text"].as_str().unwrap().contains("{++sixty++}"));
+
+    ok(&server.call("unpack", json!({ "input": "contract.docx" })));
+    let packed = server.call("pack", json!({ "dir": "contract.stet", "done": true }));
+    assert_eq!(ok(&packed)["working_copy_removed"], true);
+    assert!(!tmp.path().join("contract.stet").exists());
+    assert!(tmp.path().join("contract.edited.docx").is_file());
+}

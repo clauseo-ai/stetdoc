@@ -30,7 +30,7 @@ Validation: no violations in 1 part.
 $ stetdoc pack contract.stet --author "Jane Doe"
 No hand edits were pending, so the document is written as of its last edit.
 wrote contract.edited.docx
-working copy contract.stet is at base 5737b772923cf8d3:1:6a07baa2d488eeb5
+working copy contract.stet is at base 5737b772923cf8d3:1:6a07baa2d488eeb5. It stays until you delete the folder, or pack again with --done to remove it.
 
 $ stetdoc view contract.edited.docx --range p4..p4
 {stet 1 view=body base=745747bfd39463c1:0:745747bfd39463c1 mode=redline common-style="Normal" range=p4..p4}

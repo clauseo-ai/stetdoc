@@ -1,0 +1,2 @@
+error[invalid_payload]: contract.docx is a .docx, and an edit of a .docx needs to know where to write.
+next: Name another file with -o, pass --in-place to write back to this one, or unpack the document and edit the working copy.

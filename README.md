@@ -53,8 +53,9 @@ with: sixty days
 EOF
 ```
 
-The base is the token the last view or receipt printed, so a batch written against an older state is refused rather
-than misapplied. `stetdoc compare original.docx revised.docx -o redline.docx` writes a redline of two versions.
+The base is the token the last view or receipt printed. A batch whose base comes from another document or another
+history, or that names a block changed since its base, is refused rather than misapplied; a batch from an older state
+that touches only blocks unchanged since still applies. `stetdoc compare original.docx revised.docx -o redline.docx` writes a redline of two versions.
 
 The working copy holds readable files (`document.md`, `notes.md`, `headers.md`, `comments.md`) that agents edit with
 string replacement or `apply_patch`, and the complement (`.stet/`) that holds everything needed to rebuild the exact

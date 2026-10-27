@@ -500,8 +500,9 @@ cross-package transplants:
 | `inspect <docx\|dir> <ref>` | `open` or `resume` → `inspect` |
 | `edit <dir>` | `resume` (refuses with `pending_edits` while hand edits are pending) → `edit(Edit::ops)`, with the batch naming the base token → `export` → `write_plan` |
 | `edit <docx> -o <out>` | `open` → `edit(Edit::ops)`, with the batch required to name the base token → `save` |
+| `edit <docx> --in-place` | as with `-o`, then an atomic write back to the input, refused with `stale_target` when the file changed since it was opened |
 | `check <dir\|docx>` | `open` or `resume` → `check_pending(pending files, stamp, strict)`: the dry run of the pending files, the revisions already there by author, `check`, and the exit status |
-| `pack <dir>` | `resume` → `edit(Edit::files(pending))` → `save` → `export` → `write_plan` with the pending files consumed. An existing output that is neither the original nor a .docx this working copy packed is `stale_target`, unless `--force` |
+| `pack <dir>` | `resume` → `edit(Edit::files(pending))` → `save` → `export` → `write_plan` with the pending files consumed. An existing output that is neither the original nor a .docx this working copy packed is `stale_target`, unless `--force`. `--done` removes the working copy after a pack that succeeded |
 | `compare <a> <b> -o <out>` | `compare` → `save` |
 | `lookup <docx\|dir> <query>` | `open` or `resume` → `lookup` |
 | `capabilities` | `capabilities`, or `json_schema` with `--schema` |
@@ -575,7 +576,7 @@ enum.
 | 1 operation failed | `unsupported`, `cross_block`, `readonly_region`, `scope_violation`, `io_error` (the CLI's file system) |
 | 2 usage | `invalid_payload`, CLI argument errors |
 | 3 target | `not_found`, `ambiguous_match` |
-| 4 stale | `stale_ref`, `stale_files`, `pending_edits`, `stale_target` (the CLI's pack output) |
+| 4 stale | `stale_ref`, `stale_files`, `pending_edits`, `stale_target` (a file the CLI would write holds a version it has not seen: a pack's output, or a .docx edited in place) |
 | 5 validation | `validation_failed` (the edit would add violations) |
 | 6 input | `malformed_input`, `limit_exceeded`, `corrupt_complement`, `unsupported_version` |
 | 7 internal | `internal` (a bug in stetdoc: report it, do not retry with another edit) |

@@ -92,9 +92,9 @@ Exit 4 (stale). The working copy has hand edits to readable files that have not 
 
 ### `stale_target`
 
-Exit 4 (stale). The file a working copy would be packed into exists and is neither the document the working copy came from nor one it packed, so writing it could overwrite a newer version. Only surfaces that write files raise it.
+Exit 4 (stale). The file a command would write holds a version that the command has not seen, so writing it could overwrite a newer version: a pack's output that is neither the document the working copy came from nor one it packed, or a .docx edited in place that someone wrote during the edit. Only surfaces that write files raise it.
 
-**Next:** Unpack the file at that path again and redo the edits on it, pack to another path, or pass --force to overwrite it.
+**Next:** Read the file at that path again and redo the edits on what it holds now, or write to another path.
 
 ### `validation_failed`
 

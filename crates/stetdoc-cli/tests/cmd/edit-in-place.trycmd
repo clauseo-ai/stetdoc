@@ -1,0 +1,35 @@
+--in-place is for a .docx. It is refused with -o, with --dry-run and on a working copy, and -o naming the input points to it.
+
+```console
+$ stetdoc edit contract.docx -o contract.docx --author "Jane Doe" --ops batch.txt
+? 2
+error[invalid_payload]: -o contract.docx names the input of this edit.
+next: Use --in-place to write back to the same file, or name another file with -o.
+
+$ stetdoc edit contract.docx -o edited.docx --in-place --author "Jane Doe" --ops batch.txt
+? 2
+error[invalid_payload]: -o and --in-place both say where to write, and an edit writes one .docx.
+next: Pass -o to write another file, or --in-place to write back to the input.
+
+$ stetdoc edit contract.docx --in-place --dry-run --author "Jane Doe" --ops batch.txt
+? 2
+error[invalid_payload]: --dry-run writes nothing, and --in-place says to write the input.
+next: Drop --in-place to see the receipt, then run the edit again with --in-place and without --dry-run.
+
+$ stetdoc unpack contract.docx
+wrote contract.stet: document.md
+base 5737b772923cf8d3:0:5737b772923cf8d3
+next: stetdoc view contract.stet
+
+$ stetdoc edit contract.stet --in-place --author "Jane Doe" --ops batch.txt
+? 2
+error[invalid_payload]: --in-place writes a .docx back to itself, and contract.stet is a working copy, which an edit always writes.
+next: Drop --in-place, and run stetdoc pack after the edit to write the .docx.
+
+$ stetdoc view contract.docx --range p4..p4
+{stet 1 view=body base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p4}
+{summary: 1 section}
+p4 Payment is due within thirty days.
+{position: p4..p4 of p4..p4 (1 of 1 blocks)}
+
+```

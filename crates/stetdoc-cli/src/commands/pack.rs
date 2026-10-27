@@ -42,23 +42,66 @@ pub fn run(args: &PackArgs) -> Result<Outcome, Failure> {
         refresh: false,
     };
     workdir.write(&next, Some(&disk), &options)?;
+    let dir = workdir.dir().to_path_buf();
+    // Only a pack that wrote and validated the .docx gets here, so the working copy is no longer needed.
+    let removal = if args.done {
+        Some(workdir.remove(&next))
+    } else {
+        drop(workdir);
+        None
+    };
 
     let mut text = match &receipt {
         Some(receipt) => receipt.text.trim_end().to_string(),
         None => "No hand edits were pending, so the document is written as of its last edit."
             .to_string(),
     };
-    text.push_str(&format!(
-        "\nwrote {}\nworking copy {} is at base {}\n",
-        output.display(),
-        workdir.dir().display(),
-        doc.base()
-    ));
+    text.push_str(&format!("\nwrote {}\n", output.display()));
+    let mut notes = notes;
+    let removed = match removal {
+        None => {
+            text.push_str(&format!(
+                "working copy {} is at base {}. It stays until you delete the folder, or pack again with --done to remove it.\n",
+                dir.display(),
+                doc.base()
+            ));
+            false
+        }
+        Some(Ok(removal)) => {
+            let named = match &removal.real {
+                Some(real) => format!(
+                    "{} (the folder {} it links to)",
+                    dir.display(),
+                    real.display()
+                ),
+                None => dir.display().to_string(),
+            };
+            if removal.kept.is_empty() {
+                text.push_str(&format!("removed the working copy {named}\n"));
+            } else {
+                text.push_str(&format!(
+                    "removed the working copy {named}, except what stetdoc did not write, which stays in the folder: {}\n",
+                    removal.kept.join(", ")
+                ));
+            }
+            true
+        }
+        // The .docx is written, so the pack succeeded: a removal that failed is a warning, not the command's failure.
+        Some(Err(Failure::Core(error))) => {
+            notes.push(format!(
+                "warning: the .docx is written, and the working copy {} could not be removed: {}",
+                dir.display(),
+                error.message()
+            ));
+            false
+        }
+    };
     let json = serde_json::json!({
         "output": output.display().to_string(),
         "receipt": receipt.as_ref().map(to_json).transpose()?,
         "saved": to_json(&saved.receipt)?,
-        "working_copy": workdir.dir().display().to_string(),
+        "working_copy": dir.display().to_string(),
+        "working_copy_removed": removed,
     });
     Ok(Outcome::new(text, json).with_notes(notes))
 }

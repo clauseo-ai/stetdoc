@@ -1,4 +1,4 @@
-# A package is never edited in place: -o is required.
+# An edit of a .docx needs -o, or --in-place to write back to it.
 bin.name = "stetdoc"
 args = ["edit", "contract.docx", "--author", "Jane Doe"]
 stdin = """

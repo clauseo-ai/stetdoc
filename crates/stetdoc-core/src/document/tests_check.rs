@@ -109,25 +109,28 @@ fn an_edit_is_never_refused_for_a_problem_the_input_already_had() {
             "{op}: {out:?} has a code that the input lacked"
         );
     }
-    // The problems that the edited blocks already had are in the receipt, so the agent is told they are not its own.
+    // The problems that the edited blocks already had are in the receipt's JSON, so the agent is told they are not its own,
+    // and its text counts them on one line that says where the list is, rather than repeating them.
     let mut doc = faulty();
     let receipt = run(
         &mut doc,
         r#"{"op":"replace","ref":"p1","find":"First","with":"Opening"}"#,
     );
-    assert!(receipt.validation.carried_total >= 1);
+    let total = receipt.validation.carried_total;
+    assert!(total >= 1);
     assert_eq!(
         receipt.validation.carried[0].code,
         FindingCode::EmptyProperties
     );
     assert_eq!(receipt.validation.carried[0].block.as_deref(), Some("p1"));
+    let line =
+        "already in the input, and no new one was added: `stetdoc check --all` lists them.\n";
+    let text = &receipt.text;
     assert!(
-        receipt
-            .text
-            .contains("problems were already there:\n  empty_properties p1: an empty w:rPr"),
-        "{}",
-        receipt.text
+        text.contains(&format!("{total} problem")) && text.contains(line),
+        "{text}"
     );
+    assert!(!text.contains("empty_properties"), "not listed: {text}");
 }
 
 #[test]

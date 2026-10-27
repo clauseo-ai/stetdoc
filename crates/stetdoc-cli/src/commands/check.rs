@@ -8,7 +8,7 @@ use crate::target::{self, Source};
 use std::fmt::Write;
 use stetdoc_core::{AuthorRevisions, CheckResult};
 
-/// How many findings the text lists. `--json` has all that the report keeps.
+/// How many findings the text lists without `--all`. `--all` and `--json` have all that the report keeps.
 const SHOWN_FINDINGS: usize = 20;
 
 /// Runs `check`.
@@ -16,7 +16,7 @@ pub fn run(args: &CheckArgs) -> Result<Outcome, Failure> {
     match Source::of(&args.input) {
         Source::Docx(path) => {
             let doc = target::open_docx(&path)?;
-            outcome(&doc.check_pending(None, None, args.strict)?)
+            outcome(&doc.check_pending(None, None, args.strict)?, args.all)
         }
         Source::Dir(path) => {
             let (workdir, notes) = Workdir::open(&path)?;
@@ -28,19 +28,19 @@ pub fn run(args: &CheckArgs) -> Result<Outcome, Failure> {
                 None => None,
             };
             let result = doc.check_pending(pending, stamp, args.strict)?;
-            Ok(outcome(&result)?.with_notes(notes))
+            Ok(outcome(&result, args.all)?.with_notes(notes))
         }
     }
 }
 
 /// What `check` prints for a result, with its exit status.
-fn outcome(result: &CheckResult) -> Result<Outcome, Failure> {
-    let mut outcome = Outcome::new(text(result), to_json(result)?);
+fn outcome(result: &CheckResult, all: bool) -> Result<Outcome, Failure> {
+    let mut outcome = Outcome::new(text(result, all), to_json(result)?);
     outcome.exit = result.exit_status;
     Ok(outcome)
 }
 
-fn text(result: &CheckResult) -> String {
+fn text(result: &CheckResult, all: bool) -> String {
     let mut out = String::new();
     match &result.receipt {
         Some(receipt) => {
@@ -77,7 +77,12 @@ fn text(result: &CheckResult) -> String {
         let _ = write!(out, ", {}", plural(report.notes, "note"));
     }
     let _ = writeln!(out, ".");
-    for finding in report.findings.iter().take(SHOWN_FINDINGS) {
+    let shown = if all {
+        report.findings.len()
+    } else {
+        SHOWN_FINDINGS
+    };
+    for finding in report.findings.iter().take(shown) {
         let place = match &finding.block {
             Some(block) => format!("{} {block}", finding.part),
             None => finding.part.clone(),
@@ -89,11 +94,20 @@ fn text(result: &CheckResult) -> String {
             finding.message
         );
     }
-    if report.findings.len() > SHOWN_FINDINGS {
+    let listed = report.findings.len().min(shown);
+    let counted = report.violations + report.notes;
+    if report.findings.len() > listed {
         let _ = writeln!(
             out,
-            "  ... {} more; --json lists them.",
-            report.findings.len() - SHOWN_FINDINGS
+            "  ... {} more; --all lists them.",
+            report.findings.len() - listed
+        );
+    } else if counted > listed {
+        // The report keeps the first findings and counts the rest, by code in `--json`.
+        let _ = writeln!(
+            out,
+            "  ... {} more, which the report counts by code (--json) and does not list.",
+            counted - listed
         );
     }
     if result.strict && result.exit_status != 0 {

@@ -264,11 +264,33 @@ released yet.
   which replaces the placeholder `cargo xtask release` and keeps the packages and the workflow in step with the workspace.
 - The library's documentation, `crates/stetdoc-napi/npm/README.md`, shipped in the package, and its sections in `README.md`
   and `CONTRIBUTING.md`.
+- `stetdoc edit FILE.docx --in-place` (and `in_place` on the MCP edit tool) writes the result back to the .docx it read,
+  atomically: a temporary file beside it, readable by its owner only until it gets the file's permissions, an fsync and a
+  rename (and a sync of the folder on Unix). A link is written through, a hard link is broken, the owner is not kept, and
+  a read-only file is refused. If someone wrote the file during the edit, the write is refused with `stale_target` and the
+  file is untouched. The meaning of `stale_target` now covers this case; its code and exit class are unchanged. It is refused with `--dry-run`, with
+  `-o`, and on a working copy, which an edit always writes. `-o` naming the input is still refused, and its `next` now
+  names `--in-place`.
+- `stetdoc pack DIR --done` (and `done` on the MCP pack tool) removes the working copy once the .docx is written and
+  validated. It removes only what stetdoc writes (the manifest first), so files it did not write, in the folder or in
+  `.stet/`, stay with their folders and are named. A working copy named through a link has the folder it links to
+  removed, then the link. When the pack fails, the working copy stays.
+- `stetdoc check FILE --all` lists every finding the report keeps (the first 200), not only the first 20.
 
 ### Changed
 
 - The default page of a view is 3,000 tokens (about 12 KB), not 8,000, in the CLI, the MCP view tool and
   `Budget::default()`, so that one view, or two or three in one call, stays under what an agent's tool result holds.
+- A receipt of `edit`, `pack` or `compare` counts the problems that were already in the input on one line, such as
+  "66 problems were already in the input, and no new one was added: `stetdoc check --all` lists them.", instead of listing
+  ten of them. The JSON still has the first ten in `validation.carried`. A problem the edit would add still refuses it
+  with `validation_failed`, naming the problems.
+- The pack receipt says that the working copy stays until the folder is deleted, and that `pack --done` removes it. The
+  JSON has `working_copy_removed`.
+- The README said that any batch written against an older state is refused. What is refused is a batch from another
+  document or history, or one that names a block changed since its base; a batch from an older state of the same history
+  that touches only unchanged blocks applies, as the design says (`docs/design/refs-and-state.md`).
+
 - The first view of a large document, and the first range with its margin notes, take about half the time they did: the
   text model is built only for the paragraphs that hold a note reference when the notes are numbered, a UTF-8 part's names and
   text are not checked again on every read, a revision is looked for by its name before its namespace, and mentions of

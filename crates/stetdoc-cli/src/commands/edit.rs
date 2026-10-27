@@ -5,8 +5,10 @@ use crate::fsio;
 use crate::fsio::workdir::Workdir;
 use crate::output::{Failure, Outcome, to_json};
 use crate::stamp;
-use crate::target::{self, Source};
-use stetdoc_core::{Batch, Edit, Limits, OffsetUnit, Quotes, Stamp, WriteOptions};
+use crate::target::Source;
+use stetdoc_core::{
+    Batch, Document, Edit, Limits, OffsetUnit, OpenOptions, Quotes, Stamp, WriteOptions,
+};
 
 /// Runs `edit`.
 pub fn run(args: &EditArgs) -> Result<Outcome, Failure> {
@@ -24,6 +26,15 @@ fn edit_dir(args: &EditArgs, dir: &std::path::Path) -> Result<Outcome, Failure> 
             "Drop -o, and run stetdoc pack after the edit.",
         ));
     }
+    if args.in_place {
+        return Err(Failure::usage(
+            format!(
+                "--in-place writes a .docx back to itself, and {} is a working copy, which an edit always writes.",
+                dir.display()
+            ),
+            "Drop --in-place, and run stetdoc pack after the edit to write the .docx.",
+        ));
+    }
     let stamp = stamp::resolve(&args.stamp)?;
     let (workdir, notes) = Workdir::open(dir)?;
     let (mut doc, disk) = workdir.resume()?;
@@ -37,31 +48,68 @@ fn edit_dir(args: &EditArgs, dir: &std::path::Path) -> Result<Outcome, Failure> 
 }
 
 fn edit_docx(args: &EditArgs, path: &std::path::Path) -> Result<Outcome, Failure> {
-    let Some(output) = &args.output else {
-        return Err(Failure::usage(
-            format!(
-                "{} is a .docx, and stetdoc never edits a package in place.",
-                path.display()
-            ),
-            "Name the file to write with -o, or unpack the document and edit the working copy.",
-        ));
+    let output = match (&args.output, args.in_place) {
+        (Some(_), true) => {
+            return Err(Failure::usage(
+                "-o and --in-place both say where to write, and an edit writes one .docx.",
+                "Pass -o to write another file, or --in-place to write back to the input.",
+            ));
+        }
+        (None, true) if args.dry_run => {
+            return Err(Failure::usage(
+                "--dry-run writes nothing, and --in-place says to write the input.",
+                "Drop --in-place to see the receipt, then run the edit again with --in-place and without --dry-run.",
+            ));
+        }
+        (None, true) => None,
+        (Some(output), false) => {
+            if fsio::same_file(output, path) {
+                return Err(Failure::usage(
+                    format!("-o {} names the input of this edit.", output.display()),
+                    "Use --in-place to write back to the same file, or name another file with -o.",
+                ));
+            }
+            fsio::check_output(output, &[path], &[])?;
+            Some(output.clone())
+        }
+        (None, false) => {
+            return Err(Failure::usage(
+                format!(
+                    "{} is a .docx, and an edit of a .docx needs to know where to write.",
+                    path.display()
+                ),
+                "Name another file with -o, pass --in-place to write back to this one, or unpack the document and edit the working copy.",
+            ));
+        }
     };
-    fsio::check_output(output, &[path], &[])?;
     let stamp = stamp::resolve(&args.stamp)?;
-    let mut doc = target::open_docx(path)?;
+    let options = OpenOptions::default();
+    let input = fsio::read_file(path, options.limits.max_archive_bytes)?;
+    let digest = fsio::sha256_hex(&input);
+    let mut doc = Document::open(input, &options)?;
     let edit = build(args, stamp)?;
     let receipt = doc.edit(edit)?;
     if args.dry_run {
         return Outcome::of(&receipt.text, &receipt);
     }
     let saved = doc.save()?;
-    fsio::write_atomic(output, &saved.bytes)?;
+    let written = match &output {
+        Some(output) => {
+            fsio::write_atomic(output, &saved.bytes)?;
+            output.clone()
+        }
+        None => {
+            fsio::replace_atomic(path, &saved.bytes, &digest)?;
+            path.to_path_buf()
+        }
+    };
     let json = serde_json::json!({
-        "output": output.display().to_string(),
+        "output": written.display().to_string(),
+        "in_place": output.is_none(),
         "receipt": to_json(&receipt)?,
         "saved": to_json(&saved.receipt)?,
     });
-    let text = format!("{}\nwrote {}\n", receipt.text.trim_end(), output.display());
+    let text = format!("{}\nwrote {}\n", receipt.text.trim_end(), written.display());
     Ok(Outcome::new(text, json))
 }
 

@@ -5,6 +5,7 @@
 //! straight quotes taken as the same (`ops::target::find` does the same two tries). A paragraph where the text is only in
 //! a tracked deletion is listed apart, because an operation cannot target it.
 
+use super::place::{Placer, heading_text};
 use super::select::{Selected, clause_scope, range_scope, story_scope};
 use crate::api::error::{ErrorCode, StetError};
 use crate::api::occurrence::{Occurrence, Occurrences};
@@ -53,10 +54,18 @@ pub(crate) fn occurrences(
         }
     };
     let index = parts.doc_index()?;
+    let mut placer = Placer::new(parts, &index)?;
     let mut hits = Vec::new();
     let mut deleted = Vec::new();
     for selected in &selections {
-        scan(&parts, &index, selected, needle, &mut hits, &mut deleted)?;
+        scan(
+            &parts,
+            &mut placer,
+            selected,
+            needle,
+            &mut hits,
+            &mut deleted,
+        )?;
     }
     Ok(Occurrences {
         base: state.base_token().to_string(),
@@ -69,7 +78,7 @@ pub(crate) fn occurrences(
 /// Adds the matches in the paragraphs of one selection.
 fn scan(
     parts: &PartsView<'_>,
-    index: &crate::index::Index,
+    placer: &mut Placer<'_, '_>,
     selected: &Selected,
     needle: &str,
     hits: &mut Vec<Occurrence>,
@@ -107,14 +116,17 @@ fn scan(
                 found = ranges(&fold_quotes(&text), &folded_needle);
                 loose = true;
             }
-            let clause = index
-                .context_at(key.part(), entry)
-                .and_then(|at| index.clause(at))
-                .map(|c| c.full.clone());
+            let place = placer.place(source.part, &source.story, entry)?;
+            let clause = place.clause.map(|c| c.full.clone());
+            let heading = match place.heading {
+                Some(h) => Some(heading_text(parts, source.part, &source.story, h)?),
+                None => None,
+            };
             let place = |n: usize, range: &Range<usize>, text: &str, loose: bool| Occurrence {
                 block: r.to_string(),
                 story: story.to_string(),
                 clause: clause.clone(),
+                heading: heading.clone(),
                 occurrence: u32::try_from(n + 1).unwrap_or(u32::MAX),
                 start: u32::try_from(range.start).unwrap_or(u32::MAX),
                 end: u32::try_from(range.end).unwrap_or(u32::MAX),

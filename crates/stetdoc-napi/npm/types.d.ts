@@ -410,10 +410,19 @@ export type NewParagraph = string | {
 export type Occurrence = {
   /** The ref of the paragraph. */
   block: string;
-  /** The full label of the clause the paragraph is in, such as `11.1(a)`, when it is in one. */
+  /**
+   * The full label of the clause the paragraph is, or whose own text it is, such as `11.1(a)`. A paragraph after a
+   * list item, such as one after (g) with no number, is in the clause the list is in. A recital or another paragraph
+   * under a heading that is not a clause is in none.
+   */
   clause?: string | null;
   /** One past the last character of the match. */
   end: number;
+  /**
+   * When the paragraph is in no clause: the start of the nearest heading before it (a paragraph with an outline
+   * level), such as `RECITALS`, cut at 50 characters.
+   */
+  heading?: string | null;
   /** True when only the second try matched: curly and straight quotes taken as the same, as an operation's `find` does. */
   loose: boolean;
   /** Which match of the text in the paragraph it is, counted from 1: the `occurrence` an operation names it with. */
@@ -904,6 +913,11 @@ export type Retired = {
 export type RevisionFilter = {
   /** Only changes by this author, by code or name. */
   author?: string | null;
+  /**
+   * In a view: 0 for one line for each change; otherwise the blocks that hold the kept changes whole, as the redline
+   * shows them, with this many blocks on each side. `Document::revisions` ignores it.
+   */
+  context?: number;
   /**
    * Only changes whose inserted or deleted text contains one of these texts. Each is case-insensitive unless it has
    * an uppercase letter, as in a `Find`. Empty keeps every change. JSON takes one string or a list of them.

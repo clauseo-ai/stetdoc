@@ -130,9 +130,10 @@ pub struct ViewArgs {
     /// contains one of them.
     #[arg(long, value_name = "TEXT", action = clap::ArgAction::Append, conflicts_with_all = ["outline", "clause", "comments", "story"])]
     pub find: Vec<String>,
-    /// With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. 0 is
-    /// the one-line list.
-    #[arg(long, value_name = "N", requires = "find", default_value_t = 0)]
+    /// With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. With
+    /// --revisions, show the blocks that hold the changes whole, as the redline shows them, with N blocks on each side,
+    /// and not one line for each change. 0 is the one-line list.
+    #[arg(long, value_name = "N", default_value_t = 0)]
     pub context: u8,
     /// The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters.
     #[arg(long)]

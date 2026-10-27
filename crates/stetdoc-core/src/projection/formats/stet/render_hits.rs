@@ -5,11 +5,13 @@
 //! p102 {§5.2} …this Agreement are denominated in United States Dollars (USD). All invoices shall be issued in USD…
 //! p144 CLAUSE 11 — PAYMENT
 //! p150 11.6 All payments due under this Agreement shall be made in United States Dollars (USD) by wire… {~ 4 matches}
+//! {in p292 "Schedule 1 — PRODUCTS"}
+//! p303 {§Schedule 1} 240,000 MT {row: p302 "Gas Oil (GO)", p304 "~20,000 MT", p305 "USD 12.75"}
 //! {tip: p144 is the heading of clause 11: view clause 11 to read it whole, or look up clause 11 for what cites it}
 //! ```
 //!
 //! The text of a line is the paragraph's own, so a piece of it can be given as an edit's `find`. An ellipsis outside it
-//! says the paragraph goes on.
+//! says the paragraph goes on. A paragraph in a table is followed by the other paragraphs of its row, each cut short.
 
 use super::layout::LineBuf;
 use super::refs_syntax::write_ref;
@@ -59,7 +61,7 @@ pub(super) fn hit_lines(out: &mut String, list: &HitList) {
 fn hit_line(b: &mut LineBuf, hit: &FindHit, needles: u32) {
     b.atomic(&write_ref(hit.r#ref));
     if let Some(clause) = &hit.clause
-        && (hit.cut_before || !hit.text.starts_with(&**clause))
+        && (hit.cut_before || !starts_with_label(&hit.text, clause))
     {
         b.atomic(" {§");
         b.content(clause, true, None);
@@ -76,10 +78,33 @@ fn hit_line(b: &mut LineBuf, hit: &FindHit, needles: u32) {
     if hit.deleted_only {
         b.atomic(" {~ only in deleted text}");
     }
+    if !hit.row.is_empty() {
+        b.atomic(" {row:");
+        for (i, cell) in hit.row.iter().enumerate() {
+            b.atomic(&format!(
+                "{} {} ",
+                if i == 0 { "" } else { "," },
+                write_ref(cell.r#ref)
+            ));
+            b.quoted(&cell.text);
+        }
+        b.atomic("}");
+    }
     let total: u32 = hit.terms.iter().fold(0, |a, t| a.saturating_add(t.count));
     if needles > 1 {
         b.atomic(&format!(" {{~ {}}}", terms_text(&hit.terms)));
     } else if total > 1 {
         b.atomic(&format!(" {{~ {total} matches}}"));
     }
+}
+
+/// True if a paragraph's text starts with its clause label, in any case: `11.6 All payments`, or `SCHEDULE 1 — PRODUCTS`
+/// for `Schedule 1`.
+fn starts_with_label(text: &str, label: &str) -> bool {
+    let mut chars = text.chars();
+    label.chars().all(|l| {
+        chars
+            .next()
+            .is_some_and(|t| t.to_lowercase().eq(l.to_lowercase()))
+    })
 }

@@ -37,6 +37,7 @@ export class Document {
   save(): { bytes: Uint8Array; receipt: SaveReceipt };
   inspect(target: string): Inspection;               // "p42", "t3", "r17", "styles", "numbering", "sections"
   revisions(filter?: RevisionFilter): RevisionInfo[];
+  occurrences(text: string, scope?: Scope): Occurrences; // where a text is, as an edit's find matches it
   lookup(query: string): Lookup;
   check(): CheckReport;
   checkPending(request?: { pending?: ReadableFiles; author?: string; date?: string; strict?: boolean }): CheckResult;

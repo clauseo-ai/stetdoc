@@ -132,9 +132,11 @@ pub(crate) fn find_scope(
                 });
             }
             if matches > 0 {
+                // A one-line list counts the paragraphs it lists, and whole blocks count the tables as one each.
+                let counted = if context == 0 { paras.len() } else { 1 };
+                blocks = blocks.saturating_add(u32::try_from(counted).unwrap_or(u32::MAX));
                 tops.push((t, matches, paras));
                 found = found.saturating_add(matches);
-                blocks = blocks.saturating_add(1);
             }
         }
         if tops.is_empty() {

@@ -60,3 +60,19 @@ $ stetdoc view tracked.docx --revisions --find law --full
 {position: change:4..change:4 of changes with text "law" (1 of 1 changes)}
 
 ```
+
+`--revisions --context N` shows the blocks that hold the changes whole, as the redline shows them, with N blocks on
+each side, so each change reads in its paragraph. It takes `--author`, `--kind` and `--find` as the list does.
+
+```console
+$ stetdoc view tracked.docx --revisions --author "Eric White" --context 1
+{stet 1 view=changes base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=p1..p4}
+{authors: JD "Jane Doe" · EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+p1 The Seller {++shall pay ++}{#1 JD}
+p2 Price {--gross--}{#2 EW} net
+p3 {rev run #3 JD} Bold now
+p4 Governing law: {++English law++}{#4 EW}
+{position: p1..p4 of changes by Eric White: 2 changes in 2 blocks (4 of 4 blocks)}
+
+```

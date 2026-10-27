@@ -15,6 +15,13 @@ released yet.
   Gemini CLI now notes that Google retired it.
 - The skill stub tells the agent to write each output next to its input in the user's folder, never in a temporary
   folder, and, when `stetdoc` is missing, not to offer another way into the .docx.
+- `stetdoc view --revisions --context N` shows the blocks that hold the changes whole, as the redline shows them, with N
+  blocks on each side, so each change reads in its paragraph. It takes `--author`, `--kind` and `--find` as the list
+  does. `RevisionFilter` has `context`. `--context` without `--find` or `--revisions` is refused with a next step.
+- The Node bindings have `Document.occurrences(text, scope?)`, typed with `Occurrences` and `Scope`.
+- `Occurrence` has `heading`: the nearest heading when the paragraph is in no clause, which the CLI prints as
+  `(under "RECITALS")`.
+
 - An eval suite for the Claude Code plugin in `evals/`, run with `evals/run.sh` on Claude Code's `claude plugin eval`: nine
   cases on real contracts, graded from stetdoc's own reading of the documents the agent wrote, with turns, tokens, cost
   and time per case, and arms to compare with no plugin or another plugin. See `docs/evals.md`.
@@ -321,6 +328,13 @@ released yet.
 - `stetdoc check FILE --all` lists every finding the report keeps (the first 200), not only the first 20.
 
 ### Changed
+
+- A find hit or an occurrence names a clause only when its paragraph is that clause or its own text. A recital after the
+  parties "(1)" and "(2)" names no clause and sits under its heading (`{in p15 "RECITALS"}`), and a paragraph after a
+  list item such as (g) names the clause the list is in (`{§14.1}`, not `{§14.1(g)}`). A bare label keeps its noun:
+  `{§Schedule 1}`.
+- A find hit in a table cell shows the other cells of its row (`{row: p36 "Greater than 4.25 to 1.00", p38 "2.25%"}`),
+  and a compact find pages by hit line, so a table with many matching cells no longer comes on one page.
 
 - The MCP `edit` and `replace` tools' descriptions say to call `skills_get` first for the batch syntax and the rules.
 - `stetdoc edit --dry-run` on a .docx with `-o` or `--in-place` writes nothing, and says so on its first line, instead of

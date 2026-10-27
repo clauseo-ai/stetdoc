@@ -39,6 +39,11 @@ $ stetdoc view tracked.docx --full --json
   }
 }
 
+$ stetdoc view contract.docx --context 1
+? 2
+error[invalid_payload]: --context shows the blocks around each --find match or each --revisions change, and neither was given.
+next: Add --find TEXT or --revisions, or leave out --context.
+
 $ stetdoc view contract.docx --find days --range p9..p2
 ? 2
 error[invalid_payload]: the end of the range comes before p9, and a range goes forward.

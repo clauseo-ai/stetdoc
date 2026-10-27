@@ -53,6 +53,7 @@ on install. A missing addon throws an error that names the target and the paths 
 | `save()` | `{ bytes, receipt }` | The package and a summary of it. An unedited document returns its input bytes exactly |
 | `inspect(target)` | `Inspection` | One block (`p42`, `t3`, `r17`), or `styles`, `numbering` or `sections` |
 | `revisions(filter?)` | `RevisionInfo[]` | The tracked changes, filtered by `author` and `kind` |
+| `occurrences(text, scope?)` | `Occurrences` | Every place `text` is, matched as an edit's `find` matches it, each with its block, clause and `occurrence`. `scope` is `"auto"` (the default), `{ range: { from, to } }`, `{ clause: "11.1" }` or `{ story: "body" }` |
 | `lookup(query)` | `Lookup` | A defined term, a clause number or a cross-reference, resolved |
 | `check()` | `CheckReport` | Schema and Word-rule problems of the document as it is |
 | `checkPending(request?)` | `CheckResult` | A dry run of `pending` readable files, the revisions already there and the check report |

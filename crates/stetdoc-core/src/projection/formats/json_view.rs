@@ -68,7 +68,7 @@ json_struct!(TermCount { term => "term", count => "count" });
 json_struct!(HitList { needles => "needles", hits => "hits", tips => "tips" });
 json_struct!(FindHit {
     r#ref => "ref", under => "under", clause => "clause", text => "text", cut_before => "cut_before",
-    cut_after => "cut_after", terms => "terms", deleted_only => "deleted_only"
+    cut_after => "cut_after", terms => "terms", deleted_only => "deleted_only", row => "row"
 });
 json_struct!(Tip { r#ref => "ref", clause => "clause", text => "text" });
 json_struct!(ThreadList { total => "total", resolved => "resolved", threads => "threads" });

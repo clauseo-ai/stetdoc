@@ -138,6 +138,16 @@ check("the edit counted UTF-16 units", doc.view(final).text.includes("Emoji \u{1
 const revisions = doc.revisions({ author: "Jane Doe" });
 check("the edit wrote tracked revisions by the author", revisions.length > 0, revisions);
 
+// Occurrences name each place a text is, and an edit targets one by its block and occurrence.
+const found = doc.occurrences("Payment is due");
+check("occurrences list every place and the base", found.hits.length === 2 && found.base === doc.base(), found);
+check("each occurrence names its block and its number", found.hits.every((h) => h.occurrence === 1 && h.block.startsWith("p")), found);
+const inP4 = doc.occurrences("on demand", { range: { from: found.hits[1].block } });
+check("occurrences take a scope", inP4.hits.length === 1 && inP4.hits[0].block === found.hits[1].block, inP4);
+const dry: Receipt = doc.edit({ base: doc.base(), ops: [{ op: "replace", ref: found.hits[1].block, find: "on demand", with: "at once" }], ...stamp, dryRun: true });
+check("an occurrence is a target", dry.base === doc.base() && JSON.stringify(dry).includes(found.hits[1].block), dry);
+throws("occurrences of an empty text", () => doc.occurrences(""));
+
 // Export and resume keep refs.
 const copy: WorkingCopy = doc.export();
 check("a working copy has readable files", copy.files.some(([name]) => name === "document.md"), copy.files);

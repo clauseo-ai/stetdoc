@@ -99,7 +99,8 @@ fn contract_text(index: usize) -> String {
 fn a_find_that_matches_a_clause_heading_says_how_to_view_that_clause_whole() {
     let state = contract().state();
     let v = view(&state, &spec(find(&["PAYMENT"], 0), 0)).unwrap();
-    assert!(v.text.contains("p1 {§1} CLAUSE 1 — PAYMENT"), "{}", v.text);
+    // The text starts with its label, Clause 1, so the line does not repeat it.
+    assert!(v.text.contains("p1 CLAUSE 1 — PAYMENT\n"), "{}", v.text);
     assert!(
         v.text
             .contains("{tip: p1 is the heading of clause 1: view clause 1 to read it whole, or look up clause 1"),

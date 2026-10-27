@@ -6,7 +6,7 @@ use napi::bindgen_prelude::Buffer;
 use napi_derive::napi;
 use stetdoc_core::{
     Batch, CompareOptions, Complement, Document, Edit, ErrorCode, Limits, OpenOptions,
-    RevisionFilter, Stamp, StetError, ViewSpec, WorkingCopy,
+    RevisionFilter, Scope, Stamp, StetError, ViewSpec, WorkingCopy,
 };
 
 /// One entry of a working copy's complement: its name relative to `.stet/` and its bytes.
@@ -171,6 +171,15 @@ impl NativeDocument {
         guard(|| {
             let filter: RevisionFilter = parse("revision filter", &filter)?;
             json(&self.inner.revisions(&filter)?)
+        })
+    }
+
+    /// `occurrences` of a text, with the JSON of a `Scope`. Returns the JSON of the `Occurrences`.
+    #[napi]
+    pub fn occurrences(&self, needle: String, scope: String) -> napi::Result<String> {
+        guard(|| {
+            let scope: Scope = parse("scope", &scope)?;
+            json(&self.inner.occurrences(&needle, &scope)?)
         })
     }
 

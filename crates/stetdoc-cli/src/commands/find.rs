@@ -51,11 +51,17 @@ pub fn place_words(scope: &Scope) -> String {
     }
 }
 
-/// One place on one line: its ref, its clause, and the snippet.
+/// One place on one line: its ref, its clause or the heading it is under, and the snippet.
 pub fn line(hit: &Occurrence) -> String {
-    match &hit.clause {
-        Some(clause) => format!("  {} (clause {clause}) {}", hit.block, hit.snippet),
-        None => format!("  {} {}", hit.block, hit.snippet),
+    format!("  {}{} {}", hit.block, where_words(hit), hit.snippet)
+}
+
+/// Where a place is, after its ref: ` (clause 11.1)`, ` (under "RECITALS")`, or nothing.
+fn where_words(hit: &Occurrence) -> String {
+    match (&hit.clause, &hit.heading) {
+        (Some(clause), _) => format!(" (clause {clause})"),
+        (None, Some(heading)) => format!(" (under {heading:?})"),
+        (None, None) => String::new(),
     }
 }
 
@@ -133,10 +139,7 @@ pub fn refuse(problems: Vec<(ErrorCode, String)>, what: &str, all: bool) -> Fail
 /// Where the places of one text are, on one line: `once, at p12 (clause 11.1)` or `14 times, in 9 blocks: p3, p5, ...`.
 pub fn summary(found: &Occurrences) -> String {
     match found.hits.as_slice() {
-        [one] => match &one.clause {
-            Some(clause) => format!("once, at {} (clause {clause})", one.block),
-            None => format!("once, at {}", one.block),
-        },
+        [one] => format!("once, at {}{}", one.block, where_words(one)),
         hits => {
             let mut blocks: Vec<&str> = Vec::new();
             for hit in hits {

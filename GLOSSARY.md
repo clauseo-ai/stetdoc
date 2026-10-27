@@ -177,7 +177,8 @@ block shown, so it stays valid when the document is edited. A table that a page 
 rows has the ref of its last row.
 
 **Hit line.** One line of a compact find: the ref of a paragraph that matched, the clause
-it is in, and its text around the match, exact so that a piece of it can be an edit's `find`.
+it is or whose own text it is, and its text around the match, exact so that a piece of it can be
+an edit's `find`. A hit in a table also shows the other cells of its row.
 
 **Margin note.** A line of a page that is about the block before it and is not text: how
 many times a find matched in it, what a citation in it came to, what cites a clause. It

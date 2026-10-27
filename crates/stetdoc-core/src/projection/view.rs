@@ -13,13 +13,14 @@ use super::appendix::appendix;
 use super::build::{Pick, Selection, StorySel, TopPick, project};
 use super::comments_view::comments_view;
 use super::formats::{Format, by_id};
-use super::ledger_view::ledger_view;
+use super::ledger_view::{label_of, ledger_view};
 use super::model::{Margin, Output, Projection, TermCount};
 use super::notes::Notes;
 use super::page::{estimate, fit, greedy, weight};
 use super::select::{
     Item, Selected, Source, Start, clause_scope, range_scope, start_after, story_scope,
 };
+use super::select_changes::changes_scope;
 use super::select_find::{Found, find_scope};
 use crate::api::error::{ErrorCode, StetError};
 use crate::api::view::{Cursor, FormatId, Mode, Position, Scope, StoryName, View, ViewSpec};
@@ -116,6 +117,13 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
             }
         }
         Scope::Clause(text) => cx.blocks(clause_scope(&cx.parts, spec.mode, text)?),
+        Scope::Revisions(filter) if filter.context > 0 => cx.blocks(changes_scope(
+            &cx.parts,
+            state,
+            spec.mode,
+            filter,
+            label_of(filter),
+        )?),
         Scope::Revisions(filter) => ledger_view(cx.parts, spec, filter, cx.format, cx.base),
         Scope::Comments(filter) => comments_view(cx.parts, spec, filter, cx.format, cx.base),
     }
@@ -231,9 +239,9 @@ impl Cx<'_> {
             {
                 pick.before.push(Margin::Continued { table, from });
             }
-            if selected.name == "find" {
+            if matches!(selected.name, "find" | "changes") {
                 let index = start.item + k;
-                if item.matches > 0 {
+                if item.matches > 0 && selected.name == "find" {
                     pick.after.push(match &self.found {
                         Some(found) => Margin::Terms(
                             found
@@ -374,7 +382,7 @@ impl Cx<'_> {
                 _ => selected.name.to_string(),
             });
         let mut scope = scope;
-        if selected.name == "find" {
+        if matches!(selected.name, "find" | "changes") {
             // Which of the blocks that match this page shows, counted from the first.
             let matching = |list: &[Item]| list.iter().filter(|i| i.matches > 0).count();
             let before = matching(selected.items.get(..start.item).unwrap_or_default());

@@ -208,6 +208,9 @@ pub(crate) struct FindHit {
     pub terms: Vec<TermCount>,
     /// The needles are only in text that a tracked change deletes, so `text` is the start of the paragraph.
     pub deleted_only: bool,
+    /// For a paragraph in a table: the other paragraphs of its row, each cut short, so that a cell reads with the cells
+    /// beside it. Empty for a paragraph outside a table.
+    pub row: Vec<Target>,
 }
 
 /// A clause heading that a find matched: the clause to view whole, and how to name it.

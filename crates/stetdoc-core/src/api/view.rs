@@ -126,6 +126,9 @@ pub struct RevisionFilter {
     /// Carry the whole inserted and deleted text of each change, up to 1,000 characters, and not 200; a view shows it
     /// all and does not cut each line to 80 characters.
     pub full: bool,
+    /// In a view: 0 for one line for each change; otherwise the blocks that hold the kept changes whole, as the redline
+    /// shows them, with this many blocks on each side. `Document::revisions` ignores it.
+    pub context: u8,
 }
 
 /// Which comment threads a `Comments` view lists.

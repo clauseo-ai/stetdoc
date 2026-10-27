@@ -62,6 +62,7 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
             kind: args.kind.clone(),
             find: args.find.clone(),
             full: args.full,
+            context: args.context,
         })
     } else if args.comments {
         let resolved = match (args.resolved, args.open) {
@@ -90,6 +91,12 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
     } else {
         Scope::Auto
     };
+    if args.context > 0 && args.find.is_empty() && !args.revisions {
+        return Err(Failure::usage(
+            "--context shows the blocks around each --find match or each --revisions change, and neither was given.",
+            "Add --find TEXT or --revisions, or leave out --context.",
+        ));
+    }
     if args.author.is_some() && !args.revisions && !args.comments {
         return Err(Failure::usage(
             "--author filters --revisions or --comments, and neither was given.",

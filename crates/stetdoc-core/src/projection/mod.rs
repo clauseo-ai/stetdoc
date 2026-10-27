@@ -52,9 +52,11 @@ mod notes;
 mod occurrences;
 mod outline;
 mod page;
+mod place;
 mod receipt;
 mod render;
 mod select;
+mod select_changes;
 mod select_find;
 mod view;
 
@@ -92,6 +94,8 @@ mod tests_notes;
 mod tests_outline;
 #[cfg(test)]
 mod tests_page;
+#[cfg(test)]
+mod tests_place;
 #[cfg(test)]
 mod tests_scopes;
 #[cfg(test)]

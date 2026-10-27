@@ -128,7 +128,7 @@ stetdoc view [OPTIONS] <INPUT>
 | `--range <REFS>` | The blocks from one ref to another, such as p40..p60, or from a ref to the end of its story. |
 | `--clause <NUMBER>` | The block a clause number resolves to, with the blocks under it, such as 12.3. |
 | `--find <TEXT>` | The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line then says which it holds. With --range, only in that range; with --revisions, only the changes whose text contains one of them. |
-| `--context <N>` | With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. 0 is the one-line list. Default `0`. |
+| `--context <N>` | With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. With --revisions, show the blocks that hold the changes whole, as the redline shows them, with N blocks on each side, and not one line for each change. 0 is the one-line list. Default `0`. |
 | `--revisions` | The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters. |
 | `--full` | With --revisions, the whole inserted and deleted text of each change (up to 1,000 characters), not 80. |
 | `--comments` | The comment threads. |
@@ -205,6 +205,22 @@ $ stetdoc view tracked.docx --revisions --find law --full
 {changes: 1 change}
 #4 insert EW 2026-01-05 p4 "English law"
 {position: change:4..change:4 of changes with text "law" (1 of 1 changes)}
+
+```
+
+`--revisions --context N` shows the blocks that hold the changes whole, as the redline shows them, with N blocks on
+each side, so each change reads in its paragraph. It takes `--author`, `--kind` and `--find` as the list does.
+
+```console
+$ stetdoc view tracked.docx --revisions --author "Eric White" --context 1
+{stet 1 view=changes base=676e65f4e88a38bd:0:676e65f4e88a38bd mode=redline common-style="Normal" range=p1..p4}
+{authors: JD "Jane Doe" · EW "Eric White"}
+{summary: 4 tracked changes (JD 2, EW 2) · 1 section}
+p1 The Seller {++shall pay ++}{#1 JD}
+p2 Price {--gross--}{#2 EW} net
+p3 {rev run #3 JD} Bold now
+p4 Governing law: {++English law++}{#4 EW}
+{position: p1..p4 of changes by Eric White: 2 changes in 2 blocks (4 of 4 blocks)}
 
 ```
 

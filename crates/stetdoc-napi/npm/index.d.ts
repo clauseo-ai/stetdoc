@@ -7,6 +7,7 @@ import type {
   ErrorCode,
   Inspection,
   Lookup,
+  Occurrences,
   Op,
   OpenOptions,
   ReadableFiles,
@@ -14,6 +15,7 @@ import type {
   RevisionFilter,
   RevisionInfo,
   SaveReceipt,
+  Scope,
   View,
   ViewSpec,
 } from "./types";
@@ -87,6 +89,8 @@ export declare class Document {
   save(): { bytes: Uint8Array; receipt: SaveReceipt };
   inspect(target: string): Inspection;
   revisions(filter?: RevisionFilter): RevisionInfo[];
+  /** Every place a text is, as an edit's `find` matches it. `scope` defaults to "auto". */
+  occurrences(text: string, scope?: Scope): Occurrences;
   lookup(query: string): Lookup;
   check(): CheckReport;
   checkPending(request?: CheckPendingRequest): CheckResult;

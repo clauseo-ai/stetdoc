@@ -90,7 +90,7 @@ struct Page {
 }
 
 /// What the position line calls the list: `changes`, and the filter that narrows it.
-fn label_of(filter: &RevisionFilter) -> String {
+pub(super) fn label_of(filter: &RevisionFilter) -> String {
     let mut label = "changes".to_string();
     if let Some(author) = &filter.author {
         label.push_str(&format!(" by {author}"));

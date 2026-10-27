@@ -11,8 +11,14 @@ pub struct Occurrence {
     pub block: String,
     /// The story: `body`, `notes`, `headers` or `comments`.
     pub story: String,
-    /// The full label of the clause the paragraph is in, such as `11.1(a)`, when it is in one.
+    /// The full label of the clause the paragraph is, or whose own text it is, such as `11.1(a)`. A paragraph after a
+    /// list item, such as one after (g) with no number, is in the clause the list is in. A recital or another paragraph
+    /// under a heading that is not a clause is in none.
     pub clause: Option<String>,
+    /// When the paragraph is in no clause: the start of the nearest heading before it (a paragraph with an outline
+    /// level), such as `RECITALS`, cut at 50 characters.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub heading: Option<String>,
     /// Which match of the text in the paragraph it is, counted from 1: the `occurrence` an operation names it with.
     pub occurrence: u32,
     /// The first character of the match, as an offset in the paragraph's Final text.

@@ -58,8 +58,8 @@ repository-based channels work from the repository at its default branch, so a m
 
 - File: `packaging/homebrew/stetdoc.rb`, a template with `@VERSION@` and four `@SHA256_*@` placeholders. The `homebrew`
   job of `release.yml` runs `packaging/scripts/fill-formula.mjs` and attaches the filled file to the draft as `stetdoc.rb`.
-- Publish: create a tap repository named `homebrew-stetdoc`, copy the released `stetdoc.rb` to `Formula/stetdoc.rb`, and
-  push it. Users then run `brew install clauseo-ai/stetdoc/stetdoc`. Nothing in this repository pushes to a tap.
+- Publish: create a tap repository named `homebrew-tap`, copy the released `stetdoc.rb` to `Formula/stetdoc.rb`, and
+  push it. Users then run `brew install clauseo-ai/tap/stetdoc`. Nothing in this repository pushes to a tap.
 
 ### 3. npm: the CLI
 
@@ -68,13 +68,36 @@ repository-based channels work from the repository at its default branch, so a m
   binary itself, as esbuild does. The step copies a file npm already installed, downloads nothing, writes only inside the
   package and never fails the install. With `--ignore-scripts`, a package manager that blocks install scripts (pnpm 10,
   Bun, and npm 11.20 already warns that `allowScripts` will gate them), on Windows, or when the binary does not print
-  `stetdoc <version>`, the launcher stays and works the same, more slowly (see "Launch cost" below). The seven packages `packaging/npm/stetdoc/targets/<target>/` are `@stetdoc/cli-<target>`, one per target,
+  `stetdoc <version>`, the launcher stays and works the same, more slowly (see "Launch cost" below). The seven packages `packaging/npm/stetdoc/targets/<target>/` are `@clauseo/stetdoc-cli-<target>`, one per target,
   and the main package lists them as `optionalDependencies`. `scripts/pack.mjs` copies the binaries in.
-- Release fills: the `npm-cli` job unpacks the `cli` archives and writes eight tarballs, `stetdoc-cli-<version>.tgz` and
-  one `stetdoc-cli-<target>-<version>.tgz` per target. The main tarball is renamed because the napi addon's main package
-  is also named `stetdoc` (see the open question below).
+- Release fills: the `npm-cli` job unpacks the `cli` archives and writes eight tarballs, `stetdoc-<version>.tgz` and
+  one `clauseo-stetdoc-cli-<target>-<version>.tgz` per target. The napi addon's tarballs are `clauseo-stetdoc-*.tgz`
+  without `cli`, so none of them collide in the release.
 - Publish: publish the seven target packages first, then the main one, from the draft's tarballs, with
   `npm publish <tarball> --access public`. Then `npx stetdoc mcp` works anywhere.
+- Bun: Bun blocks the install step of any package not in `trustedDependencies`, so a plain `bun add stetdoc` or
+  `bun add -g stetdoc` keeps the Node launcher (`Blocked 1 postinstall`). Bun users should install with `--trust`:
+  `bun add -g --trust stetdoc` (or `bun add --trust stetdoc` in a project, which adds `stetdoc` to the project's
+  `trustedDependencies`), or run `bun pm -g trust stetdoc` (`bun pm trust stetdoc` in a project) after a plain install.
+  The step then runs and the binary replaces the launcher, also on a machine without Node, where Bun runs the step itself.
+  For a one-off run, `bunx --bun stetdoc` starts the launcher under Bun; plain `bunx stetdoc` follows its
+  `#!/usr/bin/env node` line and starts Node when Node is installed.
+
+  Measured on 2026-10-27 with Bun 1.4.3 from the locally packed tarballs, `stetdoc --version`, median of 20 (the binary
+  alone took 2.5 ms in the same run):
+
+  | Bun install and call | Swap ran | Launcher runs under | Median |
+  | --- | --- | --- | --- |
+  | `bun add`, then `node_modules/.bin/stetdoc` | no (blocked) | Node | 66 ms |
+  | `bun add`, then `bunx stetdoc` | no | Node (Bun when Node is missing) | 67 ms |
+  | `bun add`, then `bunx --bun stetdoc` | no | Bun | 10 ms |
+  | `bun add --trust` or `bun pm trust stetdoc`, then `.bin/stetdoc` | yes | none, the binary | 1.8 ms |
+  | `bun add --trust`, then `bunx stetdoc` | yes | none | 4.1 ms |
+  | `bun add -g`, then `stetdoc` | no (blocked) | Node | 65 ms |
+  | `bun add -g --trust` or `bun pm -g trust stetdoc`, then `stetdoc` | yes | none | 1.8 ms |
+
+  Not checked: `bunx stetdoc` straight from the registry (nothing is published), and Windows. Getting `stetdoc` onto Bun's
+  built-in list of trusted packages would make the plain install fast too; that is a request to the Bun project.
 
 ### 4. PyPI: the CLI
 
@@ -89,9 +112,24 @@ repository-based channels work from the repository at its default branch, so a m
   manylinux and musllinux containers), installs the wheels a runner can run and runs `stetdoc --version`, and
   `pypi-sdist` builds the sdist. All of them go into the draft release, named `stetdoc-<pep440 version>-*.whl` and
   `stetdoc-<pep440 version>.tar.gz`. The version comes from the workspace, as above.
-- Publish: download the wheels and the sdist from the draft into an empty folder, then `uv publish dist/*` (or
-  `twine upload dist/*`) with a PyPI API token for the project. A trusted publisher for this repository's
-  `release.yml` would avoid the token, but the workflow publishes nothing, so a token is the route for now.
+- Publish: publishing the draft release on GitHub starts the `publish-pypi` job, which downloads that release's seven
+  wheels and the sdist and uploads them with `pypa/gh-action-pypi-publish` by trusted publishing (no token in the
+  repository). Before the first release, a PyPI account with 2FA adds a pending publisher at
+  https://pypi.org/manage/account/publishing/ with these fields:
+
+  | Field | Value |
+  | --- | --- |
+  | PyPI project name | `stetdoc` |
+  | Owner | `clauseo-ai` |
+  | Repository name | `stetdoc` |
+  | Workflow name | `release.yml` |
+  | Environment name | `pypi` |
+
+  and the repository gets a GitHub environment named `pypi` (Settings, Environments), ideally with a required reviewer
+  and limited to `v*` tags. The first upload creates the project and turns the pending publisher into a normal one.
+  Without trusted publishing, the token route: download the wheels and the sdist from the release into an empty folder
+  and run `uv publish <folder>/*` (or `twine upload <folder>/*`) with an API token. The first upload needs a token scoped
+  to the whole account, because a project token exists only once the project does; replace it with a project token after.
 - Install: `uv tool install stetdoc`, `pipx install stetdoc` or `pip install stetdoc`. `uvx stetdoc mcp` runs the
   server without installing.
 - Local build: `cd packaging/pypi && maturin build --release --locked` writes a wheel for this machine to `target/wheels`
@@ -196,12 +234,14 @@ the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch 
 
 ## Decisions and open questions
 
-1. **npm names (decided).** The CLI is `stetdoc`, so `npx stetdoc` works, with platform packages `@stetdoc/cli-<target>`.
-   The napi library is `@stetdoc/node`, with platform packages `@stetdoc/node-<target>`, and stays `"private": true` until
-   the maintainers decide to publish it. `npm view` returned 404 for `stetdoc`, `@stetdoc/node` and the platform names on the
-   day of the change, so they looked free. The scope `@stetdoc` did not exist on npm (`npm org ls stetdoc` found no scope),
-   so a maintainer must create it before any `@stetdoc/*` package can be published. Check again before publishing, because a
-   404 is not a reservation.
+1. **npm names (decided).** Everything but the CLI lives under the Clauseo organisation's scope. The CLI is the unscoped
+   `stetdoc`, so `npx stetdoc` works, with platform packages `@clauseo/stetdoc-cli-<target>`. The napi library is
+   `@clauseo/stetdoc`, with platform packages `@clauseo/stetdoc-<target>`, and stays `"private": true` until the maintainers
+   decide to publish it. On 2026-10-27 the registry returned 404 for `stetdoc`, `@clauseo/stetdoc`,
+   `@clauseo/stetdoc-cli-darwin-arm64` and `@clauseo/stetdoc-darwin-arm64`, and "Scope not found" for
+   `https://registry.npmjs.org/-/org/clauseo/package`, so a maintainer must create the npm organisation `clauseo` before
+   any `@clauseo/*` package can be published. Check again before publishing, because a 404 is not a reservation. The
+   Homebrew tap is `clauseo-ai/homebrew-tap` (404 on GitHub the same day), so it can hold other Clauseo formulae later.
 2. **The Claude plugin** is `plugins/claude/` and holds only the skill, the manifest, the icon and the guard hook, not the repository.
 3. **The author** is `Clauseo` in every manifest, as in the napi package and the Cargo manifests.
 
@@ -212,7 +252,7 @@ the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch 
   so they were checked against the docs by reading only.
 - `cargo xtask release check` passes, and its tests show that a stale plugin copy of the skill is named with its fix.
 - The napi library's `cargo test -p stetdoc-napi` passes, and `test/smoke.mts` passes under Node 26 (61 checks) and Bun 1.3.14.
-  A load through `@stetdoc/node` with a `@stetdoc/node-darwin-arm64` package holding the addon also works.
+  A load through `@clauseo/stetdoc` with a `@clauseo/stetdoc-darwin-arm64` package holding the addon also works.
 - `packaging/install.sh` passes `sh -n` and `shellcheck`. It was run end to end against a local mirror (a real archive and
   its checksum: the install works, a wrong checksum stops it before anything is written, and a missing release fails).
 - `packaging/npm/stetdoc`: `scripts/pack.mjs` packed eight tarballs from fake binaries, and the launcher ran the platform
@@ -228,6 +268,12 @@ the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch 
   `--ignore-scripts` the launcher stayed. In both, `npx stetdoc --version` printed the version and `npx stetdoc mcp`
   answered `initialize` and `tools/list` with the twelve tools.
 - The `dist` napi addon passed `test/smoke.mts` (66 checks) under Node 26.
+- After the move to `@clauseo` (2026-10-27): the CLI tarballs (`stetdoc-1.0.0-dev.tgz` and
+  `clauseo-stetdoc-cli-darwin-arm64-1.0.0-dev.tgz`) installed with npm with and without scripts as above, and
+  `npx stetdoc mcp` listed 12 tools. The napi tarballs `clauseo-stetdoc-1.0.0-dev.tgz` and
+  `clauseo-stetdoc-darwin-arm64-1.0.0-dev.tgz` installed with npm, and `require("@clauseo/stetdoc")` under Node 26 and
+  `import { Document } from "@clauseo/stetdoc"` under Bun 1.4.3 loaded the addon from the platform package. The Bun runs are
+  in the npm section. `publish-pypi` passes `actionlint` and has not run.
 - The filled Homebrew formula passed `ruby -c`. `brew audit` takes only a tapped formula, and no tap was made.
 
 Not verified: a real release run, the `pypi` job and maturin-action's containers, a real tap or npm install from the registry, the Homebrew `on_*` blocks on macOS, the

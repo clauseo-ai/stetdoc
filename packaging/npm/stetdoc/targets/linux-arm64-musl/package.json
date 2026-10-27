@@ -1,5 +1,5 @@
 {
-  "name": "@stetdoc/cli-linux-arm64-musl",
+  "name": "@clauseo/stetdoc-cli-linux-arm64-musl",
   "version": "1.0.0-dev",
   "description": "The stetdoc command-line tool for aarch64-unknown-linux-musl. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",

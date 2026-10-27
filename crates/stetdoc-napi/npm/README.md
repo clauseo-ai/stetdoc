@@ -5,7 +5,7 @@ package as real Word tracked changes. Everything the edits did not touch is kept
 library: the stetdoc engine as a native addon, with TypeScript types generated from the engine's own definitions.
 
 ```ts
-import { Document, compare } from "@stetdoc/node";
+import { Document, compare } from "@clauseo/stetdoc";
 
 const doc = Document.open(bytes);                                  // a Uint8Array of a .docx
 const view = doc.view();                                           // the body, or its outline when it is long
@@ -25,7 +25,7 @@ const { document: redline, receipt: diff } = compare(original, revised, { stamp:
 
 Node 22.18 or later, or Bun 1.3.13 or later, on one of seven targets: `linux-x64-gnu`, `linux-arm64-gnu`,
 `linux-x64-musl`, `linux-arm64-musl`, `darwin-x64`, `darwin-arm64` and `win32-x64-msvc`. The addon for each target is its
-own package, `@stetdoc/<target>`, which the package manager installs as an optional dependency. No package runs a script
+own package, `@clauseo/stetdoc-<target>`, which the package manager installs as an optional dependency. No package runs a script
 on install. A missing addon throws an error that names the target and the paths it tried.
 
 ## The rules

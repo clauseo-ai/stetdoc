@@ -4,15 +4,21 @@ name: release
 # tests of both, and a draft GitHub release holding the archives, their SHA-256 files, the npm tarballs (the addon's and the
 # CLI's), the Python wheels and sdist, and the Homebrew formula filled for this version. Every shipped binary is built with
 # the `dist` profile of the root Cargo.toml (fat LTO, one codegen unit, stripped). `packaging-check` validates the packaging files first. Nothing
-# here publishes to npm, PyPI, a tap or any other registry: publishing is a maintainer's manual step, from the draft release's assets.
+# in the build publishes to npm, PyPI, a tap or any other registry: publishing is a maintainer's step, from the draft release's
+# assets. The one exception is `publish-pypi`, which runs only when a maintainer publishes the release on GitHub: it uploads
+# that release's wheels and sdist to PyPI by trusted publishing, and every build job is skipped in that run.
 # `cargo xtask release check` (run by the tests) keeps the target list here in step with the npm packages.
 
 on:
   push:
     tags: ["v*"]
   workflow_dispatch:
+  # Publishing the draft release by hand starts `publish-pypi` and nothing else.
+  release:
+    types: [published]
 
-# Least privilege: every job reads the repository, and only `release` may write, to make the draft release.
+# Least privilege: every job reads the repository, only `release` may write, to make the draft release, and only
+# `publish-pypi` may ask for an OIDC token, which PyPI exchanges for a short-lived upload token.
 permissions:
   contents: read
 
@@ -23,6 +29,7 @@ env:
 jobs:
   cli:
     name: cli ${{ matrix.target.triple }}
+    if: ${{ github.event_name != 'release' }}
     runs-on: ${{ matrix.target.runner }}
     timeout-minutes: 45
     strategy:
@@ -91,6 +98,7 @@ jobs:
 
   addon:
     name: addon ${{ matrix.target.npm }}
+    if: ${{ github.event_name != 'release' }}
     runs-on: ${{ matrix.target.runner }}
     timeout-minutes: 45
     strategy:
@@ -234,6 +242,7 @@ jobs:
   # are checked here, so a broken one stops the draft. Every tool is on the runner, so nothing is installed.
   packaging-check:
     name: packaging checks
+    if: ${{ github.event_name != 'release' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -291,7 +300,7 @@ jobs:
           if-no-files-found: error
 
   # The npm tarballs of the CLI: a main package `stetdoc` that starts the binary of the platform, and one package per
-  # target, `@stetdoc/cli-<target>`, that holds it. The binaries come out of the archives the cli jobs built, so these are
+  # target, `@clauseo/stetdoc-cli-<target>`, that holds it. The binaries come out of the archives the cli jobs built, so these are
   # the binaries that were smoke-tested. `npm pack` only writes files.
   npm-cli:
     name: npm cli tarballs
@@ -352,6 +361,7 @@ jobs:
   # run time. The Linux wheels build in maturin's manylinux and musllinux containers. Nothing is uploaded to PyPI.
   pypi:
     name: pypi wheel ${{ matrix.target.npm }}
+    if: ${{ github.event_name != 'release' }}
     runs-on: ${{ matrix.target.runner }}
     timeout-minutes: 45
     strategy:
@@ -411,6 +421,7 @@ jobs:
   # The source distribution, for a platform with no wheel: pip builds it with maturin and a Rust toolchain.
   pypi-sdist:
     name: pypi sdist
+    if: ${{ github.event_name != 'release' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
@@ -453,3 +464,35 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
         run: gh release create "$TAG" assets/* --draft --title "stetdoc $TAG" --notes "See CHANGELOG.md for what changed."
+
+  # Uploads the wheels and the sdist of a release to PyPI when a maintainer publishes that release on GitHub, so the files on
+  # PyPI are the ones the pypi jobs built and the maintainer reviewed in the draft. It uses PyPI's trusted publishing: no token
+  # is stored, and PyPI accepts the upload only from this workflow in the `pypi` environment of this repository (the pending
+  # publisher's fields are in packaging/README.md). The environment can require a reviewer's approval before the upload.
+  publish-pypi:
+    name: publish to PyPI
+    if: ${{ github.event_name == 'release' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/project/stetdoc/
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      # The sdist is stetdoc-<version>.tar.gz with a digit after the dash; the CLI archives start with a CPU name instead.
+      - name: Download the wheels and the sdist from the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          gh release download "$TAG" --dir dist --pattern 'stetdoc-*.whl' --pattern 'stetdoc-[0-9]*.tar.gz'
+          ls -l dist
+          test "$(find dist -name '*.whl' | wc -l)" -eq 7 || { echo "expected 7 wheels in the release" >&2; exit 1; }
+          test "$(find dist -name '*.tar.gz' | wc -l)" -eq 1 || { echo "expected 1 sdist in the release" >&2; exit 1; }
+
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: dist

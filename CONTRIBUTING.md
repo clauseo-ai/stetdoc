@@ -40,7 +40,7 @@ Fuzzing below). Every failure names the file and line and says how to fix it.
 
 ### The TypeScript library
 
-The package `@stetdoc/node` lives in `crates/stetdoc-napi/npm` and needs Node 22.18 or later, or Bun 1.3.13 or later, and no
+The package `@clauseo/stetdoc` lives in `crates/stetdoc-napi/npm` and needs Node 22.18 or later, or Bun 1.3.13 or later, and no
 npm install:
 
 ```

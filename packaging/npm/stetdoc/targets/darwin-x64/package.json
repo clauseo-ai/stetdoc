@@ -1,5 +1,5 @@
 {
-  "name": "@stetdoc/cli-darwin-x64",
+  "name": "@clauseo/stetdoc-cli-darwin-x64",
   "version": "1.0.0-dev",
   "description": "The stetdoc command-line tool for x86_64-apple-darwin. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",

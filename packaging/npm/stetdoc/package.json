@@ -38,12 +38,12 @@
     "pack": "node scripts/pack.mjs"
   },
   "optionalDependencies": {
-    "@stetdoc/cli-linux-x64-gnu": "1.0.0-dev",
-    "@stetdoc/cli-linux-arm64-gnu": "1.0.0-dev",
-    "@stetdoc/cli-linux-x64-musl": "1.0.0-dev",
-    "@stetdoc/cli-linux-arm64-musl": "1.0.0-dev",
-    "@stetdoc/cli-darwin-x64": "1.0.0-dev",
-    "@stetdoc/cli-darwin-arm64": "1.0.0-dev",
-    "@stetdoc/cli-win32-x64-msvc": "1.0.0-dev"
+    "@clauseo/stetdoc-cli-linux-x64-gnu": "1.0.0-dev",
+    "@clauseo/stetdoc-cli-linux-arm64-gnu": "1.0.0-dev",
+    "@clauseo/stetdoc-cli-linux-x64-musl": "1.0.0-dev",
+    "@clauseo/stetdoc-cli-linux-arm64-musl": "1.0.0-dev",
+    "@clauseo/stetdoc-cli-darwin-x64": "1.0.0-dev",
+    "@clauseo/stetdoc-cli-darwin-arm64": "1.0.0-dev",
+    "@clauseo/stetdoc-cli-win32-x64-msvc": "1.0.0-dev"
   }
 }

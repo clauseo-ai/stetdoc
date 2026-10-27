@@ -1,5 +1,5 @@
 {
-  "name": "@stetdoc/node-darwin-arm64",
+  "name": "@clauseo/stetdoc-darwin-arm64",
   "version": "1.0.0-dev",
   "description": "The stetdoc native addon for darwin-arm64. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",

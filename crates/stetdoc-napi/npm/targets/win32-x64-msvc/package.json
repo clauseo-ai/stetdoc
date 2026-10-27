@@ -1,5 +1,5 @@
 {
-  "name": "@stetdoc/node-win32-x64-msvc",
+  "name": "@clauseo/stetdoc-win32-x64-msvc",
   "version": "1.0.0-dev",
   "description": "The stetdoc native addon for win32-x64-msvc. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",

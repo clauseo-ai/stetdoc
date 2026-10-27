@@ -1,5 +1,5 @@
 {
-  "name": "@stetdoc/node-linux-arm64-musl",
+  "name": "@clauseo/stetdoc-linux-arm64-musl",
   "version": "1.0.0-dev",
   "description": "The stetdoc native addon for linux-arm64-musl. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",

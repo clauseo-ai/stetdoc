@@ -7,7 +7,7 @@ them: a server that edits through the library while an agent in a sandbox uses t
 | Way in | Choose it when |
 | --- | --- |
 | The Rust crate `stetdoc-core` | Your service is in Rust, or you want the engine with no process or runtime around it |
-| The Node and Bun package `@stetdoc/node` | Your server is in TypeScript or JavaScript and holds documents in memory between turns |
+| The Node and Bun package `@clauseo/stetdoc` | Your server is in TypeScript or JavaScript and holds documents in memory between turns |
 | The CLI as a subprocess, with `--json` | Any other language, or an agent with a shell in a sandbox |
 | MCP, with `stetdoc mcp` | An agent or app that takes tools, with no code of yours in between |
 
@@ -57,13 +57,13 @@ public interface is listed in [`ARCHITECTURE.md`](../ARCHITECTURE.md), and why i
 
 ## The Node and Bun package
 
-`@stetdoc/node` is the engine as a native addon, with TypeScript types generated from the engine's definitions. It needs
+`@clauseo/stetdoc` is the engine as a native addon, with TypeScript types generated from the engine's definitions. It needs
 Node 22.18 or Bun 1.3.13 or later. Until it is published, build the addon from a checkout with `node scripts/build.mjs`
 in `crates/stetdoc-napi/npm`, and depend on that folder.
 
 ```js
 import { readFileSync, writeFileSync } from "node:fs";
-import { Document, StetdocError } from "@stetdoc/node";
+import { Document, StetdocError } from "@clauseo/stetdoc";
 
 const doc = Document.open(readFileSync("contract.docx"));
 console.log(doc.view().text); // the page that an agent reads, with its refs
@@ -145,5 +145,5 @@ agent](agents.md). To serve it to a cloud app, see [Self-hosting the MCP server]
 ## A worked case
 
 A legal drafting product can use two of the four ways together: the CLI and the skill in the
-model's sandbox, and `@stetdoc/node` in the server for its own document tools and for Claude's text editor tool, with one
+model's sandbox, and `@clauseo/stetdoc` in the server for its own document tools and for Claude's text editor tool, with one
 pinned version for both.

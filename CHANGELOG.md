@@ -334,7 +334,7 @@ released yet.
 - The fuzz targets `batch` (a batch parsed as JSON or block text, written as JSON and parsed back, then
   applied to a small document tracked, untracked or as a dry run) and `files` (an edit of
   `document.md`), with their dictionaries and seeds. Both run in CI's fuzz job.
-- The TypeScript library over Node-API (`crates/stetdoc-napi`, package `@stetdoc/node` in its `npm/` directory): `Document` with
+- The TypeScript library over Node-API (`crates/stetdoc-napi`, package `@clauseo/stetdoc` in its `npm/` directory): `Document` with
   `open`, `resume`, `view`, `edit`, `save`, `inspect`, `revisions`, `lookup`, `check`, `checkPending`, `files` and
   `export`, and `compare`, `capabilities` and `jsonSchema`. Calls are synchronous, data crosses as the core's JSON, offsets
   count UTF-16 code units unless an edit asks for `"scalar"`, and every failure is a thrown `StetdocError` with its `code`,
@@ -347,8 +347,8 @@ released yet.
   the `tool_result` text, its `isError` flag, whether it committed and the receipt.
 - The library's data types in `npm/types.d.ts` are generated from the core's JSON Schema by `cargo xtask codegen`, and a test
   fails when they are stale. The library exports `version` and `formatVersion`, and loads in Node and Bun worker threads.
-- Packaging and release: one npm package per target (`@stetdoc/node-<target>`, seven of them) as exact optional dependencies of
-  `@stetdoc/node`, with no install script; `.github/workflows/release.yml`, which builds the CLI and the addon for the seven
+- Packaging and release: one npm package per target (`@clauseo/stetdoc-<target>`, seven of them) as exact optional dependencies of
+  `@clauseo/stetdoc`, with no install script; `.github/workflows/release.yml`, which builds the CLI and the addon for the seven
   targets, smoke-tests them on Bun 1.3.13, Bun 1.3.14 and Node 24, and attaches the archives, their SHA-256 files and the
   npm tarballs to a draft GitHub release without publishing anything; a `napi` job in CI; and `cargo xtask release check`,
   which replaces the placeholder `cargo xtask release` and keeps the packages and the workflow in step with the workspace.
@@ -369,6 +369,14 @@ released yet.
 
 ### Changed
 
+- The npm packages move under the Clauseo organisation: the Node library is `@clauseo/stetdoc` with platform packages
+  `@clauseo/stetdoc-<target>`, and the CLI's platform packages are `@clauseo/stetdoc-cli-<target>`. The CLI itself stays
+  `stetdoc`, and its release tarball is `stetdoc-<version>.tgz`. The Homebrew tap is `clauseo-ai/homebrew-tap`, so the
+  install line is `brew install clauseo-ai/tap/stetdoc`.
+- Publishing a release on GitHub uploads its wheels and sdist to PyPI by trusted publishing (the `publish-pypi` job of
+  `release.yml`, in the `pypi` environment). The tag build still only makes the draft.
+- `packaging/README.md` and the npm package's README say how Bun users get the fast install: `bun add -g --trust stetdoc`
+  or `bun pm -g trust stetdoc`, and `bunx --bun stetdoc` for one-off runs.
 - The skill says to use `--manual` when the user, or a document or note they point to (such as a client email), asks for
   manual markup or no Track Changes, and never `view --all` on a long document: page with `-- more:` or narrow with `--find`
   or `--range`. `skills get core` is shorter, so every part of the skill fits in one tool output (under 25 KB), and the stub

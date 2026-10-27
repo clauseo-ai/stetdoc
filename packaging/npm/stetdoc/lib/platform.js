@@ -1,4 +1,4 @@
-// Finds the stetdoc binary of this platform. npm installs exactly one @stetdoc/cli-<target> package (the others are
+// Finds the stetdoc binary of this platform. npm installs exactly one @clauseo/stetdoc-cli-<target> package (the others are
 // optional dependencies that do not match the platform), and that package holds the binary. The launcher
 // (bin/stetdoc) and the install step (lib/install.js) both use this. It makes no network calls.
 "use strict";
@@ -27,7 +27,7 @@ function binaryPath() {
   const exe = process.platform === "win32" ? "stetdoc.exe" : "stetdoc";
   const tried = [];
   for (const target of targets()) {
-    const name = `@stetdoc/cli-${target}`;
+    const name = `@clauseo/stetdoc-cli-${target}`;
     try {
       const manifest = require.resolve(`${name}/package.json`);
       return join(dirname(manifest), "bin", exe);

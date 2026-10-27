@@ -1,6 +1,6 @@
 // The optional install step, as esbuild does it: it replaces the launcher bin/stetdoc with the native binary of this
 // platform, so each `stetdoc` call skips starting Node. It only copies a file that npm already installed from the
-// @stetdoc/cli-<target> package: it downloads nothing, writes nothing outside this package, and never fails the install.
+// @clauseo/stetdoc-cli-<target> package: it downloads nothing, writes nothing outside this package, and never fails the install.
 // It leaves the launcher in place, which works the same, more slowly, when:
 //   - npm runs without install scripts (--ignore-scripts, or a package manager that blocks them);
 //   - the platform is Windows, where npm's .cmd shim starts bin/stetdoc with Node, so it must stay JavaScript;

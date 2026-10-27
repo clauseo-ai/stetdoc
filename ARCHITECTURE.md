@@ -287,7 +287,7 @@ crates/
                     skill (skill/, skill.rs); doc/ holds the CLI reference's tested examples
   stetdoc-napi/     thin bindings for Document, compare, capabilities and the editor (native.rs);
                     JSON marshalling and thrown errors (marshal.rs); tests/types.rs generates
-                    npm/types.d.ts. npm/ is the package `@stetdoc/node`: the wrapper, its types, the
+                    npm/types.d.ts. npm/ is the package `@clauseo/stetdoc`: the wrapper, its types, the
                     smoke test, and one package per target under targets/
 xtask/              check, docs, codegen, corpus fetch, fuzz, release (`cargo xtask`)
 fuzz/               the fuzz targets and their dictionaries: a cargo workspace of its own, built

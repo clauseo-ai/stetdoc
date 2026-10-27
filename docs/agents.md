@@ -23,7 +23,7 @@ Once releases exist, any of these works.
 
 | Channel | Command | Notes |
 | --- | --- | --- |
-| Homebrew | `brew install clauseo-ai/stetdoc/stetdoc` | macOS and Linux, from the tap `clauseo-ai/homebrew-stetdoc` |
+| Homebrew | `brew install clauseo-ai/tap/stetdoc` | macOS and Linux, from the tap `clauseo-ai/homebrew-tap` |
 | PyPI | `uv tool install stetdoc` | Or `pipx install stetdoc`, or `pip install stetdoc`. The wheel holds the native binary, so no Python runs after the install. `uvx stetdoc` runs it without installing |
 | npm | `npx stetdoc --version` | Runs the binary for your platform without installing it. `npm install -g stetdoc` puts it on the PATH |
 | Install script | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | macOS and Linux. Checks the SHA-256 and installs to `~/.local/bin`, or `$STETDOC_INSTALL_DIR` |

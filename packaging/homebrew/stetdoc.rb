@@ -3,7 +3,7 @@
 # The release job in .github/workflows/release.yml fills the @VERSION@ and @SHA256_*@ placeholders from the release's
 # `.sha256` files (see packaging/scripts/fill-formula.mjs) and attaches the result to the draft release as stetdoc.rb.
 # To publish it, a maintainer copies that file into a tap repository, as Formula/stetdoc.rb in a repository named
-# homebrew-stetdoc. Nothing here pushes to a tap. See https://docs.brew.sh/Taps and https://docs.brew.sh/Formula-Cookbook.
+# homebrew-tap. Nothing here pushes to a tap. See https://docs.brew.sh/Taps and https://docs.brew.sh/Formula-Cookbook.
 #
 # The archives hold a single directory, stetdoc-<triple>/, with the binary and the licence files in it. Homebrew enters
 # that directory when it unpacks an archive, so the glob below finds the binary either way.

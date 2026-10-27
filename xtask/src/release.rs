@@ -11,7 +11,7 @@ use serde_json::Value;
 
 /// One target: the npm platform name, and the Rust triples of its CLI and its addon.
 pub struct Target {
-    /// The suffix of `@stetdoc/node-<npm>` and of `stetdoc.<npm>.node`.
+    /// The suffix of `@clauseo/stetdoc-<npm>` and of `stetdoc.<npm>.node`.
     pub npm: &'static str,
     /// The Rust target triple.
     pub triple: &'static str,
@@ -217,9 +217,9 @@ pub fn check(repo: &Repo) -> Result<Vec<String>, String> {
             main["version"]
         ));
     }
-    if main["name"] != Value::String("@stetdoc/node".into()) {
+    if main["name"] != Value::String("@clauseo/stetdoc".into()) {
         problems.push(format!(
-            "{main_path}: name is {}. Set it to @stetdoc/node, the library's name.",
+            "{main_path}: name is {}. Set it to @clauseo/stetdoc, the library's name.",
             main["name"]
         ));
     }
@@ -234,7 +234,7 @@ pub fn check(repo: &Repo) -> Result<Vec<String>, String> {
         .unwrap_or_default();
     let wanted: Vec<String> = TARGETS
         .iter()
-        .map(|t| format!("@stetdoc/node-{}", t.npm))
+        .map(|t| format!("@clauseo/stetdoc-{}", t.npm))
         .collect();
     for name in &wanted {
         match optional.get(name) {
@@ -267,7 +267,7 @@ pub fn check(repo: &Repo) -> Result<Vec<String>, String> {
         let expect = [
             (
                 "name",
-                Value::String(format!("@stetdoc/node-{}", target.npm)),
+                Value::String(format!("@clauseo/stetdoc-{}", target.npm)),
             ),
             ("version", Value::String(version.clone())),
             ("main", Value::String(file.clone())),

@@ -2,7 +2,7 @@
 //
 // Every data type crosses the addon as JSON made by the core's serde, so this file parses results and stringifies
 // requests, maps a thrown StetError onto StetdocError, and turns the camelCase request objects into the core's names.
-// It is CommonJS with static named exports, so both `require("@stetdoc/node")` and `import { Document } from "@stetdoc/node"` work
+// It is CommonJS with static named exports, so both `require("@clauseo/stetdoc")` and `import { Document } from "@clauseo/stetdoc"` work
 // in Node and in Bun.
 "use strict";
 
@@ -28,7 +28,7 @@ function targets() {
 function load() {
   const tried = [];
   for (const target of targets()) {
-    for (const path of [`./stetdoc.${target}.node`, `@stetdoc/node-${target}`]) {
+    for (const path of [`./stetdoc.${target}.node`, `@clauseo/stetdoc-${target}`]) {
       try {
         return require(path);
       } catch (error) {

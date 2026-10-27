@@ -1,5 +1,5 @@
 {
-  "name": "@stetdoc/cli-win32-x64-msvc",
+  "name": "@clauseo/stetdoc-cli-win32-x64-msvc",
   "version": "1.0.0-dev",
   "description": "The stetdoc command-line tool for x86_64-pc-windows-msvc. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",

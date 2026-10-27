@@ -115,11 +115,11 @@ let receipt = doc.edit(Edit::ops(batch, stamp))?;   // tracked by default
 let saved = doc.save()?;                            // unedited => the input bytes
 ```
 
-Node and Bun use it through the npm package `@stetdoc/node` (`crates/stetdoc-napi/npm`), with TypeScript types generated
+Node and Bun use it through the npm package `@clauseo/stetdoc` (`crates/stetdoc-napi/npm`), with TypeScript types generated
 from the same definitions:
 
 ```ts
-import { Document } from "@stetdoc/node";
+import { Document } from "@clauseo/stetdoc";
 
 const doc = Document.open(bytes);
 const receipt = doc.edit({ base: doc.base(), ops, author: "Jane Doe", date });  // offsets count UTF-16 units

@@ -2,10 +2,10 @@
 // It only writes files: nothing is published. The release workflow runs it on the binaries of its CLI build.
 // Usage: node scripts/pack.mjs <binaries dir> <out dir>
 //   <binaries dir> holds one directory per target, named like the target package, each with `stetdoc` (or `stetdoc.exe`).
-// The main package's tarball is named stetdoc-cli-<version>.tgz, because the napi addon's main package is also `stetdoc`,
-// and the two would overwrite each other in a release.
+// npm names the tarballs after the packages: stetdoc-<version>.tgz for the main one and clauseo-stetdoc-cli-<target>-<version>.tgz
+// for each target, so they never collide with the napi addon's clauseo-stetdoc-*.tgz in the release.
 import { execFileSync } from "node:child_process";
-import { chmodSync, copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, renameSync } from "node:fs";
+import { chmodSync, copyFileSync, existsSync, mkdirSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -26,7 +26,6 @@ function pack(dir) {
   return filename;
 }
 
-const pkg = JSON.parse(readFileSync(join(here, "package.json"), "utf8"));
 const targets = readdirSync(join(here, "targets"));
 const binaryOf = (target) => (target.startsWith("win32-") ? "stetdoc.exe" : "stetdoc");
 const missing = targets.filter((target) => !existsSync(join(binaries, target, binaryOf(target))));
@@ -42,6 +41,5 @@ for (const target of targets) {
   chmodSync(file, 0o755);
   pack(join(here, "targets", target));
 }
-const main = pack(here);
-renameSync(join(out, main), join(out, `stetdoc-cli-${pkg.version}.tgz`));
+pack(here);
 console.log(`packed ${targets.length + 1} tarballs into ${out}`);

@@ -21,7 +21,8 @@ stetdoc compare old.docx new.docx -o redline.docx
 
 Each OLD must occur once: if several places are listed, use a longer OLD or `--clause 11.1`. `--all` replaces every
 one; an empty NEW deletes. Keep the user's original unchanged unless asked: write with `-o`, and use `--in-place` only
-on a file this task wrote or the user asked to update. For anything else (adding paragraphs, accepting or rejecting
+on a file this task wrote or the user asked to update. If the file has tracked changes you did not make, tell the user
+who made them and what they change. For anything else (adding paragraphs, accepting or rejecting
 revisions, formatting), run `stetdoc skills get core`.
 
 If `stetdoc` is not found, tell the user it is not installed, and stop. Never read or edit a .docx another way (unzip,

@@ -21,7 +21,8 @@ with an author and a date, so a reviewer sees exactly what you did.
    brings the working copy up to date, so you can carry on editing. On the last pack of the task, add `--done` (with MCP, `done: true`): it removes
    the working copy once the .docx is written and validated, and keeps it when the pack fails.
 6. **Finish.** Tell the user the path of the .docx you wrote. If you kept the working copy, because the user may want more
-   edits, say where it is (the pack receipt names it).
+   edits, say where it is (the pack receipt names it). If the document holds tracked changes you did not make in this
+   task (another author's, or ones added since you last viewed it), tell the user who made them and what they change.
 
 stetdoc takes the author from `--author`, then `STETDOC_AUTHOR`, then the name saved by `stetdoc init` (`stetdoc init --list` shows it).
 If the user asked for a particular name, theirs or yours (such as "Claude"), pass it with `--author` on each edit, pack and compare.

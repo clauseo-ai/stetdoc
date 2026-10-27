@@ -12,8 +12,17 @@ use crate::api::revision::RevisionInfo;
 use crate::projection::ledger::family;
 use crate::projection::model::{
     AppendixEntry, ChangeList, Margin, MentionState, Outline, OutlineSource, Projection, Target,
-    ThreadList,
+    TermCount, ThreadList,
 };
+
+/// The needles a block holds and how many times each: `"payment" 2, "days" 1`.
+pub(super) fn terms_text(terms: &[TermCount]) -> String {
+    terms
+        .iter()
+        .map(|t| format!("{:?} {}", &*t.term, t.count))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
 
 /// The line of a margin note: `{~ 3 matches}`.
 pub(super) fn margin_line(buf: &mut LineBuf, margin: &Margin) {
@@ -24,6 +33,7 @@ pub(super) fn margin_line(buf: &mut LineBuf, margin: &Margin) {
                 if *n == 1 { "match" } else { "matches" }
             ));
         }
+        Margin::Terms(terms) => buf.atomic(&format!("{{~ {}}}", terms_text(terms))),
         Margin::Gap(n) => {
             buf.atomic(&format!(
                 "{{~ {n} {} not shown}}",

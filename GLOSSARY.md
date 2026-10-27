@@ -176,6 +176,9 @@ there are none, runs of blocks.
 block shown, so it stays valid when the document is edited. A table that a page cut between
 rows has the ref of its last row.
 
+**Hit line.** One line of a compact find: the ref of a paragraph that matched, the clause
+it is in, and its text around the match, exact so that a piece of it can be an edit's `find`.
+
 **Margin note.** A line of a page that is about the block before it and is not text: how
 many times a find matched in it, what a citation in it came to, what cites a clause. It
 starts with `{~`, is never in a readable file, and is refused if an edit holds one.

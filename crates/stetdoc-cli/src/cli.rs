@@ -124,12 +124,15 @@ pub struct ViewArgs {
     /// The block a clause number resolves to, with the blocks under it, such as 12.3.
     #[arg(long, value_name = "NUMBER")]
     pub clause: Option<String>,
-    /// The blocks that contain this text, with their neighbours, paged like a range. Case-insensitive unless it has a
-    /// capital letter. With --range, only in that range; with --revisions, only the changes whose text contains it.
-    #[arg(long, value_name = "TEXT", conflicts_with_all = ["outline", "clause", "comments", "story"])]
-    pub find: Option<String>,
-    /// With --find, how many blocks to show on each side of a match.
-    #[arg(long, value_name = "N", requires = "find", default_value_t = 1)]
+    /// The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged
+    /// like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line
+    /// then says which it holds. With --range, only in that range; with --revisions, only the changes whose text
+    /// contains one of them.
+    #[arg(long, value_name = "TEXT", action = clap::ArgAction::Append, conflicts_with_all = ["outline", "clause", "comments", "story"])]
+    pub find: Vec<String>,
+    /// With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. 0 is
+    /// the one-line list.
+    #[arg(long, value_name = "N", requires = "find", default_value_t = 0)]
     pub context: u8,
     /// The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters.
     #[arg(long)]

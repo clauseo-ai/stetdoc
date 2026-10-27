@@ -123,6 +123,7 @@ fn write_files(
             Body::Outline(outline) => outline_lines(&mut text, outline),
             Body::Threads(list) => thread_lines(&mut text, p, list),
             Body::Ledger(list) => ledger_lines(&mut text, p, list),
+            Body::Hits(list) => super::render_hits::hit_lines(&mut text, list),
             Body::Stories(_) | Body::Lookup(_) => {}
         }
         for line in &file.lines {

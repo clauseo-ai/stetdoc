@@ -9,7 +9,7 @@ use crate::api::view::{Budget, RevisionFilter, Scope, ViewSpec, WarningCode};
 
 fn find(needle: &str, context: u8, from: Option<&str>, to: Option<&str>) -> Scope {
     Scope::Find {
-        needle: needle.into(),
+        needles: vec![needle.into()],
         context,
         from: from.map(str::to_string),
         to: to.map(str::to_string),
@@ -175,7 +175,7 @@ fn ledger(filter: RevisionFilter) -> crate::api::view::View {
 #[test]
 fn a_ledger_find_keeps_only_the_changes_whose_text_holds_the_needle() {
     let usd = ledger(RevisionFilter {
-        find: Some("usd".into()),
+        find: vec!["usd".into()],
         ..RevisionFilter::default()
     });
     let lines: Vec<&str> = usd.text.lines().filter(|l| l.starts_with('#')).collect();
@@ -186,7 +186,7 @@ fn a_ledger_find_keeps_only_the_changes_whose_text_holds_the_needle() {
     assert_eq!(usd.position.scope, "changes with text \"usd\"");
     // A capital makes it exact, and nothing matches.
     let exact = ledger(RevisionFilter {
-        find: Some("Usd".into()),
+        find: vec!["Usd".into()],
         ..RevisionFilter::default()
     });
     assert_eq!(exact.position.total, 0, "{}", exact.text);
@@ -194,7 +194,7 @@ fn a_ledger_find_keeps_only_the_changes_whose_text_holds_the_needle() {
         &amounts(),
         &spec(
             Scope::Revisions(RevisionFilter {
-                find: Some(" ".into()),
+                find: vec![" ".into()],
                 ..RevisionFilter::default()
             }),
             0,

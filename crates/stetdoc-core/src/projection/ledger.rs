@@ -6,6 +6,7 @@
 //! (`revisions::changes`), so nothing here decides what a change is.
 
 use super::authors::authors;
+use super::needles::Needles;
 use crate::api::error::{ErrorCode, StetError};
 use crate::api::revision::{ChangeKind, RevisionInfo};
 use crate::api::view::RevisionFilter;
@@ -167,8 +168,8 @@ pub(crate) struct LedgerFilter {
     author: Option<String>,
     /// The family of the one kind kept, when the filter names one.
     family: Option<&'static str>,
-    /// The text a kept change holds, lowercased when the match ignores case, and whether it does.
-    needle: Option<(String, bool)>,
+    /// The texts a kept change holds one of. Empty keeps every change.
+    needles: Needles,
     /// How many characters of text a description carries.
     cut: usize,
 }
@@ -209,51 +210,23 @@ impl LedgerFilter {
                 Some(name.unwrap_or_else(|| given.clone()))
             }
         };
-        let needle = match filter.find.as_deref() {
-            None => None,
-            Some(given) if given.trim().is_empty() => {
-                return Err(StetError::new(
-                    ErrorCode::InvalidPayload,
-                    "a find in the changes needs some text to look for.",
-                )
-                .with_next("Give the text to find, or leave out the find."));
-            }
-            Some(given) => {
-                let fold = !given.chars().any(char::is_uppercase);
-                Some((
-                    if fold {
-                        given.to_lowercase()
-                    } else {
-                        given.to_string()
-                    },
-                    fold,
-                ))
-            }
-        };
+        let needles = Needles::parse(&filter.find, "a find in the changes")?;
         let cut = if filter.full { FULL_CUT } else { TEXT_CUT };
         Ok(LedgerFilter {
             author,
             family,
-            needle,
+            needles,
             cut,
         })
     }
 
-    /// True if the change's inserted or deleted text holds the needle of the filter, or the filter has none. The text is
-    /// all the change carries, up to 1,000 characters each way, and not only what a description shows.
+    /// True if the change's inserted or deleted text holds one of the needles of the filter, or the filter has none. The
+    /// text is all the change carries, up to 1,000 characters each way, and not only what a description shows.
     pub(crate) fn holds(&self, change: &Change) -> bool {
-        let Some((needle, fold)) = &self.needle else {
-            return true;
-        };
-        [change.inserted.as_str(), change.deleted.as_str()]
-            .into_iter()
-            .any(|text| {
-                if *fold {
-                    text.to_lowercase().contains(needle.as_str())
-                } else {
-                    text.contains(needle.as_str())
-                }
-            })
+        self.needles.is_empty()
+            || [change.inserted.as_str(), change.deleted.as_str()]
+                .into_iter()
+                .any(|text| self.needles.any_in(text))
     }
 
     /// True if a change by `author` of `kind` is kept: by the author the filter names, and of the kind it names.

@@ -163,7 +163,7 @@ fn a_find_and_a_clause_view_page_with_their_notes_and_still_follow_every_block_o
         Scope::Story(StoryName::Body),
         Scope::Clause("clause 2".into()),
         Scope::Find {
-            needle: "clause".into(),
+            needles: vec!["clause".into()],
             context: 1,
             from: None,
             to: None,

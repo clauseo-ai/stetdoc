@@ -118,9 +118,11 @@ pub struct RevisionFilter {
     pub author: Option<String>,
     /// Only changes of this kind: `insert`, `delete`, `move` or `format`.
     pub kind: Option<String>,
-    /// Only changes whose inserted or deleted text contains this text. Case-insensitive unless it has an uppercase
-    /// letter, as a `Find` is.
-    pub find: Option<String>,
+    /// Only changes whose inserted or deleted text contains one of these texts. Each is case-insensitive unless it has
+    /// an uppercase letter, as in a `Find`. Empty keeps every change. JSON takes one string or a list of them.
+    #[serde(deserialize_with = "terms_or_none")]
+    #[schemars(schema_with = "terms_schema")]
+    pub find: Vec<String>,
     /// Carry the whole inserted and deleted text of each change, up to 1,000 characters, and not 200; a view shows it
     /// all and does not cut each line to 80 characters.
     pub full: bool,
@@ -156,11 +158,16 @@ pub enum Scope {
     },
     /// The block a clause number resolves to, with the blocks under it.
     Clause(String),
-    /// The blocks whose text contains a needle, with their neighbours.
+    /// The blocks whose text contains any of the needles. With a `context` of 0, one line for each paragraph that
+    /// matches: its ref, its clause and the text around the match. With more, the blocks whole, with their neighbours.
     Find {
-        /// The text to find. Case-insensitive unless it has an uppercase letter.
-        needle: String,
-        /// How many blocks to show on each side of a match.
+        /// The texts to find, each case-insensitive unless it has an uppercase letter. A block that holds any of them
+        /// matches. JSON takes one string or a list of them, as `needles` or `needle`.
+        #[serde(alias = "needle", deserialize_with = "terms")]
+        #[schemars(schema_with = "terms_schema")]
+        needles: Vec<String>,
+        /// 0 for one line for each matching paragraph; otherwise the matching blocks whole, with this many blocks on
+        /// each side.
         context: u8,
         /// Only the blocks from this ref on, as a `Range` starts.
         #[serde(default)]
@@ -449,4 +456,39 @@ impl JsonSchema for WarningCode {
         let names: Vec<&str> = WarningCode::ALL.iter().map(|c| c.as_str()).collect();
         json_schema!({ "type": "string", "enum": names })
     }
+}
+
+/// One string or a list of strings, as a list.
+#[derive(Deserialize)]
+#[serde(untagged)]
+enum OneOrMany {
+    One(String),
+    Many(Vec<String>),
+}
+
+/// Reads the needles of a find: one string or a list of them.
+fn terms<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<String>, D::Error> {
+    Ok(match OneOrMany::deserialize(deserializer)? {
+        OneOrMany::One(one) => vec![one],
+        OneOrMany::Many(many) => many,
+    })
+}
+
+/// Reads the texts of a find in the ledger: nothing, one string or a list of them.
+fn terms_or_none<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<String>, D::Error> {
+    Ok(match Option::<OneOrMany>::deserialize(deserializer)? {
+        None => Vec::new(),
+        Some(OneOrMany::One(one)) => vec![one],
+        Some(OneOrMany::Many(many)) => many,
+    })
+}
+
+/// The schema of one string or a list of strings.
+fn terms_schema(_generator: &mut SchemaGenerator) -> Schema {
+    json_schema!({
+        "anyOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+        ]
+    })
 }

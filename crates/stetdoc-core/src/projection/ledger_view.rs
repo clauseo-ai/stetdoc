@@ -98,8 +98,9 @@ fn label_of(filter: &RevisionFilter) -> String {
     if let Some(kind) = &filter.kind {
         label.push_str(&format!(" of kind {kind}"));
     }
-    if let Some(find) = &filter.find {
-        label.push_str(&format!(" with text {find:?}"));
+    if !filter.find.is_empty() {
+        let texts: Vec<String> = filter.find.iter().map(|f| format!("{f:?}")).collect();
+        label.push_str(&format!(" with text {}", texts.join(" or ")));
     }
     label
 }

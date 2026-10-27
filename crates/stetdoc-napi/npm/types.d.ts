@@ -905,10 +905,10 @@ export type RevisionFilter = {
   /** Only changes by this author, by code or name. */
   author?: string | null;
   /**
-   * Only changes whose inserted or deleted text contains this text. Case-insensitive unless it has an uppercase
-   * letter, as a `Find` is.
+   * Only changes whose inserted or deleted text contains one of these texts. Each is case-insensitive unless it has
+   * an uppercase letter, as in a `Find`. Empty keeps every change. JSON takes one string or a list of them.
    */
-  find?: string | null;
+  find?: string | string[];
   /**
    * Carry the whole inserted and deleted text of each change, up to 1,000 characters, and not 200; a view shows it
    * all and does not cut each line to 80 characters.
@@ -972,12 +972,18 @@ export type Scope = "auto" | {
   clause: string;
 } | {
   find: {
-    /** How many blocks to show on each side of a match. */
+    /**
+     * 0 for one line for each matching paragraph; otherwise the matching blocks whole, with this many blocks on
+     * each side.
+     */
     context: number;
     /** Only the blocks from this ref on, as a `Range` starts. */
     from?: string | null;
-    /** The text to find. Case-insensitive unless it has an uppercase letter. */
-    needle: string;
+    /**
+     * The texts to find, each case-insensitive unless it has an uppercase letter. A block that holds any of them
+     * matches. JSON takes one string or a list of them, as `needles` or `needle`.
+     */
+    needles: string | string[];
     /** With `from`, only the blocks up to this ref; without it, to the end of the story of `from`. */
     to?: string | null;
   };

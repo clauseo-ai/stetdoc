@@ -20,6 +20,7 @@ mod parse_lines;
 mod parse_structure;
 mod refs_syntax;
 mod render;
+mod render_hits;
 mod render_inline;
 mod render_other;
 mod render_structure;

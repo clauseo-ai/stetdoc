@@ -22,8 +22,8 @@ pub(crate) use super::model_inline::{
     flatten, width_of,
 };
 pub(crate) use super::model_view::{
-    AppendixEntry, ChangeList, Margin, MentionState, Outline, OutlineEntry, OutlineSource, Target,
-    ThreadComment, ThreadEntry, ThreadList,
+    AppendixEntry, ChangeList, FindHit, HitList, Margin, MentionState, Outline, OutlineEntry,
+    OutlineSource, Target, TermCount, ThreadComment, ThreadEntry, ThreadList, Tip,
 };
 
 /// What a format renders: the head of a view or a file, and its body.
@@ -42,7 +42,11 @@ impl Projection {
     pub(crate) fn stories(&self) -> &[Story] {
         match &self.body {
             Body::Stories(stories) => stories,
-            Body::Outline(_) | Body::Lookup(_) | Body::Threads(_) | Body::Ledger(_) => &[],
+            Body::Outline(_)
+            | Body::Lookup(_)
+            | Body::Threads(_)
+            | Body::Ledger(_)
+            | Body::Hits(_) => &[],
         }
     }
 }
@@ -133,6 +137,8 @@ pub(crate) enum Body {
     Threads(ThreadList),
     /// The tracked changes, one line each, from `ledger`.
     Ledger(ChangeList),
+    /// The paragraphs a find matched, one line each.
+    Hits(HitList),
 }
 
 /// One flow of content: the body, a header or footer part, the notes or the comments.

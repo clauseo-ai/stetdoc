@@ -136,7 +136,7 @@ fn p1_the_same_bytes_and_spec_give_the_same_page() {
         Scope::Outline { depth: None },
         Scope::Story(crate::api::view::StoryName::Body),
         Scope::Find {
-            needle: "number 7".into(),
+            needles: vec!["number 7".into()],
             context: 1,
             from: None,
             to: None,
@@ -148,7 +148,7 @@ fn p1_the_same_bytes_and_spec_give_the_same_page() {
     }
 }
 
-fn table_doc() -> Fixture {
+pub(super) fn table_doc() -> Fixture {
     let row = |i: u32| {
         format!(
             "<w:tr><w:tc><w:tcPr/>{}</w:tc></w:tr>",

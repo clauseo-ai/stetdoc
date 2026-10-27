@@ -307,16 +307,6 @@ pub(crate) fn range_scope(
     })
 }
 
-/// How many times `needle` is in `haystack`, with the case folded when the needle has no capital.
-pub(super) fn count(haystack: &str, needle: &str, fold: bool) -> u32 {
-    let n = if fold {
-        haystack.to_lowercase().matches(needle).count()
-    } else {
-        haystack.matches(needle).count()
-    };
-    u32::try_from(n).unwrap_or(u32::MAX)
-}
-
 /// The tops of one clause: its block, and the blocks under it up to the next clause of the same or a shallower
 /// depth. A text that names several clauses is `ambiguous_match` with all of them, and one that names none is
 /// `not_found` with the clauses that start the same way.

@@ -9,7 +9,7 @@ use super::json_value::{
 use crate::api::view::{Mode, Position, Warning, WarningCode};
 use crate::projection::model::{
     Atom, Author, AutoKind, Block, Body, Cell, CellChange, CellRev, ChangeKind, ChangeList,
-    ControlInfo, ControlState, Field, Head, HiddenReason, Inline, Label, LinkTarget,
+    ControlInfo, ControlState, Field, Head, HiddenReason, HitList, Inline, Label, LinkTarget,
     LooksHiddenSignal, Margin, Mark, MarkKind, MarkRev, NoteKind, ObjectInfo, ObjectKind,
     OpaqueBlock, Outline, Output, ParaFlags, Paragraph, Projection, PropRev, ReadOnly, RevKind,
     RevTag, Row, RowChange, RowRev, SectionLine, SectionUse, Slot, Story, Summary, Table,
@@ -278,6 +278,7 @@ impl ToJson for Body {
             Body::Lookup(lookup) => tagged("lookup", lookup.to_json()),
             Body::Threads(threads) => tagged("threads", threads.to_json()),
             Body::Ledger(changes) => tagged("ledger", changes.to_json()),
+            Body::Hits(hits) => tagged("hits", hits.to_json()),
         }
     }
 }
@@ -292,6 +293,7 @@ impl FromJson for Body {
             }
             ("threads", Some(payload)) => ThreadList::from_json(payload).map(Body::Threads),
             ("ledger", Some(payload)) => ChangeList::from_json(payload).map(Body::Ledger),
+            ("hits", Some(payload)) => HitList::from_json(payload).map(Body::Hits),
             (other, _) => Err(unknown_variant("body", other)),
         }
     }

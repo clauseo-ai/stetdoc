@@ -6,6 +6,7 @@
 //! until it is as full as the budget allows. A table that does not fit alone is cut between rows, and the
 //! cursor, which is the ref of the last block shown, says which row the next page starts at.
 
+mod hits;
 mod outline;
 
 use super::appendix::appendix;
@@ -13,13 +14,13 @@ use super::build::{Pick, Selection, StorySel, TopPick, project};
 use super::comments_view::comments_view;
 use super::formats::{Format, by_id};
 use super::ledger_view::ledger_view;
-use super::model::{Margin, Output, Projection};
+use super::model::{Margin, Output, Projection, TermCount};
 use super::notes::Notes;
 use super::page::{estimate, fit, greedy, weight};
 use super::select::{
     Item, Selected, Source, Start, clause_scope, range_scope, start_after, story_scope,
 };
-use super::select_find::find_scope;
+use super::select_find::{Found, find_scope};
 use crate::api::error::{ErrorCode, StetError};
 use crate::api::view::{Cursor, FormatId, Mode, Position, Scope, StoryName, View, ViewSpec};
 use crate::refs::{BaseToken, BlockRef};
@@ -38,6 +39,8 @@ struct Cx<'a> {
     base: BaseToken,
     /// The warning an outline that stands for the whole body carries in its head.
     outline_note: Option<crate::api::view::Warning>,
+    /// What a find with more than one needle found, for the margins that say which needles each block holds.
+    found: Option<Found>,
 }
 
 /// A page that is built: its model, its text, and what it says about itself.
@@ -56,6 +59,7 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
         format: by_id(spec.format.as_str())?,
         base: state.base_token(),
         outline_note: None,
+        found: None,
     };
     match &spec.scope {
         Scope::Auto => {
@@ -81,7 +85,7 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
             to.as_deref(),
         )?),
         Scope::Find {
-            needle,
+            needles,
             context,
             from,
             to,
@@ -97,9 +101,19 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
                     .with_next("Give the first ref of the range too, such as p40..p60."));
                 }
             };
-            cx.blocks(find_scope(
-                &cx.parts, state, spec.mode, needle, *context, within,
-            )?)
+            let (selected, found) =
+                find_scope(&cx.parts, state, spec.mode, needles, *context, within)?;
+            if *context == 0 {
+                cx.hits(&selected, &found)
+            } else if found.needles.len() > 1 {
+                let cx = Cx {
+                    found: Some(found),
+                    ..cx
+                };
+                cx.blocks(selected)
+            } else {
+                cx.blocks(selected)
+            }
         }
         Scope::Clause(text) => cx.blocks(clause_scope(&cx.parts, spec.mode, text)?),
         Scope::Revisions(filter) => ledger_view(cx.parts, spec, filter, cx.format, cx.base),
@@ -218,10 +232,24 @@ impl Cx<'_> {
                 pick.before.push(Margin::Continued { table, from });
             }
             if selected.name == "find" {
-                if item.matches > 0 {
-                    pick.after.push(Margin::Matches(item.matches));
-                }
                 let index = start.item + k;
+                if item.matches > 0 {
+                    pick.after.push(match &self.found {
+                        Some(found) => Margin::Terms(
+                            found
+                                .needles
+                                .iter()
+                                .zip(found.counts_of(index))
+                                .filter(|(_, n)| *n > 0)
+                                .map(|(term, count)| TermCount {
+                                    term: term.as_str().into(),
+                                    count,
+                                })
+                                .collect(),
+                        ),
+                        None => Margin::Matches(item.matches),
+                    });
+                }
                 if let Some(next) = selected.items.get(index + 1)
                     && next.src == item.src
                     && next.top > item.top + 1

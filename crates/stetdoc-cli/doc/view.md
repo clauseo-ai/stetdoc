@@ -1,25 +1,54 @@
 With no flag, a view shows the whole body if it fits the budget, and its outline otherwise.
 
 ```console
-$ stetdoc view contract.docx --find "thirty days" --context 0
+$ stetdoc view contract.docx --find "thirty days"
 {stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p4}
 {summary: 1 section}
 p4 Payment is due within thirty days.
-{~ 1 match}
 {position: p4..p4 of find "thirty days": 1 match in 1 block (1 of 1 blocks)}
 
 ```
 
-A find pages like a range, and its last line counts the matches. With `--range` it looks only in that range. With
-`--revisions` it keeps the changes whose inserted or deleted text holds it, and `--full` shows each change's whole text.
-`--all` is `--budget 0`: everything on one page.
+A find lists one line for each paragraph that holds the text: its ref, the clause it is in when the document numbers its
+clauses, and about 100 characters of its text around the match, exactly as the paragraph has it, so a piece of it can be
+an edit's `find`. An ellipsis says the paragraph goes on. Hits under the same top-level clause sit under one `{in ...}`
+line that names it, and a hit on a clause heading adds a `{tip: ...}` line that names the clause to view whole. Repeat
+`--find` to look for any of several texts: each line then says which texts it holds and how often, and the last line
+counts each text.
 
 ```console
-$ stetdoc view contract.docx --find "days" --range p3..p5 --context 0
+$ stetdoc view contract.docx --find thirty --find law --find "Due Date"
+{stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p5}
+{summary: 1 section}
+p4 Payment is due within thirty days. {~ "thirty" 1}
+p5 This Agreement is governed by English law. {~ "law" 1}
+{position: p4..p5 of find "thirty" (1), "law" (1), "Due Date" (0): 2 matches in 2 blocks (2 of 2 blocks)}
+
+```
+
+`--context N` shows the matching blocks whole instead, with N blocks on each side, as an editable page would.
+
+```console
+$ stetdoc view contract.docx --find thirty --context 1
+{stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p3..p5}
+{summary: 1 section}
+p3 Emoji 😀 then a tab/tand the end.
+p4 Payment is due within thirty days.
+{~ 1 match}
+p5 This Agreement is governed by English law.
+{position: p3..p5 of find "thirty": 1 match in 1 block (3 of 3 blocks)}
+
+```
+
+A find pages like a range, and its last line counts the matches. With `--range` it looks only in that range. With
+`--revisions` it keeps the changes whose inserted or deleted text holds one of the texts, and `--full` shows each
+change's whole text. `--all` is `--budget 0`: everything on one page.
+
+```console
+$ stetdoc view contract.docx --find "days" --range p3..p5
 {stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p4}
 {summary: 1 section}
 p4 Payment is due within thirty days.
-{~ 1 match}
 {position: p4..p4 of find "days" in p3..p5: 1 match in 1 block (1 of 1 blocks)}
 
 $ stetdoc view tracked.docx --revisions --find law --full

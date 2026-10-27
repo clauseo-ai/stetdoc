@@ -47,6 +47,7 @@ mod model;
 mod model_inline;
 mod model_region;
 mod model_view;
+mod needles;
 mod notes;
 mod occurrences;
 mod outline;
@@ -75,6 +76,8 @@ mod tests_comments;
 mod tests_draft;
 #[cfg(test)]
 mod tests_find;
+#[cfg(test)]
+mod tests_find_hits;
 #[cfg(test)]
 mod tests_interface;
 #[cfg(test)]

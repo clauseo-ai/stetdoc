@@ -48,6 +48,8 @@ enum Kind {
     Text,
     Integer,
     List,
+    /// A flag that may be given more than once: one string or a list of them.
+    Repeat,
 }
 
 /// Every tool, in the order of the command tree.
@@ -217,6 +219,9 @@ fn kind(arg: &Arg) -> Kind {
     if arg.get_value_delimiter().is_some() {
         return Kind::List;
     }
+    if matches!(arg.get_action(), ArgAction::Append) {
+        return Kind::Repeat;
+    }
     let type_id = arg.get_value_parser().type_id();
     let integers = [
         TypeId::of::<u8>(),
@@ -238,6 +243,9 @@ fn property(arg: &Arg, spec: &Spec) -> Value {
         Kind::Flag => json!({ "type": "boolean" }),
         Kind::Integer => json!({ "type": "integer", "minimum": 0 }),
         Kind::List => json!({ "type": "array", "items": { "type": "string" } }),
+        Kind::Repeat => json!({
+            "anyOf": [{ "type": "string" }, { "type": "array", "items": { "type": "string" } }]
+        }),
         Kind::Text => {
             let choices: Vec<String> = arg
                 .get_possible_values()
@@ -321,7 +329,7 @@ pub fn argv(
                     "Pass a boolean, or leave the argument out.",
                 ));
             }
-            (Kind::List, Value::Array(items)) => items
+            (Kind::List | Kind::Repeat, Value::Array(items)) => items
                 .iter()
                 .map(|v| scalar(key, v))
                 .collect::<Result<_, _>>()?,

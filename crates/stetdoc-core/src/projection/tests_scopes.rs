@@ -15,7 +15,7 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
         &state,
         &spec(
             Scope::Find {
-                needle: "number 7 has".into(),
+                needles: vec!["number 7 has".into()],
                 context: 1,
                 from: None,
                 to: None,
@@ -34,8 +34,8 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
         &state,
         &spec(
             Scope::Find {
-                needle: "number 1".into(),
-                context: 0,
+                needles: vec!["number 1".into()],
+                context: 1,
                 from: None,
                 to: None,
             },
@@ -43,15 +43,15 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
         ),
     )
     .unwrap();
-    // number 1, 10 to 19, 21, 31: the gaps between them are counted.
+    // number 1 and 10 to 19, each with a block on each side: the gap between them is counted.
     assert_eq!(refs_on(&two.text).first().map(String::as_str), Some("p1"));
-    assert!(two.text.contains("{~ 8 blocks not shown}"), "{}", two.text);
+    assert!(two.text.contains("{~ 6 blocks not shown}"), "{}", two.text);
     // Smart case: a capital makes it exact.
     let loose = view(
         &state,
         &spec(
             Scope::Find {
-                needle: "paragraph number 3 ".into(),
+                needles: vec!["paragraph number 3 ".into()],
                 context: 0,
                 from: None,
                 to: None,
@@ -65,7 +65,7 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
         &state,
         &spec(
             Scope::Find {
-                needle: "paragraph Number 3 ".into(),
+                needles: vec!["paragraph Number 3 ".into()],
                 context: 0,
                 from: None,
                 to: None,
@@ -80,7 +80,7 @@ fn find_shows_the_blocks_that_hold_the_needle_with_context_gaps_and_counts() {
         &state,
         &spec(
             Scope::Find {
-                needle: "   ".into(),
+                needles: vec!["   ".into()],
                 context: 0,
                 from: None,
                 to: None,
@@ -109,7 +109,7 @@ fn find_looks_in_every_story_and_pages_across_them() {
         &state,
         &spec(
             Scope::Find {
-                needle: "price".into(),
+                needles: vec!["price".into()],
                 context: 0,
                 from: None,
                 to: None,
@@ -119,7 +119,7 @@ fn find_looks_in_every_story_and_pages_across_them() {
     )
     .unwrap();
     assert_eq!(refs_on(&v.text), vec!["p1", "p3"]);
-    assert_eq!(v.text.matches("{~ 1 match}").count(), 2);
+    assert_eq!(v.position.scope, "find \"price\": 2 matches in 2 blocks");
 }
 
 #[test]

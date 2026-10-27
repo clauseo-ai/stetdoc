@@ -7,8 +7,8 @@ use super::json_value::{
 use crate::api::lookup::{Hit, Lookup, Reference, Site};
 use crate::api::revision::{ChangeKind as RevisionKind, RevisionInfo};
 use crate::projection::model::{
-    AppendixEntry, ChangeList, Margin, MentionState, NoteKind, Outline, OutlineEntry,
-    OutlineSource, Target, ThreadComment, ThreadEntry, ThreadList,
+    AppendixEntry, ChangeList, FindHit, HitList, Margin, MentionState, NoteKind, Outline,
+    OutlineEntry, OutlineSource, Target, TermCount, ThreadComment, ThreadEntry, ThreadList, Tip,
 };
 use crate::refs::BlockRef;
 
@@ -64,6 +64,13 @@ impl FromJson for ChangeList {
         Ok(out)
     }
 }
+json_struct!(TermCount { term => "term", count => "count" });
+json_struct!(HitList { needles => "needles", hits => "hits", tips => "tips" });
+json_struct!(FindHit {
+    r#ref => "ref", under => "under", clause => "clause", text => "text", cut_before => "cut_before",
+    cut_after => "cut_after", terms => "terms", deleted_only => "deleted_only"
+});
+json_struct!(Tip { r#ref => "ref", clause => "clause", text => "text" });
 json_struct!(ThreadList { total => "total", resolved => "resolved", threads => "threads" });
 json_struct!(ThreadEntry { root => "root", resolved => "resolved", comments => "comments" });
 json_struct!(ThreadComment {
@@ -74,6 +81,7 @@ impl ToJson for Margin {
     fn to_json(&self) -> Json {
         match self {
             Margin::Matches(n) => tagged("matches", n.to_json()),
+            Margin::Terms(terms) => tagged("terms", terms.to_json()),
             Margin::Gap(n) => tagged("gap", n.to_json()),
             Margin::Continued { table, from } => tagged(
                 "continued",
@@ -105,6 +113,7 @@ impl FromJson for Margin {
     fn from_json(value: &Json) -> Result<Margin, JsonError> {
         match variant(value)? {
             ("matches", Some(n)) => u32::from_json(n).map(Margin::Matches),
+            ("terms", Some(t)) => Vec::from_json(t).map(Margin::Terms),
             ("gap", Some(n)) => u32::from_json(n).map(Margin::Gap),
             ("continued", Some(payload)) => {
                 let mut fields = Fields::of(payload)?;

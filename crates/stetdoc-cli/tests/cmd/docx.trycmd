@@ -20,11 +20,10 @@ p9 b2
 p10 After the table.
 {position: p1..p10 of p1..p10 (7 of 7 blocks)}
 
-$ stetdoc view contract.docx --find thirty --context 0
+$ stetdoc view contract.docx --find thirty
 {stet 1 view=find base=5737b772923cf8d3:0:5737b772923cf8d3 mode=redline common-style="Normal" range=p4..p4}
 {summary: 1 section}
 p4 Payment is due within thirty days.
-{~ 1 match}
 {position: p4..p4 of find "thirty": 1 match in 1 block (1 of 1 blocks)}
 
 $ stetdoc inspect contract.docx p1

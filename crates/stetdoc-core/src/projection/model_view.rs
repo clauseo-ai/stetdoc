@@ -13,6 +13,8 @@ use std::sync::Arc;
 pub(crate) enum Margin {
     /// The block that precedes this line holds a find's needle this many times.
     Matches(u32),
+    /// The block that precedes this line holds these needles of a find that has more than one, this many times each.
+    Terms(Vec<TermCount>),
     /// This many blocks between the ones shown are not shown.
     Gap(u32),
     /// The table that follows was cut between rows on the page before: it goes on at this row.
@@ -165,6 +167,58 @@ pub(crate) struct ChangeList {
     pub changes: Vec<crate::api::revision::RevisionInfo>,
     /// Show the whole text of each change, and do not cut its line short.
     pub full: bool,
+}
+
+/// One needle of a find, and how many times a block holds it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct TermCount {
+    /// The needle as it was given.
+    pub term: Box<str>,
+    /// How many times the block holds it.
+    pub count: u32,
+}
+
+/// The compact page of a `Find` with no context: one line for each paragraph that matches.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct HitList {
+    /// How many needles the find has. With more than one, each line names those it holds.
+    pub needles: u32,
+    /// The paragraphs on this page, in document order.
+    pub hits: Vec<FindHit>,
+    /// The clause headings that matched, with how to read each whole.
+    pub tips: Vec<Tip>,
+}
+
+/// One paragraph that a find matched.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct FindHit {
+    /// The paragraph.
+    pub r#ref: BlockRef,
+    /// The outermost clause it is in, as a heading line over the hits under it.
+    pub under: Option<Target>,
+    /// The full label of the clause it is in, such as `4.2(a)`.
+    pub clause: Option<Box<str>>,
+    /// The text around the first match, exactly as the paragraph has it.
+    pub text: Box<str>,
+    /// Text of the paragraph comes before `text` and is not shown.
+    pub cut_before: bool,
+    /// Text of the paragraph comes after `text` and is not shown.
+    pub cut_after: bool,
+    /// The needles it holds, each with how many times.
+    pub terms: Vec<TermCount>,
+    /// The needles are only in text that a tracked change deletes, so `text` is the start of the paragraph.
+    pub deleted_only: bool,
+}
+
+/// A clause heading that a find matched: the clause to view whole, and how to name it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Tip {
+    /// The heading.
+    pub r#ref: BlockRef,
+    /// The clause as a view or a lookup takes it, such as `clause 11`.
+    pub clause: Box<str>,
+    /// The heading's text, cut short.
+    pub text: Box<str>,
 }
 
 /// A note or a comment that a page cites, with its text cut short.

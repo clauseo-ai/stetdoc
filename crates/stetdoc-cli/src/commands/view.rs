@@ -44,14 +44,15 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
                 "Write --range p40..p60, or --range p40 for p40 to the end of its story.",
             ));
         }
-        match &args.find {
-            Some(needle) => Scope::Find {
-                needle: needle.clone(),
+        if args.find.is_empty() {
+            Scope::Range { from, to }
+        } else {
+            Scope::Find {
+                needles: args.find.clone(),
                 context: args.context,
                 from: Some(from),
                 to,
-            },
-            None => Scope::Range { from, to },
+            }
         }
     } else if let Some(clause) = &args.clause {
         Scope::Clause(clause.clone())
@@ -72,9 +73,9 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
             author: args.author.clone(),
             resolved,
         })
-    } else if let Some(needle) = &args.find {
+    } else if !args.find.is_empty() {
         Scope::Find {
-            needle: needle.clone(),
+            needles: args.find.clone(),
             context: args.context,
             from: None,
             to: None,

@@ -375,6 +375,49 @@ fn the_view_tool_finds_within_a_range_and_names_a_pair_it_refuses() {
 }
 
 #[test]
+fn the_view_tool_takes_one_find_or_a_list_and_lists_one_line_for_each_hit() {
+    let tmp = tempfile::tempdir().unwrap();
+    fs::write(tmp.path().join("contract.docx"), contract::package()).unwrap();
+    let mut server = Server::start(tmp.path(), &[]);
+    let list = server.request("tools/list", json!({}));
+    let view = list["result"]["tools"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|t| t["name"] == "view")
+        .unwrap()
+        .clone();
+    let find = &view["inputSchema"]["properties"]["find"];
+    assert_eq!(find["anyOf"][0]["type"], "string", "{find}");
+    assert_eq!(find["anyOf"][1]["type"], "array", "{find}");
+    assert_eq!(view["inputSchema"]["properties"]["context"]["default"], 0);
+    // A list finds any of its texts, and each line says which it holds.
+    let many = server.call(
+        "view",
+        json!({ "input": "contract.docx", "find": ["thirty", "law", "Due Date"] }),
+    );
+    let page = ok(&many);
+    assert_eq!(
+        page["position"]["scope"],
+        "find \"thirty\" (1), \"law\" (1), \"Due Date\" (0): 2 matches in 2 blocks"
+    );
+    let text = page["text"].as_str().unwrap();
+    assert!(
+        text.contains("p4 Payment is due within thirty days. {~ \"thirty\" 1}"),
+        "{text}"
+    );
+    assert!(text.contains("{~ \"law\" 1}"), "{text}");
+    // One string is one text, and context gives the blocks whole.
+    let one = server.call(
+        "view",
+        json!({ "input": "contract.docx", "find": "thirty", "context": 1 }),
+    );
+    let text = ok(&one)["text"].as_str().unwrap().to_string();
+    assert!(text.contains("p3 ") && text.contains("p5 "), "{text}");
+    assert!(text.contains("{~ 1 match}"), "{text}");
+}
+
+#[test]
 fn edit_writes_a_docx_in_place_and_pack_done_removes_the_working_copy() {
     let tmp = tempfile::tempdir().unwrap();
     fs::write(tmp.path().join("contract.docx"), contract::package()).unwrap();

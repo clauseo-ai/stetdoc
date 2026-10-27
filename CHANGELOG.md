@@ -22,6 +22,9 @@ released yet.
   and the places found in `found`.
 - `Document::occurrences` lists where a text is, as `find` matches it, in the whole document, a story, a range or a
   clause, and the new error code `count_mismatch` (exit 3) refuses a request whose expected count does not match.
+- `stetdoc view --find` takes several texts (`--find payment --find "Due Date"`) and finds blocks that hold any of them. Each
+  line says which texts it holds and how often, and the position line counts each text. The MCP view tool's `find` takes
+  one string or a list, and `Scope::Find` has `needles` (JSON still reads `needle` and one string).
 - `stetdoc view --find TEXT --range p40..p60` looks only in that range, in the CLI and the MCP view tool. A find pages like
   a range, and its position line counts the matches: `find "days": 44 matches in 38 blocks, showing 1..9`.
 - `stetdoc view --revisions --find TEXT` lists only the changes whose inserted or deleted text contains it, and
@@ -300,6 +303,11 @@ released yet.
 - `stetdoc check FILE --all` lists every finding the report keeps (the first 200), not only the first 20.
 
 ### Changed
+
+- `stetdoc view --find` lists one line for each paragraph that matches: its ref, its clause number, and about 100
+  characters of its exact text around the match, under a line for each top-level clause, with a tip that names the
+  clause to view whole when a clause heading matches. `--context N` (N of 1 or more) shows the blocks whole, as before.
+  On a 75,000-character contract, `--find days` went from 11.5 KB for the first 9 of 38 hits to 5.3 KB for all 38.
 
 - The receipt of a command that writes a .docx (`edit -o`, `edit --in-place`, `compare`) carries the base of the written
   file, which opens in a new ref namespace, so the next batch on it can start from the receipt. When the edit added or

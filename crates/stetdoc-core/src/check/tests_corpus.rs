@@ -16,7 +16,7 @@ use crate::wordml::{AnomalyKind, BlockKind};
 use crate::xml::{NodeId, SpanTree};
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::sync::OnceLock;
-use stetdoc_testkit::corpus::{Corpus, ENV_SET, Entry};
+use stetdoc_testkit::corpus::{Corpus, Entry, named_set_kind};
 
 /// What one document taught the pass.
 struct Row {
@@ -396,7 +396,7 @@ const LEDGER: &str = include_str!("expected_findings.tsv");
 #[test]
 fn v2_the_findings_on_the_curated_set_are_the_ledger() {
     let rows = rows_or_skip!();
-    if std::env::var(ENV_SET).is_ok_and(|s| s != "curated") {
+    if named_set_kind().is_some_and(|s| s != "curated") {
         eprintln!("the ledger is the curated set's: another set is named");
         return;
     }
@@ -466,7 +466,7 @@ fn codes_of(rule: &str) -> &'static [FindingCode] {
 #[test]
 fn the_census_of_the_design_holds_on_the_full_set() {
     let rows = rows_or_skip!();
-    if std::env::var(ENV_SET).map_or(true, |s| s != "full") {
+    if named_set_kind().is_none_or(|s| s != "full") {
         eprintln!("the census figures are the full set's: STETDOC_CORPUS_SET=full is not set");
         return;
     }

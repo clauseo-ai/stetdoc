@@ -42,6 +42,10 @@ fn may_change(name: &str) -> bool {
                 "styles",
                 "settings",
                 "glossary",
+                // A write declares the prefixes that a part's mc:Ignorable names and nothing declares, in every part the
+                // check reads, touched or not (decision 0014).
+                "fonttable",
+                "websettings",
             ]
             .iter()
             .any(|p| file.starts_with(p)))

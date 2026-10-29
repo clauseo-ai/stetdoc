@@ -22,12 +22,12 @@ pub(super) fn names(bytes: &[u8]) -> Vec<String> {
 }
 
 #[test]
-fn there_are_83_edge_7_word_and_86_hostile_fixtures_with_unique_names() {
-    assert_eq!(edge().len(), 84);
+fn there_are_85_edge_7_word_and_87_hostile_fixtures_with_unique_names() {
+    assert_eq!(edge().len(), 85);
     assert_eq!(word().len(), 7);
     assert_eq!(hostile().len(), 87);
     let unique: BTreeSet<&str> = all().iter().map(|f| f.name).collect();
-    assert_eq!(unique.len(), 178);
+    assert_eq!(unique.len(), 179);
     assert!(edge().iter().all(|f| f.kind == Kind::Edge));
     assert!(word().iter().all(|f| f.kind == Kind::Word));
     assert!(hostile().iter().all(|f| f.kind == Kind::Hostile));

@@ -117,6 +117,8 @@ impl Document {
             ops::scope_guard_changed(&tx, scope, &applied, &verified.changed)
                 .map_err(|e| envelope.locate(e))?;
         }
+        // A write repairs the prefixes that the input names and never declares, which Word refuses (decision 0014).
+        let repairs = super::repair::repair(&mut tx)?;
         let names = receipt::capture_names(tx.parts(), &applied);
         let shown = Stamp::new(stamp.author(), stamp.date());
         let count = |n: usize| u32::try_from(n).unwrap_or(u32::MAX);
@@ -137,6 +139,7 @@ impl Document {
             applied: &applied,
             format: &self.format,
             notes: &envelope.notes,
+            repairs: &repairs,
             origins: &envelope.origins,
             names: &names,
             validation: &validation,

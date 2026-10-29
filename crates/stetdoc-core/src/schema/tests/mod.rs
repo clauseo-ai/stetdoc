@@ -2,10 +2,11 @@
 //! `validate_part` and the violation set. They parse XML into the span tree, which is the
 //! [`SchemaTree`] the engine reads, and `ListTree` stands in for a parent whose children are only
 //! names. `order` holds the tests of insertion, `validate` those of the validator, `scale` the
-//! time bounds, `mc` the markup compatibility rules.
+//! time bounds, `mc` the markup compatibility rules, `mc_prefixes` the prefixes they name and nothing declares.
 
 mod ctx;
 mod mc;
+mod mc_prefixes;
 mod order;
 mod scale;
 mod span;

@@ -9,5 +9,4 @@ crates/stetdoc-core/src/xml/corpus_laws.rs | the span tree laws read the XML par
 crates/stetdoc-core/src/package/corpus_laws/gating.rs | tests of the corpus gates build small corpora in a temporary directory
 crates/stetdoc-core/src/xml/corpus_laws/gating.rs | tests of the span tree law's gates build a small corpus in a temporary directory
 crates/stetdoc-core/src/wordml/tests_corpus.rs | the wordml story and text model laws read the fetched corpus named by STETDOC_CORPUS_DIR
-crates/stetdoc-core/src/check/tests_corpus.rs | the laws of check::document read the fetched corpus named by STETDOC_CORPUS_DIR and the set named by STETDOC_CORPUS_SET
 crates/stetdoc-core/src/compare/tests_pairs.rs | The compare laws on the compare pairs of corpus/pairs.tsv in the fetched corpus named by STETDOC_CORPUS_DIR and STETDOC_CORPUS_SET, with the verdicts written to STETDOC_N_OUT when it is set

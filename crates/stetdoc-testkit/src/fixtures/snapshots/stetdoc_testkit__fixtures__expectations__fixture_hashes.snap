@@ -64,6 +64,7 @@ c6219531c7999cf13817e5775d49b7df2d08948306c2a965c5e723a72f91cfdc       1611  xml
 74324680d9f421192796f2df46d52680b3901ee6f2cfa5053cbb77d226b61f04       1896  xml-long-single-line
 7df1301520eb86213fb2ab798065c6b8226b9cb5c3de3936ace45dbd3bfa05cc       1941  xml-many-attributes-50
 3007afb95a9a7a08bd9226b4f121e92ad2d129825289347bf9de3336b7a19639       1618  xml-unusual-bytes-in-text
+24b720efd46ed831a7a310beaca10fe502ca0093719f7637ede16eba514c0fdb       1667  xml-mc-ignorable-undeclared-prefix
 a0f1f78b6ebe30f6714e5096604ffc8cea1d41d633dec821241da6b7a968886c       1707  xml-attribute-order-varied
 0014a6497acc1f44682b2602bdbb7cd86f944a40814165f998597c924b2fa72c       1608  xml-cdata-end-written-in-text
 f725e5d437ebd64d5a8e6ec302b59cbbeeb5a4dcc8d8a9db811abd20fdd5bb79       1711  zip-prefix-stub-relative-offsets

@@ -118,6 +118,11 @@ finding_codes! {
         class: Violation,
         doc: "mc:MustUnderstand names a namespace that Word does not understand.",
     }
+    McPrefixUndeclared {
+        wire: "mc_prefix_undeclared",
+        class: Violation,
+        doc: "mc:Ignorable, mc:ProcessContent or mc:MustUnderstand names a prefix that no namespace declaration binds. The schema allows the attribute, and Word refuses to open the file. An edit repairs it in every part it writes (decision 0014).",
+    }
     SchemaUnexpectedText {
         wire: "schema_unexpected_text",
         class: Violation,

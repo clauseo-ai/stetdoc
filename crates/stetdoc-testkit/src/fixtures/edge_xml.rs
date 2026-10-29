@@ -351,6 +351,15 @@ pub(super) fn list() -> Vec<Fixture> {
             },
         ),
         fx(
+            "xml-mc-ignorable-undeclared-prefix",
+            "mc:Ignorable on the root lists w14, wp14 and an unknown zz and declares none of them, as python-docx leaves a template's root; Word refuses it, and an edit declares w14 and wp14 and drops zz (decision 0014)",
+            OK,
+            || {
+                let attrs = " xmlns:mc=\"http://schemas.openxmlformats.org/markup-compatibility/2006\" mc:Ignorable=\"w14 wp14 zz\"";
+                pkg(&Doc::new().root_attrs(attrs).bytes())
+            },
+        ),
+        fx(
             "xml-attribute-order-varied",
             "mc:Ignorable placed before the namespace declaration of its own prefix",
             OK,

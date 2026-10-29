@@ -13,6 +13,23 @@ pub const ENV_DIR: &str = "STETDOC_CORPUS_DIR";
 /// The environment variable that names the set to read.
 pub const ENV_SET: &str = "STETDOC_CORPUS_SET";
 
+/// The kind of a set (`curated`, `full`, `pairs`): its name without the twelve hexadecimal digits of the manifest hash
+/// that `cargo xtask check` names it by, so `curated-0c16ee04b227` and `curated` are both `curated`. A test that
+/// belongs to one kind of set compares this, never the name, or it would skip itself under the check.
+pub fn set_kind(name: &str) -> &str {
+    match name.rsplit_once('-') {
+        Some((kind, hash)) if hash.len() == 12 && hash.bytes().all(|b| b.is_ascii_hexdigit()) => {
+            kind
+        }
+        _ => name,
+    }
+}
+
+/// The kind of the set that `ENV_SET` names, or `None` when it is not set.
+pub fn named_set_kind() -> Option<String> {
+    std::env::var(ENV_SET).ok().map(|s| set_kind(&s).to_owned())
+}
+
 /// How many times in all [`through_link`] tries an open that keeps failing with EINVAL.
 const WALK_ATTEMPTS: u32 = 5;
 
@@ -197,6 +214,17 @@ mod tests {
     use super::*;
     use std::cell::Cell;
     use std::io;
+
+    #[test]
+    fn the_kind_of_a_set_ignores_the_manifest_hash_the_check_names_it_by() {
+        assert_eq!(set_kind("curated-0c16ee04b227"), "curated");
+        assert_eq!(set_kind("full-0c16ee04b227"), "full");
+        assert_eq!(set_kind("curated"), "curated");
+        assert_eq!(set_kind("curatedpairs-0c16ee04b227"), "curatedpairs");
+        // Not a hash: twelve characters that are not all hexadecimal, or another length.
+        assert_eq!(set_kind("my-set-xyzxyzxyzxyz"), "my-set-xyzxyzxyzxyz");
+        assert_eq!(set_kind("curated-0c16"), "curated-0c16");
+    }
 
     /// An opener that fails with `error` for its first `failures` calls and then succeeds.
     fn opener(

@@ -7,7 +7,8 @@
 //! **Interface.** `edit(&Tx, &Declared) -> Result<Verified, StetError>` for the commit pipeline,
 //! `document(&PartsView) -> CheckReport` for `Document::check`, `scan_unit` and `scan_part` for the
 //! Word rules of one unit and of a whole part, which the compiler's post-conditions use as well,
-//! and `unit_keys` for `compare`'s origins in another package.
+//! `unit_keys` for `compare`'s origins in another package, and `undeclared`, the prefixes a
+//! markup-compatibility attribute of a part names and nothing declares, which `document` repairs.
 //!
 //! **Invariants.**
 //! - No new violations: after an edit, the keys of every unit that differs from the base are a
@@ -50,6 +51,7 @@ mod found;
 mod keys;
 mod origins;
 mod package;
+mod prefixes;
 mod report;
 mod rules;
 #[cfg(test)]
@@ -88,5 +90,6 @@ pub(crate) use edit::{Refusal, edit, edit_located};
 pub(crate) use found::Found;
 pub(crate) use keys::{Key, KeySet};
 pub(crate) use origins::{Declared, Origin, part_keys, unit_keys};
+pub(crate) use prefixes::undeclared;
 pub(crate) use rules::{scan_part, scan_unit};
 pub(crate) use verdict::{Checked, Verified};

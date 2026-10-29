@@ -319,11 +319,14 @@ pub enum WarningCode {
     CompareListsDropped,
     /// A view of the whole body showed its outline, because the body is more than one page.
     OutlineShown,
+    /// The edit repaired a defect of the input that stops Word opening the file: a prefix that `mc:Ignorable`,
+    /// `mc:ProcessContent` or `mc:MustUnderstand` names and nothing declares (decision 0014).
+    Repaired,
 }
 
 impl WarningCode {
     /// Every code, in the order of the design's table.
-    pub const ALL: [WarningCode; 34] = [
+    pub const ALL: [WarningCode; 35] = [
         WarningCode::LooksHidden,
         WarningCode::HiddenText,
         WarningCode::NumberingApproximate,
@@ -358,6 +361,7 @@ impl WarningCode {
         WarningCode::CompareNotesDropped,
         WarningCode::CompareListsDropped,
         WarningCode::OutlineShown,
+        WarningCode::Repaired,
     ];
 
     /// The snake_case name used on the wire.
@@ -397,6 +401,7 @@ impl WarningCode {
             WarningCode::CompareNotesDropped => "compare_notes_dropped",
             WarningCode::CompareListsDropped => "compare_lists_dropped",
             WarningCode::OutlineShown => "outline_shown",
+            WarningCode::Repaired => "repaired",
         }
     }
 

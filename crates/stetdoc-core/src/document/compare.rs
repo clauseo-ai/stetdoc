@@ -57,6 +57,7 @@ pub fn compare(
     crate::revisions::canonical::order_created(&mut tx)?;
     let told = declared_of(&prepared, &tx, &rc)?;
     let verified = check::edit_located(&tx, &told.declared).map_err(|refusal| refusal.error)?;
+    let repairs = super::repair::repair(&mut tx)?;
     let (next, _committed) = tx.commit()?;
     let document = Document {
         state: next,
@@ -73,7 +74,7 @@ pub fn compare(
         carried_total: count(verified.carried_total),
         notes: verified.notes,
     };
-    let receipt = receipt_of(&document, &rc, &told.merged, validation, &stamp)?;
+    let receipt = receipt_of(&document, &rc, &told.merged, validation, &stamp, repairs)?;
     Ok(Compared { document, receipt })
 }
 
@@ -208,6 +209,7 @@ fn receipt_of(
     merged: &[BlockKey],
     validation: Validation,
     stamp: &RevStamp,
+    repairs: Vec<Warning>,
 ) -> Result<Receipt, StetError> {
     let parts = document.state.parts();
     // Every key here is a block of the redline: compare never hands over a key of the original to name.
@@ -252,6 +254,7 @@ fn receipt_of(
         );
         warnings.push(warn(WarningCode::CompareKeysMerged, at, message));
     }
+    warnings.extend(repairs);
     let named = |key: &BlockKey| shown(key).unwrap_or_else(|| "a block".to_string());
     let moves: Vec<MoveEntry> = rc
         .moves

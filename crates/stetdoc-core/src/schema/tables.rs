@@ -60,6 +60,18 @@ pub(super) fn ns_by_uri(uri: &str) -> Option<u8> {
         .map(|a| a.1)
 }
 
+/// The namespace whose preferred prefix is `prefix`, if one is. `xml` and the empty prefix are never one.
+pub(super) fn ns_by_prefix(prefix: &str) -> Option<&'static str> {
+    if prefix.is_empty() || prefix == "xml" {
+        return None;
+    }
+    names::NAMESPACES
+        .get(1..)?
+        .iter()
+        .find(|r| r.1 == prefix)
+        .map(|r| r.0)
+}
+
 /// Whether the tables hold content models for the namespace. A namespace that is not
 /// understood can be skipped when a document lists it in `mc:Ignorable`; one that is
 /// understood is always validated.

@@ -199,7 +199,7 @@ Releases, npm, PyPI and Homebrew.
 - `cargo xtask corpus fetch`: downloads the corpus manifest's documents from their pinned
   commits, verifies every SHA-256 and caches them, offline once cached. `cargo xtask check`
   runs it and sets `STETDOC_CORPUS_DIR` for the tests.
-- `stetdoc_testkit::fixtures`: 84 edge, 7 Word and 87 hostile synthetic documents built in
+- `stetdoc_testkit::fixtures`: 85 edge, 7 Word and 87 hostile synthetic documents built in
   memory, each with the outcome stetdoc must give and, for a hostile one, why. They include
   the package layer's own 117 cases, ported without duplicates: 53 are new fixtures and the
   rest are the fixtures the testkit already had. A snapshot pins the SHA-256 of every fixture,
@@ -471,6 +471,14 @@ Releases, npm, PyPI and Homebrew.
 
 ### Fixed
 
+- An input whose `mc:Ignorable` names prefixes it never declares, as python-docx leaves some templates' main part, no
+  longer gives an output that Word refuses to open ("Word found unreadable content"). Every edit, compare, accept and
+  reject now declares the prefixes Word knows (`w14`, `wp14`, `w15`, the `w16` family and the rest Word writes) on the
+  element that names them and drops the ones nobody knows, in every part the check reads, touched or not, and changes
+  nothing else. The receipt says what it repaired in a new warning, `repaired`, and `stetdoc check` reports the defect on
+  any document as `mc_prefix_undeclared`, a problem already in the input
+  ([decision 0014](docs/decisions/0014-repair-undeclared-mc-prefixes.md)). The Harvey indenture of the long markup task
+  opened in Word only after this fix.
 - A run that an edit creates or cuts off (new text, the rest of a split run, a comment's anchor, a new row, compare's
   runs) gets its run properties in the order Word writes, even when the run it copies from has them out of order. Before,
   each copy repeated the defect, and the Open XML SDK validator counted every copy as a new schema error (33 new errors

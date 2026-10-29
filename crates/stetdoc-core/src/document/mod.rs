@@ -1,7 +1,9 @@
 //! The public handle and orchestration.
 //!
 //! **Owns.** `Document`: the orchestration of stage, ops, check, scope guard and commit; the working copy (`export`, `resume`,
-//! the manifest, `pending_files`, `write_plan` and `recover`); `save`; and the public `compare` entry.
+//! the manifest, `pending_files`, `write_plan` and `recover`); `save`; the public `compare` entry; and the repair, on every
+//! write, of the prefixes a part's markup-compatibility attributes name and nothing declares, which Word refuses (`repair.rs`,
+//! decision 0014).
 //!
 //! **Interface.** The public interface, as listed in `ARCHITECTURE.md`: the fourteen methods of `Document`, `WorkingCopy::{pending_files,
 //! ensure_clean, write_plan, recover}`, and the free functions `compare`, `capabilities` and `json_schema`.
@@ -37,6 +39,7 @@ mod inspect_lists;
 mod inspect_marks;
 mod receipt;
 mod receipt_text;
+mod repair;
 mod write_plan;
 
 use crate::api::error::{ErrorCode, StetError};
@@ -213,6 +216,8 @@ mod tests_inspect;
 mod tests_inspect_marks;
 #[cfg(test)]
 mod tests_occurrences;
+#[cfg(test)]
+mod tests_repair;
 #[cfg(test)]
 mod tests_scale;
 #[cfg(test)]

@@ -11,7 +11,8 @@
 //! `validate_subtree`, `validate_unit` and `unit_root`; `walk_unit`, `read_children`,
 //! `is_unit_boundary` and `in_taken_branch`, which read a unit as the validator does for code
 //! that applies other rules to it (`check`); and, for code that holds `NodeRef`s,
-//! `taken_branch` and `disposition`. The module reads a document only through two traits in
+//! `taken_branch` and `disposition`; and `undeclared_prefixes` with `prefix_namespace`, the prefixes a
+//! markup-compatibility attribute names that nothing declares, which Word refuses (decision 0014). The module reads a document only through two traits in
 //! `tree`, so it names no concrete tree type. `Nodes` is the name, parent, children, attributes
 //! and prefixes of one element, which is all that insertion and the markup compatibility rules
 //! read. `SchemaTree` adds the root and a text test, which validation reads as well. The span tree
@@ -137,6 +138,7 @@
 mod ctx;
 mod effective;
 mod generated;
+mod mc_prefixes;
 mod order;
 mod scope;
 mod span;
@@ -149,6 +151,7 @@ mod walk;
 pub use ctx::{Ctx, ctx_at};
 pub(crate) use effective::{Mc, disposition, taken_branch};
 pub use generated::parts::PartKind;
+pub use mc_prefixes::{Undeclared, prefix_namespace, token_prefix, undeclared_prefixes};
 pub use order::{Fit, Placement, Prefer, insert_in_order, reorder};
 pub(crate) use span::Refs;
 pub use tables::display_qname;

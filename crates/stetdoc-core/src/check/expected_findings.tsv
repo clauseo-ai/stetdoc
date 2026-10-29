@@ -50,8 +50,10 @@ harvey-labs:tasks/antitrust-competition/draft-antitrust-complaint/documents/clie
 harvey-labs:tasks/antitrust-competition/draft-antitrust-complaint/documents/legal-research-memo.docx	schema_out_of_order	2
 harvey-labs:tasks/antitrust-competition/draft-antitrust-complaint/documents/retailer-declarations.docx	schema_out_of_order	2
 harvey-labs:tasks/antitrust-competition/draft-antitrust-compliance-training-materials/documents/bimc-bylaws-and-minutes.docx	schema_out_of_order	1
+harvey-labs:tasks/antitrust-competition/draft-antitrust-compliance-training-materials/documents/doj-complaint-summary.docx	mc_prefix_undeclared	1
 harvey-labs:tasks/antitrust-competition/draft-antitrust-compliance-training-materials/documents/doj-complaint-summary.docx	schema_unknown_attribute	2
 harvey-labs:tasks/antitrust-competition/extract-pricing-data-from-document-production/documents/sebpa-ceo-roundtable-invitation.docx	schema_out_of_order	1
+harvey-labs:tasks/banking-finance/analyze-counterparty-markup-of-senior-secured-credit-facility-term-sheet/documents/lender-markup-term-sheet.docx	mc_prefix_undeclared	1
 harvey-labs:tasks/banking-finance/analyze-counterparty-markup-of-senior-secured-credit-facility-term-sheet/documents/lender-markup-term-sheet.docx	schema_non_canonical_order	89
 harvey-labs:tasks/banking-finance/analyze-counterparty-markup-of-senior-secured-credit-facility-term-sheet/documents/lender-markup-term-sheet.docx	schema_out_of_order	3
 harvey-labs:tasks/banking-finance/analyze-counterparty-markup-of-senior-secured-credit-facility-term-sheet/documents/lender-markup-term-sheet.docx	schema_unknown_attribute	5
@@ -59,6 +61,7 @@ harvey-labs:tasks/bankruptcy-restructuring/identify-preference-exposure-analysis
 harvey-labs:tasks/contracts/financing/credit-lending-first-turn-redline/scenario-02/documents/borrower-first-markup-redline.docx	schema_non_canonical_order	522
 harvey-labs:tasks/contracts/financing/credit-lending-first-turn-redline/scenario-02/documents/borrower-first-markup-redline.docx	schema_out_of_order	13
 harvey-labs:tasks/corporate-governance/analyze-compliance-program-gaps/documents/compliance-manual.docx	schema_out_of_order	3
+harvey-labs:tasks/data-privacy-cybersecurity/analyze-counterparty-markup-of-cross/documents/cascadia-tia-summary.docx	mc_prefix_undeclared	1
 harvey-labs:tasks/data-privacy-cybersecurity/analyze-counterparty-markup-of-cross/documents/cascadia-tia-summary.docx	schema_out_of_order	1
 harvey-labs:tasks/data-privacy-cybersecurity/analyze-counterparty-markup-of-cross/documents/cascadia-tia-summary.docx	schema_unknown_attribute	3
 harvey-labs:tasks/diligence/media-recap/documents/6.0 Commercial Contracts and Revenue Relationships/6.3 Consumer Products and Merchandising Licenses/pacific-playworks-palisade-plus-gift-kit-brand-style-approval-holiday-.docx	schema_out_of_order	30
@@ -70,6 +73,7 @@ harvey-labs:tasks/firm-knowledge/dms/matters/1001-00006/Rollover Equity/llc-agre
 harvey-labs:tasks/funds-asset-management/analyze-counterparty-markup-of-investment-advisory-agreement/documents/crestline-form-adv-excerpts.docx	schema_out_of_order	1
 harvey-labs:tasks/healthcare-life-sciences/analyze-counterparty-markup-of-clinical-trial-agreement/documents/cta-negotiation-playbook.docx	schema_out_of_order	3
 harvey-labs:tasks/immigration/compare-employer-corrective-action-plans-against-ice-regulatory-standards/documents/cap-2-everify.docx	schema_out_of_order	1
+harvey-labs:tasks/insurance/analyze-counterparty-markup-of-reinsurance-treaty/documents/cascade-treaty-playbook.docx	mc_prefix_undeclared	1
 harvey-labs:tasks/insurance/analyze-counterparty-markup-of-reinsurance-treaty/documents/cascade-treaty-playbook.docx	schema_out_of_order	2
 harvey-labs:tasks/insurance/analyze-counterparty-markup-of-reinsurance-treaty/documents/cascade-treaty-playbook.docx	schema_unknown_attribute	2
 harvey-labs:tasks/real-estate/analyze-counterparty-markup-of-commercial-lease-agreement/documents/lease-review-playbook.docx	schema_out_of_order	1
@@ -86,6 +90,7 @@ libreoffice-core:sw/qa/extras/docbookexport/data/tdf91095.docx	empty_properties	
 libreoffice-core:sw/qa/extras/docbookexport/data/tdf91095.docx	schema_invalid_attribute_value	1
 libreoffice-core:sw/qa/extras/docbookexport/data/tdf91095.docx	schema_non_canonical_order	126
 libreoffice-core:sw/qa/extras/layout/data/floattable-center-shift-down.docx	empty_properties	28
+libreoffice-core:sw/qa/extras/layout/data/floattable-center-shift-down.docx	mc_prefix_undeclared	1
 libreoffice-core:sw/qa/extras/ooxmlexport/data/fdo76098.docx	edge_space_without_preserve	1
 libreoffice-core:sw/qa/extras/ooxmlexport/data/fdo76098.docx	empty_properties	4
 libreoffice-core:sw/qa/extras/ooxmlexport/data/fdo76098.docx	schema_invalid_attribute_value	2

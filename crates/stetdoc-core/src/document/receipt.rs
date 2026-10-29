@@ -44,6 +44,8 @@ pub(super) struct Inputs<'a> {
     pub format: &'a FormatId,
     /// Warnings of the plan of an edit of files.
     pub notes: &'a [Warning],
+    /// What the write repaired in the input (decision 0014).
+    pub repairs: &'a [Warning],
     /// Where each operation came from, for an edit of files.
     pub origins: &'a [Origin],
     /// The refs, read before the commit, of the existing blocks that the batch touched, removed or joined. A later operation of
@@ -342,7 +344,8 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
         .flat_map(|o| o.warnings.iter())
         .chain(applied.warnings.iter().map(|(_, w)| w))
         .chain(shown.warnings.iter())
-        .chain(i.notes.iter());
+        .chain(i.notes.iter())
+        .chain(i.repairs.iter());
     for w in every {
         if seen.insert((w.code, w.block.clone(), w.message.clone())) {
             warnings.push(w.clone());

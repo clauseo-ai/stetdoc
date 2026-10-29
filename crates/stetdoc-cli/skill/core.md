@@ -149,6 +149,10 @@ A receipt lists the problems your change added, if any. Problems that were alrea
 (`no new problem, ... 66 problems were already in the input`). They are not yours to fix, so mention them only if
 the user asks. `stetdoc check FILE --all` (with MCP, `all: true`) lists them.
 
+One kind is repaired for you, because Word refuses to open a file that has it: a prefix that `mc:Ignorable` names and
+nothing declares. The receipt says so in a `repaired` warning, such as `declared w14, wp14 in word/document.xml so Word
+can open the file`. Tell the user that the input did not open in Word and the output does.
+
 When the document holds tracked changes you did not make, receipts and views say so in a line such as
 `4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #0 insert p1 "shall pay ", ...`, followed by
 `Tell the user about them.` Do it: name who made them and what they change. `stetdoc view FILE --revisions --context 1`

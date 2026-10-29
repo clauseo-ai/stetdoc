@@ -268,6 +268,24 @@ impl Editor<'_> {
         Ok(prefix)
     }
 
+    /// Declares `prefix` for `uri` on the element `el`, after its last namespace declaration, so the rest of its start tag
+    /// keeps its bytes. It is for a prefix that something already names and nothing binds, such as a token of
+    /// `mc:Ignorable` (decision 0014), so a prefix that is already bound at `el`, `xml`, `xmlns`, the empty prefix, a name
+    /// that is not an NCName and a URI that cannot be bound are refused with `invalid_payload`.
+    pub fn declare_prefix(&mut self, el: NodeId, prefix: &str, uri: &str) -> Result<(), StetError> {
+        self.element(el)?;
+        if prefix.is_empty() || !is_ncname(prefix) || prefix == "xml" || prefix == "xmlns" {
+            return Err(invalid("not a prefix that can be declared"));
+        }
+        if uri.is_empty() || uri == XMLNS_NS || uri == XML_NS {
+            return Err(invalid("not a bindable namespace URI"));
+        }
+        if self.tree.prefix_uri_at(el.0, prefix).is_some() {
+            return Err(invalid("the prefix is already bound here"));
+        }
+        self.declare_on(el.0, uri, prefix)
+    }
+
     /// A prefix named after `base` that nothing in scope at `from` uses.
     pub(super) fn fresh_prefix(&self, base: &str, from: u32) -> String {
         let base = if is_ncname(base) && base != "xmlns" && base != "xml" {

@@ -257,3 +257,34 @@ fn the_editor_keeps_to_the_limits_the_part_was_parsed_with() {
     }
     assert!(made >= 5);
 }
+
+#[test]
+fn declare_prefix_adds_one_declaration_after_the_last_and_keeps_the_rest_of_the_tag() {
+    let src = "<r xmlns:mc=\"urn:mc\" a=\"1\" mc:Ignorable=\"w14\"><c xmlns:q=\"urn:q\"/></r>";
+    let mut t = parse(src);
+    let root = t.root().id();
+    t.edit().declare_prefix(root, "w14", "urn:w14").unwrap();
+    assert_eq!(
+        out(&t),
+        "<r xmlns:mc=\"urn:mc\" xmlns:w14=\"urn:w14\" a=\"1\" mc:Ignorable=\"w14\"><c xmlns:q=\"urn:q\"/></r>"
+    );
+    assert_eq!(
+        t.root().namespace_of_prefix("w14").as_deref(),
+        Some("urn:w14")
+    );
+    // A prefix that is bound already, and the reserved ones, are refused and change nothing.
+    let c = t.root().first_child().unwrap().id();
+    for (prefix, uri) in [
+        ("w14", "urn:other"),
+        ("q", "urn:x"),
+        ("xml", "urn:x"),
+        ("xmlns", "urn:x"),
+        ("", "urn:x"),
+        ("ok", ""),
+    ] {
+        let at = if prefix == "q" { c } else { root };
+        let e = t.edit().declare_prefix(at, prefix, uri).unwrap_err();
+        assert_eq!(e.code(), ErrorCode::InvalidPayload, "{prefix}");
+    }
+    assert!(out(&t).ends_with("<c xmlns:q=\"urn:q\"/></r>"));
+}

@@ -8,7 +8,7 @@ use super::keys::schema_code;
 use super::report::{Builder, schema_message};
 use super::rules::scan_part;
 use super::units::{Layout, layout_of};
-use super::{audit, fields};
+use super::{audit, fields, prefixes};
 use crate::api::check::{CheckReport, Class, Finding};
 use crate::api::error::StetError;
 use crate::schema::{PartKind, Report, is_unit_boundary, unit_root, validate_part};
@@ -196,6 +196,14 @@ pub(crate) fn document(parts: &PartsView<'_>) -> CheckReport {
             tree,
         };
         schema(&mut builder, &source, &validate_part(part.kind, tree));
+        match prefixes::undeclared(parts, part.id) {
+            Ok(list) => {
+                for found in prefixes::findings(&list) {
+                    add_found(&mut builder, &source, &found);
+                }
+            }
+            Err(why) => builder.unreadable(&part.name, &why),
+        }
         if !is_story(part.kind) {
             continue;
         }

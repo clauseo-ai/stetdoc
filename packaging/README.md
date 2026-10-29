@@ -16,6 +16,13 @@ repository has a GitHub remote. A maintainer runs those steps. The release workf
   fails if `packaging/pypi/pyproject.toml` declares a static version. The release
   workflow runs `--write` before it packs anything. Before tagging a release, also run `--write` and commit, so the
   channels that install from git (the plugins) carry the same version.
+- A release candidate is the tag `v<version>-rc.N` on a commit whose workspace version is `<version>`, such as
+  `v0.9.0-rc.1` for 0.9.0. Every job of `release.yml` that builds or packs first runs `packaging/scripts/prerelease.mjs`,
+  which stamps `<version>-rc.N` into its checkout (Cargo.toml, Cargo.lock, the npm packages and the listings), so the
+  candidate's files say `0.9.0-rc.1` (npm) and `0.9.0rc1` (PyPI) and can never pass for 0.9.0. Its draft release is marked
+  a prerelease, and `publish-pypi` never runs for a draft or a prerelease. To try a candidate from npm, publish its
+  tarballs with `npm publish <tarball> --tag next`, never under `latest`. Any other `v*` tag that is not `v<version>` fails
+  the build. Candidates are numbered on: a pushed tag is never moved, so a fix gets the next `rc.N`.
 
 ## Where the files must sit
 

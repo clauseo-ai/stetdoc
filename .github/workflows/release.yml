@@ -48,6 +48,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
+
       - name: Install the pinned toolchain and the target
         shell: bash
         run: |
@@ -116,6 +121,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
 
       - name: Install the pinned toolchain and the target
         if: ${{ !matrix.target.musl }}
@@ -219,6 +229,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
+
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: addon-*
@@ -250,6 +265,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
+
       - name: Check the install script
         run: |
           sh -n packaging/install.sh
@@ -276,6 +296,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -311,6 +336,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
 
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
@@ -380,6 +410,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
+
       # maturin-action installs Rust itself, inside its container on Linux, so it is given the pinned version.
       - name: Read the pinned toolchain
         id: toolchain
@@ -429,6 +464,11 @@ jobs:
         with:
           persist-credentials: false
 
+      # A v<version>-rc.N tag builds the candidate's version, so its files never pass for the release; see the script.
+      - name: Stamp the version of the tag
+        shell: bash
+        run: node packaging/scripts/prerelease.mjs "$GITHUB_REF"
+
       - name: Build the sdist
         uses: PyO3/maturin-action@e83996d129638aa358a18fbd1dfb82f0b0fb5d3b # v1.51.0
         with:
@@ -463,7 +503,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
-        run: gh release create "$TAG" assets/* --draft --title "stetdoc $TAG" --notes "See CHANGELOG.md for what changed."
+        # A candidate's tag has a hyphen (v0.9.0-rc.1): its draft is marked a prerelease, which publish-pypi never uploads.
+        run: |
+          prerelease=""
+          case "$TAG" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "$TAG" assets/* --draft $prerelease --title "stetdoc $TAG" --notes "See CHANGELOG.md for what changed."
 
   # Uploads the wheels and the sdist of a release to PyPI when a maintainer publishes that release on GitHub, so the files on
   # PyPI are the ones the pypi jobs built and the maintainer reviewed in the draft. It uses PyPI's trusted publishing: no token
@@ -471,7 +515,8 @@ jobs:
   # publisher's fields are in packaging/README.md). The environment can require a reviewer's approval before the upload.
   publish-pypi:
     name: publish to PyPI
-    if: ${{ github.event_name == 'release' }}
+    # Never a draft or a prerelease (a release candidate): publishing a candidate's release on GitHub uploads nothing.
+    if: ${{ github.event_name == 'release' && !github.event.release.draft && !github.event.release.prerelease && !contains(github.event.release.tag_name, '-') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:

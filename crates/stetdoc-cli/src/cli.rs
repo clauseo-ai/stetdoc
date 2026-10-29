@@ -53,7 +53,7 @@ pub enum Command {
     Skills(SkillsArgs),
     /// Install the skill stub for the agents you pick, in your home folder or (with --project) in a project.
     Init(InitArgs),
-    /// List the operations, whether each is tracked, the error codes and the format version.
+    /// List the operations, whether each is tracked, the refusal codes and the format version.
     Capabilities(CapabilitiesArgs),
     /// Serve the commands as tools over the Model Context Protocol, on stdin and stdout.
     Mcp(McpArgs),
@@ -128,9 +128,9 @@ pub struct ViewArgs {
     pub clause: Vec<String>,
     /// The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged
     /// like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line
-    /// then says which it holds. With --range, only in that range; with --revisions, only the changes whose text
-    /// contains one of them.
-    #[arg(long, value_name = "TEXT", action = clap::ArgAction::Append, conflicts_with_all = ["outline", "clause", "comments", "story"])]
+    /// then says which it holds. With --range, only in that range; with --story, only in that story; with --revisions,
+    /// only the changes whose text contains one of them.
+    #[arg(long, value_name = "TEXT", action = clap::ArgAction::Append, conflicts_with_all = ["outline", "clause", "comments"])]
     pub find: Vec<String>,
     /// With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. With
     /// --revisions, show the blocks that hold the changes whole, as the redline shows them, with N blocks on each side,
@@ -158,7 +158,7 @@ pub struct ViewArgs {
     /// With --comments, only open threads.
     #[arg(long, requires = "comments")]
     pub open: bool,
-    /// One story whole.
+    /// One story whole, or with --find, the matches in that story only.
     #[arg(long, value_enum, value_name = "STORY")]
     pub story: Option<StoryArg>,
     /// How tracked changes appear.
@@ -324,10 +324,11 @@ pub struct ReplaceArgs {
 pub struct CommentArgs {
     /// A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where.
     pub input: PathBuf,
-    /// The text to anchor the comment to, matched as replace matches OLD. It must be there once (see --all and --expect).
-    pub anchor: String,
-    /// The comment. A newline is a paragraph break of the comment.
-    pub text: String,
+    /// ANCHOR and TEXT, as many pairs as you like, added together or not at all. ANCHOR is the text to anchor the comment
+    /// to, matched as replace matches OLD; it must be there once (see --all and --expect). TEXT is the comment, and a
+    /// newline in it is a paragraph break of the comment.
+    #[arg(value_name = "ANCHOR TEXT", num_args = 2.., required = true)]
+    pub pairs: Vec<String>,
     /// Comment on every occurrence of the anchor, one comment each, and say how many.
     #[arg(long, conflicts_with = "expect")]
     pub all: bool,

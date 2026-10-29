@@ -90,6 +90,7 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
             context,
             from,
             to,
+            story,
         } => {
             let within = match (from.as_deref(), to.as_deref()) {
                 (Some(from), to) => Some((from, to)),
@@ -102,8 +103,9 @@ pub(crate) fn view(state: &State, spec: &ViewSpec) -> Result<View, StetError> {
                     .with_next("Give the first ref of the range too, such as p40..p60."));
                 }
             };
-            let (selected, found) =
-                find_scope(&cx.parts, state, spec.mode, needles, *context, within)?;
+            let (selected, found) = find_scope(
+                &cx.parts, state, spec.mode, needles, *context, within, *story,
+            )?;
             if *context == 0 {
                 cx.hits(&selected, &found)
             } else if found.needles.len() > 1 {

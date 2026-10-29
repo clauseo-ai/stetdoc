@@ -510,7 +510,7 @@ cross-package transplants:
 | `capabilities` | `capabilities`, or `json_schema` with `--schema` |
 | `skills get [name]` | the embedded skill (`stetdoc-cli/skill/*.md`) with tables from `capabilities` and the command tree |
 | `init` | no core call: the skill stub for the agents picked or detected, and with `--project` the `AGENTS.md` block, written by `fsio` |
-| `mcp` | each tool runs its command's function in process; the tools are walked from the command tree, each description carries the tool's rules (`mcp/describe.rs`), and the edit tool's typed `ops` are generated from `capabilities` (`mcp/ops.rs`) |
+| `mcp` | each tool runs its command's function in process and answers with the command's text, in the tool's words (`mcp/call.rs`); the tools are walked from the command tree, each description and property says the few words a model needs (`mcp/describe.rs`, kept at or under about 4,100 tokens for the whole list), and the edit tool's typed `ops` are generated from `capabilities` (`mcp/ops.rs`) |
 
 Every command on a directory takes an advisory lock on `.stet/lock` first, and finishes or
 undoes an interrupted write (`WorkingCopy::recover`) before anything else. The author comes from

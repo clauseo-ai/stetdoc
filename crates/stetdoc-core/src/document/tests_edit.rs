@@ -431,6 +431,16 @@ fn the_text_of_a_receipt_for_hundreds_of_operations_is_capped_and_says_what_it_l
         );
         // The JSON still has every operation.
         assert_eq!(r.operations.len(), 300);
+        // A smaller cap keeps the head and the check line, and says what it left out.
+        let short = r.text_within(2_000);
+        assert!(short.len() <= 2_000, "{} bytes: {short}", short.len());
+        assert_eq!(short.lines().next(), text.lines().next());
+        assert!(short.contains("\n0 replace p1: "), "{short}");
+        assert!(
+            short.contains("more operations, not listed here"),
+            "{short}"
+        );
+        assert!(short.contains("validated "), "{short}");
     }
     // A batch that fits lists every operation and shows every block, and says nothing was left out.
     let mut small = many(5);
@@ -448,6 +458,7 @@ fn the_text_of_a_receipt_for_hundreds_of_operations_is_capped_and_says_what_it_l
         "{}",
         r.text
     );
+    assert_eq!(r.text_within(2_000), r.text);
 }
 
 #[test]

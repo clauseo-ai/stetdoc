@@ -5,7 +5,7 @@ use super::build::testing::*;
 use super::tests_view::{doc, pages, refs_on, spec};
 use super::view::view;
 use crate::api::error::ErrorCode;
-use crate::api::view::{Budget, RevisionFilter, Scope, ViewSpec, WarningCode};
+use crate::api::view::{Budget, RevisionFilter, Scope, StoryName, ViewSpec, WarningCode};
 
 fn find(needle: &str, context: u8, from: Option<&str>, to: Option<&str>) -> Scope {
     Scope::Find {
@@ -13,6 +13,7 @@ fn find(needle: &str, context: u8, from: Option<&str>, to: Option<&str>) -> Scop
         context,
         from: from.map(str::to_string),
         to: to.map(str::to_string),
+        story: None,
     }
 }
 
@@ -224,4 +225,64 @@ fn a_full_ledger_shows_the_whole_text_of_each_change() {
         120,
     );
     assert!(paged.len() > 1, "{} pages", paged.len());
+}
+
+#[test]
+fn a_find_in_one_story_lists_only_the_matches_there() {
+    let f = Fixture::new(&format!(
+        "{}{}",
+        p("Acme Corp signs here."),
+        p("Nothing else.")
+    ))
+    .header(1, &p("Acme Corp confidential"))
+    .sect("<w:headerReference w:type=\"default\" r:id=\"rIdH1\"/>");
+    let state = f.state();
+    let in_story = |story: Option<StoryName>| {
+        view(
+            &state,
+            &spec(
+                Scope::Find {
+                    needles: vec!["Acme".into()],
+                    context: 0,
+                    from: None,
+                    to: None,
+                    story,
+                },
+                0,
+            ),
+        )
+        .unwrap()
+        .text
+    };
+    let everywhere = in_story(None);
+    assert!(
+        everywhere.contains("signs here") && everywhere.contains("confidential"),
+        "{everywhere}"
+    );
+    let headers = in_story(Some(StoryName::Headers));
+    assert!(
+        headers.contains("confidential") && !headers.contains("signs here"),
+        "{headers}"
+    );
+    let body = in_story(Some(StoryName::Body));
+    assert!(
+        body.contains("signs here") && !body.contains("confidential"),
+        "{body}"
+    );
+    // A range is in one story, so a range outside the story asked for is refused.
+    let outside = view(
+        &state,
+        &spec(
+            Scope::Find {
+                needles: vec!["Acme".into()],
+                context: 0,
+                from: Some("p1".into()),
+                to: None,
+                story: Some(StoryName::Headers),
+            },
+            0,
+        ),
+    )
+    .unwrap_err();
+    assert_eq!(outside.code(), ErrorCode::InvalidPayload);
 }

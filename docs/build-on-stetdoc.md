@@ -127,10 +127,12 @@ many edits to one document, `unpack` it once to a working copy and edit that, so
 
 ## MCP
 
-`stetdoc mcp` serves the commands as tools on stdin and stdout: `unpack`, `pack`, `view`, `inspect`, `edit`,
-`compare`, `check`, `lookup`, `skills_get` and `capabilities`. Each takes the command's flags as arguments and returns
-the JSON the command prints with `--json`. The `edit` tool takes its batch in `batch`. A failure is a result with
-`isError` set. A client sends one JSON-RPC message per line:
+`stetdoc mcp` serves the commands as tools on stdin and stdout: `unpack`, `pack`, `view`, `inspect`, `edit`, `replace`,
+`comment`, `compare`, `check`, `lookup` and `skills_get`. Each takes the command's flags as arguments and returns the
+text the command prints, with the JSON of `--json` in `structuredContent`. A receipt's text is cut to about 2 KB unless
+the call passes `detail: true`. The `edit` tool takes typed operations in `ops`, or a batch in `batch`. A failure is a
+result with `isError` set. The tools' descriptions are kept short, about 4,100 tokens for all of them, since a client
+sends them on every turn ([decision 0013](decisions/0013-mcp-for-fewer-turns.md)). A client sends one JSON-RPC message per line:
 
 ```
 $ stetdoc mcp --root ./documents

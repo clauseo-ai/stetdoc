@@ -16,7 +16,7 @@ $ stetdoc edit contract.docx --in-place --dry-run --author "Jane Doe" --ops batc
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 $ stetdoc unpack contract.docx
 wrote contract.stet: document.md

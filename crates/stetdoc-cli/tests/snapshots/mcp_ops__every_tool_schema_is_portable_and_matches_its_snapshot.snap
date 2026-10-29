@@ -4,20 +4,20 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
 ---
 [
   {
-    "description": "Write a working copy of a .docx: readable files beside a .stet/ folder that you never touch. Only to edit by changing readable files: view, replace, comment and edit work on a .docx directly. Unpack once per task and keep the folder; pack writes the .docx.",
+    "description": "Write a working copy of a .docx. Not needed to edit: replace, comment and edit change a .docx in one call. Unpack only to edit the files with your own tools, then pack.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "input": {
-          "description": "The .docx to unpack, or with --refresh a working copy to render again. A path.",
+          "description": "The .docx, or with refresh a working copy.",
           "type": "string"
         },
         "output": {
-          "description": "The working copy to write. Defaults to NAME.stet beside the .docx. A path.",
+          "description": "The working copy to write, instead of NAME.stet beside the .docx.",
           "type": "string"
         },
         "refresh": {
-          "description": "Render every readable file of an existing working copy again, discarding hand edits that were not packed.",
+          "description": "Render a working copy again, dropping unpacked hand edits.",
           "type": "boolean"
         }
       },
@@ -29,36 +29,40 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "unpack"
   },
   {
-    "description": "Compile the edits of a working copy into tracked changes, validate them and write the .docx. Writes NAME.edited.docx, or output, and keeps the working copy up to date. Pass done on the last pack of the task. On stale_target, unpack that file again rather than force.",
+    "description": "Write a working copy's edits into the .docx as tracked changes, validated. On stale_target, unpack again rather than force.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "author": {
-          "description": "The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default.",
+          "description": "The author, if not the server's.",
           "type": "string"
         },
         "date": {
-          "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
+          "description": "YYYY-MM-DDTHH:MM:SS.",
           "type": "string"
         },
+        "detail": {
+          "description": "The whole receipt, not a summary of about 2 KB.",
+          "type": "boolean"
+        },
         "dir": {
-          "description": "The working copy. A path.",
+          "description": "The working copy.",
           "type": "string"
         },
         "done": {
-          "description": "Remove the working copy once the .docx is written and validated. When the pack fails, the working copy stays. Files that stetdoc did not write stay too, and so does the folder that holds them.",
+          "description": "Remove the working copy once the .docx is written.",
           "type": "boolean"
         },
         "force": {
-          "description": "Overwrite the output even when it holds a document this working copy neither came from nor packed.",
+          "description": "Overwrite an output this working copy did not write.",
           "type": "boolean"
         },
         "no_track": {
-          "description": "Write the edits as plain changes, not tracked ones. Only for documents that are not under review.",
+          "description": "Untracked: only for a document not under review.",
           "type": "boolean"
         },
         "output": {
-          "description": "The .docx to write. Defaults to NAME.edited.docx beside the working copy. An existing file is overwritten only when it is the document the working copy came from or one it packed. A path.",
+          "description": "The .docx to write, instead of NAME.edited.docx.",
           "type": "string"
         }
       },
@@ -70,72 +74,67 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "pack"
   },
   {
-    "description": "Show a document or a working copy: an outline of a large document, or a range, a search, the revisions, the comments. Works on a .docx or a working copy. A page is about 3000 tokens: when the result has `next`, call again with after set to it. A long body shows its outline: then view a range or clause. find lists one short line per matching paragraph (ref, clause, the text around the match), the cheap way to locate text.",
+    "description": "Read a .docx: pages of about 3000 tokens (pass after: the page's next), the outline of a long body, a range, clauses, revisions, comments, or find: a line per matching paragraph with its ref, the cheap way to locate text. Use one of outline, range, clause, revisions, comments, story; find also goes with range, story or revisions.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "after": {
-          "description": "Continue after this cursor, from the last line of the previous page.",
+          "description": "The next of the previous page.",
           "type": "string"
         },
         "all": {
-          "description": "Everything on one page, however long: the same as --budget 0, and it wins over --budget.",
+          "description": "Everything on one page.",
           "type": "boolean"
         },
         "author": {
-          "description": "With --revisions or --comments, only those by this author (a name or the code the view shows).",
+          "description": "With revisions or comments: only this author.",
           "type": "string"
         },
         "budget": {
-          "default": 3000,
-          "description": "The size of a page, in estimated tokens (about 4 characters each). 0 shows everything.",
-          "minimum": 0,
+          "description": "The page size in tokens; 0 is everything.",
           "type": "integer"
         },
         "clause": {
-          "description": "The block a clause number resolves to, with the blocks under it, such as 12.3. Repeat it to view several clauses at once: their blocks in document order, each once. Cannot be used with `outline`, `range`, `find`, `revisions`, `comments`, `story`.",
+          "description": "The blocks of these clauses, such as 12.3.",
           "items": {
             "type": "string"
           },
           "type": "array"
         },
         "comments": {
-          "description": "The comment threads. Cannot be used with `outline`, `range`, `clause`, `find`, `revisions`, `story`.",
+          "description": "The comment threads.",
           "type": "boolean"
         },
         "context": {
-          "default": 0,
-          "description": "With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. With --revisions, show the blocks that hold the changes whole, as the redline shows them, with N blocks on each side, and not one line for each change. 0 is the one-line list.",
-          "minimum": 0,
+          "description": "With find or revisions: whole blocks, with N on each side.",
           "type": "integer"
         },
         "depth": {
-          "description": "With --outline, the deepest heading level shown.",
-          "minimum": 0,
+          "description": "With outline: the deepest level.",
           "type": "integer"
         },
         "find": {
-          "description": "The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line then says which it holds. With --range, only in that range; with --revisions, only the changes whose text contains one of them. Cannot be used with `outline`, `clause`, `comments`, `story`.",
+          "description": "Paragraphs holding any of these texts, one line each with its ref.",
           "items": {
             "type": "string"
           },
           "type": "array"
         },
         "full": {
-          "description": "With --revisions, the whole inserted and deleted text of each change (up to 1,000 characters), not 80.",
+          "description": "With revisions: the whole changed text.",
           "type": "boolean"
         },
         "input": {
-          "description": "A .docx or a working copy. A working copy shows its last export, not edits that were not packed. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "kind": {
-          "description": "With --revisions, only this kind: insert, delete, move or format.",
+          "description": "With revisions: insert, delete, move or format.",
           "type": "string"
         },
         "mode": {
           "default": "redline",
-          "description": "How tracked changes appear.",
+          "description": "How tracked changes show.",
           "enum": [
             "final",
             "original",
@@ -144,31 +143,31 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "string"
         },
         "no_notes": {
-          "description": "Leave out the margin notes and the appendix of the notes and comments the page cites.",
+          "description": "Leave out the margin notes.",
           "type": "boolean"
         },
         "open": {
-          "description": "With --comments, only open threads. Cannot be used with `resolved`.",
+          "description": "With comments: only open threads.",
           "type": "boolean"
         },
         "outline": {
-          "description": "The headings only. Cannot be used with `range`, `clause`, `find`, `revisions`, `comments`, `story`.",
+          "description": "The headings only.",
           "type": "boolean"
         },
         "range": {
-          "description": "The blocks from one ref to another, such as p40..p60, or from a ref to the end of its story. Cannot be used with `outline`, `clause`, `revisions`, `comments`, `story`.",
+          "description": "The blocks from one ref to another, such as p40..p60.",
           "type": "string"
         },
         "resolved": {
-          "description": "With --comments, only resolved threads. Cannot be used with `open`.",
+          "description": "With comments: only resolved threads.",
           "type": "boolean"
         },
         "revisions": {
-          "description": "The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters. Cannot be used with `outline`, `range`, `clause`, `comments`, `story`.",
+          "description": "The tracked changes, one line each.",
           "type": "boolean"
         },
         "story": {
-          "description": "One story whole. Cannot be used with `outline`, `range`, `clause`, `find`, `revisions`, `comments`.",
+          "description": "One story whole, or with find, only its matches.",
           "enum": [
             "body",
             "notes",
@@ -186,12 +185,12 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "view"
   },
   {
-    "description": "Show the effective formatting of a block and where each value comes from, or the styles, lists or sections.",
+    "description": "Show a block's effective formatting and where it comes from, or the styles, numbering or sections.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "input": {
-          "description": "A .docx or a working copy. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "target": {
@@ -208,65 +207,59 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "inspect"
   },
   {
-    "description": "Apply a batch of operations, read from stdin or --ops, to a working copy or a .docx. Give the operations in ops (typed objects, the default) or a batch in batch (block text or JSON), not both; all apply or none. Refs (p42, t3, r17, c3) come from a view. base is the base token of that view or of the last receipt: required for a working copy, optional for a .docx, whose refs are then read from the file as it is now. A .docx is written to NAME.edited.docx beside it, unless output names another file or in_place writes it back (only for a file the user asked to update or this task wrote); dry_run writes nothing. manual or manual_color marks the changes with strikethrough and underline, not tracked changes: only when the user asks for that. To change or comment on text, replace and comment are simpler.",
+    "description": "Change a .docx in one call: all its operations and comments together, applied all or none. A refused call changes nothing and says why, so never dry-run first. Refs (p42, t3, c3) come from view. A .docx needs no base, unpack, pack or check: it goes to NAME.edited.docx unless output or in_place says where, and it is validated as written. Op fields: skills_get name operations. For text changes or comments, replace and comment need no refs.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "author": {
-          "description": "The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default.",
+          "description": "The author, if not the server's.",
           "type": "string"
         },
         "base": {
-          "description": "With ops, the base token of the view or receipt the refs come from. Required for a working copy; for a .docx, leave it out to read the refs from the file as it is now.",
+          "description": "The base token of the view or receipt the refs come from: for a working copy, not a .docx.",
           "type": "string"
         },
         "batch": {
-          "description": "The batch as text instead of ops: block text or JSON, as `stetdoc edit` reads from stdin. Its first line is `base:` with the base token, which a .docx may leave out. skills_get with name operations has the syntax.",
+          "description": "The operations as block text or JSON, instead of ops.",
           "type": "string"
         },
         "date": {
-          "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
+          "description": "YYYY-MM-DDTHH:MM:SS.",
           "type": "string"
         },
+        "detail": {
+          "description": "The whole receipt, not a summary of about 2 KB.",
+          "type": "boolean"
+        },
         "dry_run": {
-          "description": "Validate and show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it.",
+          "description": "Write nothing. Rarely needed: a refusal writes nothing.",
           "type": "boolean"
         },
         "in_place": {
-          "description": "With a .docx, write the result back to it, atomically, and only if no one changed it during the edit. A link is written through, a hard link is broken, the permissions are kept and the owner is not; a read-only file is refused. A working copy needs no flag: an edit always writes it.",
+          "description": "Write back to the input: only a file the user asked to update or this task wrote.",
           "type": "boolean"
         },
         "input": {
-          "description": "A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "manual": {
-          "description": "Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not Track Changes. A deletion is struck text only, an insertion underlined text only.",
+          "description": "Strike and underline, not tracked: only if the user asks.",
           "type": "boolean"
         },
         "manual_color": {
-          "description": "As --manual, with deleted text also red and new text also blue.",
+          "description": "As manual, in red and blue.",
           "type": "boolean"
         },
         "no_track": {
-          "description": "Write plain changes, not tracked ones. Only for documents that are not under review.",
+          "description": "Untracked: only for a document not under review.",
           "type": "boolean"
         },
-        "offsets": {
-          "default": "scalar",
-          "description": "What offsets count: Unicode scalar values, or UTF-16 units as JavaScript does.",
-          "enum": [
-            "scalar",
-            "utf16"
-          ],
-          "type": "string"
-        },
         "ops": {
-          "description": "The operations, applied in order as one edit, all or none. Each is an object: `op` names the operation and the other properties are its fields. Not with `batch`.",
+          "description": "The operations, in order, all applied or none.",
           "items": {
             "properties": {
               "action": {
-                "description": "Whether to insert a row next to this one or delete it.",
                 "enum": [
                   "insert",
                   "delete"
@@ -274,11 +267,9 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
                 "type": "string"
               },
               "after": {
-                "description": "Cut just after this text, which must match once. A newline matches a line break.",
                 "type": "string"
               },
               "align": {
-                "description": "The alignment.",
                 "enum": [
                   "left",
                   "center",
@@ -288,128 +279,104 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
                 "type": "string"
               },
               "all": {
-                "description": "Every revision.",
                 "type": "boolean"
               },
               "at": {
-                "description": "The offset of the cut in the Final text.",
                 "type": "integer"
               },
               "author": {
-                "description": "Every revision of this author, by name or by the short code the view shows.",
                 "type": "string"
               },
               "before": {
-                "description": "Cut just before this text, which must match once. A newline matches a line break.",
                 "type": "string"
               },
               "bold": {
-                "description": "Bold on or off.",
                 "type": "boolean"
               },
               "cell": {
-                "description": "The cell of a row, from 1.",
                 "type": "integer"
               },
               "cells": {
-                "description": "For an insert, the text of each cell, in order. A newline inside one is a line break of the cell.",
                 "items": {
                   "type": "string"
                 },
                 "type": "array"
               },
               "char_style": {
-                "description": "The id or name of a character style.",
                 "type": "string"
               },
               "clear": {
-                "description": "The names of properties to remove, one for each entry. format: The names of formatting to remove, one for each entry.",
                 "items": {
                   "type": "string"
                 },
                 "type": "array"
               },
               "color": {
-                "description": "The text colour, `RRGGBB` or `auto`.",
                 "type": "string"
               },
               "comment": {
-                "description": "The comment. reply: Any comment of the thread, such as `c3`. resolve: Any comment of the thread.",
+                "description": "A comment of the thread, such as c3.",
                 "type": "string"
               },
               "end": {
-                "description": "One past the last character of the range, as an offset in the Final text. Not with `find`.",
                 "type": "integer"
               },
               "find": {
-                "description": "The text to find in the paragraph's Final text. It must match once, or `occurrence` says which match. A newline matches a line break of the paragraph.",
+                "description": "Text of the paragraph, matched once unless occurrence says which.",
                 "type": "string"
               },
               "first_line": {
-                "description": "The indent of the first line.",
                 "type": "string"
               },
               "font": {
-                "description": "The font name.",
                 "type": "string"
               },
               "hanging": {
-                "description": "The hanging indent.",
                 "type": "string"
               },
               "highlight": {
-                "description": "The highlight colour, by Word's name.",
                 "type": "string"
               },
               "ids": {
-                "description": "The revisions with these ids, the numbers after `#` in the view. A change is resolved whole.",
+                "description": "Revision numbers, as view revisions shows them after #.",
                 "items": {
                   "type": "integer"
                 },
                 "type": "array"
               },
               "indent_left": {
-                "description": "The left indent.",
                 "type": "string"
               },
               "indent_right": {
-                "description": "The right indent.",
                 "type": "string"
               },
               "initials": {
-                "description": "The initials shown with the comment. By default the first letters of the author's words.",
                 "type": "string"
               },
               "italic": {
-                "description": "Italic on or off.",
                 "type": "boolean"
               },
               "keep_lines": {
-                "description": "Keep the lines together.",
                 "type": "boolean"
               },
               "keep_next": {
-                "description": "Keep with the next paragraph.",
                 "type": "boolean"
               },
               "level": {
-                "description": "The new level, from 0.",
                 "type": "integer"
               },
               "line_spacing": {
-                "description": "The line spacing.",
                 "type": "string"
               },
               "note": {
-                "description": "The note, such as `fn3` or `en2`: its kind and its ordinal.",
                 "type": "string"
               },
               "occurrence": {
-                "description": "Which match of `find` to use, counted from 1.",
+                "description": "Which match of find, from 1.",
                 "type": "integer"
               },
               "op": {
-                "description": "The operation. Its fields (* required; | one of; range: find, occurrence, start, end): replace (ref*, with*, range): Replaces a text range, or the whole paragraph, with new text. insert (ref*, place*, paragraphs*): Inserts new paragraphs before or after a paragraph or a table, in order. delete (ref*, to, range): Deletes a whole paragraph or table, a text range, or the blocks from one paragraph through another. split (ref*, at|before|after): Cuts a paragraph in two, at an offset or before or after some text. merge (ref*, second): Joins a paragraph and the one after it. format (ref*, bold, italic, underline, strike, color, highlight, size, font, char_style, clear, range): Changes the formatting of the runs in a range, or of the whole paragraph. paragraph (ref*, align, indent_left, indent_right, first_line, hanging, space_before, space_after, line_spacing, keep_next, keep_lines, page_break_before, clear): Changes the formatting of a paragraph. style (ref*, style*): Sets the paragraph style. list (ref*, level|restart|remove): Changes the level of a list item, restarts its numbering at a number, or takes it out of the list. set (props*, target, ref, section, cell, clear, range): Sets any schema property of a paragraph, run, paragraph mark, section, table, row or cell. row (ref*, action*, place, cells): Inserts a table row, or deletes one. comment (ref*, text*, initials, range): Adds a comment anchored to a range, or to the whole paragraph. reply (comment*, text*): Replies to a comment thread. resolve (comment*, reopen): Resolves a comment thread, or reopens it. edit-comment (comment*, text*): Replaces the text of one of the author's own comments. delete-comment (comment*): Deletes one of the author's own comments, with its replies. delete-note (note*): Deletes a footnote or endnote, with its reference. accept (all|author|ids): Accepts revisions: applies them. reject (all|author|ids): Rejects revisions: undoes them.",
+                "description": "Fields (* required, | one of, range: find, occurrence, start, end): replace (ref*, with*, range): Replaces a text range. insert (ref*, place*, paragraphs*): Inserts new paragraphs before or after a paragraph or a table. delete (ref*, to, range): Deletes a whole paragraph or table. split (ref*, at|before|after): Cuts a paragraph in two. merge (ref*, second): Joins a paragraph and the one after it. format (ref*, bold, italic, underline, strike, color, highlight, size, font, char_style, clear, range): Changes the formatting of the runs in a range. paragraph (ref*, align, indent_left, indent_right, first_line, hanging, space_before, space_after, line_spacing, keep_next, keep_lines, page_break_before, clear): Changes the formatting of a paragraph. style (ref*, style*): Sets the paragraph style. list (ref*, level|restart|remove): Changes the level of a list item. set (props*, target, ref, section, cell, clear, range): Sets any schema property of a paragraph. row (ref*, action*, place, cells): Inserts a table row. comment (ref*, text*, initials, range): Adds a comment anchored to a range. reply (comment*, text*): Replies to a comment thread. resolve (comment*, reopen): Resolves a comment thread. edit-comment (comment*, text*): Replaces the text of one of the author's own comments. delete-comment (comment*): Deletes one of the author's own comments. delete-note (note*): Deletes a footnote or endnote. accept (all|author|ids): Accepts revisions. reject (all|author|ids): Rejects revisions.",
                 "enum": [
                   "replace",
                   "insert",
@@ -434,18 +401,15 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
                 "type": "string"
               },
               "page_break_before": {
-                "description": "Start a new page before the paragraph.",
                 "type": "boolean"
               },
               "paragraphs": {
-                "description": "The paragraphs, in order. Each is one paragraph of text, and a newline inside one is a line break of that paragraph.",
                 "items": {
                   "type": "string"
                 },
                 "type": "array"
               },
               "place": {
-                "description": "insert: Whether they go before or after it. row: For an insert, whether the new row goes before or after. After by default.",
                 "enum": [
                   "before",
                   "after"
@@ -453,22 +417,20 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
                 "type": "string"
               },
               "props": {
-                "description": "The properties to set.",
                 "items": {
                   "properties": {
                     "attrs": {
-                      "description": "Its other attributes, each `name=value`, such as `before=6pt`.",
+                      "description": "Other attributes, each name=value.",
                       "items": {
                         "type": "string"
                       },
                       "type": "array"
                     },
                     "name": {
-                      "description": "The element's local name, such as `jc` or `spacing`.",
+                      "description": "Element name, such as jc.",
                       "type": "string"
                     },
                     "val": {
-                      "description": "Its `w:val`, for the properties that have only that.",
                       "type": "string"
                     }
                   },
@@ -480,55 +442,43 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
                 "type": "array"
               },
               "ref": {
-                "description": "The paragraph. insert: The paragraph or table the new paragraphs go next to. delete: The paragraph, table or first paragraph of the range. merge: The paragraph that stays. set: The paragraph, table or row. A section is named by `section` instead. row: The row.",
+                "description": "The block: a paragraph (p4), a table (t1) or a row (r2).",
                 "type": "string"
               },
               "remove": {
-                "description": "Take the paragraph out of its list.",
                 "type": "boolean"
               },
               "reopen": {
-                "description": "Reopen the thread instead of resolving it.",
                 "type": "boolean"
               },
               "restart": {
-                "description": "Restart the numbering at this number.",
                 "type": "integer"
               },
               "second": {
-                "description": "The paragraph that is joined into it. By default the next paragraph that is not a deleted block.",
                 "type": "string"
               },
               "section": {
-                "description": "The number of the section, as `inspect sections` shows it, from 1.",
                 "type": "integer"
               },
               "size": {
-                "description": "The font size with a unit, such as `12pt`.",
                 "type": "string"
               },
               "space_after": {
-                "description": "The space after the paragraph.",
                 "type": "string"
               },
               "space_before": {
-                "description": "The space before the paragraph.",
                 "type": "string"
               },
               "start": {
-                "description": "The first character of the range, as an offset in the Final text. Not with `find`.",
                 "type": "integer"
               },
               "strike": {
-                "description": "Strike through on or off.",
                 "type": "boolean"
               },
               "style": {
-                "description": "The style, by id or by name as the view shows it. One line.",
                 "type": "string"
               },
               "target": {
-                "description": "What to set it on. By default from the kind of `ref`.",
                 "enum": [
                   "paragraph",
                   "run",
@@ -541,19 +491,17 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
                 "type": "string"
               },
               "text": {
-                "description": "comment: The text of the comment. A newline is a paragraph break of the comment, which has no line break inside a paragraph. reply: The text of the reply. A newline is a paragraph break. edit-comment: The new text. A newline is a paragraph break.",
+                "description": "The text of the comment or reply; a newline starts a paragraph.",
                 "type": "string"
               },
               "to": {
-                "description": "The last paragraph of a range that spans paragraphs. Then `start` is an offset in `ref` and `end` an offset in `to`.",
+                "description": "The last paragraph of a range of blocks.",
                 "type": "string"
               },
               "underline": {
-                "description": "The underline style: `single`, `double`, `none` and the others Word has.",
                 "type": "string"
               },
               "with": {
-                "description": "The new text. A newline is a line break inside the paragraph, and a tab is written as a tab.",
                 "type": "string"
               }
             },
@@ -566,16 +514,16 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "array"
         },
         "ops_file": {
-          "description": "The batch, as block text or JSON. Defaults to stdin; - is stdin too. A batch for a .docx may leave out its base, and then its refs are read against the file as it is now. A path.",
+          "description": "A file holding the batch, instead of ops.",
           "type": "string"
         },
         "output": {
-          "description": "With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. A path.",
+          "description": "The .docx to write, instead of NAME.edited.docx.",
           "type": "string"
         },
         "quotes": {
           "default": "match",
-          "description": "Follow the paragraph's quotes (match), or keep them as typed.",
+          "description": "Quotes.",
           "enum": [
             "match",
             "as-typed"
@@ -583,7 +531,7 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "string"
         },
         "scope": {
-          "description": "Refuse the whole batch if it changes anything outside these refs and ranges, such as p12,p40..p60.",
+          "description": "Refuse the batch if it changes anything outside these refs, such as p40..p60.",
           "items": {
             "type": "string"
           },
@@ -598,73 +546,74 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "edit"
   },
   {
-    "description": "Replace text in one step, as tracked changes or, with --manual, as manual markup: each OLD, found once in the document as it reads now, becomes NEW. Each old must be in the document exactly once, as the final view reads it, or nothing is written and the error lists each place: use a longer old, narrow with clause or range, or pass all or expect. An empty new deletes. A .docx is written to NAME.edited.docx beside it, unless output names another file or in_place writes it back (only for a file the user asked to update or this task wrote). manual or manual_color marks the changes with strikethrough and underline, not tracked changes: only when the user asks for that.",
+    "description": "Replace text in a .docx as tracked changes in one call, no refs needed: put every change in pairs. Each old must be in the document once, or nothing is written and the error lists each place: retry with all: true for every one, a range, or a longer old. Empty new deletes. Goes to NAME.edited.docx unless output or in_place; it is validated as written, so no check or dry run is needed.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "all": {
-          "description": "Replace every occurrence of each OLD, and say how many. Cannot be used with `expect`.",
+          "description": "Replace every occurrence of each old.",
           "type": "boolean"
         },
         "author": {
-          "description": "The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default.",
+          "description": "The author, if not the server's.",
           "type": "string"
         },
         "clause": {
-          "description": "Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or \"Article III\". Repeat it to look in several clauses. Cannot be used with `range`.",
+          "description": "Look only in these clauses, such as 11.1.",
           "items": {
             "type": "string"
           },
           "type": "array"
         },
         "date": {
-          "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
+          "description": "YYYY-MM-DDTHH:MM:SS.",
           "type": "string"
         },
+        "detail": {
+          "description": "The whole receipt, not a summary of about 2 KB.",
+          "type": "boolean"
+        },
         "dry_run": {
-          "description": "Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it.",
+          "description": "Write nothing. Rarely needed: a refusal writes nothing.",
           "type": "boolean"
         },
         "expect": {
-          "description": "Replace every occurrence of each OLD, and only if there are exactly N of each. Cannot be used with `all`.",
-          "minimum": 0,
+          "description": "Every occurrence, only if there are exactly N.",
           "type": "integer"
         },
         "ignore_case": {
-          "description": "Match letters whatever their case, so \"net 30\" also finds \"Net 30\". Without it the case must be the document's.",
+          "description": "Match whatever the case.",
           "type": "boolean"
         },
         "in_place": {
-          "description": "With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it.",
+          "description": "Write back to the input: only a file the user asked to update or this task wrote.",
           "type": "boolean"
         },
         "input": {
-          "description": "A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "manual": {
-          "description": "Mark the changes by hand, not as tracked changes: old text stays, struck through, and new text is underlined, as plain formatting with no revision. For a reader who asked for manual markup (strikethrough and underline) and not Track Changes. A deletion is struck text only, an insertion underlined text only.",
+          "description": "Strike and underline, not tracked: only if the user asks.",
           "type": "boolean"
         },
         "manual_color": {
-          "description": "As --manual, with deleted text also red and new text also blue.",
+          "description": "As manual, in red and blue.",
           "type": "boolean"
         },
         "output": {
-          "description": "With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. A path.",
+          "description": "The .docx to write, instead of NAME.edited.docx.",
           "type": "string"
         },
         "pairs": {
-          "description": "The replacements, applied together as tracked changes or not at all.",
+          "description": "Each old text and the new text it becomes.",
           "items": {
             "additionalProperties": false,
             "properties": {
               "new": {
-                "description": "The text it becomes. Empty deletes it.",
                 "type": "string"
               },
               "old": {
-                "description": "The text to replace, as the document reads now. It must be there once, unless all or expect says otherwise.",
                 "type": "string"
               }
             },
@@ -679,7 +628,7 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
         },
         "quotes": {
           "default": "match",
-          "description": "Follow the paragraph's quotes (match), or keep them as typed.",
+          "description": "Quotes.",
           "enum": [
             "match",
             "as-typed"
@@ -687,7 +636,7 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "string"
         },
         "range": {
-          "description": "Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. Cannot be used with `clause`.",
+          "description": "Look only in these blocks, such as p40..p60.",
           "type": "string"
         }
       },
@@ -700,61 +649,84 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "replace"
   },
   {
-    "description": "Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now. anchor must be in the document exactly once, as for replace: use a longer one, or narrow with clause or range. A .docx is written to NAME.edited.docx beside it, unless output names another file or in_place writes it back. To reply to or resolve a comment, use edit.",
+    "description": "Comment on text in a .docx in one call, no refs needed: anchor and text for one, comments for several, all or none. Each anchor must be there once, as for replace (all: true for every one). Goes to NAME.edited.docx unless output or in_place. To reply or resolve, use edit.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "all": {
-          "description": "Comment on every occurrence of the anchor, one comment each, and say how many. Cannot be used with `expect`.",
+          "description": "Comment on every occurrence of each anchor.",
           "type": "boolean"
         },
         "anchor": {
-          "description": "The text to anchor the comment to, matched as replace matches OLD. It must be there once (see --all and --expect).",
+          "description": "The text to comment on.",
           "type": "string"
         },
         "author": {
-          "description": "The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default.",
+          "description": "The author, if not the server's.",
           "type": "string"
         },
         "clause": {
-          "description": "Look only in this clause and the blocks under it, as view --clause names it, such as 11.1 or \"Article III\". Repeat it to look in several clauses. Cannot be used with `range`.",
+          "description": "Look only in these clauses, such as 11.1.",
           "items": {
             "type": "string"
           },
           "type": "array"
         },
+        "comments": {
+          "description": "Several comments, each an anchor and a text.",
+          "items": {
+            "additionalProperties": false,
+            "properties": {
+              "anchor": {
+                "type": "string"
+              },
+              "text": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "anchor",
+              "text"
+            ],
+            "type": "object"
+          },
+          "type": "array"
+        },
         "date": {
-          "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
+          "description": "YYYY-MM-DDTHH:MM:SS.",
           "type": "string"
         },
+        "detail": {
+          "description": "The whole receipt, not a summary of about 2 KB.",
+          "type": "boolean"
+        },
         "dry_run": {
-          "description": "Show the receipt, and write nothing. A .docx needs neither -o nor --in-place for it.",
+          "description": "Write nothing. Rarely needed: a refusal writes nothing.",
           "type": "boolean"
         },
         "expect": {
-          "description": "Comment on every occurrence of the anchor, and only if there are exactly N. Cannot be used with `all`.",
-          "minimum": 0,
+          "description": "Every occurrence, only if there are exactly N.",
           "type": "integer"
         },
         "ignore_case": {
-          "description": "Match letters whatever their case, so \"net 30\" also finds \"Net 30\". Without it the case must be the document's.",
+          "description": "Match whatever the case.",
           "type": "boolean"
         },
         "in_place": {
-          "description": "With a .docx, write the result back to it, atomically, and only if no one changed it meanwhile. A working copy needs no flag: the edit always writes it.",
+          "description": "Write back to the input: only a file the user asked to update or this task wrote.",
           "type": "boolean"
         },
         "input": {
-          "description": "A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "output": {
-          "description": "With a .docx, the .docx to write, instead of NAME.edited.docx beside the input. It must not be the input: --in-place writes back to it. A path.",
+          "description": "The .docx to write, instead of NAME.edited.docx.",
           "type": "string"
         },
         "quotes": {
           "default": "match",
-          "description": "Follow the paragraph's quotes (match), or keep them as typed.",
+          "description": "Quotes.",
           "enum": [
             "match",
             "as-typed"
@@ -762,46 +734,44 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
           "type": "string"
         },
         "range": {
-          "description": "Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. Cannot be used with `clause`.",
+          "description": "Look only in these blocks, such as p40..p60.",
           "type": "string"
         },
         "text": {
-          "description": "The comment. A newline is a paragraph break of the comment.",
+          "description": "The comment.",
           "type": "string"
         }
       },
       "required": [
-        "input",
-        "anchor",
-        "text"
+        "input"
       ],
       "type": "object"
     },
     "name": "comment"
   },
   {
-    "description": "Write a redline of the differences between two documents as tracked changes.",
+    "description": "Write a redline of two documents as tracked changes.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "author": {
-          "description": "The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default.",
+          "description": "The author, if not the server's.",
           "type": "string"
         },
         "date": {
-          "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
+          "description": "YYYY-MM-DDTHH:MM:SS.",
           "type": "string"
         },
         "original": {
-          "description": "The original document. A path.",
+          "description": "The original document.",
           "type": "string"
         },
         "output": {
-          "description": "The redline to write. A path.",
+          "description": "The redline to write.",
           "type": "string"
         },
         "revised": {
-          "description": "The revised document. A path.",
+          "description": "The revised document.",
           "type": "string"
         }
       },
@@ -815,28 +785,28 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "compare"
   },
   {
-    "description": "Validate, and show every revision that pack would write, by author. Run it on a working copy before pack to see what pack will write.",
+    "description": "Only for a .docx stetdoc did not write, or hand edits of a working copy: stetdoc validates what it writes.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "all": {
-          "description": "List every finding the report keeps (the first 200), not only the first 20.",
+          "description": "List up to 200 findings, not 20.",
           "type": "boolean"
         },
         "author": {
-          "description": "The author of the revisions, as Word shows it. Defaults to STETDOC_AUTHOR, then the name saved with stetdoc init. There is no other default.",
+          "description": "The author, if not the server's.",
           "type": "string"
         },
         "date": {
-          "description": "The date of the revisions, YYYY-MM-DDTHH:MM:SS. Defaults to STETDOC_DATE, then the local clock.",
+          "description": "YYYY-MM-DDTHH:MM:SS.",
           "type": "string"
         },
         "input": {
-          "description": "A working copy or a .docx. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "strict": {
-          "description": "Fail (exit 5) on any violation, including ones already in the input.",
+          "description": "Fail on any violation, old ones too.",
           "type": "boolean"
         }
       },
@@ -853,7 +823,7 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
       "additionalProperties": false,
       "properties": {
         "input": {
-          "description": "A .docx or a working copy. A path.",
+          "description": "The .docx, or a working copy.",
           "type": "string"
         },
         "query": {
@@ -870,16 +840,16 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
     "name": "lookup"
   },
   {
-    "description": "Print a skill: core (the default), operations or errors. core has the whole workflow and its rules, operations every field of each operation, errors what each error code means and what to do.",
+    "description": "The guide: core (workflow, rules), operations (op fields), errors (what each code means).",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {
         "full": {
-          "description": "Print every part of the skill.",
+          "description": "Every part of the skill.",
           "type": "boolean"
         },
         "name": {
-          "description": "The skill's name.",
+          "description": "core (the default), operations or errors.",
           "type": "string"
         }
       },
@@ -887,20 +857,5 @@ expression: "serde_json::to_string_pretty(&tools).unwrap()"
       "type": "object"
     },
     "name": "skills_get"
-  },
-  {
-    "description": "List the operations, whether each is tracked, the error codes and the format version.",
-    "inputSchema": {
-      "additionalProperties": false,
-      "properties": {
-        "schema": {
-          "description": "Print the JSON Schema of every public type instead.",
-          "type": "boolean"
-        }
-      },
-      "required": [],
-      "type": "object"
-    },
-    "name": "capabilities"
   }
 ]

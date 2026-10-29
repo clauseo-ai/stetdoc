@@ -1,5 +1,6 @@
-//! `stetdoc comment`: a comment anchored to a text, found once (or at every place, with --all or --expect) in the document as it reads now, in one edit built from
-//! `Document::occurrences` and applied with `edit(Edit::ops)` as a `comment` operation on the paragraph's ref and offsets.
+//! `stetdoc comment`: comments anchored to texts, each found once (or at every place, with --all or --expect) in the
+//! document as it reads now, in one edit built from `Document::occurrences` and applied with `edit(Edit::ops)` as
+//! `comment` operations on the paragraphs' refs and offsets, all or nothing.
 
 use super::apply::{Made, Where, apply};
 use super::find::{self, Wanted};
@@ -10,17 +11,42 @@ use stetdoc_core::{Batch, CommentOp, Edit, Op};
 
 /// Runs `comment`.
 pub fn run(args: &CommentArgs) -> Result<Outcome, Failure> {
-    if args.text.trim().is_empty() {
+    if !args.pairs.len().is_multiple_of(2) {
         return Err(Failure::usage(
-            "The comment is empty.",
-            "Give the comment's text after the anchor.",
+            format!(
+                "comment takes ANCHOR TEXT pairs, and {} texts were given, so the last anchor has no comment.",
+                args.pairs.len()
+            ),
+            "Give the comment's text after each anchor.",
         ));
     }
-    if args.anchor.is_empty() {
-        return Err(Failure::usage(
-            "The anchor is empty, and comment needs text to anchor to.",
-            "Give the text to comment on as the document reads.",
-        ));
+    let pairs: Vec<(&String, &String)> = args
+        .pairs
+        .chunks(2)
+        .filter_map(|p| match p {
+            [anchor, text] => Some((anchor, text)),
+            _ => None,
+        })
+        .collect();
+    let several = pairs.len() > 1;
+    for (i, (anchor, text)) in pairs.iter().enumerate() {
+        let which = if several {
+            format!(" of pair {}", i + 1)
+        } else {
+            String::new()
+        };
+        if text.trim().is_empty() {
+            return Err(Failure::usage(
+                format!("The comment{which} is empty."),
+                "Give the comment's text after the anchor.",
+            ));
+        }
+        if anchor.is_empty() {
+            return Err(Failure::usage(
+                format!("The anchor{which} is empty, and comment needs text to anchor to."),
+                "Give the text to comment on as the document reads.",
+            ));
+        }
     }
     let at = Where {
         input: &args.input,
@@ -35,56 +61,68 @@ pub fn run(args: &CommentArgs) -> Result<Outcome, Failure> {
     };
     apply(&at, &args.find.stamp, |doc, stamp| {
         let scope = find::scope(&args.find)?;
-        let found = find::find(doc, &args.anchor, &scope, &args.find)?;
-        if let Some((code, mut text)) = find::problem(&found, wanted, &scope, "") {
-            let hint = find::case_hint(doc, &found, &scope, &args.find, "")?;
-            if let Some(hint) = &hint {
-                text.push('\n');
-                text.push_str(hint);
+        let mut problems = Vec::new();
+        let mut case = false;
+        let mut found = Vec::new();
+        for (i, (anchor, _)) in pairs.iter().enumerate() {
+            let hits = find::find(doc, anchor, &scope, &args.find)?;
+            let label = if several {
+                format!("pair {}: ", i + 1)
+            } else {
+                String::new()
+            };
+            if let Some((code, mut text)) = find::problem(&hits, wanted, &scope, &label) {
+                if let Some(hint) = find::case_hint(doc, &hits, &scope, &args.find, &label)? {
+                    case = true;
+                    text.push('\n');
+                    text.push_str(&hint);
+                }
+                problems.push((code, text));
             }
+            found.push(hits);
+        }
+        if !problems.is_empty() {
+            let example = find::example(&found);
             return Err(find::refuse(
-                vec![(code, text)],
+                problems,
                 "the anchor",
                 "comment on every one",
-                hint.is_some(),
+                case,
+                example.as_deref(),
             ));
         }
-        if found.hits.is_empty() {
-            return Err(find::refuse(
-                Vec::new(),
-                "the anchor",
-                "comment on every one",
-                false,
-            ));
-        }
-        // One comment for each place, in document order. A comment adds no text, so no place moves another's offsets.
-        let ops: Vec<Op> = found
-            .hits
-            .iter()
-            .map(|hit| {
+        // One comment for each place of each anchor. A comment adds no text, so no place moves another's offsets.
+        let mut ops: Vec<Op> = Vec::new();
+        for ((_, text), hits) in pairs.iter().zip(&found) {
+            ops.extend(hits.hits.iter().map(|hit| {
                 Op::Comment(CommentOp {
                     r#ref: hit.block.clone(),
-                    text: args.text.clone(),
+                    text: (*text).clone(),
                     initials: None,
                     find: None,
                     occurrence: None,
                     start: Some(hit.start),
                     end: Some(hit.end),
                 })
-            })
-            .collect();
+            }));
+        }
         let edit = find::shape(Edit::ops(Batch::new(doc.base(), ops), stamp), &args.find);
+        let head: Vec<String> = pairs
+            .iter()
+            .zip(&found)
+            .map(|((anchor, _), hits)| format!("comment on {anchor:?}: {}", find::summary(hits)))
+            .collect();
+        let json_found = pairs
+            .iter()
+            .zip(&found)
+            .map(|((anchor, _), hits)| {
+                Ok(json!({ "anchor": anchor, "count": hits.hits.len(), "hits": find::hits_json(hits)? }))
+            })
+            .collect::<Result<Vec<_>, Failure>>()?;
         Ok(Made {
             edit,
-            head: Some(format!(
-                "comment on {:?}: {}",
-                args.anchor,
-                find::summary(&found)
-            )),
-            extra: vec![(
-                "found",
-                json!([{ "anchor": args.anchor, "count": found.hits.len(), "hits": find::hits_json(&found)? }]),
-            )],
+            head: Some(head.join("\n")),
+            extra: vec![("found", serde_json::Value::Array(json_found))],
         })
     })
 }

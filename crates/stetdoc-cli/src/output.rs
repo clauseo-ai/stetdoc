@@ -3,7 +3,25 @@
 
 use serde::Serialize;
 use serde_json::Value;
-use stetdoc_core::{ErrorCode, StetError};
+use std::sync::atomic::{AtomicUsize, Ordering};
+use stetdoc_core::{ErrorCode, Receipt, StetError};
+
+/// The bytes a receipt's text is cut to, or 0 for the text as the core composed it. The CLI never sets it; the MCP
+/// server sets it for each call, since its reader pays for every byte on every turn after.
+static RECEIPT_CAP: AtomicUsize = AtomicUsize::new(0);
+
+/// Cuts the text of every receipt that follows to about `cap` bytes, or with `None` leaves it as the core composed it.
+pub fn set_receipt_cap(cap: Option<usize>) {
+    RECEIPT_CAP.store(cap.unwrap_or(0), Ordering::Relaxed);
+}
+
+/// The text of a receipt, cut as `set_receipt_cap` said.
+pub fn receipt_text(receipt: &Receipt) -> String {
+    match RECEIPT_CAP.load(Ordering::Relaxed) {
+        0 => receipt.text.clone(),
+        cap => receipt.text_within(cap),
+    }
+}
 
 /// What a command that ran prints.
 pub struct Outcome {

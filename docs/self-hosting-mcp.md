@@ -12,8 +12,10 @@ cloud app ──HTTPS──▶ reverse proxy (TLS, auth) ──HTTP──▶ bri
 ## The pieces
 
 **The server.** `stetdoc mcp --root DIR` confines every path argument of every tool call to `DIR`, and resolves relative
-paths against it. Its tools are the commands: `unpack`, `pack`, `view`, `inspect`, `edit`, `compare`, `check`,
-`lookup`, `skills_get` and `capabilities`. Each returns the JSON that the command prints with `--json`.
+paths against it. Its tools are the commands: `unpack`, `pack`, `view`, `inspect`, `edit`, `replace`, `comment`,
+`compare`, `check`, `lookup` and `skills_get`. Each returns the text the command prints, and the JSON of `--json` in
+`structuredContent`. A relative path that is not there is looked for in the folders of the documents the session has
+named, and stays confined to `DIR`.
 
 **The bridge.** [supergateway](https://github.com/supercorp-ai/supergateway) runs a stdio server and serves it over
 streamable HTTP. It is maintained, and its 4.1.0 release was the current one on 2026-10-11:

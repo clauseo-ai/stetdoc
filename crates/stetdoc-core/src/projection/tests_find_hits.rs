@@ -13,6 +13,7 @@ fn find(needles: &[&str], context: u8) -> Scope {
         context,
         from: None,
         to: None,
+        story: None,
     }
 }
 
@@ -224,6 +225,7 @@ fn a_compact_find_within_a_range_lists_only_the_hits_inside_it() {
                 context: 0,
                 from: Some("p12".into()),
                 to: Some("p31".into()),
+                story: None,
             },
             0,
         ),

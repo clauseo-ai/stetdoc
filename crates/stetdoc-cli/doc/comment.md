@@ -10,7 +10,7 @@ comment on "thirty days": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base a2a6bbc2e3a46398:0:a2a6bbc2e3a46398
 0 comment p4: c0 added
 p4 Payment is due within {c0}thirty days{/c0}.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote commented.docx
 
 $ stetdoc comment contract.docx "Supplier" "Which one?" -o commented.docx --author "Jane Doe"
@@ -18,7 +18,7 @@ $ stetdoc comment contract.docx "Supplier" "Which one?" -o commented.docx --auth
 error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
   p1 The [Supplier] shall indemnify the Customer,…
   p2 …sses” means any loss, and the [Supplier]’s liability.
-next: Nothing was applied. Make the anchor longer so it matches once, limit the search with --range or --clause, or pass --all to comment on every one.
+next: Nothing was applied, so retry at once, with no dry run: to comment on every one, pass --all; to pick one place, pass --range with its ref, such as --range p1..p1, or make the anchor longer so it matches once.
 
 $ stetdoc comment contract.docx "Supplier" "Which one?" --all -o commented.docx --author "Jane Doe"
 comment on "Supplier": 2 times, in 2 blocks: p1, p2
@@ -27,7 +27,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base cfe4d86f3f8
 1 comment p2: c1 added
 p1 The {c0}Supplier{/c0} shall indemnify the Customer, and shall pay on demand.
 p2 “Losses” means any loss, and the {c1}Supplier{/c1}’s liability.
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote commented.docx
 
 ```

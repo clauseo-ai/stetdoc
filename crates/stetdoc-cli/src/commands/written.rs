@@ -32,22 +32,17 @@ pub fn retell(
     let reopened = Document::open(bytes.to_vec(), &OpenOptions::default())?;
     let kept = same_refs(session, &reopened)?;
     let old = format!(". base {}", receipt.base);
+    let told = crate::output::receipt_text(receipt);
     let mut json = to_json(receipt)?;
     let (head, next) = if kept {
         let base = reopened.base();
         json["base"] = serde_json::Value::String(base.clone());
-        (
-            receipt.text.replacen(&old, &format!(". base {base}"), 1),
-            hint,
-        )
+        (told.replacen(&old, &format!(". base {base}"), 1), hint)
     } else {
         json["base"] = serde_json::Value::Null;
         let why = "the written file numbers its blocks again, so take the next base from a view";
         let view = hint.unwrap_or_else(|| format!("stetdoc view {}", path.display()));
-        (
-            receipt.text.replacen(&old, ".", 1),
-            Some(format!("{view} ({why})")),
-        )
+        (told.replacen(&old, ".", 1), Some(format!("{view} ({why})")))
     };
     json["text"] = serde_json::Value::String(head.clone());
     let mut text = format!("{}\nwrote {}\n", head.trim_end(), path.display());

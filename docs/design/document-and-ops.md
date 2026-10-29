@@ -713,7 +713,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T10:00:00Z. base 3f9a0c11d2b
 p42 The Supplier {--shall--}{++must++} indemnify the Customer. (the line as the file holds it)
 p57 ...
 warning quotes_curled p42: 2 straight quotes were curled to match the paragraph.
-checked 3 units. 2 problems were already in the input, and no new one was added: `stetdoc check --all` lists them.
+validated 3 units: no new problems, and this file needs no separate check. 2 problems were already in the input: `stetdoc check --all` lists them.
 ```
 
 A dry run says `dry run: nothing was applied. A new block has no ref until the edit is applied`, shows each new block as new with its anchor, and shows the rest as the real edit

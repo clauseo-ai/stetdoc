@@ -15,7 +15,9 @@ with an author and a date, so a reviewer sees exactly what you did.
    changes and comments.
 3. **Edit.** Change text with `stetdoc replace` and comment with `stetdoc comment` (below). For anything else, change the
    readable files or send a batch of operations.
-4. **Check.** `stetdoc check contract.stet` shows the redline that pack will write, by author, and validates it.
+4. **Check, for hand edits only.** `stetdoc check contract.stet` shows the redline that pack will write from edited
+   readable files, by author, and validates it. `replace`, `comment`, `edit` and `pack` validate what they write, and
+   their receipt's `validated` line says so: do not run check after them, nor on a document you only read.
 5. **Pack.** `stetdoc pack contract.stet` writes `contract.edited.docx`, or the file `-o` names, and brings the working
    copy up to date, so you can carry on editing. On the last pack of the task, add `--done` (with MCP, `done: true`): it
    removes the working copy once the .docx is written and validated, and keeps it when the pack fails.
@@ -97,9 +99,9 @@ The first writes `contract.edited.docx`, and the second adds the comment to that
   tracked deletion. Pairs whose texts overlap are refused. Put `--` before the pairs when a text starts with `-`.
 - **Matching.** OLD (and a comment's ANCHOR) is matched in the text as the final view reads it, across runs and
   formatting, case-sensitive, with curly and straight quotes the same. It must be there exactly once. If it is not there
-  (`not_found`) or is there more than once (`ambiguous_match`), nothing is written and the error lists each place (ref,
+  (`not_found`) or is there more than once (`ambiguous_match`), nothing is written and the refusal lists each place (ref,
   clause or `(under "HEADING")`, and the text around it): use a longer OLD, or narrow the search with `--clause 11.1` or
-  `--range p40..p60`. `--ignore-case` matches whatever the case. A `not_found` error lists the places that match in
+  `--range p40..p60`. `--ignore-case` matches whatever the case. A `not_found` refusal lists the places that match in
   another case: rerun with `--ignore-case` if those are the ones you meant.
 - **Finding OLD first.** `stetdoc view contract.docx --find 'net 30' --find 'governing law'` prints one line per matching
   paragraph, with its ref, its clause and the text around the match, which you can copy as OLD. A hit in a table cell ends
@@ -112,7 +114,11 @@ The first writes `contract.edited.docx`, and the second adds the comment to that
   refused there. `--dry-run` shows the receipt and writes nothing. `--author NAME` names the author, as for every edit.
 - **Quoting.** Put each text in single quotes. For a text with an apostrophe, use double quotes when it has no `$`,
   backtick or backslash, or a batch.
-- With MCP, the `replace` tool takes `pairs: [{old, new}]` and the `comment` tool `anchor` and `text`.
+- **Several comments.** `stetdoc comment FILE ANCHOR TEXT ANCHOR TEXT ...` adds them in one edit, all or none.
+- With MCP, edit the .docx itself, one call per document with every change in it: the `replace` tool takes
+  `pairs: [{old, new}]`, the `comment` tool `anchor` and `text`, or `comments: [{anchor, text}]` for several. No `unpack`,
+  `pack` or `check` is needed, and every write is validated, as its receipt says. A receipt is cut to about 2 KB; `detail: true`
+  returns all of it.
 
 ## Manual markup, without tracked changes
 
@@ -140,7 +146,7 @@ formatting, or for text that is long or holds many quotes.
 ## Receipts and problems already in the document
 
 A receipt lists the problems your change added, if any. Problems that were already in the input are summed up in one line
-(`66 problems were already in the input, and no new one was added`). They are not yours to fix, so mention them only if
+(`no new problem, ... 66 problems were already in the input`). They are not yours to fix, so mention them only if
 the user asks. `stetdoc check FILE --all` (with MCP, `all: true`) lists them.
 
 When the document holds tracked changes you did not make, receipts and views say so in a line such as
@@ -196,7 +202,8 @@ EOF
   (`scope_violation`) instead of landing.
 - **Quotes.** Type straight quotes. stetdoc follows the paragraph's own convention (curly or straight) and says so in the
   receipt. `--quotes as-typed` keeps exactly what you typed.
-- `--dry-run` shows the receipt and changes nothing. A batch applies completely or not at all.
+- `--dry-run` shows the receipt and changes nothing. A batch applies completely or not at all, and a refused one
+  changes nothing and says why, so a dry run before it only doubles the work.
 - `stetdoc skills get operations` lists every operation with its fields and an example.
 
 {{ops_summary}}
@@ -223,8 +230,8 @@ you accepted and which you rejected.
   The one exception is a request for manual markup that the user pointed you to (see "Manual markup").
 - Never edit `.stet/`, and never unzip a .docx or read or edit its XML. If stetdoc fails, follow its `next:` line or tell
   the user; do not work around it with other tools, and do not offer to.
-- Read an error's `next:` line and do what it says. Exit 7 (`internal`) is a bug in stetdoc: report it, do not work around it.
-- `--json` on any command prints data for programs, and errors as `{"error": {"code", "message", "next"}}`.
+- Read a refusal's `next:` line and do what it says. Exit 7 (`internal`) is a bug in stetdoc: report it, do not work around it.
+- `--json` on any command prints data for programs, and a refusal as one object with its code, message and next step.
 
 ## With MCP tools
 
@@ -244,6 +251,7 @@ description carries its rules, so read it. The same defaults apply.
 
 {{commands}}
 
-## Errors
+## When a command refuses
 
-{{errors_table}}
+Every refusal has a stable code, a message and a `next:` line: do what `next:` says. `stetdoc skills get errors` (with
+MCP, `skills_get` with `name: errors`) lists every code and what to do.

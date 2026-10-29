@@ -17,7 +17,7 @@ $ stetdoc edit contract.stet --author "Jane Doe" --ops batch.txt
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 $ stetdoc check contract.stet
 No pending edits.
@@ -28,7 +28,7 @@ Revisions already in the document:
 Validation: no violations in 1 part.
 
 $ stetdoc pack contract.stet --author "Jane Doe"
-No hand edits were pending, so the document is written as of its last edit.
+No hand edits were pending, so the document is written as of its last edit, which was validated.
 wrote contract.edited.docx
 working copy contract.stet is at base 5737b772923cf8d3:1:6a07baa2d488eeb5. It stays until you delete the folder, or pack again with --done to remove it.
 

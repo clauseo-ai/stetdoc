@@ -79,7 +79,14 @@ fn make(args: &ReplaceArgs, doc: &Document, stamp: Stamp) -> Result<Made, Failur
         found.push((i, (*old).clone(), (*new).clone(), hits));
     }
     if !problems.is_empty() {
-        return Err(find::refuse(problems, "OLD", "change every one", case));
+        let example = find::example(found.iter().map(|(.., hits)| hits));
+        return Err(find::refuse(
+            problems,
+            "OLD",
+            "change every one",
+            case,
+            example.as_deref(),
+        ));
     }
     // Every place, grouped by paragraph in the order the paragraphs were first found, each group from its end to its start.
     let mut places: Vec<(String, u32, u32, usize)> = Vec::new();

@@ -3,9 +3,13 @@
 //! JSON-RPC 2.0, one message per line, handled one at a time with `serde_json`. The server speaks the current revision,
 //! 2026-07-28, in which every request carries its version in `_meta` and `server/discover` describes the server, and the
 //! earlier revisions that open with an `initialize` handshake, so clients of either era work. Each tool call runs the
-//! command's own function in this process and answers with the JSON the CLI prints with `--json`; a failure is a result
-//! with `isError` and the failure's message and next step. Stdout carries protocol messages only: logs go to stderr.
+//! command's own function in this process and answers with the text the CLI prints, in the tool's words (`call.rs`),
+//! and with the JSON of `--json` in `structuredContent`; a failure is a result with `isError` and the failure's message
+//! and next step. A receipt's text is cut to about 2 KB unless the call passes `detail`. The server remembers the folders
+//! of the documents a session names, where a relative name that is not there as given is looked for. Stdout carries
+//! protocol messages only: logs go to stderr.
 
+mod call;
 mod confine;
 mod describe;
 mod ops;
@@ -16,7 +20,9 @@ use crate::output::{self, Failure};
 use clap::Parser;
 use confine::Root;
 use serde_json::{Map, Value, json};
+use std::cell::RefCell;
 use std::io::{BufRead, Read, Write};
+use std::path::{Path, PathBuf};
 use stetdoc_core::{ErrorCode, StetError};
 use tools::Tool;
 
@@ -33,10 +39,11 @@ const MAX_MESSAGE: u64 = 64 << 20;
 const TTL_MS: u64 = 3_600_000;
 
 const INSTRUCTIONS: &str = "stetdoc reads and edits Word documents (.docx) and writes every edit as a real tracked change. \
-Before you work on a .docx, call skills_get and follow what it returns. The tools take the arguments of the stetdoc \
-commands; the edit tool takes typed operations in `ops` or a text batch in `batch`, and the replace and comment tools \
-change or comment on text found once in the document in one call. Never read or edit a .docx any other way (unzip, the XML, python-docx), \
-and if these tools stop working, tell the user rather than work around them.";
+Edit a .docx in one call on the .docx itself: replace for text changes, comment for comments, edit for anything else, \
+each taking every change of the document at once, all applied or none. No unpack, pack, check or dry run is needed: a \
+refused call writes nothing and says how to retry, and every write is validated as it is written. For anything beyond a simple \
+edit, call skills_get first and follow what it returns. Never read or edit a .docx any other way (unzip, the XML, \
+python-docx), and if these tools stop working, tell the user rather than work around them.";
 
 /// Runs the server until stdin closes, and returns the exit status.
 pub fn serve(args: &McpArgs) -> u8 {
@@ -50,6 +57,7 @@ pub fn serve(args: &McpArgs) -> u8 {
         root,
         author: args.author.clone(),
         tools: tools::tools(),
+        seen: RefCell::new(Vec::new()),
     };
     eprintln!(
         "stetdoc mcp {}: {} tools on stdin and stdout{}",
@@ -104,7 +112,13 @@ struct Server {
     root: Option<Root>,
     author: Option<String>,
     tools: Vec<Tool>,
+    /// The folders of the documents and working copies the calls so far named or wrote, most recent first, where a
+    /// relative path that is not there as given is looked for.
+    seen: RefCell<Vec<PathBuf>>,
 }
+
+/// How many folders `seen` keeps.
+const SEEN: usize = 16;
 
 /// A JSON-RPC error: the code, the message, and the data.
 type RpcError = (i64, String, Option<Value>);
@@ -233,7 +247,14 @@ impl Server {
                 for note in &outcome.notes {
                     eprintln!("{note}");
                 }
-                let mut content = vec![json!({ "type": "text", "text": pretty(&outcome.json) })];
+                // The text the CLI prints is what the skill teaches and far smaller than the JSON, which
+                // structuredContent carries whole for a client that wants the fields.
+                let text = if outcome.text.trim().is_empty() {
+                    pretty(&outcome.json)
+                } else {
+                    call::for_tool(outcome.text.trim_end(), tool)
+                };
+                let mut content = vec![json!({ "type": "text", "text": text })];
                 if !outcome.notes.is_empty() {
                     content.push(json!({ "type": "text", "text": outcome.notes.join("\n") }));
                 }
@@ -246,7 +267,7 @@ impl Server {
                 result
             }
             Err(failure) => json!({
-                "content": [{ "type": "text", "text": failure.to_text() }],
+                "content": [{ "type": "text", "text": call::for_tool(&failure.to_text(), tool) }],
                 "structuredContent": failure.to_json(),
                 "isError": true,
             }),
@@ -255,8 +276,10 @@ impl Server {
 
     /// Runs a tool's command, as the CLI would parse it, in this process.
     fn run(&self, tool: &Tool, arguments: &Map<String, Value>) -> Result<output::Outcome, Failure> {
-        let (argv, batch) = tools::argv(tool, arguments, self.root.as_ref())?;
-        let cli = Cli::try_parse_from(argv).map_err(|e| {
+        let call = call::argv(tool, arguments, self.root.as_ref(), &self.seen.borrow())?;
+        self.remember(&call.paths);
+        let batch = call.batch.clone();
+        let cli = Cli::try_parse_from(&call.argv).map_err(|e| {
             Failure::usage(
                 output::argument_message(&e),
                 output::argument_next(&e, Some(&tool.name)).unwrap_or_else(|| {
@@ -332,7 +355,34 @@ impl Server {
                 root.check(&super::apply::default_output(input))?;
             }
         }
-        super::run(&command)
+        output::set_receipt_cap((!call.detail).then_some(tools::RECEIPT_BYTES));
+        let outcome = super::run(&command);
+        output::set_receipt_cap(None);
+        let outcome = outcome?;
+        // What the call wrote is where the next call's relative names most likely point.
+        let wrote: Vec<PathBuf> = ["output", "working_copy", "dir"]
+            .iter()
+            .filter_map(|key| outcome.json.get(key).and_then(Value::as_str))
+            .map(PathBuf::from)
+            .filter(|p| p.exists())
+            .collect();
+        self.remember(&wrote);
+        Ok(outcome)
+    }
+
+    /// Puts the folders of `paths` first in `seen`.
+    fn remember(&self, paths: &[PathBuf]) {
+        let mut seen = self.seen.borrow_mut();
+        for path in paths {
+            let absolute = dunce::canonicalize(path).unwrap_or_else(|_| path.clone());
+            let Some(dir) = absolute.parent().filter(|d| !d.as_os_str().is_empty()) else {
+                continue;
+            };
+            let dir: &Path = dir;
+            seen.retain(|d| d != dir);
+            seen.insert(0, dir.to_path_buf());
+        }
+        seen.truncate(SEEN);
     }
 }
 

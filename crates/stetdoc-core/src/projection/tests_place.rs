@@ -13,6 +13,7 @@ fn find(needle: &str) -> Scope {
         context: 0,
         from: None,
         to: None,
+        story: None,
     }
 }
 

@@ -184,6 +184,10 @@ pub enum Scope {
         /// With `from`, only the blocks up to this ref; without it, to the end of the story of `from`.
         #[serde(default)]
         to: Option<String>,
+        /// Only in this story, such as the headers and footers. A range is in one story already, so with `from` this
+        /// must be the story of `from`.
+        #[serde(default)]
+        story: Option<StoryName>,
     },
     /// The tracked changes, as a ledger.
     Revisions(RevisionFilter),

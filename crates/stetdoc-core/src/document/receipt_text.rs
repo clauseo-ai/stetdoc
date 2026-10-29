@@ -261,20 +261,49 @@ fn blocks_left_out(r: &Receipt, shown: usize) -> String {
     )
 }
 
+impl Receipt {
+    /// The text of the receipt in about `cap` bytes, as `text` is in about 11,000: whole when it fits, and otherwise the
+    /// first operations and blocks that fit, with what was left out and where to see it. The head line, the warnings and
+    /// the check line are always whole, and a block is never cut, so a text may be longer than a small cap. A surface
+    /// whose reader pays for every byte, such as an MCP server, asks for less than `text` holds.
+    #[must_use]
+    pub fn text_within(&self, cap: usize) -> String {
+        if self.text.len() <= cap {
+            self.text.clone()
+        } else if self.text.starts_with(COMPARED) {
+            compose_compared_within(self, cap)
+        } else {
+            compose_within(self, cap)
+        }
+    }
+}
+
 /// The text of a receipt. Under `TEXT_CAP` it lists every operation and shows every block it holds; over it, the first ones
 /// that fit, and says what it left out.
 pub(super) fn compose(r: &Receipt) -> String {
+    compose_within(r, TEXT_CAP)
+}
+
+/// The room for the lines that say what a receipt cut to `cap` left out.
+fn left_out_room(cap: usize) -> usize {
+    LEFT_OUT_ROOM.min(cap / 4)
+}
+
+/// The text of a receipt in about `cap` bytes. The operation lines take at most the share of it that `OPS_CAP` is of
+/// `TEXT_CAP`.
+fn compose_within(r: &Receipt, cap: usize) -> String {
+    let ops_cap = OPS_CAP.saturating_mul(cap) / TEXT_CAP;
     let mut out = head(r);
     let lines: Vec<String> = r.operations.iter().map(|op| op_line(r, op)).collect();
     let blocks: Vec<String> = r.blocks.iter().map(block_lines).collect();
     let mut end = String::new();
     tail(r, &mut end);
     let size = |items: &[String]| items.iter().map(String::len).sum::<usize>();
-    let fits = out.len() + size(&lines) + size(&blocks) + end.len() <= TEXT_CAP;
+    let fits = out.len() + size(&lines) + size(&blocks) + end.len() <= cap;
     let ops_shown = if fits {
         lines.len()
     } else {
-        fitting(&lines, OPS_CAP)
+        fitting(&lines, ops_cap)
     };
     for line in lines.iter().take(ops_shown) {
         out.push_str(line);
@@ -285,7 +314,7 @@ pub(super) fn compose(r: &Receipt) -> String {
     let blocks_shown = if fits {
         blocks.len()
     } else {
-        let budget = TEXT_CAP.saturating_sub(out.len() + end.len() + LEFT_OUT_ROOM);
+        let budget = cap.saturating_sub(out.len() + end.len() + left_out_room(cap));
         fitting(&blocks, budget)
     };
     for block in blocks.iter().take(blocks_shown) {
@@ -323,14 +352,16 @@ fn tail(r: &Receipt, out: &mut String) {
     if v.units > 0 {
         let units = plural(v.units as usize, "unit", "units");
         if v.carried_total == 0 {
-            out.push_str(&format!("checked {units}.\n"));
+            out.push_str(&format!(
+                "validated {units}: no problems, and this file needs no separate check.\n"
+            ));
         } else {
             // One line, not a list: a problem the input had is the same in every receipt, and the receipt is about what the
             // edit did. A new problem never reaches a receipt, because it refuses the edit (`validation_failed`). The JSON
             // keeps the first ones in `carried`.
             let was = plural(v.carried_total as usize, "problem was", "problems were");
             out.push_str(&format!(
-                "checked {units}. {was} already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
+                "validated {units}: no new problems, and this file needs no separate check. {was} already in the input: `stetdoc check --all` lists them.\n"
             ));
         }
     }
@@ -346,6 +377,14 @@ fn tail(r: &Receipt, out: &mut String) {
 
 /// The text of the receipt of a comparison: the revisions by author, the moves, and the warnings.
 pub(super) fn compose_compared(r: &Receipt) -> String {
+    compose_compared_within(r, TEXT_CAP)
+}
+
+/// How the text of the receipt of a comparison starts.
+const COMPARED: &str = "compared: ";
+
+/// The text of the receipt of a comparison in about `cap` bytes.
+fn compose_compared_within(r: &Receipt, cap: usize) -> String {
     let mut out = String::new();
     let total: u32 = r
         .revisions
@@ -353,7 +392,7 @@ pub(super) fn compose_compared(r: &Receipt) -> String {
         .map(|a| a.counts.iter().map(|(_, n)| n).sum::<u32>())
         .sum();
     out.push_str(&format!(
-        "compared: {}, tracked as {} {}. base {}
+        "{COMPARED}{}, tracked as {} {}. base {}
 ",
         plural(total as usize, "revision", "revisions"),
         r.stamp.author,
@@ -380,7 +419,7 @@ pub(super) fn compose_compared(r: &Receipt) -> String {
         .collect();
     let mut end = String::new();
     tail(r, &mut end);
-    let budget = TEXT_CAP.saturating_sub(out.len() + end.len() + LEFT_OUT_ROOM);
+    let budget = cap.saturating_sub(out.len() + end.len() + left_out_room(cap));
     let shown = fitting(&moves, budget);
     for line in moves.iter().take(shown) {
         out.push_str(line);

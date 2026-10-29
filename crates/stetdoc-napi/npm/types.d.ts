@@ -1018,6 +1018,11 @@ export type Scope = "auto" | {
      * matches. JSON takes one string or a list of them, as `needles` or `needle`.
      */
     needles: string | string[];
+    /**
+     * Only in this story, such as the headers and footers. A range is in one story already, so with `from` this
+     * must be the story of `from`.
+     */
+    story?: StoryName | null;
     /** With `from`, only the blocks up to this ref; without it, to the end of the story of `from`. */
     to?: string | null;
   };

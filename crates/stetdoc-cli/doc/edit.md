@@ -20,7 +20,7 @@ $ stetdoc edit contract.stet --author "Jane Doe" --ops batch.txt
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 ```
 
@@ -33,7 +33,7 @@ $ stetdoc edit contract.docx -o edited.docx --author "Jane Doe" --ops batch.txt 
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 ```
 
@@ -51,7 +51,7 @@ $ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote contract.docx
 
 $ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt

@@ -39,18 +39,13 @@ fn a_client_unpacks_edits_and_packs_a_tracked_change() {
         .iter()
         .map(|t| t["name"].as_str().unwrap())
         .collect();
-    for name in [
-        "unpack",
-        "view",
-        "edit",
-        "check",
-        "pack",
-        "skills_get",
-        "capabilities",
-    ] {
+    for name in ["unpack", "view", "edit", "check", "pack", "skills_get"] {
         assert!(names.contains(&name), "{name} in {names:?}");
     }
-    assert!(!names.contains(&"init") && !names.contains(&"mcp"));
+    // capabilities lists what skills_get teaches, for programs: the CLI keeps it.
+    for name in ["init", "mcp", "capabilities"] {
+        assert!(!names.contains(&name), "{name} in {names:?}");
+    }
 
     let unpacked = server.call("unpack", json!({ "input": "contract.docx" }));
     let base = ok(&unpacked)["base"].as_str().unwrap().to_string();
@@ -276,14 +271,11 @@ fn the_view_tool_finds_within_a_range_and_names_a_pair_it_refuses() {
         .find(|t| t["name"] == "view")
         .unwrap()
         .clone();
-    let find = view["inputSchema"]["properties"]["find"]["description"]
-        .as_str()
-        .unwrap();
+    let about = view["description"].as_str().unwrap();
     assert!(
-        find.contains("Cannot be used with `outline`, `clause`"),
-        "{find}"
+        about.contains("find also goes with range, story or revisions"),
+        "{about}"
     );
-    assert_eq!(view["inputSchema"]["properties"]["budget"]["default"], 3000);
     let refused = server.call(
         "view",
         json!({ "input": "contract.docx", "find": "days", "clause": "1" }),
@@ -315,7 +307,6 @@ fn the_view_tool_takes_one_find_or_a_list_and_lists_one_line_for_each_hit() {
     let find = &view["inputSchema"]["properties"]["find"];
     // A list, and not a union, which some clients refuse; a lone string is still taken, as the test goes on to show.
     assert_eq!(find["type"], "array", "{find}");
-    assert_eq!(view["inputSchema"]["properties"]["context"]["default"], 0);
     // A list finds any of its texts, and each line says which it holds.
     let many = server.call(
         "view",
@@ -417,10 +408,8 @@ fn replace_and_comment_take_pairs_and_an_anchor_in_one_call() {
         replace["properties"]["pairs"]["items"]["required"],
         json!(["old", "new"])
     );
-    assert_eq!(
-        schema("comment")["required"],
-        json!(["input", "anchor", "text"])
-    );
+    assert_eq!(schema("comment")["required"], json!(["input"]));
+    assert_eq!(schema("comment")["properties"]["comments"]["type"], "array");
 
     // Two places: refused with both listed, and nothing written.
     let several = server.call(

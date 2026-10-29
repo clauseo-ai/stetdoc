@@ -20,7 +20,7 @@ Every command takes `--json`, which prints the result, or the error, as JSON on 
 | `stetdoc lookup` | Find a defined term, a cross-reference, or what refers to a clause |
 | `stetdoc skills` | Print the agent skill embedded in this binary |
 | `stetdoc init` | Install the skill stub for the agents you pick, in your home folder or (with --project) in a project |
-| `stetdoc capabilities` | List the operations, whether each is tracked, the error codes and the format version |
+| `stetdoc capabilities` | List the operations, whether each is tracked, the refusal codes and the format version |
 | `stetdoc mcp` | Serve the commands as tools over the Model Context Protocol, on stdin and stdout |
 
 ## `stetdoc unpack`
@@ -81,12 +81,12 @@ base 5737b772923cf8d3:0:5737b772923cf8d3
 next: stetdoc view contract.stet
 
 $ stetdoc pack contract.stet --author "Jane Doe"
-No hand edits were pending, so the document is written as of its last edit.
+No hand edits were pending, so the document is written as of its last edit, which was validated.
 wrote contract.edited.docx
 working copy contract.stet is at base 5737b772923cf8d3:0:5737b772923cf8d3. It stays until you delete the folder, or pack again with --done to remove it.
 
 $ stetdoc pack contract.stet -o contract.docx --author "Jane Doe"
-No hand edits were pending, so the document is written as of its last edit.
+No hand edits were pending, so the document is written as of its last edit, which was validated.
 wrote contract.docx
 working copy contract.stet is at base 5737b772923cf8d3:0:5737b772923cf8d3. It stays until you delete the folder, or pack again with --done to remove it.
 
@@ -101,7 +101,7 @@ error[stale_target]: revised.docx exists and is neither the document contract.st
 next: Unpack revised.docx again (or into a new folder) and redo the edits on it, pack to another path with -o, or pass --force to overwrite it.
 
 $ stetdoc pack contract.stet --done --author "Jane Doe"
-No hand edits were pending, so the document is written as of its last edit.
+No hand edits were pending, so the document is written as of its last edit, which was validated.
 wrote contract.edited.docx
 removed the working copy contract.stet
 
@@ -127,7 +127,7 @@ stetdoc view [OPTIONS] <INPUT>
 | `--depth <N>` | With --outline, the deepest heading level shown. |
 | `--range <REFS>` | The blocks from one ref to another, such as p40..p60, or from a ref to the end of its story. |
 | `--clause <NUMBER>` | The block a clause number resolves to, with the blocks under it, such as 12.3. Repeat it to view several clauses at once: their blocks in document order, each once. |
-| `--find <TEXT>` | The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line then says which it holds. With --range, only in that range; with --revisions, only the changes whose text contains one of them. |
+| `--find <TEXT>` | The paragraphs that contain this text, one line each: the ref, the clause, and the text around the match, paged like a range. Case-insensitive unless it has a capital letter. Repeat it to find any of several texts: each line then says which it holds. With --range, only in that range; with --story, only in that story; with --revisions, only the changes whose text contains one of them. |
 | `--context <N>` | With --find, show the matching blocks whole, with N blocks on each side, and not one line for each match. With --revisions, show the blocks that hold the changes whole, as the redline shows them, with N blocks on each side, and not one line for each change. 0 is the one-line list. Default `0`. |
 | `--revisions` | The tracked changes, one line each: their ids, kind, author, day, block and text, cut to 80 characters. |
 | `--full` | With --revisions, the whole inserted and deleted text of each change (up to 1,000 characters), not 80. |
@@ -136,7 +136,7 @@ stetdoc view [OPTIONS] <INPUT>
 | `--kind <KIND>` | With --revisions, only this kind: insert, delete, move or format. |
 | `--resolved` | With --comments, only resolved threads. |
 | `--open` | With --comments, only open threads. |
-| `--story <STORY>` | One story whole. One of `body`, `notes`, `headers`, `comments`. |
+| `--story <STORY>` | One story whole, or with --find, the matches in that story only. One of `body`, `notes`, `headers`, `comments`. |
 | `--mode <MODE>` | How tracked changes appear. One of `final`, `original`, `redline`. Default `redline`. |
 | `--budget <TOKENS>` | The size of a page, in estimated tokens (about 4 characters each). 0 shows everything. Default `3000`. |
 | `--all` | Everything on one page, however long: the same as --budget 0, and it wins over --budget. |
@@ -308,7 +308,7 @@ $ stetdoc edit contract.stet --author "Jane Doe" --ops batch.txt
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:1:6a07baa2d488eeb5
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 ```
 
@@ -321,7 +321,7 @@ $ stetdoc edit contract.docx -o edited.docx --author "Jane Doe" --ops batch.txt 
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 ```
 
@@ -339,7 +339,7 @@ $ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote contract.docx
 
 $ stetdoc edit contract.docx --in-place --author "Jane Doe" --ops batch.txt
@@ -390,7 +390,7 @@ replace "thirty days" with "sixty days": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote contract.edited.docx
 contract.docx is unchanged. Run the next edit on contract.edited.docx to build on this one, or pass -o FILE or --in-place to choose.
 
@@ -405,7 +405,7 @@ $ stetdoc replace contract.docx "Supplier" "Vendor" -o edited.docx --author "Jan
 error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
   p1 The [Supplier] shall indemnify the Customer,…
   p2 …sses” means any loss, and the [Supplier]’s liability.
-next: Nothing was applied. Make OLD longer so it matches once, limit the search with --range or --clause, or pass --all to change every one.
+next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, pass --range with its ref, such as --range p1..p1, or make OLD longer so it matches once.
 
 $ stetdoc replace contract.docx "ninety days" "sixty days" -o edited.docx --author "Jane Doe"
 ? 3
@@ -430,7 +430,7 @@ replace "payment is due" with "Payment falls due": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 8e37edb10d183515:0:8e37edb10d183515
 0 replace p4: deletion #0, insertion #1
 p4 Payment {--is--}{#0 JD}{++falls++}{#1 JD} due within thirty days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote edited.docx
 
 ```
@@ -447,7 +447,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base f2018f511cd
 1 replace p2: deletion #2, insertion #3
 p1 The {--Supplier--}{#0 JD}{++Vendor++}{#1 JD} shall indemnify the Customer, and shall pay on demand.
 p2 “Losses” means any loss, and the {--Supplier--}{#2 JD}{++Vendor++}{#3 JD}’s liability.
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote edited.docx
 
 $ stetdoc replace contract.docx "Supplier" "Vendor" --expect 3 -o edited.docx --author "Jane Doe"
@@ -462,7 +462,7 @@ replace "Supplier" with "Vendor": once, at p2
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p2: deletion #0, insertion #1
 p2 “Losses” means any loss, and the {--Supplier--}{#0 JD}{++Vendor++}{#1 JD}’s liability.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 ```
 
@@ -479,7 +479,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base 2fcb6ddbee5
 1 delete p1: deletion #2
 p1 The Supplier shall indemnify the Customer{--, and shall pay on demand--}{#2 JD}.
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote contract.docx
 
 ```
@@ -489,14 +489,13 @@ wrote contract.docx
 Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now.
 
 ```text
-stetdoc comment [OPTIONS] <INPUT> <ANCHOR> <TEXT>
+stetdoc comment [OPTIONS] <INPUT> <ANCHOR TEXT> <ANCHOR TEXT>...
 ```
 
 | Argument | Meaning |
 |---|---|
 | `<INPUT>` | A working copy, or a .docx. A .docx is written to NAME.edited.docx beside it, unless -o or --in-place says where. |
-| `<ANCHOR>` | The text to anchor the comment to, matched as replace matches OLD. It must be there once (see --all and --expect). |
-| `<TEXT>` | The comment. A newline is a paragraph break of the comment. |
+| `<ANCHOR TEXT>` | ANCHOR and TEXT, as many pairs as you like, added together or not at all. ANCHOR is the text to anchor the comment to, matched as replace matches OLD; it must be there once (see --all and --expect). TEXT is the comment, and a newline in it is a paragraph break of the comment. |
 | `--all` | Comment on every occurrence of the anchor, one comment each, and say how many. |
 | `--expect <N>` | Comment on every occurrence of the anchor, and only if there are exactly N. |
 | `--range <REFS>` | Look only in these blocks, such as p40..p60, or p40 for p40 to the end of its story. |
@@ -523,7 +522,7 @@ comment on "thirty days": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base a2a6bbc2e3a46398:0:a2a6bbc2e3a46398
 0 comment p4: c0 added
 p4 Payment is due within {c0}thirty days{/c0}.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote commented.docx
 
 $ stetdoc comment contract.docx "Supplier" "Which one?" -o commented.docx --author "Jane Doe"
@@ -531,7 +530,7 @@ $ stetdoc comment contract.docx "Supplier" "Which one?" -o commented.docx --auth
 error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
   p1 The [Supplier] shall indemnify the Customer,…
   p2 …sses” means any loss, and the [Supplier]’s liability.
-next: Nothing was applied. Make the anchor longer so it matches once, limit the search with --range or --clause, or pass --all to comment on every one.
+next: Nothing was applied, so retry at once, with no dry run: to comment on every one, pass --all; to pick one place, pass --range with its ref, such as --range p1..p1, or make the anchor longer so it matches once.
 
 $ stetdoc comment contract.docx "Supplier" "Which one?" --all -o commented.docx --author "Jane Doe"
 comment on "Supplier": 2 times, in 2 blocks: p1, p2
@@ -540,7 +539,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base cfe4d86f3f8
 1 comment p2: c1 added
 p1 The {c0}Supplier{/c0} shall indemnify the Customer, and shall pay on demand.
 p2 “Losses” means any loss, and the {c1}Supplier{/c1}’s liability.
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote commented.docx
 
 ```
@@ -569,7 +568,7 @@ stetdoc compare [OPTIONS] --output <DOCX> <ORIGINAL> <REVISED>
 $ stetdoc compare contract.docx revised.docx -o redline.docx --author "Jane Doe"
 compared: 3 revisions, tracked as Jane Doe 2026-10-06T09:30:00Z. base 8785d09e0fdbb2b7:0:8785d09e0fdbb2b7
 Jane Doe: insertion 2, deletion 1
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote redline.docx
 next: stetdoc view redline.docx --revisions
 
@@ -692,7 +691,7 @@ wrote AGENTS.md
 
 ## `stetdoc capabilities`
 
-List the operations, whether each is tracked, the error codes and the format version.
+List the operations, whether each is tracked, the refusal codes and the format version.
 
 ```text
 stetdoc capabilities [OPTIONS]

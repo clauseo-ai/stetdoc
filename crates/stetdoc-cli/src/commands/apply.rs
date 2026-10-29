@@ -117,7 +117,7 @@ fn apply_dir(
         let next = doc.export()?;
         workdir.write(&next, Some(&disk), &WriteOptions::default())?;
     }
-    let outcome = Outcome::of(&receipt.text, &receipt)?.with_notes(notes);
+    let outcome = Outcome::of(&crate::output::receipt_text(&receipt), &receipt)?.with_notes(notes);
     let outcome = tell_others(outcome, &doc, &author, dir)?;
     Ok(finish(outcome, made.head, made.extra))
 }
@@ -232,7 +232,12 @@ fn apply_docx(
     let written = match target {
         Target::Nothing => {
             let head = join_head(ignored_output(at), made.head);
-            let outcome = tell_others(Outcome::of(&receipt.text, &receipt)?, &doc, &author, path)?;
+            let outcome = tell_others(
+                Outcome::of(&crate::output::receipt_text(&receipt), &receipt)?,
+                &doc,
+                &author,
+                path,
+            )?;
             return Ok(finish(outcome, head, made.extra));
         }
         Target::File(output) => (output, None),

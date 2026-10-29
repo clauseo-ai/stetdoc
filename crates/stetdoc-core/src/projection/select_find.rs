@@ -1,9 +1,9 @@
 //! The `Find` scope: the blocks whose text holds a needle, with their neighbours, in every story or within one range.
 
 use super::needles::{Needles, Snippet, snippet};
-use super::select::{Item, Selected, Source, error, locate};
+use super::select::{Item, Selected, Source, error, locate, story_kinds};
 use crate::api::error::{ErrorCode, StetError};
-use crate::api::view::Mode;
+use crate::api::view::{Mode, StoryName};
 use crate::state::{PartId, PartsView, State};
 use crate::wordml::BlockKind;
 
@@ -52,8 +52,8 @@ impl Found {
 }
 
 /// The tops that hold any of the needles, with `context` tops on each side, in every story, or only in the range
-/// `within`: from a ref to a ref, or to the end of the story of the first. The label counts the matches of each needle
-/// and the blocks that hold them.
+/// `within`: from a ref to a ref, or to the end of the story of the first, and only in the stories of `story`. The label
+/// counts the matches of each needle and the blocks that hold them.
 pub(crate) fn find_scope(
     parts: &PartsView<'_>,
     state: &State,
@@ -61,6 +61,7 @@ pub(crate) fn find_scope(
     given: &[String],
     context: u8,
     within: Option<(&str, Option<&str>)>,
+    story: Option<StoryName>,
 ) -> Result<(Selected, Found), StetError> {
     if given.is_empty() {
         return Err(error(
@@ -75,6 +76,20 @@ pub(crate) fn find_scope(
         None => None,
     };
     let list = parts.story_specs()?;
+    let kinds = story.map(story_kinds);
+    if let (Some(limit), Some((label, kinds)), Some((from, _))) = (&limit, kinds, within) {
+        let inside = list
+            .0
+            .iter()
+            .any(|s| kinds.contains(&s.kind) && parts.id(&s.part) == Some(limit.part));
+        if !inside {
+            return Err(error(
+                ErrorCode::InvalidPayload,
+                format!("{from} is not in the {label}, and the find was asked to look only there."),
+                "Leave out the story, or give a range in that story.",
+            ));
+        }
+    }
     let mut sources = Vec::new();
     let mut items = Vec::new();
     let mut hits = Vec::new();
@@ -84,7 +99,9 @@ pub(crate) fn find_scope(
         let Some(part) = parts.id(&spec.part) else {
             continue;
         };
-        if limit.as_ref().is_some_and(|l| l.part != part) {
+        if limit.as_ref().is_some_and(|l| l.part != part)
+            || kinds.is_some_and(|(_, kinds)| !kinds.contains(&spec.kind))
+        {
             continue;
         }
         let source = Source::load(parts, part, mode, true)?;
@@ -173,7 +190,7 @@ pub(crate) fn find_scope(
     let place = match within {
         Some((from, Some(to))) => format!(" in {from}..{to}"),
         Some((from, None)) => format!(" in {from}.."),
-        None => String::new(),
+        None => kinds.map_or_else(String::new, |(label, _)| format!(" in the {label}")),
     };
     let counted = match (found, blocks) {
         (0, _) => "no matches".to_string(),

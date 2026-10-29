@@ -3,10 +3,11 @@
 //!
 //! The items are one flat object whose `op` names the operation, with every operation's fields as optional properties,
 //! and not a `oneOf` of one object per operation: clients such as Gemini's refuse or flatten unions, and Claude's refuse
-//! them at the top of a schema. The `op` property lists each operation's fields, and a field that two operations use with
-//! different meanings says which meaning goes with which. The core refuses a field the operation does not have, and names
-//! the operation's index. A property's `attrs` is a list of `name=value` texts, since a free-form object has no
-//! properties to declare.
+//! them at the top of a schema. The `op` property lists each operation's fields and what it does in a few words. Only
+//! the fields whose meaning their name does not give carry a description (`NOTES`): the schema is sent on every turn,
+//! and `skills_get` with `name: operations` has every field in full. The core refuses a field the operation does not
+//! have, and names the operation's index. A property's `attrs` is a list of `name=value` texts, since a free-form object
+//! has no properties to declare.
 
 use crate::output::Failure;
 use serde_json::{Map, Value, json};
@@ -39,7 +40,7 @@ pub fn schema() -> Value {
     json!({
         "type": "array",
         "minItems": 1,
-        "description": "The operations, applied in order as one edit, all or none. Each is an object: `op` names the operation and the other properties are its fields. Not with `batch`.",
+        "description": "The operations, in order, all applied or none.",
         "items": {
             "type": "object",
             "properties": properties,
@@ -51,10 +52,33 @@ pub fn schema() -> Value {
 /// The fields that pick a range inside a paragraph, which several operations share and the description names once.
 const RANGE: [&str; 4] = ["find", "occurrence", "start", "end"];
 
+/// The fields whose name does not say enough, with what they hold. Every other field has no description.
+const NOTES: [(&str, &str); 7] = [
+    (
+        "ref",
+        "The block: a paragraph (p4), a table (t1) or a row (r2).",
+    ),
+    (
+        "find",
+        "Text of the paragraph, matched once unless occurrence says which.",
+    ),
+    ("occurrence", "Which match of find, from 1."),
+    ("to", "The last paragraph of a range of blocks."),
+    ("comment", "A comment of the thread, such as c3."),
+    (
+        "ids",
+        "Revision numbers, as view revisions shows them after #.",
+    ),
+    (
+        "text",
+        "The text of the comment or reply; a newline starts a paragraph.",
+    ),
+];
+
 /// Each operation with its fields, a star marking the required ones, then what it does.
 fn op_description(ops: &[OpInfo]) -> String {
     let mut text = format!(
-        "The operation. Its fields (* required; | one of; range: {}): ",
+        "Fields (* required, | one of, range: {}): ",
         RANGE.join(", ")
     );
     let lines: Vec<String> = ops
@@ -80,12 +104,14 @@ fn op_description(ops: &[OpInfo]) -> String {
             if ranged {
                 fields.push("range".into());
             }
-            // The first sentence is enough to pick the operation; the reference has the rest.
+            // The words up to the first comma, colon or full stop are enough to pick the operation; the reference has the
+            // rest.
             let summary = op
                 .summary
-                .split_once(". ")
-                .map_or(op.summary.as_str(), |(first, _)| first)
-                .trim_end_matches('.');
+                .split([',', ':', '.'])
+                .next()
+                .unwrap_or(op.summary.as_str())
+                .trim();
             format!("{} ({}): {summary}.", op.name, fields.join(", "))
         })
         .collect();
@@ -93,52 +119,21 @@ fn op_description(ops: &[OpInfo]) -> String {
     text
 }
 
-/// The schema of one field, from every operation that has it.
+/// The schema of one field, from every operation that has it: its type, its choices, and a description from `NOTES`.
 fn field_schema(ops: &[OpInfo], name: &str) -> Value {
-    let uses: Vec<(&str, &stetdoc_core::FieldInfo)> = ops
+    let uses: Vec<&stetdoc_core::FieldInfo> = ops
         .iter()
-        .flat_map(|op| {
-            op.fields
-                .iter()
-                .filter(|f| f.name == name)
-                .map(|f| (op.name.as_str(), f))
-        })
+        .flat_map(|op| op.fields.iter().filter(|f| f.name == name))
         .collect();
-    // Operations that give the field the same meaning share one sentence.
-    let mut meanings: Vec<(Vec<&str>, &str)> = Vec::new();
     let mut choices: Vec<String> = Vec::new();
-    for (op, field) in &uses {
-        let doc = field.doc.as_str();
-        match meanings.iter_mut().find(|(_, d)| *d == doc) {
-            Some((names, _)) => names.push(op),
-            None => meanings.push((vec![op], doc)),
-        }
+    for field in &uses {
         for choice in &field.choices {
             if !choices.contains(choice) {
                 choices.push(choice.clone());
             }
         }
     }
-    // The meaning most operations share goes first without their names, since `op` already lists each one's fields.
-    meanings.sort_by_key(|(names, _)| std::cmp::Reverse(names.len()));
-    let leads = match meanings.as_slice() {
-        [_] => true,
-        [(first, _), (second, _), ..] => first.len() > second.len(),
-        [] => false,
-    };
-    let description = meanings
-        .iter()
-        .enumerate()
-        .map(|(i, (names, doc))| {
-            if i == 0 && leads {
-                for_json(doc)
-            } else {
-                format!("{}: {}", names.join(", "), for_json(doc))
-            }
-        })
-        .collect::<Vec<_>>()
-        .join(" ");
-    let kind = uses.first().map_or("text", |(_, f)| f.kind.as_str());
+    let kind = uses.first().map_or("text", |f| f.kind.as_str());
     let mut schema = match kind {
         "number" => json!({ "type": "integer" }),
         "bool" => json!({ "type": "boolean" }),
@@ -149,12 +144,12 @@ fn field_schema(ops: &[OpInfo], name: &str) -> Value {
             "items": {
                 "type": "object",
                 "properties": {
-                    "name": { "type": "string", "description": "The element's local name, such as `jc` or `spacing`." },
-                    "val": { "type": "string", "description": "Its `w:val`, for the properties that have only that." },
+                    "name": { "type": "string", "description": "Element name, such as jc." },
+                    "val": { "type": "string" },
                     "attrs": {
                         "type": "array",
                         "items": { "type": "string" },
-                        "description": "Its other attributes, each `name=value`, such as `before=6pt`."
+                        "description": "Other attributes, each name=value."
                     },
                 },
                 "required": ["name"],
@@ -163,19 +158,13 @@ fn field_schema(ops: &[OpInfo], name: &str) -> Value {
         _ if !choices.is_empty() => json!({ "type": "string", "enum": choices }),
         _ => json!({ "type": "string" }),
     };
-    if let Some(object) = schema.as_object_mut() {
-        object.insert("description".into(), Value::String(description));
+    if let (Some((_, note)), Some(object)) = (
+        NOTES.iter().find(|(field, _)| *field == name),
+        schema.as_object_mut(),
+    ) {
+        object.insert("description".into(), Value::String((*note).to_string()));
     }
     schema
-}
-
-/// A field's doc without the sentences about block text, which `ops` never is.
-fn for_json(doc: &str) -> String {
-    doc.split_inclusive(". ")
-        .filter(|sentence| !sentence.contains("block text") && !sentence.contains("JSON only"))
-        .collect::<String>()
-        .trim_end()
-        .to_string()
 }
 
 /// The batch, as JSON text, that the `ops` of a call stand for. Without a base, the batch has none, and the edit reads its
@@ -190,6 +179,7 @@ pub fn batch(ops: &Value, base: Option<&str>) -> Result<String, Failure> {
     let Value::Array(items) = ops else {
         return Err(wrong("ops is a list of operations.".into()));
     };
+    let kinds = field_kinds();
     let mut out = Vec::with_capacity(items.len());
     for (index, item) in items.iter().enumerate() {
         let Value::Object(fields) = item else {
@@ -203,7 +193,11 @@ pub fn batch(ops: &Value, base: Option<&str>) -> Result<String, Failure> {
             if key == "props" {
                 op.insert(key.clone(), props(value, index)?);
             } else {
-                op.insert(key.clone(), value.clone());
+                let kind = kinds
+                    .iter()
+                    .find(|(name, _)| name == key)
+                    .map(|(_, kind)| kind.as_str());
+                op.insert(key.clone(), typed(value, kind));
             }
         }
         out.push(Value::Object(op));
@@ -214,6 +208,34 @@ pub fn batch(ops: &Value, base: Option<&str>) -> Result<String, Failure> {
     }
     batch.insert("ops".into(), Value::Array(out));
     Ok(Value::Object(batch).to_string())
+}
+
+/// The kind of each field of any operation, by its name, as `capabilities()` gives it.
+fn field_kinds() -> Vec<(String, String)> {
+    let mut kinds: Vec<(String, String)> = Vec::new();
+    for op in capabilities().ops {
+        for field in op.fields {
+            if !kinds.iter().any(|(name, _)| *name == field.name) {
+                kinds.push((field.name, field.kind));
+            }
+        }
+    }
+    kinds
+}
+
+/// A field's value with a boolean or a number that came as text made the type the field takes, since some clients send
+/// `"true"` or `"2"`. Anything else is passed on as it came, for the core to judge.
+fn typed(value: &Value, kind: Option<&str>) -> Value {
+    match (kind, value) {
+        (Some("bool"), Value::String(_)) => {
+            super::call::flag(value).map_or_else(|| value.clone(), Value::Bool)
+        }
+        (Some("number"), Value::String(s)) => s
+            .trim()
+            .parse::<u64>()
+            .map_or_else(|_| value.clone(), Value::from),
+        _ => value.clone(),
+    }
 }
 
 /// A `set` operation's properties, with each `attrs` list of `name=value` texts made the object the core reads.

@@ -167,6 +167,7 @@ fn a_find_and_a_clause_view_page_with_their_notes_and_still_follow_every_block_o
             context: 1,
             from: None,
             to: None,
+            story: None,
         },
     ] {
         let whole = view(&state, &spec(scope.clone(), 0)).unwrap();

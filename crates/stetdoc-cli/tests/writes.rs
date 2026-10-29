@@ -347,7 +347,7 @@ fn a_receipt_counts_the_problems_already_there_and_check_all_lists_them() {
     let receipt = text(&out.stdout);
     assert!(
         receipt.contains(
-            "checked 1 unit. 1 problem was already in the input, and no new one was added: `stetdoc check --all` lists them.\n"
+            "validated 1 unit: no new problems, and this file needs no separate check. 1 problem was already in the input: `stetdoc check --all` lists them.\n"
         ),
         "{receipt}"
     );
@@ -381,7 +381,7 @@ fn an_empty_run_property_is_a_note_and_not_a_violation() {
     let out = stetdoc(cwd, &["edit", "empty.docx", "--dry-run"], &batch);
     let receipt = text(&out.stdout);
     assert_eq!(out.status.code(), Some(0), "{}", text(&out.stderr));
-    assert!(!receipt.contains("problem"), "{receipt}");
+    assert!(!receipt.contains("already in the input"), "{receipt}");
 }
 
 /// The base on the head line of a receipt, if it has one.

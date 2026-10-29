@@ -123,8 +123,7 @@ fn an_edit_is_never_refused_for_a_problem_the_input_already_had() {
         FindingCode::SchemaNonCanonicalOrder
     );
     assert_eq!(receipt.validation.carried[0].block.as_deref(), Some("p1"));
-    let line =
-        "already in the input, and no new one was added: `stetdoc check --all` lists them.\n";
+    let line = "already in the input: `stetdoc check --all` lists them.\n";
     let text = &receipt.text;
     assert!(
         text.contains(&format!("{total} problem")) && text.contains(line),
@@ -144,7 +143,7 @@ fn a_clean_document_stays_clean_and_the_receipt_has_nothing_carried() {
     assert_eq!(receipt.validation.carried_total, 0);
     assert!(receipt.validation.carried.is_empty() && receipt.validation.notes.is_empty());
     assert!(receipt.validation.units >= 3, "{:?}", receipt.validation);
-    assert!(receipt.text.contains("checked "), "{}", receipt.text);
+    assert!(receipt.text.contains("validated "), "{}", receipt.text);
     // An edit that changed nothing checked nothing.
     let none = run(
         &mut doc,

@@ -178,18 +178,23 @@ fn group_parts(parts: &PartsView<'_>, kinds: &[StoryKind]) -> Result<Vec<PartId>
         .collect())
 }
 
+/// The label of a group of stories and the kinds of story in it.
+pub(crate) fn story_kinds(name: StoryName) -> (&'static str, &'static [StoryKind]) {
+    match name {
+        StoryName::Body => ("body", &[StoryKind::Body]),
+        StoryName::Notes => ("notes", &[StoryKind::Footnotes, StoryKind::Endnotes]),
+        StoryName::Headers => ("headers", &[StoryKind::Header, StoryKind::Footer]),
+        StoryName::Comments => ("comments", &[StoryKind::Comments]),
+    }
+}
+
 /// Every top of the stories of a group.
 pub(crate) fn story_scope(
     parts: &PartsView<'_>,
     mode: Mode,
     name: StoryName,
 ) -> Result<Selected, StetError> {
-    let (label, kinds): (&'static str, &[StoryKind]) = match name {
-        StoryName::Body => ("body", &[StoryKind::Body]),
-        StoryName::Notes => ("notes", &[StoryKind::Footnotes, StoryKind::Endnotes]),
-        StoryName::Headers => ("headers", &[StoryKind::Header, StoryKind::Footer]),
-        StoryName::Comments => ("comments", &[StoryKind::Comments]),
-    };
+    let (label, kinds) = story_kinds(name);
     let mut sources = Vec::new();
     let mut items = Vec::new();
     for part in group_parts(parts, kinds)? {

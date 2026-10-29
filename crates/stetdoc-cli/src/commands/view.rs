@@ -71,6 +71,7 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
                 context: args.context,
                 from: Some(from),
                 to,
+                story: None,
             }
         }
     } else if !args.clause.is_empty() {
@@ -99,14 +100,10 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
             context: args.context,
             from: None,
             to: None,
+            story: args.story.map(story_name),
         }
     } else if let Some(story) = args.story {
-        Scope::Story(match story {
-            StoryArg::Body => StoryName::Body,
-            StoryArg::Notes => StoryName::Notes,
-            StoryArg::Headers => StoryName::Headers,
-            StoryArg::Comments => StoryName::Comments,
-        })
+        Scope::Story(story_name(story))
     } else {
         Scope::Auto
     };
@@ -134,6 +131,16 @@ fn spec(args: &ViewArgs) -> Result<ViewSpec, Failure> {
         notes: !args.no_notes,
         ..ViewSpec::default()
     })
+}
+
+/// The story a flag names.
+fn story_name(story: StoryArg) -> StoryName {
+    match story {
+        StoryArg::Body => StoryName::Body,
+        StoryArg::Notes => StoryName::Notes,
+        StoryArg::Headers => StoryName::Headers,
+        StoryArg::Comments => StoryName::Comments,
+    }
 }
 
 /// The command that shows the next page: this one, with `--after` set to the cursor.

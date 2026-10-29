@@ -140,6 +140,7 @@ fn p1_the_same_bytes_and_spec_give_the_same_page() {
             context: 1,
             from: None,
             to: None,
+            story: None,
         },
     ] {
         let a = view(&doc(40).state(), &spec(scope.clone(), 400)).unwrap();

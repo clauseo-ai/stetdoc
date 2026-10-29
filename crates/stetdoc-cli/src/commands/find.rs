@@ -119,15 +119,28 @@ pub fn problem(
 
 /// The refusal for one or more problems, with the code of the first and a next step for it. `what` names the text, such
 /// as `OLD` or `the anchor`, and `all` says what --all does, such as `change every one`. `case` says that a text not found
-/// is there in another case, which --ignore-case matches.
-pub fn refuse(problems: Vec<(ErrorCode, String)>, what: &str, all: &str, case: bool) -> Failure {
+/// is there in another case, which --ignore-case matches. `example` is the ref of one of the places an ambiguous text was
+/// found at, which the next step shows how to pick.
+pub fn refuse(
+    problems: Vec<(ErrorCode, String)>,
+    what: &str,
+    all: &str,
+    case: bool,
+    example: Option<&str>,
+) -> Failure {
     let code = problems
         .first()
         .map_or(ErrorCode::NotFound, |(code, _)| *code);
     let next = match code {
-        ErrorCode::AmbiguousMatch => format!(
-            "Nothing was applied. Make {what} longer so it matches once, limit the search with --range or --clause, or pass --all to {all}."
-        ),
+        ErrorCode::AmbiguousMatch => {
+            let pick = example.map_or_else(
+                || "pass --range with the ref of the place you mean".to_string(),
+                |r| format!("pass --range with its ref, such as --range {r}..{r}"),
+            );
+            format!(
+                "Nothing was applied, so retry at once, with no dry run: to {all}, pass --all; to pick one place, {pick}, or make {what} longer so it matches once."
+            )
+        }
         ErrorCode::NotFound if case => format!(
             "Nothing was applied. Run it again with --ignore-case to match the places listed, or write {what} in the document's case."
         ),
@@ -225,6 +238,15 @@ pub fn shape(edit: Edit, args: &FindArgs) -> Edit {
         QuotesArg::AsTyped => Quotes::AsTyped,
     });
     if args.dry_run { edit.dry_run() } else { edit }
+}
+
+/// The ref of the first place of the first text found more than once, for the next step of an `ambiguous_match`.
+pub fn example<'a>(found: impl IntoIterator<Item = &'a Occurrences>) -> Option<String> {
+    found
+        .into_iter()
+        .find(|f| f.hits.len() > 1)
+        .and_then(|f| f.hits.first())
+        .map(|hit| hit.block.clone())
 }
 
 /// The places as JSON.

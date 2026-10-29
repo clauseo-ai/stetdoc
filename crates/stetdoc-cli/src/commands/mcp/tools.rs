@@ -1,59 +1,70 @@
 //! The MCP tools, made from the `clap` tree that also gives `--help`, the skill's command table and the CLI reference, so a
 //! tool and its command cannot drift apart. Each command the skill teaches is a tool (a nested one such as `skills get`
-//! is `skills_get`), each of its flags and positionals a property, and a call becomes the command line the CLI would parse.
-//! The edit tool's list of operations comes from `capabilities()`, like the `capabilities` command.
+//! is `skills_get`), each of its flags and positionals a property, and a call becomes the command line the CLI would parse
+//! (`call.rs`). The words of each description come from `describe.rs`, short, since they are sent on every turn.
+//! The edit tool's list of operations comes from `capabilities()`, like the `capabilities` command, which is not a tool.
 
-use super::confine::Root;
 use super::{describe, ops};
 use crate::cli::Cli;
-use crate::output::Failure;
 use clap::{Arg, ArgAction, CommandFactory, ValueHint};
 use serde_json::{Map, Value, json};
 use std::any::TypeId;
-use std::ffi::OsString;
 
-/// The commands that are not tools: `init` writes into agents' folders and `mcp` is this server.
-const NOT_TOOLS: [&str; 2] = ["init", "mcp"];
+/// The commands that are not tools: `init` writes into agents' folders, `mcp` is this server, and `capabilities` lists
+/// what `skills_get` teaches (the operations and the error codes), for programs rather than agents.
+const NOT_TOOLS: [&str; 3] = ["init", "mcp", "capabilities"];
 
 /// The arguments that are not properties: help, the version, and `--json`, which a tool always gets.
 const NOT_PROPERTIES: [&str; 3] = ["help", "version", "json"];
 
 /// The edit tool's property for the batch as text, which the CLI reads from stdin.
-pub const BATCH: &str = "batch";
+pub(super) const BATCH: &str = "batch";
 
 /// The edit tool's property for the operations as typed objects.
-const OPS: &str = "ops";
+pub(super) const OPS: &str = "ops";
 
 /// The edit tool's property for the base token of `ops`.
-const BASE: &str = "base";
+pub(super) const BASE: &str = "base";
 
 /// The edit tool's property for `--ops FILE`, renamed so that `ops` can be the typed operations.
 const OPS_FILE: &str = "ops_file";
 
 /// The replace tool's property for its OLD NEW pairs, an array of `{old, new}` objects that the CLI takes as positionals.
-const PAIRS: &str = "pairs";
+pub(super) const PAIRS: &str = "pairs";
+
+/// The property of the tools that write for a receipt in full, not cut to `RECEIPT_BYTES`.
+pub(super) const DETAIL: &str = "detail";
+
+/// The tools that write a receipt.
+pub(super) const WRITERS: [&str; 4] = ["edit", "replace", "comment", "pack"];
+
+/// About how many bytes a receipt's text takes without `detail`.
+pub(super) const RECEIPT_BYTES: usize = 2_000;
+
+/// The comment tool's property for its ANCHOR TEXT pairs, an array of `{anchor, text}` objects.
+pub(super) const COMMENTS: &str = "comments";
 
 /// One tool.
 pub struct Tool {
     /// The tool's name: the command's words joined with `_`.
     pub name: String,
     /// The command's words, such as `["skills", "get"]`.
-    path: Vec<String>,
+    pub(super) path: Vec<String>,
     /// The description and the input schema, as `tools/list` shows them.
     pub listing: Value,
-    args: Vec<Spec>,
+    pub(super) args: Vec<Spec>,
 }
 
-struct Spec {
-    id: String,
-    long: Option<String>,
-    positional: bool,
-    kind: Kind,
-    path: bool,
+pub(super) struct Spec {
+    pub(super) id: String,
+    pub(super) long: Option<String>,
+    pub(super) positional: bool,
+    pub(super) kind: Kind,
+    pub(super) path: bool,
 }
 
 #[derive(Clone, Copy, PartialEq)]
-enum Kind {
+pub(super) enum Kind {
     Flag,
     Text,
     Integer,
@@ -89,7 +100,7 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
     let apart = conflicts(command);
     for arg in command.get_arguments() {
         let mut id = arg.get_id().as_str().to_string();
-        if NOT_PROPERTIES.contains(&id.as_str()) {
+        if NOT_PROPERTIES.contains(&id.as_str()) || describe::hidden(&name, &id) {
             continue;
         }
         if name == "edit" && id == OPS {
@@ -106,7 +117,10 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
             ),
         };
         let mut listed = property(arg, &spec);
-        if let Some(others) = apart.get(&id)
+        let said = describe::property(&name, &id);
+        if let (Some(said), Some(object)) = (said, listed.as_object_mut()) {
+            object.insert("description".into(), Value::String(said.to_string()));
+        } else if let Some(others) = apart.get(&id)
             && let Some(Value::String(text)) = listed.get_mut("description")
         {
             let names: Vec<String> = others.iter().map(|o| format!("`{o}`")).collect();
@@ -118,31 +132,65 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
         }
         args.push(spec);
     }
-    let about = command
-        .get_about()
-        .map(ToString::to_string)
-        .unwrap_or_default();
-    let mut description = about.trim_end_matches('.').to_string();
-    description.push('.');
-    let rules = describe::rules(&name);
-    if !rules.is_empty() {
-        description.push(' ');
-        description.push_str(rules);
-    }
+    let description = describe::tool(&name).map_or_else(
+        || {
+            let about = command
+                .get_about()
+                .map(ToString::to_string)
+                .unwrap_or_default();
+            format!("{}.", about.trim_end_matches('.'))
+        },
+        str::to_string,
+    );
     if name == "edit" {
         properties.insert(OPS.into(), ops::schema());
         properties.insert(
             BASE.into(),
             json!({
                 "type": "string",
-                "description": "With ops, the base token of the view or receipt the refs come from. Required for a working copy; for a .docx, leave it out to read the refs from the file as it is now."
+                "description": "The base token of the view or receipt the refs come from: for a working copy, not a .docx."
             }),
         );
         properties.insert(
             BATCH.into(),
             json!({
                 "type": "string",
-                "description": "The batch as text instead of ops: block text or JSON, as `stetdoc edit` reads from stdin. Its first line is `base:` with the base token, which a .docx may leave out. skills_get with name operations has the syntax."
+                "description": "The operations as block text or JSON, instead of ops."
+            }),
+        );
+    }
+    if WRITERS.contains(&name.as_str()) {
+        properties.insert(
+            DETAIL.into(),
+            json!({ "type": "boolean", "description": "The whole receipt, not a summary of about 2 KB." }),
+        );
+    }
+    if name == "comment" {
+        // One comment in `anchor` and `text`, or several in `comments`, which the CLI takes as ANCHOR TEXT pairs.
+        properties.remove(PAIRS);
+        required.retain(|r| r != PAIRS);
+        properties.insert(
+            "anchor".into(),
+            json!({ "type": "string", "description": "The text to comment on." }),
+        );
+        properties.insert(
+            "text".into(),
+            json!({ "type": "string", "description": "The comment." }),
+        );
+        properties.insert(
+            COMMENTS.into(),
+            json!({
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "anchor": { "type": "string" },
+                        "text": { "type": "string" }
+                    },
+                    "required": ["anchor", "text"],
+                    "additionalProperties": false
+                },
+                "description": "Several comments, each an anchor and a text."
             }),
         );
     }
@@ -155,13 +203,13 @@ fn tool(words: &[&str], command: &clap::Command) -> Tool {
                 "items": {
                     "type": "object",
                     "properties": {
-                        "old": { "type": "string", "description": "The text to replace, as the document reads now. It must be there once, unless all or expect says otherwise." },
-                        "new": { "type": "string", "description": "The text it becomes. Empty deletes it." }
+                        "old": { "type": "string" },
+                        "new": { "type": "string" }
                     },
                     "required": ["old", "new"],
                     "additionalProperties": false
                 },
-                "description": "The replacements, applied together as tracked changes or not at all."
+                "description": "Each old text and the new text it becomes."
             }),
         );
     }
@@ -254,7 +302,7 @@ fn property(arg: &Arg, spec: &Spec) -> Value {
     let help = arg.get_help().map(ToString::to_string).unwrap_or_default();
     let mut property = match spec.kind {
         Kind::Flag => json!({ "type": "boolean" }),
-        Kind::Integer => json!({ "type": "integer", "minimum": 0 }),
+        Kind::Integer => json!({ "type": "integer" }),
         Kind::List => json!({ "type": "array", "items": { "type": "string" } }),
         // A list, not a union of a string and a list, which clients such as Gemini's do not take. A lone string still works.
         Kind::Repeat => json!({ "type": "array", "items": { "type": "string" } }),
@@ -281,7 +329,11 @@ fn property(arg: &Arg, spec: &Spec) -> Value {
     }
     if let Some(object) = property.as_object_mut() {
         object.insert("description".into(), Value::String(description));
-        if let Some(default) = arg.get_default_values().first() {
+        // An integer's default is said in words where it matters (a page of about 3000 tokens); a choice's default
+        // says what happens when it is left out.
+        if let Some(default) = arg.get_default_values().first()
+            && spec.kind != Kind::Integer
+        {
             let default = default.to_string_lossy().into_owned();
             let value = match spec.kind {
                 Kind::Integer => default
@@ -293,143 +345,6 @@ fn property(arg: &Arg, spec: &Spec) -> Value {
         }
     }
     property
-}
-
-/// The command line a call stands for, and the edit tool's batch. With a root, every path is resolved and confined.
-pub fn argv(
-    tool: &Tool,
-    arguments: &Map<String, Value>,
-    root: Option<&Root>,
-) -> Result<(Vec<OsString>, Option<String>), Failure> {
-    let mut argv: Vec<OsString> = vec!["stetdoc".into()];
-    argv.extend(tool.path.iter().map(OsString::from));
-    let mut positionals: Vec<(usize, OsString)> = Vec::new();
-    let mut batch = None;
-    let mut typed = None;
-    let mut base = None;
-    for (key, value) in arguments {
-        if value.is_null() {
-            continue;
-        }
-        if tool.name == "edit" && key == BATCH {
-            batch = Some(scalar(key, value)?);
-            continue;
-        }
-        if tool.name == "edit" && key == OPS {
-            typed = Some(value);
-            continue;
-        }
-        if tool.name == "edit" && key == BASE {
-            base = Some(scalar(key, value)?);
-            continue;
-        }
-        if tool.name == "replace" && key == PAIRS {
-            let index = tool
-                .args
-                .iter()
-                .position(|s| s.id == PAIRS)
-                .unwrap_or(usize::MAX);
-            for (old, new) in pairs(value)? {
-                positionals.push((index, old.into()));
-                positionals.push((index, new.into()));
-            }
-            continue;
-        }
-        let Some((index, spec)) = tool.args.iter().enumerate().find(|(_, s)| s.id == *key) else {
-            let known: Vec<&str> = tool.args.iter().map(|s| s.id.as_str()).collect();
-            return Err(Failure::usage(
-                format!("{} takes no argument named {key}.", tool.name),
-                format!("Use only: {}.", known.join(", ")),
-            ));
-        };
-        let values: Vec<String> = match (spec.kind, value) {
-            (Kind::Flag, Value::Bool(true)) => {
-                argv.push(format!("--{}", spec.long.as_deref().unwrap_or(&spec.id)).into());
-                continue;
-            }
-            (Kind::Flag, Value::Bool(false)) => continue,
-            (Kind::Flag, _) => {
-                return Err(Failure::usage(
-                    format!("{key} is true or false."),
-                    "Pass a boolean, or leave the argument out.",
-                ));
-            }
-            (Kind::List | Kind::Repeat, Value::Array(items)) => items
-                .iter()
-                .map(|v| scalar(key, v))
-                .collect::<Result<_, _>>()?,
-            _ => vec![scalar(key, value)?],
-        };
-        for value in values {
-            let value: OsString = match root {
-                Some(root) if spec.path => root.resolve(&value)?.into_os_string(),
-                _ => value.into(),
-            };
-            match &spec.long {
-                Some(long) if !spec.positional => {
-                    let mut flag = OsString::from(format!("--{long}="));
-                    flag.push(value);
-                    argv.push(flag);
-                }
-                _ => positionals.push((index, value)),
-            }
-        }
-    }
-    match (typed, &batch, &base) {
-        (Some(_), Some(_), _) => {
-            return Err(Failure::usage(
-                "The edit tool takes ops or batch, and both were given.",
-                "Pass the operations once: in ops as objects, or in batch as text.",
-            ));
-        }
-        (Some(typed), None, _) => batch = Some(ops::batch(typed, base.as_deref())?),
-        (None, _, Some(_)) => {
-            return Err(Failure::usage(
-                "base goes with ops, and no ops were given.",
-                "Pass the operations in ops, or put the base line at the top of batch.",
-            ));
-        }
-        (None, _, None) => {}
-    }
-    positionals.sort_by_key(|(index, _)| *index);
-    argv.push("--".into());
-    argv.extend(positionals.into_iter().map(|(_, v)| v));
-    Ok((argv, batch))
-}
-
-/// The OLD NEW pairs of the replace tool, from an array of `{old, new}` objects.
-fn pairs(value: &Value) -> Result<Vec<(String, String)>, Failure> {
-    let wrong = || {
-        Failure::usage(
-            "pairs is an array of objects, each with old and new as strings.",
-            "Pass pairs as [{\"old\": \"net 30\", \"new\": \"net 60\"}].",
-        )
-    };
-    let Value::Array(items) = value else {
-        return Err(wrong());
-    };
-    items
-        .iter()
-        .map(|item| {
-            let field = |name: &str| item.get(name).and_then(Value::as_str).map(str::to_string);
-            match (item.as_object().map(Map::len), field("old"), field("new")) {
-                (Some(2), Some(old), Some(new)) => Ok((old, new)),
-                _ => Err(wrong()),
-            }
-        })
-        .collect()
-}
-
-fn scalar(key: &str, value: &Value) -> Result<String, Failure> {
-    match value {
-        Value::String(s) => Ok(s.clone()),
-        Value::Number(n) => Ok(n.to_string()),
-        Value::Bool(b) => Ok(b.to_string()),
-        _ => Err(Failure::usage(
-            format!("{key} is a string, not {value}."),
-            "Pass the argument as the tool's input schema says.",
-        )),
-    }
 }
 
 #[cfg(test)]
@@ -452,8 +367,7 @@ mod tests {
                 "compare",
                 "check",
                 "lookup",
-                "skills_get",
-                "capabilities"
+                "skills_get"
             ]
         );
     }
@@ -469,8 +383,10 @@ mod tests {
         }
         let view = all.iter().find(|t| t.name == "view").unwrap();
         let argv_of = |arguments: serde_json::Value| -> Vec<String> {
-            let (argv, _) = super::argv(view, arguments.as_object().unwrap(), None).unwrap();
-            argv.iter()
+            let call =
+                super::super::call::argv(view, arguments.as_object().unwrap(), None, &[]).unwrap();
+            call.argv
+                .iter()
                 .map(|a| a.to_string_lossy().into_owned())
                 .collect()
         };
@@ -491,28 +407,20 @@ mod tests {
         let schema = &view.listing["inputSchema"];
         assert_eq!(schema["required"], serde_json::json!(["input"]));
         assert_eq!(schema["properties"]["budget"]["type"], "integer");
-        assert_eq!(schema["properties"]["budget"]["default"], 3000);
         assert_eq!(schema["properties"]["all"]["type"], "boolean");
-        // A pair the CLI refuses is named in both descriptions, and a pair it takes is not.
+        // The pairs the CLI refuses are said once, in the tool's description, and not in every property's.
         let said = |name: &str| {
             schema["properties"][name]["description"]
                 .as_str()
                 .unwrap()
                 .to_string()
         };
+        let about = view.listing["description"].as_str().unwrap();
         assert!(
-            said("find").contains("Cannot be used with `outline`, `clause`, `comments`, `story`."),
-            "{}",
-            said("find")
+            about.contains("Use one of outline, range, clause, revisions, comments, story"),
+            "{about}"
         );
-        assert!(said("clause").contains("`find`"), "{}", said("clause"));
-        assert!(!said("range").contains("`find`"), "{}", said("range"));
-        assert!(
-            !said("revisions").contains("`find`"),
-            "{}",
-            said("revisions")
-        );
-        assert!(!said("all").contains("Cannot"), "{}", said("all"));
+        assert!(!said("find").contains("Cannot"), "{}", said("find"));
         assert_eq!(schema["properties"]["outline"]["type"], "boolean");
         assert_eq!(
             schema["properties"]["mode"]["enum"],
@@ -543,13 +451,15 @@ mod tests {
         );
         assert_eq!(ops["items"]["properties"]["occurrence"]["type"], "integer");
         assert!(edit.listing["inputSchema"]["properties"]["ops_file"].is_object());
+        // offsets serves programs that count UTF-16 units, and is the CLI's only.
+        assert!(edit.listing["inputSchema"]["properties"]["offsets"].is_null());
         // Each editing tool carries its rules, so a client that drops the server's instructions still has them.
         let replace = all.iter().find(|t| t.name == "replace").unwrap();
         assert!(
             replace.listing["description"]
                 .as_str()
                 .unwrap()
-                .contains("exactly once"),
+                .contains("all: true"),
             "{}",
             replace.listing
         );
@@ -557,7 +467,7 @@ mod tests {
             edit.listing["description"]
                 .as_str()
                 .unwrap()
-                .contains("optional for a .docx"),
+                .contains("never dry-run first"),
             "{}",
             edit.listing
         );

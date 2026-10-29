@@ -11,7 +11,7 @@ replace "thirty days" with "sixty days": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 745747bfd39463c1:0:745747bfd39463c1
 0 replace p4: deletion #0, insertion #1
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote contract.edited.docx
 contract.docx is unchanged. Run the next edit on contract.edited.docx to build on this one, or pass -o FILE or --in-place to choose.
 
@@ -26,7 +26,7 @@ $ stetdoc replace contract.docx "Supplier" "Vendor" -o edited.docx --author "Jan
 error[ambiguous_match]: "Supplier" is in the document 2 times, and it must be there once:
   p1 The [Supplier] shall indemnify the Customer,…
   p2 …sses” means any loss, and the [Supplier]’s liability.
-next: Nothing was applied. Make OLD longer so it matches once, limit the search with --range or --clause, or pass --all to change every one.
+next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, pass --range with its ref, such as --range p1..p1, or make OLD longer so it matches once.
 
 $ stetdoc replace contract.docx "ninety days" "sixty days" -o edited.docx --author "Jane Doe"
 ? 3
@@ -51,7 +51,7 @@ replace "payment is due" with "Payment falls due": once, at p4
 applied 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 8e37edb10d183515:0:8e37edb10d183515
 0 replace p4: deletion #0, insertion #1
 p4 Payment {--is--}{#0 JD}{++falls++}{#1 JD} due within thirty days.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 wrote edited.docx
 
 ```
@@ -68,7 +68,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base f2018f511cd
 1 replace p2: deletion #2, insertion #3
 p1 The {--Supplier--}{#0 JD}{++Vendor++}{#1 JD} shall indemnify the Customer, and shall pay on demand.
 p2 “Losses” means any loss, and the {--Supplier--}{#2 JD}{++Vendor++}{#3 JD}’s liability.
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote edited.docx
 
 $ stetdoc replace contract.docx "Supplier" "Vendor" --expect 3 -o edited.docx --author "Jane Doe"
@@ -83,7 +83,7 @@ replace "Supplier" with "Vendor": once, at p2
 dry run: nothing was applied. A new block has no ref until the edit is applied. 1 operation, tracked as Jane Doe 2026-10-06T09:30:00Z. base 5737b772923cf8d3:0:5737b772923cf8d3
 0 replace p2: deletion #0, insertion #1
 p2 “Losses” means any loss, and the {--Supplier--}{#0 JD}{++Vendor++}{#1 JD}’s liability.
-checked 1 unit.
+validated 1 unit: no problems, and this file needs no separate check.
 
 ```
 
@@ -100,7 +100,7 @@ applied 2 operations, tracked as Jane Doe 2026-10-06T09:30:00Z. base 2fcb6ddbee5
 1 delete p1: deletion #2
 p1 The Supplier shall indemnify the Customer{--, and shall pay on demand--}{#2 JD}.
 p4 Payment is due within {--thirty--}{#0 JD}{++sixty++}{#1 JD} days.
-checked 2 units.
+validated 2 units: no problems, and this file needs no separate check.
 wrote contract.docx
 
 ```

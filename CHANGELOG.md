@@ -9,6 +9,15 @@ released yet.
 
 ### Added
 
+- `Receipt::text_within(cap)` composes a receipt's text in about `cap` bytes, as `text` is in about 11,000. The MCP
+  tools that write (`edit`, `replace`, `comment`, `pack`) answer with a receipt of about 2 KB: the head line with its base,
+  the first operations and blocks, what was left out, and the check line. `detail: true` returns the whole receipt.
+- `stetdoc comment FILE ANCHOR TEXT [ANCHOR TEXT ...]` adds several comments in one edit, all or none, as `replace`
+  takes several pairs. The MCP comment tool takes them in `comments`, a list of `{anchor, text}`, beside `anchor` and
+  `text` for one.
+- `stetdoc view --find TEXT --story STORY` finds only in that story, such as the headers and footers, where `--find`
+  and `--story` used to be refused together. `Scope::Find` has `story`
+  ([decision 0013](docs/decisions/0013-mcp-for-fewer-turns.md)).
 - The text of a receipt is capped at about 11,000 bytes, so `replace --all` or `comment --all` over hundreds of places
   prints a receipt an agent can read whole: the first operations and blocks, how many it left out, and the `stetdoc view`
   command that shows them. The head line, the base, the warnings and the check line stay whole, and the JSON is unchanged.
@@ -369,6 +378,24 @@ released yet.
 
 ### Changed
 
+- The MCP tools' list is 11 tools and about 4,100 tokens (16,419 characters), from 12 and about 7,200: each description
+  says the few words a model needs, steers to one `replace`, `comment` or `edit` call on the .docx with no `unpack`,
+  `pack`, `check` or dry run, and leaves the detail to `skills_get` and the refusals. `capabilities` is no longer an MCP
+  tool (`skills_get` teaches the operations and the error codes; the CLI keeps it), and the edit tool leaves out
+  `offsets` ([decision 0013](docs/decisions/0013-mcp-for-fewer-turns.md)).
+- `stetdoc mcp` answers a call with the text the CLI prints, which is what the skill teaches and a tenth of the size of
+  the JSON for a typical receipt; `structuredContent` still carries the JSON whole. Next steps and refusals name the
+  tool's properties (`all: true`, `range`, `output`), not the CLI's flags.
+- `stetdoc mcp` takes `"true"` and `"false"` as text for a boolean argument and for a typed operation's boolean field, and a
+  number as text for a typed operation's number field, since some clients (Gemini's among them) send them so.
+- `stetdoc mcp` finds a working copy or a document passed by a relative name that is not there as given in the folders of
+  the documents the session has named or written, most recent first, so `contract.stet` works after `unpack` wrote it
+  beside a document in another folder. A path to write is never moved, and `--root` still confines every path.
+- Every receipt's check line reads as the completed validation it is: `validated 3 units: no problems, and this file
+  needs no separate check.` The core skill no longer carries the table of refusal codes (`skills get errors` has it), and
+  `check` is described, in the MCP tool and the skill, as for files stetdoc did not write and for hand edits.
+- An `ambiguous_match` refusal of `replace` or `comment` says how to retry in one call: `--all` for every place, or
+  `--range` with the ref of one place, such as `--range p12..p12`, and that no dry run is needed.
 - The npm packages move under the Clauseo organisation: the Node library is `@clauseo/stetdoc` with platform packages
   `@clauseo/stetdoc-<target>`, and the CLI's platform packages are `@clauseo/stetdoc-cli-<target>`. The CLI itself stays
   `stetdoc`, and its release tarball is `stetdoc-<version>.tgz`. The Homebrew tap is `clauseo-ai/homebrew-tap`, so the

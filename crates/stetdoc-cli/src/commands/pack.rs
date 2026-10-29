@@ -53,8 +53,8 @@ pub fn run(args: &PackArgs) -> Result<Outcome, Failure> {
     };
 
     let mut text = match &receipt {
-        Some(receipt) => receipt.text.trim_end().to_string(),
-        None => "No hand edits were pending, so the document is written as of its last edit."
+        Some(receipt) => crate::output::receipt_text(receipt).trim_end().to_string(),
+        None => "No hand edits were pending, so the document is written as of its last edit, which was validated."
             .to_string(),
     };
     text.push_str(&format!("\nwrote {}\n", output.display()));

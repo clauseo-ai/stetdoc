@@ -1070,7 +1070,7 @@ checksum = "5c0e04424e733e69714ca1bbb9204c1a57f09f5493439520f9f68c132ad25eec"
 
 [[package]]
 name = "stetdoc"
-version = "1.0.0-dev"
+version = "0.9.0"
 dependencies = [
  "clap",
  "dunce",
@@ -1088,7 +1088,7 @@ dependencies = [
 
 [[package]]
 name = "stetdoc-core"
-version = "1.0.0-dev"
+version = "0.9.0"
 dependencies = [
  "memchr",
  "miniz_oxide",
@@ -1104,7 +1104,7 @@ dependencies = [
 
 [[package]]
 name = "stetdoc-editor"
-version = "1.0.0-dev"
+version = "0.9.0"
 dependencies = [
  "serde",
  "serde_json",
@@ -1114,7 +1114,7 @@ dependencies = [
 
 [[package]]
 name = "stetdoc-napi"
-version = "1.0.0-dev"
+version = "0.9.0"
 dependencies = [
  "napi",
  "napi-build",
@@ -1127,7 +1127,7 @@ dependencies = [
 
 [[package]]
 name = "stetdoc-testkit"
-version = "1.0.0-dev"
+version = "0.9.0"
 dependencies = [
  "flate2",
  "insta",
@@ -1442,7 +1442,7 @@ checksum = "23b97319f7b8343df12cc98938e5c3eb436064524c8d2b4e30a1d3a36eecdf81"
 
 [[package]]
 name = "xtask"
-version = "1.0.0-dev"
+version = "0.9.0"
 dependencies = [
  "insta",
  "proc-macro2",

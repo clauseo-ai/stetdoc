@@ -2,7 +2,7 @@
 
 ```console
 $ stetdoc capabilities
-stetdoc 1.0.0-dev
+stetdoc 0.9.0
 formats: stet/1 (.md)
 complement: 1.0
 

@@ -4,7 +4,7 @@ The skill is embedded in the binary. core is the default; operations and errors 
 $ stetdoc skills get errors
 # stetdoc errors
 
-Every failure of stetdoc 1.0.0-dev has a stable code, a message, and a `next` hint that says what to do. The exit status is
+Every failure of stetdoc 0.9.0 has a stable code, a message, and a `next` hint that says what to do. The exit status is
 the code's class. Codes never change meaning.
 
 ## `unsupported` (exit 1)

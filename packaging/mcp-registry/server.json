@@ -3,7 +3,7 @@
   "name": "io.github.clauseo-ai/stetdoc",
   "title": "stetdoc",
   "description": "Read, redline and compare Word .docx files with real tracked changes",
-  "version": "1.0.0-dev",
+  "version": "0.9.0",
   "repository": {
     "url": "https://github.com/clauseo-ai/stetdoc",
     "source": "github"
@@ -12,7 +12,7 @@
     {
       "registryType": "npm",
       "identifier": "stetdoc",
-      "version": "1.0.0-dev",
+      "version": "0.9.0",
       "runtimeHint": "npx",
       "packageArguments": [
         { "type": "positional", "value": "mcp" }

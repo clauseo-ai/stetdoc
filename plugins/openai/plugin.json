@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "stetdoc",
-  "version": "1.0.0-dev",
+  "version": "0.9.0",
   "description": "Read, redline and compare Word .docx files with real tracked changes. Agents edit a .docx as a working copy, and every edit becomes a Word revision with an author.",
   "author": { "name": "Clauseo" },
   "homepage": "https://github.com/clauseo-ai/stetdoc",

@@ -1,6 +1,6 @@
 {
   "name": "@clauseo/stetdoc-cli-darwin-arm64",
-  "version": "1.0.0-dev",
+  "version": "0.9.0",
   "description": "The stetdoc command-line tool for aarch64-apple-darwin. Install `stetdoc`, which depends on it.",
   "license": "MIT OR Apache-2.0",
   "author": "Clauseo",

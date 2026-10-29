@@ -2,10 +2,15 @@
 
 All notable changes to stetdoc are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project follows
-[semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Nothing has been
-released yet.
+[semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
+1.0.0 may change the interface between minor versions.
 
 ## Unreleased
+
+## [0.9.0] - 2026-10-30
+
+The first release: the `stetdoc` CLI with its MCP server and the agent plugins, built for seven targets, from GitHub
+Releases, npm, PyPI and Homebrew.
 
 ### Added
 
@@ -615,3 +620,5 @@ released yet.
   properties under their formatting change, a run they inserted, or a paragraph or row that holds their
   changes is `readonly_region`, and the message says to accept or reject that change first. Untracked still
   means your own changes go untracked.
+
+[0.9.0]: https://github.com/clauseo-ai/stetdoc/releases/tag/v0.9.0

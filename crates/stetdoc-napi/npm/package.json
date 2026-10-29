@@ -1,6 +1,6 @@
 {
   "name": "@clauseo/stetdoc",
-  "version": "1.0.0-dev",
+  "version": "0.9.0",
   "description": "Turn a .docx into an agent-editable working copy and back, with real Word tracked changes",
   "license": "MIT OR Apache-2.0",
   "author": "Clauseo",
@@ -37,12 +37,12 @@
     "smoke": "node test/smoke.mts"
   },
   "optionalDependencies": {
-    "@clauseo/stetdoc-linux-x64-gnu": "1.0.0-dev",
-    "@clauseo/stetdoc-linux-arm64-gnu": "1.0.0-dev",
-    "@clauseo/stetdoc-linux-x64-musl": "1.0.0-dev",
-    "@clauseo/stetdoc-linux-arm64-musl": "1.0.0-dev",
-    "@clauseo/stetdoc-darwin-x64": "1.0.0-dev",
-    "@clauseo/stetdoc-darwin-arm64": "1.0.0-dev",
-    "@clauseo/stetdoc-win32-x64-msvc": "1.0.0-dev"
+    "@clauseo/stetdoc-linux-x64-gnu": "0.9.0",
+    "@clauseo/stetdoc-linux-arm64-gnu": "0.9.0",
+    "@clauseo/stetdoc-linux-x64-musl": "0.9.0",
+    "@clauseo/stetdoc-linux-arm64-musl": "0.9.0",
+    "@clauseo/stetdoc-darwin-x64": "0.9.0",
+    "@clauseo/stetdoc-darwin-arm64": "0.9.0",
+    "@clauseo/stetdoc-win32-x64-msvc": "0.9.0"
   }
 }

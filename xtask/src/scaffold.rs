@@ -95,7 +95,7 @@ fn the_workspace_declares_edition_licence_version_and_the_lint_policy() {
     for needle in [
         "edition = \"2024\"",
         "license = \"MIT OR Apache-2.0\"",
-        "version = \"1.0.0-dev\"",
+        "[workspace.package]\nversion = \"",
         "publish = false",
         "unsafe_code = \"forbid\"",
         "unwrap_used = \"deny\"",

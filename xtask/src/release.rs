@@ -462,8 +462,11 @@ mod tests {
             .collect();
         let (_dir, repo) = crate::repo::testutil::repo(&borrowed);
         let problems = check(&repo).unwrap().join("\n");
+        let current = workspace_version(&real).unwrap();
         assert!(
-            problems.contains("version is \"1.0.0-dev\", but the workspace is 1.2.3"),
+            problems.contains(&format!(
+                "version is \"{current}\", but the workspace is 1.2.3"
+            )),
             "{problems}"
         );
         assert!(

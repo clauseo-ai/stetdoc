@@ -1,6 +1,6 @@
 {
   "name": "stetdoc",
-  "version": "1.0.0-dev",
+  "version": "0.9.0",
   "description": "The stetdoc command-line tool: turn a .docx into an agent-editable working copy and back, with real Word tracked changes, and run its MCP server with `stetdoc mcp`",
   "license": "MIT OR Apache-2.0",
   "author": "Clauseo",
@@ -38,12 +38,12 @@
     "pack": "node scripts/pack.mjs"
   },
   "optionalDependencies": {
-    "@clauseo/stetdoc-cli-linux-x64-gnu": "1.0.0-dev",
-    "@clauseo/stetdoc-cli-linux-arm64-gnu": "1.0.0-dev",
-    "@clauseo/stetdoc-cli-linux-x64-musl": "1.0.0-dev",
-    "@clauseo/stetdoc-cli-linux-arm64-musl": "1.0.0-dev",
-    "@clauseo/stetdoc-cli-darwin-x64": "1.0.0-dev",
-    "@clauseo/stetdoc-cli-darwin-arm64": "1.0.0-dev",
-    "@clauseo/stetdoc-cli-win32-x64-msvc": "1.0.0-dev"
+    "@clauseo/stetdoc-cli-linux-x64-gnu": "0.9.0",
+    "@clauseo/stetdoc-cli-linux-arm64-gnu": "0.9.0",
+    "@clauseo/stetdoc-cli-linux-x64-musl": "0.9.0",
+    "@clauseo/stetdoc-cli-linux-arm64-musl": "0.9.0",
+    "@clauseo/stetdoc-cli-darwin-x64": "0.9.0",
+    "@clauseo/stetdoc-cli-darwin-arm64": "0.9.0",
+    "@clauseo/stetdoc-cli-win32-x64-msvc": "0.9.0"
   }
 }

@@ -10,7 +10,8 @@ All notable changes to stetdoc are recorded here. The format follows
 ## [0.9.0] - 2026-10-30
 
 The first release: the `stetdoc` CLI with its MCP server and the agent plugins, built for seven targets, from GitHub
-Releases, npm, PyPI and Homebrew.
+Releases, npm, PyPI, Homebrew and crates.io (`cargo install stetdoc --locked`, which also publishes the engine as the
+`stetdoc-core` library).
 
 ### Added
 

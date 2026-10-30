@@ -142,11 +142,35 @@ repository-based channels work from the repository at its default branch, so a m
 - Local build: `cd packaging/pypi && maturin build --release --locked` writes a wheel for this machine to `target/wheels`
   at the repository root.
 
-### 5. Claude Code: plugin and marketplace
+### 5. crates.io: the engine and the CLI
+
+- Files: none of their own. Two crates are published: `stetdoc-core` (`crates/stetdoc-core`, the engine as a library) and
+  `stetdoc` (`crates/stetdoc-cli`, the binary). Both take the version, license and repository from the workspace and the
+  repository README as their crates.io page. Every other crate has `publish = false`, and neither published crate needs
+  one: `stetdoc-testkit` is only a dev-dependency, which cargo drops from the published manifest.
+- Release fills: nothing. crates.io builds nothing; `cargo install` compiles on the user's machine with the `release`
+  profile, not `dist`, and the same mimalloc allocator.
+- Publish: from a clean checkout of the `v<version>` tag, after the GitHub release, run
+  `cargo publish -p stetdoc-core -p stetdoc`. Cargo 1.90 or newer publishes both in dependency order and waits for
+  `stetdoc-core` to reach the index before `stetdoc`. `cargo publish --dry-run -p stetdoc-core -p stetdoc` checks the
+  same without uploading; it passed on 2026-10-30 at 0.9.0. A published version can be yanked but never replaced or
+  deleted, and its README is frozen with it.
+- Account, once: sign in at https://crates.io with GitHub, verify the email address under Account Settings, create an
+  API token there with the `publish-new` and `publish-update` scopes (it is shown once), and run `cargo login`, which
+  reads the token from stdin and keeps it in `~/.cargo/credentials.toml`. crates.io has no organisations: the crates
+  belong to the account that publishes first. Add co-owners after with `cargo owner --add <github-login>`, or a GitHub
+  team with `cargo owner --add github:clauseo-ai:<team>`.
+- Later releases: once the crates exist, trusted publishing (crate Settings, Trusted Publishing, repository
+  `clauseo-ai/stetdoc`, workflow `release.yml`) lets a release job publish with `rust-lang/crates-io-auth-action` and no
+  stored token. No such job exists yet; the first publish has to be by hand, because a trusted publisher can only be
+  added to a crate that exists.
+- Install: `cargo install stetdoc --locked`, or `cargo binstall stetdoc` (not checked), which looks for a prebuilt binary.
+
+### 6. Claude Code: plugin and marketplace
 
 - Files: `.claude-plugin/marketplace.json` at the root, and `plugins/claude/` with `.claude-plugin/plugin.json`, the
   guard hook (`hooks/hooks.json` and `hooks/docx-guard.sh`) and the skill copy. The skill runs `stetdoc`, so the binary must
-  be on the PATH (from channel 1, 2, 3 or 4). The hook needs only `sh` and `awk`.
+  be on the PATH (from channel 1, 2, 3, 4 or 5). The hook needs only `sh` and `awk`.
 - Release fills: nothing. The version comes from the stamp script.
 - Check: `claude plugin validate .` (the marketplace) and `claude plugin validate plugins/claude` (the plugin) both pass.
   The validator does not check that a marketplace's source folder exists, so `cargo xtask release check` does.
@@ -156,7 +180,7 @@ repository-based channels work from the repository at its default branch, so a m
   https://code.claude.com/docs/en/plugins/marketplace-reference.md, https://code.claude.com/docs/en/plugins/publish.md,
   https://code.claude.com/docs/en/plugin-marketplaces
 
-### 6. Cursor: plugin
+### 7. Cursor: plugin
 
 - Files: `plugins/cursor/` with `.cursor-plugin/plugin.json` (no `$schema`, because Cursor's schema rejects unknown top-level
   keys), `mcp.json` and the skill copy.
@@ -164,7 +188,7 @@ repository-based channels work from the repository at its default branch, so a m
   by hand. Local test: copy `plugins/cursor/` to `~/.cursor/plugins/local/stetdoc/` and reload the window.
 - Sources: https://cursor.com/docs/reference/plugins, https://raw.githubusercontent.com/cursor/plugins/main/schemas/plugin.schema.json
 
-### 7. OpenAI: Codex and ChatGPT
+### 8. OpenAI: Codex and ChatGPT
 
 - Files: `plugins/openai/` with `plugin.json` (portable format, with its `$schema`), `mcp.json` and the skill copy, and
   `.agents/plugins/marketplace.json` at the root, which points at `./plugins/openai`.
@@ -176,7 +200,7 @@ repository-based channels work from the repository at its default branch, so a m
 - Sources: https://developers.openai.com/plugins/build/plugins, https://developers.openai.com/plugins/deploy/submission.md,
   https://developers.openai.com/codex/skills
 
-### 8. MCP Registry
+### 9. MCP Registry
 
 - Files: `mcp-registry/server.json` (the schema is `https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json`).
   Its package is `stetdoc` from npm, run with `npx stetdoc mcp` over stdio. `packaging/npm/stetdoc/package.json` carries
@@ -188,7 +212,7 @@ repository-based channels work from the repository at its default branch, so a m
 - Sources: https://modelcontextprotocol.io/registry/quickstart, https://modelcontextprotocol.io/registry/package-types,
   https://modelcontextprotocol.io/registry/faq.md
 
-### 9. OpenClaw ClawHub: skill
+### 10. OpenClaw ClawHub: skill
 
 - No manifest. ClawHub takes the skill folder as it is: `skills/stetdoc/SKILL.md` is the whole skill.
 - Publish: `clawhub login`, then from the repository root:
@@ -196,7 +220,7 @@ repository-based channels work from the repository at its default branch, so a m
   Omit `--owner` to publish as yourself. The `--dry-run` form for skills is unverified.
 - Sources: https://docs.openclaw.ai/clawhub/publishing, https://docs.openclaw.ai/clawhub/skill-format
 
-### 10. Hermes Skills Hub: skill
+### 11. Hermes Skills Hub: skill
 
 - No manifest. Hermes takes a folder with `SKILL.md`, and the frontmatter of `skills/stetdoc/SKILL.md` already fits.
 - Publish to a GitHub repository, from the repository root:
@@ -206,7 +230,7 @@ repository-based channels work from the repository at its default branch, so a m
 - Sources: https://hermes-agent.nousresearch.com/docs/user-guide/features/skills,
   https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills
 
-### 11. Agent Skills standard
+### 12. Agent Skills standard
 
 `skills/stetdoc/SKILL.md` follows https://agentskills.io/specification: `name` is `stetdoc`, the same as its directory,
 and `description` is under 1024 characters. The `skills-ref validate` tool named in that spec was not run.

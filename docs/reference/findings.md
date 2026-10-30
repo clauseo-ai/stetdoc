@@ -15,7 +15,7 @@
 | `schema_non_canonical_order` | In a property container that the schema leaves unordered, a child is not in the order Word writes. Word reads it, and the Open XML SDK validator counts it as a schema error. |
 | `schema_missing_child` | The content of an element ends before a required child. |
 | `schema_must_understand` | mc:MustUnderstand names a namespace that Word does not understand. |
-| `mc_prefix_undeclared` | mc:Ignorable, mc:ProcessContent or mc:MustUnderstand names a prefix that no namespace declaration binds. The schema allows the attribute, and Word refuses to open the file. An edit repairs it in every part it writes (decision 0014). |
+| `mc_prefix_undeclared` | mc:Ignorable, mc:ProcessContent or mc:MustUnderstand names a prefix that no namespace declaration binds. The schema allows the attribute, and Word refuses to open the file or offers to repair it. A report lists it before every other finding, and an edit repairs it in every part it writes (decision 0014). |
 | `schema_unexpected_text` | Character data in an element that has element-only content. |
 | `schema_unknown_attribute` | An attribute the schema does not define on this element. |
 | `schema_missing_attribute` | A required attribute is absent. |

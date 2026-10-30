@@ -67,7 +67,7 @@ fn check_reports_every_undeclared_prefix_as_a_violation_the_input_has() {
     assert_eq!(found.len(), 2, "{found:?}");
     assert_eq!(found[0].0, "word/document.xml");
     assert!(
-        found[0].1.starts_with("mc:Ignorable names w14, wp14, zz, which no namespace declaration binds, so Word will not open the file."),
+        found[0].1.starts_with("mc:Ignorable names w14, wp14, zz, which no namespace declaration binds, so Word refuses the file or offers to repair it. stetdoc declares w14, wp14 and removes zz from the attribute when it writes the document."),
         "{found:?}"
     );
     assert_eq!(found[1].0, "word/settings.xml");
@@ -179,5 +179,82 @@ fn a_document_without_the_defect_gets_no_repair() {
             .all(|w| w.code != WarningCode::Repaired),
         "{:?}",
         receipt.warnings
+    );
+}
+
+/// A main part whose root lists `ignorable` under mc:Ignorable and declares `declared` besides mc, with `body` in it.
+fn open_main(declared: &str, ignorable: &str, body: &str) -> Document {
+    let root = format!(" xmlns:mc=\"{MC}\"{declared} mc:Ignorable=\"{ignorable}\"");
+    let xml = Doc::new().root_attrs(&root).body(body).xml();
+    let bytes = Zip::new(parts::entries_doc(xml.as_bytes())).build();
+    Document::open(bytes, &OpenOptions::default()).unwrap()
+}
+
+#[test]
+fn check_names_both_undeclared_prefixes_and_says_a_write_declares_them() {
+    let doc = open_main("", "w14 wp14", BODY);
+    assert_eq!(
+        undeclared(&doc),
+        vec![(
+            "word/document.xml".to_string(),
+            "mc:Ignorable names w14, wp14, which no namespace declaration binds, so Word refuses the file or offers to repair it. stetdoc declares w14, wp14 when it writes the document.".to_string()
+        )]
+    );
+    let report = doc.check();
+    assert!(!report.ok);
+    assert_eq!(
+        report.findings[0].class,
+        crate::api::check::Class::Violation
+    );
+}
+
+#[test]
+fn check_reports_nothing_when_the_prefixes_are_declared() {
+    let declared = format!(" xmlns:w14=\"{W14}\" xmlns:wp14=\"{WP14}\"");
+    let doc = open_main(&declared, "w14 wp14", BODY);
+    assert!(undeclared(&doc).is_empty(), "{:?}", undeclared(&doc));
+    assert!(doc.check().ok, "{:?}", doc.check().findings);
+}
+
+#[test]
+fn check_reports_only_the_prefix_that_is_not_declared() {
+    let declared = format!(" xmlns:w14=\"{W14}\"");
+    let doc = open_main(&declared, "w14 wp14", BODY);
+    let found = undeclared(&doc);
+    assert_eq!(found.len(), 1, "{found:?}");
+    assert!(
+        found[0].1.starts_with("mc:Ignorable names wp14, which"),
+        "{found:?}"
+    );
+    assert!(
+        found[0].1.contains("stetdoc declares wp14 when"),
+        "{found:?}"
+    );
+}
+
+#[test]
+fn a_finding_word_refuses_is_listed_first_even_past_the_listing_limit() {
+    // More schema violations than the report lists, all before the root's finding in document order.
+    let n = crate::api::check::CheckReport::MAX_FINDINGS + 30;
+    let body: String = (0..n)
+        .map(|i| format!("<w:p><w:r><w:t w:space=\"x\">clause {i}</w:t></w:r></w:p>"))
+        .collect();
+    let doc = open_main("", "w14 wp14", &body);
+    let report = doc.check();
+    assert_eq!(report.violations, n + 1, "{:?}", report.by_code);
+    assert_eq!(
+        report.findings.len(),
+        crate::api::check::CheckReport::MAX_FINDINGS
+    );
+    assert_eq!(report.findings[0].code, FindingCode::McPrefixUndeclared);
+    assert_eq!(report.findings[0].part, "word/document.xml");
+    assert!(report.findings[0].message.contains("w14, wp14"));
+    assert_eq!(
+        report
+            .findings
+            .iter()
+            .filter(|f| f.code == FindingCode::McPrefixUndeclared)
+            .count(),
+        1
     );
 }

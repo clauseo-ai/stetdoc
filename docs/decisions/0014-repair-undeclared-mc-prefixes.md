@@ -49,6 +49,12 @@ did not touch. Passing the defect through faithfully gave the user a file Word w
 - **`check` reports the defect** on any document with a new finding code, `mc_prefix_undeclared`, a violation, so
   `stetdoc check` of the input says that Word will not open it. Like every problem of the input, it is reported and never
   blocks an edit, and after any edit it is gone.
+- **`check` lists it first** (amended on 2026-10-30). A report lists the findings that make Word refuse the file or
+  offer to repair it before every other finding, in a quota of their own, so that neither the 200 findings a report keeps
+  nor the 20 lines `stetdoc check` prints without `--all` can hide them behind the part's schema findings. The finding
+  sat after those and was missed on the Harvey LAB inputs. Its message names the prefixes, and says that stetdoc declares
+  the ones Word knows and removes the others when it writes the document. `mc_prefix_undeclared` is the only such code
+  today (`check::report::word_refuses`).
 - **L2 is amended** for this defect class only: a write may change the start tags of the elements that name undeclared
   prefixes, in any part the check reads, by the declarations and token removals above. The testkit's entry-level check
   of L2 lets the font table and web settings change for this reason; every other part it allows already.

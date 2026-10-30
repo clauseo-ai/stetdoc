@@ -472,6 +472,13 @@ Releases, npm, PyPI, Homebrew and crates.io (`cargo install stetdoc --locked`, w
 
 ### Fixed
 
+- `stetdoc check` lists `mc_prefix_undeclared` first, on a .docx, a working copy and the MCP check tool, so a prefix
+  that `mc:Ignorable` names and nothing declares is the first thing the check says about the input. It used to come after
+  the part's schema findings, past the 20 that the text lists without `--all`, and past the 200 that a report keeps when
+  the part had more. Its message names the part and the prefixes, says that Word refuses the file or offers to repair
+  it, and says which prefixes stetdoc declares and which it removes when it writes the document
+  ([decision 0014](docs/decisions/0014-repair-undeclared-mc-prefixes.md)).
+
 - An input whose `mc:Ignorable` names prefixes it never declares, as python-docx leaves some templates' main part, no
   longer gives an output that Word refuses to open ("Word found unreadable content"). Every edit, compare, accept and
   reject now declares the prefixes Word knows (`w14`, `wp14`, `w15`, the `w16` family and the rest Word writes) on the

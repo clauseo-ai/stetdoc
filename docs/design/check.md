@@ -187,7 +187,7 @@ A finding is a **violation** or a **note**. Every rule above and every schema ke
 
 ### 3.6 Undeclared markup-compatibility prefixes
 
-`mc_prefix_undeclared` is a violation of every part the check reads: an element whose `mc:Ignorable` or `mc:MustUnderstand` names a prefix, or whose `mc:ProcessContent` names a qualified name, that no declaration in scope binds. The schema allows the attribute and its value, and Word for Mac refuses the part ("Word found unreadable content"); the Open XML SDK calls it `MC_InvalidIgnorableAttribute`. The rule is `schema::undeclared_prefixes`, a walk of every element, cached per part generation (`check/prefixes.rs`). 5 of the 300 documents of the curated corpus have it, each in the main part, each listing `w14` and `wp14` (four Harvey LAB inputs written by python-docx and a LibreOffice test file). It is the one finding that an edit repairs instead of carrying: every write declares the prefixes Word knows and drops the others, in every part, touched or not ([decision 0014](../decisions/0014-repair-undeclared-mc-prefixes.md)), so the finding is never new and is gone after any edit.
+`mc_prefix_undeclared` is a violation of every part the check reads: an element whose `mc:Ignorable` or `mc:MustUnderstand` names a prefix, or whose `mc:ProcessContent` names a qualified name, that no declaration in scope binds. The schema allows the attribute and its value, and Word for Mac refuses the part ("Word found unreadable content"); the Open XML SDK calls it `MC_InvalidIgnorableAttribute`. The rule is `schema::undeclared_prefixes`, a walk of every element, cached per part generation (`check/prefixes.rs`). 5 of the 300 documents of the curated corpus have it, each in the main part, each listing `w14` and `wp14` (four Harvey LAB inputs written by python-docx and a LibreOffice test file). It is the one finding that an edit repairs instead of carrying: every write declares the prefixes Word knows and drops the others, in every part, touched or not ([decision 0014](../decisions/0014-repair-undeclared-mc-prefixes.md)), so the finding is never new and is gone after any edit. A report lists it before every other finding, in a quota of its own, so the part's schema findings never push it past the report's 200 or the 20 lines `stetdoc check` prints.
 
 ## 4. The comment audit
 
@@ -290,7 +290,7 @@ The errors `edit` returns are `validation_failed`, and `internal` for a `Declare
 pub struct CheckReport {
     pub ok: bool,                        // no violation, notes allowed
     pub violations: usize, pub notes: usize,
-    pub findings: Vec<Finding>,          // violations first; at most 200
+    pub findings: Vec<Finding>,          // what Word refuses, then violations, then notes; at most 200
     pub by_code: Vec<(FindingCode, usize)>,   // every code that occurred, complete
     pub parts: usize,                    // parts examined
     pub unchecked: usize,                // parts with no schema, or unreadable

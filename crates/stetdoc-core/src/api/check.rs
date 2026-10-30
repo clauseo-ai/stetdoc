@@ -121,7 +121,7 @@ finding_codes! {
     McPrefixUndeclared {
         wire: "mc_prefix_undeclared",
         class: Violation,
-        doc: "mc:Ignorable, mc:ProcessContent or mc:MustUnderstand names a prefix that no namespace declaration binds. The schema allows the attribute, and Word refuses to open the file. An edit repairs it in every part it writes (decision 0014).",
+        doc: "mc:Ignorable, mc:ProcessContent or mc:MustUnderstand names a prefix that no namespace declaration binds. The schema allows the attribute, and Word refuses to open the file or offers to repair it. A report lists it before every other finding, and an edit repairs it in every part it writes (decision 0014).",
     }
     SchemaUnexpectedText {
         wire: "schema_unexpected_text",
@@ -346,8 +346,9 @@ pub struct CheckReport {
     pub violations: usize,
     /// How many notes there are, all of them.
     pub notes: usize,
-    /// The findings in the order they were found, violations first and then notes, at most
-    /// [`CheckReport::MAX_FINDINGS`] of them.
+    /// The findings in the order they were found, at most [`CheckReport::MAX_FINDINGS`] of them: first
+    /// the ones that make Word refuse the file or offer to repair it (`mc_prefix_undeclared`), then the
+    /// other violations, then notes.
     pub findings: Vec<Finding>,
     /// Every code that occurred and how many times, in the order of [`FindingCode::ALL`]. It
     /// counts all the findings, and not only the ones in `findings`.

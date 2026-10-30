@@ -163,7 +163,7 @@ fn schema(builder: &mut Builder, source: &Source<'_, '_>, report: &Report<NodeId
 
 fn add_found(builder: &mut Builder, source: &Source<'_, '_>, found: &Found) {
     builder.count(found.code, 1);
-    if builder.has_room(found.code.class()) {
+    if builder.has_room_for(found.code) {
         builder.list(source.finding(found));
     }
 }

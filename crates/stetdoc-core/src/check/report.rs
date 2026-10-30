@@ -104,10 +104,19 @@ pub(crate) fn sentence(code: FindingCode, subject: &str) -> String {
     }
 }
 
+/// Whether Word refuses a file with a finding of this code, or opens it only after offering to repair it. Such a
+/// finding is listed before every other one and is never crowded out by them, because it decides whether the file opens
+/// at all (decision 0014).
+pub(crate) fn word_refuses(code: FindingCode) -> bool {
+    matches!(code, FindingCode::McPrefixUndeclared)
+}
+
 /// Collects findings into a [`CheckReport`]. Counts are kept for every finding, and the findings
-/// are listed up to the limit of the report, violations and notes separately, so that a document
-/// with a million notes cannot crowd the violations out.
+/// are listed up to the limit of the report: the ones Word refuses first, then the other violations,
+/// then the notes, each kind separately, so that a document with a million notes cannot crowd the
+/// violations out, nor a million violations the one that stops Word opening the file.
 pub(crate) struct Builder {
+    refused: Vec<Finding>,
     violations: Vec<Finding>,
     notes: Vec<Finding>,
     counts: BTreeMap<FindingCode, usize>,
@@ -119,6 +128,7 @@ impl Builder {
     /// An empty report.
     pub(crate) fn new() -> Builder {
         Builder {
+            refused: Vec::new(),
             violations: Vec::new(),
             notes: Vec::new(),
             counts: BTreeMap::new(),
@@ -161,6 +171,15 @@ impl Builder {
         }
     }
 
+    /// Whether another finding of this code would be listed.
+    pub(crate) fn has_room_for(&self, code: FindingCode) -> bool {
+        if word_refuses(code) {
+            self.refused.len() < CheckReport::MAX_FINDINGS
+        } else {
+            self.has_room(code.class())
+        }
+    }
+
     /// Counts `n` findings of a code, without listing them.
     pub(crate) fn count(&mut self, code: FindingCode, n: usize) {
         if n > 0 {
@@ -170,11 +189,16 @@ impl Builder {
 
     /// Lists a finding, if there is room, without counting it.
     pub(crate) fn list(&mut self, finding: Finding) {
-        if self.has_room(finding.class) {
-            match finding.class {
-                Class::Violation => self.violations.push(finding),
-                Class::Note => self.notes.push(finding),
-            }
+        if !self.has_room_for(finding.code) {
+            return;
+        }
+        if word_refuses(finding.code) {
+            self.refused.push(finding);
+            return;
+        }
+        match finding.class {
+            Class::Violation => self.violations.push(finding),
+            Class::Note => self.notes.push(finding),
         }
     }
 
@@ -194,7 +218,9 @@ impl Builder {
                 .sum::<usize>()
         };
         let (violations, notes) = (total(Class::Violation), total(Class::Note));
-        let mut findings = self.violations;
+        let mut findings = self.refused;
+        let room = CheckReport::MAX_FINDINGS.saturating_sub(findings.len());
+        findings.extend(self.violations.into_iter().take(room));
         let room = CheckReport::MAX_FINDINGS.saturating_sub(findings.len());
         findings.extend(self.notes.into_iter().take(room));
         CheckReport {

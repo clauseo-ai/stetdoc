@@ -6,7 +6,7 @@ use super::found::Found;
 use super::keys::Key;
 use crate::api::check::FindingCode;
 use crate::api::error::StetError;
-use crate::schema::{Undeclared, undeclared_prefixes};
+use crate::schema::{Undeclared, prefix_namespace, undeclared_prefixes};
 use crate::state::{Dep, PartId, PartsView};
 use crate::xml::NodeId;
 use std::sync::Arc;
@@ -45,13 +45,25 @@ pub(super) fn findings(list: &Prefixes) -> Vec<Found> {
                 }
             }
             let prefixes = u.prefixes().join(", ");
+            let (known, unknown): (Vec<&str>, Vec<&str>) = u
+                .prefixes()
+                .into_iter()
+                .partition(|p| prefix_namespace(p).is_some());
+            let mut repair: Vec<String> = Vec::new();
+            if !known.is_empty() {
+                repair.push(format!("declares {}", known.join(", ")));
+            }
+            if !unknown.is_empty() {
+                repair.push(format!("removes {} from the attribute", unknown.join(", ")));
+            }
             Found {
                 key: Key::rule(code, prefixes.clone()),
                 code,
                 node: Some(u.node),
                 message: format!(
-                    "{}, which no namespace declaration binds, so Word will not open the file. An edit declares a prefix Word knows and drops one it does not.",
-                    said.join(" and ")
+                    "{}, which no namespace declaration binds, so Word refuses the file or offers to repair it. stetdoc {} when it writes the document.",
+                    said.join(" and "),
+                    repair.join(" and ")
                 ),
             }
         })

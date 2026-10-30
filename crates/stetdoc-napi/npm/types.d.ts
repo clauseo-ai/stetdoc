@@ -75,8 +75,9 @@ export type CheckReport = {
    */
   by_code: [FindingCode, number][];
   /**
-   * The findings in the order they were found, violations first and then notes, at most
-   * [`CheckReport::MAX_FINDINGS`] of them.
+   * The findings in the order they were found, at most [`CheckReport::MAX_FINDINGS`] of them: first
+   * the ones that make Word refuse the file or offer to repair it (`mc_prefix_undeclared`), then the
+   * other violations, then notes.
    */
   findings: Finding[];
   /** How many notes there are, all of them. */

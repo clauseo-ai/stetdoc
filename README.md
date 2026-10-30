@@ -28,8 +28,8 @@ Markdown lose formatting, tracked changes and comments.
 
 ## Usage
 
-One `stetdoc` binary and a skill that works in any agent with a shell. Until the first release, build it from this
-repository with `cargo install --path crates/stetdoc-cli`.
+One `stetdoc` binary and a skill that works in any agent with a shell. Install it with `cargo install stetdoc --locked`,
+or see [docs/agents.md](docs/agents.md) for Homebrew, PyPI, npm and the install script.
 
 ```
 export STETDOC_AUTHOR="Jane Doe"   # every revision has an author (or save yours once with stetdoc init)

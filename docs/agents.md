@@ -13,13 +13,7 @@ over this page when the two disagree.
 
 ## Install stetdoc
 
-Nothing has been released yet. Until the first release, build from a checkout of the repository:
-
-```
-cargo install --path crates/stetdoc-cli
-```
-
-Once releases exist, any of these works.
+Any of these works.
 
 | Channel | Command | Notes |
 | --- | --- | --- |
@@ -27,7 +21,7 @@ Once releases exist, any of these works.
 | PyPI | `uv tool install stetdoc` | Or `pipx install stetdoc`, or `pip install stetdoc`. The wheel holds the native binary, so no Python runs after the install. `uvx stetdoc` runs it without installing |
 | npm | `npx stetdoc --version` | Runs the binary for your platform without installing it. `npm install -g stetdoc` puts it on the PATH |
 | Install script | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | macOS and Linux. Checks the SHA-256 and installs to `~/.local/bin`, or `$STETDOC_INSTALL_DIR` |
-| Cargo | `cargo install --path crates/stetdoc-cli` | Works today, from a checkout |
+| Cargo | `cargo install stetdoc --locked` | Builds from source on crates.io. Needs a Rust toolchain |
 
 An agent may run `stetdoc` dozens of times in one task, so pick a channel that puts the binary itself on the PATH:
 Homebrew, the install script, or `uv tool install` / `pipx`. Each call then starts in about 5 ms. Through `npx` each call

@@ -27,13 +27,13 @@ repository has a GitHub remote. A maintainer runs those steps. The release workf
 ## Where the files must sit
 
 Most files sit under `packaging/`. Each plugin has its own folder under `plugins/`, so installing one plugin copies only
-that folder. Two marketplace indexes must sit at the repository root, because their docs say so. Nothing else is at the root.
+that folder. Two marketplace indexes must sit at the repository root, because their docs say so. The only other packaging file at the root is `favicon.svg`, a copy of `packaging/brand/favicon.svg`, where tools look for a repository's icon.
 
 | Path | Read by | Why it sits there |
 | --- | --- | --- |
 | `.claude-plugin/marketplace.json` | Claude Code | The marketplace is the repository root. Its plugin entry points at `./plugins/claude` ([marketplace reference](https://code.claude.com/docs/en/plugins/marketplace-reference.md)). |
 | `.agents/plugins/marketplace.json` | Codex, ChatGPT desktop | The repository marketplace is read from `$REPO_ROOT/.agents/plugins/`, and its plugins live in `./plugins/<name>` ([OpenAI plugins](https://developers.openai.com/plugins/build/plugins)). |
-| `plugins/claude/` | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/icon.png` (the listing icon, a placeholder for now), `hooks/hooks.json` with `hooks/docx-guard.sh`, and `skills/stetdoc/SKILL.md`. No MCP entry: in Claude Code the skill and the `stetdoc` command are the route. |
+| `plugins/claude/` | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/icon.png` (the listing icon, rendered from `packaging/brand/`), `hooks/hooks.json` with `hooks/docx-guard.sh`, and `skills/stetdoc/SKILL.md`. No MCP entry: in Claude Code the skill and the `stetdoc` command are the route. |
 | `plugins/cursor/` | Cursor | `.cursor-plugin/plugin.json`, `mcp.json` and `skills/stetdoc/SKILL.md`. Cursor needs no index file for a plugin to load. |
 | `plugins/openai/` | Codex, ChatGPT desktop | `plugin.json` (portable format), `mcp.json` and `skills/stetdoc/SKILL.md`. |
 

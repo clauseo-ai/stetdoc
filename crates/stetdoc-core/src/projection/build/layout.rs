@@ -41,7 +41,9 @@ impl PartsView<'_> {
     /// The tops of the story at `part` in `mode`, cached until the part changes. With `expanded` no field is
     /// collapsed, so a selection inside a table of contents shows its paragraphs. Whether a field is collapsed depends on the
     /// mode, as what it would hide does: text that a pending deletion takes out is not in `Final`, so there a field it was
-    /// the only text beside is collapsed, as it is once the deletion is accepted.
+    /// the only text beside is collapsed, as it is once the deletion is accepted. Its paragraphs are counted as the review makes
+    /// them too: in `Final` a paragraph whose mark is deleted is one with the next, as once accepted, and in `Original` one
+    /// whose mark is inserted, as once rejected. `Redline` counts the paragraphs as they are.
     pub(crate) fn tops(
         &self,
         part: PartId,
@@ -143,6 +145,11 @@ fn collapse_fields(story: &Story, tree: &SpanTree, tops: Vec<Top>, mode: Mode) -
         ) else {
             continue;
         };
+        if mode != Mode::Redline
+            && paragraphs_once_reviewed(story, tree, &tops, (tb, te), mode) < COLLAPSE_AT
+        {
+            continue;
+        }
         let (Some(first), Some(last)) = (tops.get(tb), tops.get(te)) else {
             continue;
         };
@@ -207,6 +214,29 @@ fn shows_text(story: &Story, tree: &SpanTree, i: usize, mode: Mode) -> bool {
             .iter()
             .any(|item| item.len > 0 && item.vis.in_mode(mode))
     })
+}
+
+/// How many top-level blocks the tops `tb..=te` make once the revisions are reviewed as `mode` shows them: accepted for `Final`,
+/// rejected for `Original`. A paragraph whose mark is gone in `mode` (deleted for `Final`, inserted for `Original`) is one block
+/// with the paragraph it joins, so a field is collapsed in the view exactly when it is in the file that the review makes.
+fn paragraphs_once_reviewed(
+    story: &Story,
+    tree: &SpanTree,
+    tops: &[Top],
+    (tb, te): (usize, usize),
+    mode: Mode,
+) -> usize {
+    let tops = tops.get(tb..=te).unwrap_or_default();
+    let joined = tops
+        .windows(2)
+        .filter(|w| match w {
+            [prev, next] => {
+                prev.end == next.first && story.join_run(tree, prev.first, mode).end > next.first
+            }
+            _ => false,
+        })
+        .count();
+    tops.len() - joined
 }
 
 /// The index of the first top a collapsed field covers, from the top where it begins `tb` in `mode`, or `None` when the

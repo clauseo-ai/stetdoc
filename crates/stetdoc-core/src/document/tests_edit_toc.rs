@@ -56,7 +56,12 @@ fn shown(doc: &Document, mode: Mode) -> String {
 /// The texts the body's Final view shows, in order: each block line without its ref and markers, and a collapsed field as
 /// `toc`. A paragraph that the view hides because it joins the next is not a line.
 fn final_lines(doc: &Document) -> Vec<String> {
-    shown(doc, Mode::Final)
+    lines_in(doc, Mode::Final)
+}
+
+/// `final_lines`, in any mode.
+fn lines_in(doc: &Document, mode: Mode) -> Vec<String> {
+    shown(doc, mode)
         .lines()
         .filter_map(|l| {
             if l.starts_with("{opaque toc") {
@@ -140,4 +145,145 @@ fn deleting_a_paragraph_before_a_table_of_contents_shows_in_final_what_accepting
     );
     accept(&mut doc);
     assert_eq!(final_lines(&doc), intended, "{}", shown(&doc, Mode::Final));
+}
+
+/// A table of contents over three paragraphs, the first with the paragraph mark `mark` (`""`, or a tracked `ins` or `del`), the
+/// second with `entry` as its runs, and the third only the field's end, followed by "After".
+fn toc_of_three(mark: &str, entry: &str) -> Document {
+    let p_pr = if mark.is_empty() {
+        String::new()
+    } else {
+        format!(
+            r#"<w:pPr><w:rPr><w:{mark} w:id="90" w:author="JD" w:date="2026-01-01T00:00:00Z"/></w:rPr></w:pPr>"#
+        )
+    };
+    let body = [
+        format!(
+            r#"<w:p>{p_pr}<w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText> TOC \o "1-3" </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r><w:r><w:t xml:space="preserve">Heading one	1</w:t></w:r></w:p>"#
+        ),
+        format!("<w:p>{entry}</w:p>"),
+        r#"<w:p><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>"#.to_string(),
+        r#"<w:p><w:r><w:t>After</w:t></w:r></w:p>"#.to_string(),
+    ]
+    .concat();
+    let xml = parts::Doc::new().body(&body).bytes();
+    Document::open(
+        Zip::new(parts::entries_doc(&xml)).build(),
+        &OpenOptions::default(),
+    )
+    .unwrap()
+}
+
+const ENTRY: &str = r#"<w:r><w:t xml:space="preserve">Heading two	1</w:t></w:r>"#;
+
+/// The text of a line: its markers left out, but for a field marker, which reads as its quoted text.
+fn line_text(line: &str) -> String {
+    let mut out = String::new();
+    let mut rest = line;
+    while let Some(at) = rest.find('{') {
+        out.push_str(&rest[..at]);
+        let end = rest[at..].find('}').map_or(rest.len(), |e| at + e);
+        let marker = &rest[at..end];
+        if marker.starts_with("{field ")
+            && let (Some(a), Some(b)) = (marker.find('"'), marker.rfind('"'))
+        {
+            out.push_str(&marker[a + 1..b.max(a + 1)]);
+        }
+        rest = rest.get(end + 1..).unwrap_or_default();
+    }
+    out.push_str(rest);
+    out.trim().to_string()
+}
+
+/// The body's lines in a mode as a review would leave them, as L5 compares them: each line's text without its ref, a collapsed
+/// field as `toc`, and a paragraph that joins the next one in one line with it.
+fn joined_lines(doc: &Document, mode: Mode) -> Vec<String> {
+    let mut out: Vec<String> = Vec::new();
+    let mut join = false;
+    for l in shown(doc, mode).lines() {
+        let text = if l.starts_with("{opaque toc") {
+            "toc".to_string()
+        } else {
+            let (r, rest) = l.split_once(' ').unwrap_or((l, ""));
+            if !(r.len() > 1 && r.starts_with('p') && r[1..].chars().all(|c| c.is_ascii_digit())) {
+                continue;
+            }
+            rest.to_string()
+        };
+        let joins = text.contains("{joins-next}");
+        let text = line_text(&text);
+        match out.last_mut() {
+            Some(last) if join => last.push_str(&text),
+            _ => out.push(text),
+        }
+        join = joins;
+    }
+    out
+}
+
+/// The document's Final and Original lines, and those of the document that accepting and rejecting every revision make.
+fn reviewed(make: impl Fn() -> Document) -> [(Vec<String>, Vec<String>); 2] {
+    let doc = &make();
+    let mut accepted = make();
+    accept(&mut accepted);
+    let mut rejected = make();
+    run(&mut rejected, r#"{"op":"reject","all":true}"#);
+    [
+        (
+            joined_lines(doc, Mode::Final),
+            joined_lines(&accepted, Mode::Final),
+        ),
+        (
+            joined_lines(doc, Mode::Original),
+            joined_lines(&rejected, Mode::Original),
+        ),
+    ]
+}
+
+#[test]
+fn a_table_of_contents_that_a_deleted_mark_brings_under_three_paragraphs_stays_open_in_final() {
+    // In Final the first paragraph joins the second, so the field spans two paragraphs, as once accepted, and is not collapsed
+    // (fdo77129.docx, seed 9351215736669558703). In Original the mark is there, three paragraphs, as once rejected.
+    let doc = toc_of_three("del", ENTRY);
+    let [(fin, accepted), (orig, rejected)] = reviewed(|| toc_of_three("del", ENTRY));
+    assert!(
+        !fin.contains(&"toc".to_string()),
+        "{}",
+        shown(&doc, Mode::Final)
+    );
+    assert_eq!(fin, accepted, "{}", shown(&doc, Mode::Final));
+    assert_eq!(orig, ["toc", "After"], "{}", shown(&doc, Mode::Original));
+    assert_eq!(orig, rejected);
+    // The redline counts the paragraphs as they are.
+    assert!(shown(&doc, Mode::Redline).contains("{opaque toc"));
+}
+
+#[test]
+fn a_table_of_contents_that_an_inserted_mark_brings_to_three_paragraphs_stays_open_in_original() {
+    // In Original the inserted mark is gone and the first paragraph joins the second, as once rejected; in Final it is there.
+    let doc = toc_of_three("ins", ENTRY);
+    let [(fin, accepted), (orig, rejected)] = reviewed(|| toc_of_three("ins", ENTRY));
+    assert!(
+        !orig.contains(&"toc".to_string()),
+        "{}",
+        shown(&doc, Mode::Original)
+    );
+    assert_eq!(orig, rejected, "{}", shown(&doc, Mode::Original));
+    assert_eq!(fin, ["toc", "After"], "{}", shown(&doc, Mode::Final));
+    assert_eq!(fin, accepted);
+    assert!(shown(&doc, Mode::Redline).contains("{opaque toc"));
+}
+
+#[test]
+fn a_table_of_contents_whose_paragraphs_no_revision_joins_collapses_in_every_mode() {
+    // A pending insertion of text in an entry leaves the three paragraphs as they are.
+    let entry = format!(
+        r#"{ENTRY}<w:ins w:id="91" w:author="JD" w:date="2026-01-01T00:00:00Z"><w:r><w:t>new</w:t></w:r></w:ins>"#
+    );
+    let doc = toc_of_three("", &entry);
+    let [(fin, accepted), (orig, rejected)] = reviewed(|| toc_of_three("", &entry));
+    assert_eq!(fin, ["toc", "After"], "{}", shown(&doc, Mode::Final));
+    assert_eq!((&fin, &orig), (&accepted, &rejected));
+    assert_eq!(orig, fin);
+    assert!(shown(&doc, Mode::Redline).contains("{opaque toc"));
 }

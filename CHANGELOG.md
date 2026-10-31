@@ -7,6 +7,11 @@ All notable changes to stetdoc are recorded here. The format follows
 
 ## Unreleased
 
+### Fixed
+
+- The Claude Code guard hook reads the tool call to the end when `STETDOC_GUARD=off` turns it off, so Claude Code
+  never writes into a closed pipe. Its test failed now and then in CI for that reason.
+
 ## [0.9.0] - 2026-10-30
 
 The first release: the `stetdoc` CLI with its MCP server and the agent plugins, built for seven targets, from GitHub

@@ -9,8 +9,13 @@
 # better than a blocked stetdoc task. docs/agents.md lists what it blocks. STETDOC_GUARD=off in Claude Code's
 # environment turns it off.
 
+# Turned off, it still reads the tool call to the end: a hook that exits before its caller has written stdin leaves the
+# caller with a broken pipe.
 case "${STETDOC_GUARD:-}" in
-off | 0 | false | no) exit 0 ;;
+off | 0 | false | no)
+    cat >/dev/null
+    exit 0
+    ;;
 esac
 
 prog='

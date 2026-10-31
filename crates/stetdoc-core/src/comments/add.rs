@@ -6,7 +6,7 @@
 use super::body::{self, NewComment, ParaSpec};
 use super::errors::{internal, invalid, unsupported};
 use super::lookup::{find, locate};
-use super::parts::{ensure_comments, ensure_extended, names};
+use super::parts::{ensure_comments, ensure_extended, names, refuse_w15_preview};
 use super::{CommentAction, CommentEffect, CommentWarning, rows, styles};
 use crate::api::error::{ErrorCode, StetError};
 use crate::revisions::compiler::Compiler;
@@ -71,7 +71,9 @@ pub(super) struct New<'a> {
 }
 
 /// Writes the comment, its paragraphs and its rows, creating `comments.xml` and `commentsExtended.xml` if
-/// the document has none and adding the two styles if it has neither. Returns the parts it wrote.
+/// the document has none and adding the two styles if it has neither. Returns the parts it wrote. A package
+/// with no `commentsExtended` that binds `w15` to the preview namespace gets no `w15` row, and no `commentsExtended.xml`: the new
+/// comment is open and has no parent, which is what Word reads from a comment with no row.
 pub(super) fn write(
     tx: &mut PartWriter<'_, '_>,
     stamp: &RevStamp,
@@ -125,8 +127,10 @@ pub(super) fn write(
     )?;
     super::xmlw::place(tree, crate::schema::PartKind::Comments, root, element)?;
     written.push(Arc::clone(&comments));
-    rows::add_extended(tx, &extended, last, new.parent_para, new.done)?;
-    written.push(extended);
+    if let Some(extended) = extended {
+        rows::add_extended(tx, &extended, last, new.parent_para, new.done)?;
+        written.push(extended);
+    }
     if let (Some(part), Some(d)) = (&n.ids, durable) {
         rows::add_id(tx, part, last, d)?;
         written.push(Arc::clone(part));
@@ -135,7 +139,7 @@ pub(super) fn write(
         rows::add_extensible(tx, part, d)?;
         written.push(Arc::clone(part));
     }
-    if let Some(part) = &n.people {
+    if let Some(part) = n.people.as_ref().filter(|_| !n.w15_preview) {
         rows::add_person(tx, part, stamp.author())?;
         written.push(Arc::clone(part));
     }
@@ -218,7 +222,8 @@ pub(crate) fn add(
 /// Replies to the thread that holds the comment `comment`. The reply names the thread's root as its parent,
 /// takes its place beside the root's markers, and is as resolved as the root is. A reply to a resolved
 /// thread succeeds and says so. A thread whose root has no range cannot be answered: there is nothing to
-/// anchor beside.
+/// anchor beside. A package with no `commentsExtended` that binds `w15` to the preview namespace cannot hold the reply's link to its
+/// thread, so the reply is `unsupported` there (`parts::refuse_w15_preview`).
 pub(crate) fn reply(
     c: &mut Compiler<'_, '_>,
     stamp: &RevStamp,
@@ -242,6 +247,9 @@ pub(crate) fn reply(
             )));
         };
         let n = names(&view)?;
+        if n.w15_preview {
+            return Err(refuse_w15_preview("A reply's link to its thread"));
+        }
         let w = view
             .id(&anchor_part)
             .map(|id| view.tree(id))
@@ -262,7 +270,8 @@ pub(crate) fn reply(
     let mut writer = c.parts_mut();
     let tx = &mut writer;
     ensure_comments(tx)?;
-    let extended = ensure_extended(tx)?;
+    let extended =
+        ensure_extended(tx)?.ok_or_else(|| internal("a reply on a package with no w15 rows"))?;
     let mut parts: Vec<Arc<str>> = Vec::new();
     let root_para = match root_para {
         Some(p) => p,

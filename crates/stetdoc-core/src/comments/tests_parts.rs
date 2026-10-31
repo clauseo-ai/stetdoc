@@ -81,12 +81,16 @@ fn a_new_extended_part_has_an_open_row_for_each_comment_that_has_a_paragraph_id(
     ]);
     let state = pkg.open();
     let mut tx = state.begin();
-    let name = parts::ensure_extended(&mut PartWriter::over(&mut tx)).unwrap();
+    let name = parts::ensure_extended(&mut PartWriter::over(&mut tx))
+        .unwrap()
+        .unwrap();
     let xml = text(&tx, &name);
     assert_eq!(xml.matches("<w15:commentEx ").count(), 2, "{xml}");
     assert!(xml.contains("w15:paraId=\"0000000A\" w15:done=\"0\""));
     assert_eq!(
-        &*parts::ensure_extended(&mut PartWriter::over(&mut tx)).unwrap(),
+        &*parts::ensure_extended(&mut PartWriter::over(&mut tx))
+            .unwrap()
+            .unwrap(),
         &*name
     );
 }

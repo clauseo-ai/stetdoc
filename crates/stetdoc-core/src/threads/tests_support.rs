@@ -19,6 +19,8 @@ const CT: &str = "application/vnd.openxmlformats-officedocument.wordprocessingml
 pub(crate) struct Pkg {
     strict: bool,
     body: String,
+    /// More namespace declarations on the root of the main part, as written.
+    decls: String,
     parts: Vec<(PartKind, &'static str, &'static str, String)>,
 }
 
@@ -28,6 +30,7 @@ impl Pkg {
         Pkg {
             strict: false,
             body: body.to_owned(),
+            decls: String::new(),
             parts: Vec::new(),
         }
     }
@@ -35,6 +38,14 @@ impl Pkg {
     /// Makes the document Strict: its root is in the Strict namespace.
     pub(crate) fn strict(mut self) -> Pkg {
         self.strict = true;
+        self
+    }
+
+    /// Declares `prefix` as `uri` on the root of the main part, with `mc:Ignorable` naming it, as Word
+    /// writes the extension namespaces it uses.
+    pub(crate) fn declare(mut self, prefix: &str, uri: &str) -> Pkg {
+        self.decls =
+            format!(" xmlns:{prefix}=\"{uri}\" xmlns:mc=\"{MC}\" mc:Ignorable=\"{prefix}\"");
         self
     }
 
@@ -174,8 +185,9 @@ impl Pkg {
     /// part in the package that is not in it is an unrelated part.
     pub(crate) fn bytes_related(&self, related: impl Fn(PartKind) -> bool) -> Vec<u8> {
         let doc = format!(
-            "{DECL}<w:document xmlns:w=\"{}\"><w:body>{}<w:sectPr/></w:body></w:document>",
+            "{DECL}<w:document xmlns:w=\"{}\"{}><w:body>{}<w:sectPr/></w:body></w:document>",
             self.ns(),
+            self.decls,
             self.body
         );
         let mut types = String::new();

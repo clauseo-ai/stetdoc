@@ -1,6 +1,12 @@
 //! Finding and creating the comment parts of a document: `comments.xml` when there is none, and
 //! `commentsExtended.xml`, which threads and the done flag need. The other extension parts are kept up to
 //! date when they exist and are not created (`docs/design/comments-and-notes.md`, section 15).
+//!
+//! A package that binds `w15` to the namespace of Word 2013's preview (`…/word/2010/11/wordml`) and has no
+//! `commentsExtended` gets none, and no `w15` row: desktop Word refuses such a file once a `commentsExtended`
+//! part with rows is beside it, and opens it when the part is not there (Comment035 of the Open XML SDK's
+//! corpus, Word 16.114). A package that has the part already keeps it up to date, in its own namespace, as
+//! any other: the rows of the new comments are what keeps it consistent with `comments.xml`.
 
 use crate::api::error::{ErrorCode, StetError};
 use crate::package::NewPart;
@@ -35,6 +41,19 @@ pub(super) struct Names {
     pub(super) extensible: Option<Arc<str>>,
     /// `people.xml`.
     pub(super) people: Option<Arc<str>>,
+    /// True if the package has no `commentsExtended` and the main part or a comment part binds a prefix to
+    /// the `w15` namespace of Word 2013's preview. Then no `commentsExtended.xml` is made and no `w15` row is
+    /// written (`commentsExtended`, `people`).
+    pub(super) w15_preview: bool,
+}
+
+/// True if the root of the part binds a prefix to the `w15` namespace of Word 2013's preview.
+fn binds_w15_preview(view: &PartsView<'_>, part: crate::state::PartId) -> Result<bool, StetError> {
+    Ok(view
+        .tree(part)?
+        .root()
+        .attrs()
+        .any(|a| a.is_namespace_declaration() && a.value() == crate::threads::NS_W15_PREVIEW))
 }
 
 /// The parts, as a view sees them.
@@ -48,7 +67,15 @@ pub(super) fn names(view: &PartsView<'_>) -> Result<Names, StetError> {
         .ok_or_else(|| StetError::new(ErrorCode::Internal, "the document has no main part"))?;
     let parts = CommentParts::find(view, main.0)?;
     let name = |p: Option<crate::state::PartId>| p.and_then(|p| view.name(p)).cloned();
+    let mut w15_preview = false;
+    if parts.extended.is_none() {
+        w15_preview = binds_w15_preview(view, main.0)?;
+        for part in parts.all() {
+            w15_preview = w15_preview || binds_w15_preview(view, part)?;
+        }
+    }
     Ok(Names {
+        w15_preview,
         strict: view.tree(main.0)?.root().namespace() == STRICT_W,
         main: main.1,
         comments: name(parts.comments),
@@ -131,11 +158,15 @@ pub(super) fn ensure_comments(tx: &mut PartWriter<'_, '_>) -> Result<Arc<str>, S
 }
 
 /// `commentsExtended.xml`: the part that exists, or a new one that has a row, open and with no parent,
-/// for every comment whose last paragraph has a `paraId`.
-pub(super) fn ensure_extended(tx: &mut PartWriter<'_, '_>) -> Result<Arc<str>, StetError> {
+/// for every comment whose last paragraph has a `paraId`. `None` for a package that binds `w15` to the
+/// preview namespace and has none, which gets no rows (`Names::w15_preview`).
+pub(super) fn ensure_extended(tx: &mut PartWriter<'_, '_>) -> Result<Option<Arc<str>>, StetError> {
     let n = names(&tx.parts())?;
+    if n.w15_preview {
+        return Ok(None);
+    }
     if let Some(e) = n.extended {
-        return Ok(e);
+        return Ok(Some(e));
     }
     let w15 = crate::threads::NS_W15;
     let rows: String = Threads::of(&tx.parts())?
@@ -147,5 +178,17 @@ pub(super) fn ensure_extended(tx: &mut PartWriter<'_, '_>) -> Result<Arc<str>, S
     let xml = format!(
         "{DECL}<w15:commentsEx xmlns:w15=\"{w15}\" xmlns:mc=\"{MC}\" mc:Ignorable=\"w15\">{rows}</w15:commentsEx>"
     );
-    add(tx, &n, PartKind::CommentsExtended, xml)
+    add(tx, &n, PartKind::CommentsExtended, xml).map(Some)
+}
+
+/// The refusal of an operation that only `commentsExtended` can express (a reply's link to its thread, a
+/// thread's resolved state), on a package that has no `commentsExtended` and binds `w15` to the preview
+/// namespace.
+pub(super) fn refuse_w15_preview(what: &str) -> StetError {
+    StetError::new(
+        ErrorCode::Unsupported,
+        format!(
+            "{what} is kept only in commentsExtended.xml, and this document binds w15 to the namespace of Word 2013's preview (http://schemas.microsoft.com/office/word/2010/11/wordml), beside which Word refuses that part. Add a new comment instead, or save the document in a current Word first."
+        ),
+    )
 }

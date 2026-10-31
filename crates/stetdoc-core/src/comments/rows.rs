@@ -2,7 +2,8 @@
 //! done flag or its parent, and remove the rows of removed comments.
 //!
 //! A new row takes the namespace of its part's root, which is what the rows already in it use, so a part
-//! written in the namespace of Word 2013's preview stays in it.
+//! written in the namespace of Word 2013's preview stays in it. (No row is added to a package with no `commentsExtended` that binds
+//! `w15` to that namespace: see `parts`.)
 
 use super::xmlw::{self, el};
 use crate::api::error::StetError;

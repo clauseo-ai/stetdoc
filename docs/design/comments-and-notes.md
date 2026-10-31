@@ -36,6 +36,14 @@ available, so every claim about what Word writes is a claim about files that Wor
    added to a document that has none.** `commentsIds`, `commentsExtensible` and `people` are kept up to date when they
    exist and are not created. Of the 13 documents with comments, 7 have `commentsExtended`, 4 have `commentsIds`, 1
    has `commentsExtensible` and 3 have `people` (4 more documents have a `people` part and no comments part). The alternative, writing all four as Word 365 does, was question 4 and was decided against (section 15).
+   The exception is a package that binds `w15` to the namespace of Word 2013's preview
+   (`http://schemas.microsoft.com/office/word/2010/11/wordml`, as `Comment035` of the Open XML SDK corpus does in all 11
+   parts): desktop Word (16.114) refuses it once a `commentsExtended` part with rows is beside it, and opens it with
+   stetdoc's comment when the part is absent. Such a package, when it has no `commentsExtended`, gets none and no `w15` row
+   (`commentsExtended`, `people`); a new comment is open and has no parent, which is what Word reads without a row. A reply
+   and a resolve or reopen need a row, so they are `unsupported` there. A package whose `commentsExtended` exists
+   (Word 2013's preview wrote it, as in `Comment042`) keeps it up to date in its own namespace, as before. The package's namespaces are not rewritten,
+   since that would change parts the edit does not touch.
 7. **A comment survives the removal of its text, and `reconcile` is the safety net.** `revisions` hoists range markers and comment
    references and never removes either (`revisions.md` 3.6.5, and `cleanup.rs`), so an untracked deletion, an accepted deletion or
    a rejected insertion leaves the comment at the place where its text was, with an empty range, and `comments::reconcile`
@@ -518,5 +526,5 @@ These five questions were settled in review of the first version of this documen
 1. Notes in 1.0: text edits plus `delete-note` on the compiler's primitives. Insert-note is not implemented.
 2. `edit-comment` and `reopen` (a flag of `resolve`) are in.
 3. `ARCHITECTURE.md` rule 2 gets a sentence: the comment parts are written by `comments`, and the document's stories only by the compiler.
-4. Existing extension parts are maintained, and only `commentsExtended` is created, when needed.
+4. Existing extension parts are maintained, and only `commentsExtended` is created, when needed; not at all in a package that binds `w15` to the preview namespace (1.6).
 5. No `dateUtc` on new rows.

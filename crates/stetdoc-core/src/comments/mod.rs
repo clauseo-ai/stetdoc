@@ -19,6 +19,9 @@
 //!   from `Tx::mint_id`, so ids are the highest plus one and the same on a dry run and the real edit.
 //! - Every extension part that exists is kept consistent with `comments.xml`: one row per comment that has a
 //!   `paraId`, none for a comment that is gone. Only `commentsExtended.xml` is created, when it is needed.
+//!   The exception: a package with no `commentsExtended` that binds `w15` to the namespace of Word 2013's preview gets no `w15` row
+//!   and no `commentsExtended.xml` (Word refuses the file then), and a reply or a resolve there is
+//!   `unsupported`.
 //! - A document that is Strict gets parts in the Strict namespace and the Strict relationship type.
 //! - A comment whose reference run was removed by another operation is removed with its own markers, and no
 //!   other (`reconcile`). A comment that was already stranded in the input is left alone.
@@ -51,6 +54,8 @@ mod tests_laws;
 mod tests_notes;
 #[cfg(test)]
 mod tests_parts;
+#[cfg(test)]
+mod tests_preview;
 #[cfg(test)]
 mod tests_scale;
 #[cfg(test)]

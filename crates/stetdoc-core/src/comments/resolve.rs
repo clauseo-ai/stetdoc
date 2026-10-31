@@ -8,7 +8,7 @@
 use super::add::give_para_id_at;
 use super::errors::internal;
 use super::lookup::{find, locate};
-use super::parts::{ensure_comments, ensure_extended};
+use super::parts::{ensure_comments, ensure_extended, names, refuse_w15_preview};
 use super::{CommentAction, CommentEffect, CommentWarning, rows};
 use crate::api::error::StetError;
 use crate::revisions::compiler::Compiler;
@@ -19,7 +19,8 @@ use std::sync::Arc;
 /// Sets the thread that holds `comment` to resolved, or to open when `resolved` is false. Every comment of
 /// the thread gets the same `done`. A comment with no `paraId` is given one, since a row needs it, and
 /// `commentsExtended.xml` is made if the document has none. A thread that is already as asked is left
-/// alone and the effect says so.
+/// alone and the effect says so. A package with no `commentsExtended` that binds `w15` to the preview namespace cannot hold the
+/// resolved state, so changing it there is `unsupported` (`parts::refuse_w15_preview`).
 pub(crate) fn set_resolved(
     c: &mut Compiler<'_, '_>,
     comment: i64,
@@ -94,11 +95,15 @@ pub(crate) fn set_resolved(
         });
         return Ok(effect);
     }
+    if names(&c.tx().parts())?.w15_preview {
+        return Err(refuse_w15_preview("Whether a thread is resolved"));
+    }
     let mut writer = c.parts_mut();
     let tx = &mut writer;
     let mut parts: Vec<Arc<str>> = Vec::new();
     let comments = ensure_comments(tx)?;
-    let extended = ensure_extended(tx)?;
+    let extended =
+        ensure_extended(tx)?.ok_or_else(|| internal("a resolve on a package with no w15 rows"))?;
     let mut paras: Vec<Option<u32>> = members.iter().map(|(_, p)| *p).collect();
     for (slot, _, part, node) in missing {
         let p = give_para_id_at(tx, &part, node)?;

@@ -1,0 +1,3053 @@
+/*
+ * The docs: the launch page's world in Read mode (plan section 6). Same
+ * tokens from globals.css, Anek as the one family with width as voice,
+ * depth from planes and set-in wells, 1px inset hairlines, nothing that
+ * moves at rest. Colours come only through the shared custom properties.
+ *
+ * Bands (SYSTEM.md). Breaks fall between device classes, never inside one;
+ * inside a band sizes run fluid and the layout holds still.
+ *   S    under 600px   phones upright, iPad Split View. One column, the
+ *                      full-width dock, page actions as icon keys beside
+ *                      the breadcrumbs, tables as rows.
+ *   M    600-1023px    tablets upright. One column, the floating dock,
+ *                      labelled page actions under the H1, real tables.
+ *   L    1024-1439px   tablets on their side, 13in iPads, 1280 laptops.
+ *                      Sticky header with search and an "On this page"
+ *                      key, sticky sidebar, no dock.
+ *   XL   1440-1919px   laptops and 1680 desktops. The TOC column joins;
+ *                      the frame grows with the screen, 1440 to 1760.
+ *   XXL  1920px up     the frame stops at 1760; reading type steps up.
+ *   SHORT (orientation: landscape) and (max-height: 500px), on any band:
+ *                      a phone on its side. Nothing sticks over the page:
+ *                      the header scrolls away, the dock moves into it,
+ *                      sheets come in from the side, the 404 sets the
+ *                      mark beside its words.
+ * The prose measure is in em, set against Anek's real average glyph (about
+ * 0.46em at 104%), not ch, whose "0" is wide. Counted in WebKit on the
+ * quickstart and the glossary, 32em gave 70-71 characters a line on
+ * average; 31em aims at 68.
+ * Tables and code may run wider than prose, to the track's edge.
+ *
+ * globals.css styles some of the same class names for the launch page
+ * (.code, .copy, .ln, .cmd); the rules here scope to the docs and override.
+ * It also sets the phone gutter at 739px; the docs set their own gutter per
+ * band on .dx, so they follow these bands and not the launch page's.
+ */
+
+.dx {
+	--dh: 56px;
+	--dock-h: 56px;
+	/* the site's edge: the left inset of the nav logo, the same on / and on
+	   every docs page, so the lockup doesn't move between them. globals.css
+	   sets --site-edge on :root; until it does, --edge-x repeats the launch
+	   page's own inset band by band (.launch --edge: the gutter, or from XL
+	   the gutter inside a centred frame). The header, the footer and the
+	   docs grid all sit on it, so the logo, the sidebar and the footer share
+	   one left edge, and the header and the TOC column one right edge. */
+	--edge-g: 20px;
+	--edge-frame: 1440px;
+	--edge-x: max(var(--edge-g), calc(50% - var(--edge-frame) / 2 + var(--edge-g)));
+	--gutter: var(--site-edge, var(--edge-x));
+	/* the content track: tables and code fill it, prose stops at the measure */
+	--track: 760px;
+	--measure: 31em;
+	/* multi-line code: the system monospace, zero bytes downloaded. Anek
+	   failed the glyph gate (plan 6.3): I and l, 0 and O read alike at 14
+	   and 15px. Inline code and the chrome stay in Anek. */
+	--code-font: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace;
+	--scrim: color-mix(in srgb, var(--ink) 22%, transparent);
+	--lift: 0 -1px 0 var(--divide), 0 -10px 28px -14px color-mix(in srgb, var(--ink) 30%, transparent);
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	color: var(--body);
+}
+@media (prefers-color-scheme: dark) {
+	.dx {
+		--scrim: color-mix(in srgb, var(--inset) 70%, transparent);
+		--lift: 0 -1px 0 var(--divide), 0 -10px 28px -14px color-mix(in srgb, var(--inset) 90%, transparent);
+	}
+}
+/* M: the launch page's gutter, 32px at 600 to 48px at 1024 */
+@media (min-width: 600px) {
+	.dx {
+		--edge-g: clamp(32px, calc(9.36px + 3.774vw), 48px);
+	}
+}
+/* L and XL: 48px, inside the launch page's 1440 frame from XL */
+@media (min-width: 1024px) {
+	.dx {
+		--edge-g: 48px;
+	}
+}
+/* XXL: the launch frame grows a quarter of every pixel past 1920, to 1760 */
+@media (min-width: 1920px) {
+	.dx {
+		--edge-frame: min(1760px, calc(1600px + (100vw - 1920px) / 4));
+	}
+}
+
+html:has(.dx) {
+	scroll-padding-top: 24px;
+	/* the dock covers the bottom of the screen on S and M */
+	scroll-padding-bottom: calc(var(--dock-h, 56px) + env(safe-area-inset-bottom) + 24px);
+}
+@media (min-width: 1024px) {
+	html:has(.dx) {
+		scroll-padding-top: calc(64px + 24px);
+		scroll-padding-bottom: 24px;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) {
+	html:has(.dx) {
+		scroll-padding-top: 16px;
+		scroll-padding-bottom: 16px;
+	}
+}
+
+.skip {
+	position: absolute;
+	left: 12px;
+	top: -100px;
+	z-index: 30;
+	padding: 10px 16px;
+	border-radius: 4px;
+	background: var(--bar);
+	color: var(--on-bar);
+	font-weight: 560;
+}
+.skip:focus {
+	top: 8px;
+}
+.doc-main:focus {
+	outline: none;
+}
+
+/* ---------- header ---------- */
+
+.dh {
+	position: relative;
+	z-index: 10;
+	background: var(--ground);
+	box-shadow: inset 0 -1px 0 var(--divide);
+}
+.dh-in {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	min-height: var(--dh);
+	padding: 0 var(--gutter);
+	margin: 0 auto;
+}
+.dh-id {
+	display: flex;
+	align-items: center;
+	margin: 0;
+	margin-right: auto;
+}
+.dh-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: 9px;
+	min-height: 44px;
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	font-weight: 600;
+	font-size: 21px;
+	line-height: 28px;
+	letter-spacing: -0.015em;
+	color: var(--ink);
+}
+.dh-mark {
+	display: block;
+	width: 22px;
+	height: auto;
+	fill: currentColor;
+	transform: translateY(1px);
+}
+.dh-docs {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	min-width: 44px;
+	padding: 0 8px;
+	margin-left: 2px;
+	font-stretch: 116%;
+	font-weight: 450;
+	font-size: 21px;
+	line-height: 28px;
+	letter-spacing: -0.01em;
+	color: var(--quiet);
+	transition: color 140ms var(--ease);
+}
+.dh-nav {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	margin-right: -10px;
+}
+.dh-nav a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	min-width: 44px;
+	padding: 0 10px;
+	font-size: 15px;
+	font-weight: 450;
+	color: var(--quiet);
+	transition: color 140ms var(--ease);
+}
+.dh-version {
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-variant-numeric: tabular-nums;
+}
+@media (hover: hover) {
+	.dh-docs:hover,
+	.dh-nav a:hover {
+		color: var(--ink);
+	}
+}
+
+/* the narrowest phones: the header's four parts fit 300px */
+@media (max-width: 379px) {
+	.dh-in {
+		gap: 8px;
+	}
+	.dh-brand {
+		gap: 8px;
+		font-size: 19px;
+	}
+	.dh-mark {
+		width: 20px;
+	}
+	.dh-docs {
+		min-width: 0;
+		padding: 0 6px;
+		font-size: 19px;
+	}
+	.dh-nav {
+		gap: 0;
+		margin-right: -8px;
+	}
+	.dh-nav a {
+		padding: 0 8px;
+	}
+}
+
+/* the search key: in the header from L, and on the 404 */
+.dh-search,
+.nf-search {
+	display: none;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	min-height: 44px;
+	padding: 0 8px 0 16px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--well);
+	box-shadow: var(--set-in);
+	color: var(--quiet);
+	font: inherit;
+	font-size: 15px;
+	line-height: 20px;
+	font-weight: 450;
+	text-align: left;
+	cursor: pointer;
+	transition: color 140ms var(--ease);
+}
+.dh-search .search-label,
+.nf-search .search-label {
+	flex: 1;
+}
+.dh-search kbd,
+.nf-search kbd {
+	display: inline-grid;
+	place-items: center;
+	min-width: 26px;
+	height: 26px;
+	padding: 0 6px;
+	border-radius: 4px;
+	background: var(--surface);
+	box-shadow: var(--shadow-flat);
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-size: 14px;
+	font-weight: 520;
+	color: var(--muted);
+}
+@media (hover: hover) {
+	.dh-search:hover,
+	.nf-search:hover {
+		color: var(--ink);
+	}
+}
+
+/* "On this page" in the header: L only, where there's a sidebar but no
+   room yet for the TOC column; it opens the same sheet the dock opens */
+.dh-toc {
+	display: none;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 0 12px;
+	border: 0;
+	border-radius: 6px;
+	background: none;
+	color: var(--ink);
+	font: inherit;
+	font-size: 15px;
+	line-height: 20px;
+	font-weight: 500;
+	white-space: nowrap;
+	cursor: pointer;
+	anchor-name: --toc;
+	transition: background-color 140ms var(--ease);
+}
+.dh-toc .icon {
+	color: var(--quiet);
+}
+@media (hover: hover) {
+	.dh-toc:hover {
+		background: var(--well);
+	}
+}
+.dh-toc:active {
+	background: var(--inset);
+}
+
+@media (min-width: 1024px) {
+	.dx {
+		--dh: 64px;
+	}
+	.dh {
+		position: sticky;
+		top: 0;
+	}
+	.dh-in {
+		gap: clamp(12px, 2.9vw - 18px, 24px);
+	}
+	.dh-search {
+		display: inline-flex;
+		width: clamp(240px, 14.5vw + 92px, 300px);
+		anchor-name: --dsearch;
+	}
+}
+@media (min-width: 1024px) and (max-width: 1439px) {
+	.dh-toc {
+		display: inline-flex;
+	}
+}
+/* XL and up: the header on the page's columns. The lockup over the
+   sidebar, the search key at the start of the reading column, so its panel
+   opens over the article and never over the TOC, and the version and
+   GitHub at the right edge, over the TOC */
+@media (min-width: 1440px) {
+	.dh-in {
+		display: grid;
+		grid-template-columns: var(--side) minmax(0, 1fr) auto;
+		column-gap: var(--cgap);
+	}
+	.dh-id {
+		grid-column: 1;
+		margin-right: 0;
+	}
+	.dh-search {
+		grid-column: 2;
+		justify-self: start;
+	}
+	.dh-nav {
+		grid-column: 3;
+	}
+}
+
+/* SHORT: a phone on its side has 320 to 370px to read in, so the header
+   scrolls away with the page, and on S and M the dock's three keys move
+   into it instead of floating over the text */
+@media (orientation: landscape) and (max-height: 500px) {
+	.dx {
+		--dh: 48px;
+	}
+	.dh {
+		position: relative;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+	.dh-nav {
+		display: none;
+	}
+}
+
+/* ---------- the grid ---------- */
+
+/* the header, the grid and the footer run the full width and take their
+   insets from the site's edge (above), not from a frame of their own */
+.docs {
+	flex: 1;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	width: 100%;
+	margin: 0 auto;
+	padding: 0 var(--gutter);
+}
+.doc-main {
+	min-width: 0;
+	max-width: var(--track);
+	width: 100%;
+	padding-top: 16px;
+}
+.side,
+.toc-col {
+	display: none;
+}
+
+/* M: one column on the site's left edge, under the logo; any slack past
+   the 760px track stays on the right, where the rail goes on SHORT */
+@media (min-width: 600px) {
+	.doc-main {
+		padding-top: clamp(24px, 3.8vw + 1px, 40px);
+		margin: 0;
+	}
+	.no-side .doc-main {
+		margin: 0 auto;
+	}
+}
+/* L: the sidebar beside a track that grows to 880px; the slack stays on
+   the right, where the prose's own margin already is */
+@media (min-width: 1024px) {
+	.dx {
+		--side: clamp(200px, 9.64vw + 101px, 240px);
+	}
+	.docs {
+		--track: 880px;
+		grid-template-columns: var(--side) minmax(0, var(--track));
+		column-gap: clamp(40px, 3.86vw, 56px);
+	}
+	.docs.no-side {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.doc-main {
+		margin: 0;
+		padding-top: 44px;
+	}
+	.no-side .doc-main {
+		margin: 0 auto;
+		max-width: none;
+	}
+	.side {
+		display: block;
+		position: sticky;
+		top: var(--dh);
+		align-self: start;
+		max-height: calc(100dvh - var(--dh));
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		padding: 36px 8px 48px 0;
+		margin-left: -12px;
+		padding-left: 12px;
+		scrollbar-width: thin;
+	}
+}
+/* XL and XXL: the TOC column. The sidebar and the TOC keep their widths;
+   the track takes the rest, up to 960px, so code and tables gain the width
+   and prose keeps its measure. The TOC follows the track at one gap and
+   runs to the site's edge, where the header's last key ends, so the page
+   has one right edge. The header sets its parts on the same columns. */
+@media (min-width: 1440px) {
+	.dx {
+		--side: clamp(240px, 6.667vw + 144px, 272px);
+		--tocw: clamp(208px, 6.667vw + 112px, 240px);
+		--cgap: clamp(48px, 3.333vw, 64px);
+	}
+	.docs {
+		--track: 960px;
+		column-gap: var(--cgap);
+	}
+	.docs.with-toc {
+		grid-template-columns: var(--side) minmax(0, var(--track)) minmax(var(--tocw), 1fr);
+	}
+	.toc-col {
+		display: block;
+		position: sticky;
+		top: var(--dh);
+		align-self: start;
+		max-height: calc(100dvh - var(--dh));
+		overflow-y: auto;
+		overscroll-behavior: contain;
+		padding: 44px 0 48px;
+		scrollbar-width: thin;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) {
+	.doc-main {
+		padding-top: 12px;
+	}
+	.side,
+	.toc-col {
+		top: 0;
+		max-height: 100dvh;
+	}
+}
+
+/* ---------- sidebar and menu list ---------- */
+
+.dnav .nav-sec + .nav-sec {
+	margin-top: 26px;
+}
+.nav-head {
+	margin: 0 0 6px;
+	font-stretch: 116%;
+	font-weight: 520;
+	font-size: 13px;
+	line-height: 18px;
+	color: var(--quiet);
+}
+.dnav ul,
+.toc-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+/* block, not flex, so an external row's arrow stays after its last word
+   when the label wraps */
+.dnav a,
+.toc-list a {
+	position: relative;
+	display: block;
+	padding: 7px 0 7px 18px;
+	margin-left: -18px;
+	font-size: 15px;
+	line-height: 20px;
+	font-weight: 450;
+	color: var(--muted);
+	border-radius: 4px;
+	transition: color 140ms var(--ease);
+}
+/* the current page: the mark's bar before the label */
+.dnav a[aria-current='page'],
+.toc-list a[aria-current] {
+	color: var(--ink);
+	font-weight: 560;
+}
+.dnav a[aria-current='page']::before,
+.toc-list a[aria-current]::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 50%;
+	width: 12px;
+	height: 3px;
+	margin-top: -1.5px;
+	border-radius: 2px;
+	background: var(--bar);
+}
+@media (hover: hover) {
+	.dnav a:hover,
+	.toc-list a:hover {
+		color: var(--ink);
+	}
+}
+@media (pointer: coarse) {
+	.dnav a,
+	.toc-list a {
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+}
+/* L and up on a short laptop screen: the sidebar's 22 rows fit without a
+   scroll of their own at 880px and up, and need only a short one at 800 */
+@media (min-width: 1024px) and (max-height: 1050px) and (pointer: fine) {
+	.side a {
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+	.side .nav-sec + .nav-sec {
+		margin-top: 14px;
+	}
+	.side {
+		padding-top: 20px;
+		padding-bottom: 24px;
+	}
+}
+
+/* a sidebar scrolled to the current page (the docs script starts it at a
+   section's label, never through one) fades its top 20px, the padding
+   above that label, while there is more above, so the cut reads as a
+   scroll */
+@property --side-fade {
+	syntax: '<length>';
+	inherits: false;
+	initial-value: 0px;
+}
+@keyframes side-fade {
+	to {
+		--side-fade: 20px;
+	}
+}
+@supports (animation-timeline: scroll()) {
+	.side {
+		-webkit-mask-image: linear-gradient(to bottom, transparent, var(--ink) var(--side-fade));
+		mask-image: linear-gradient(to bottom, transparent, var(--ink) var(--side-fade));
+		animation: side-fade linear both;
+		animation-timeline: scroll(self block);
+		animation-range: 0px 20px;
+	}
+}
+
+/* external rows carry the arrow */
+.dnav a[data-external]::after,
+.prose a[data-external]::after {
+	content: '';
+	display: inline-block;
+	flex: none;
+	width: 0.62em;
+	height: 0.62em;
+	margin-left: 0.28em;
+	vertical-align: 0.06em;
+	background: currentColor;
+	opacity: 0.75;
+	-webkit-mask: var(--arrow) center / contain no-repeat;
+	mask: var(--arrow) center / contain no-repeat;
+}
+.dx {
+	--arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M2.5 1.5h6v6M8.5 1.5 1.5 8.5' fill='none' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+/* ---------- TOC ---------- */
+
+.toc-head {
+	margin: 0 0 8px;
+	font-stretch: 116%;
+	font-weight: 520;
+	font-size: 13px;
+	line-height: 18px;
+	color: var(--quiet);
+}
+.toc-list a {
+	font-size: 14px;
+	padding-top: 6px;
+	padding-bottom: 6px;
+}
+.toc-list [data-depth='3'] a {
+	padding-left: 32px;
+}
+.toc-list [data-depth='3'] a::before {
+	left: 14px;
+}
+
+/* ---------- the page head ----------
+   M, L, XL: the breadcrumbs, the H1, the three labelled keys under it.
+   S and SHORT: the keys turn to icons and move up beside the breadcrumbs,
+   so the H1 and the lead start one row sooner. */
+
+.dochead {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-areas: 'crumbs crumbs' 'title title' 'tools tools';
+	align-items: center;
+}
+.doc-crumbs {
+	grid-area: crumbs;
+	min-width: 0;
+}
+.dochead h1 {
+	grid-area: title;
+}
+.doc-tools {
+	grid-area: tools;
+	margin: 18px 0 0;
+}
+
+.crumbs ol {
+	display: flex;
+	flex-wrap: wrap;
+	list-style: none;
+	margin: 0 0 4px;
+	padding: 0;
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 450;
+	color: var(--quiet);
+}
+.crumbs li + li::before {
+	content: '/';
+	margin: 0 8px;
+	color: var(--quiet);
+}
+.crumbs a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	margin: -12px 0;
+	color: var(--quiet);
+	transition: color 140ms var(--ease);
+}
+.crumbs li {
+	display: flex;
+	align-items: center;
+	min-height: 20px;
+}
+@media (hover: hover) {
+	.crumbs a:hover {
+		color: var(--ink);
+	}
+}
+
+/* the H1: 30px at 320 to 34px at 599, 38 to 44 across M, 44 on L and XL,
+   48 on XXL; never over 12% of a short screen */
+.doc h1 {
+	margin: 0;
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	font-weight: 620;
+	font-size: clamp(30px, 1.43vw + 25.4px, 34px);
+	line-height: 1.12;
+	letter-spacing: -0.025em;
+	color: var(--ink);
+	text-wrap: balance;
+}
+@media (min-width: 600px) {
+	.doc h1 {
+		font-size: clamp(38px, 1.42vw + 29.5px, 44px);
+		line-height: 1.09;
+	}
+	.crumbs ol {
+		margin-bottom: 8px;
+	}
+}
+@media (min-width: 1920px) {
+	.doc h1 {
+		font-size: 48px;
+	}
+}
+
+.doc-eyebrow {
+	display: none;
+}
+@media (max-width: 599px), (orientation: landscape) and (max-height: 500px) {
+	.doc-eyebrow {
+		display: block;
+		margin: 0;
+		font-size: 14px;
+		line-height: 20px;
+		font-weight: 450;
+		color: var(--quiet);
+	}
+	.dochead {
+		grid-template-areas: 'crumbs tools' 'title title';
+		column-gap: 12px;
+	}
+	.crumbs ol {
+		margin: 0;
+	}
+	/* the header's "docs" already leads home, so the trail starts at the
+	   section and keeps one line beside the keys */
+	.crumbs li:first-child {
+		display: none;
+	}
+	.crumbs li:first-child + li::before {
+		content: none;
+	}
+	.doc-tools {
+		margin: 0;
+	}
+	.dochead h1 {
+		margin-top: 8px;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) {
+	.doc h1 {
+		font-size: min(clamp(30px, 1.42vw + 29.5px, 44px), 12svh);
+	}
+}
+
+/* ---------- page actions ---------- */
+
+/* three small keys, flat surface planes, so they read as controls. On S
+   and SHORT each key shows its icon only and carries its name for screen
+   readers, so the three fit one row beside the breadcrumbs (148px) and
+   every action stays one tap: Copy page, the one most readers want, is not
+   folded into a menu */
+.actions {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+.act {
+	display: inline-grid;
+	grid-auto-flow: column;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 0 14px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--surface);
+	box-shadow: var(--shadow-flat);
+	color: var(--ink);
+	font: inherit;
+	font-size: 15px;
+	line-height: 20px;
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		box-shadow 140ms var(--ease),
+		transform 140ms var(--ease);
+}
+.act-copy > span {
+	grid-area: 1 / 1;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+/* icons sit at the text's cap height, in the control's own colour */
+.icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+}
+.act .icon {
+	color: var(--quiet);
+}
+.act-copy .copy-done,
+.act-copy[data-copied] .copy-idle {
+	visibility: hidden;
+}
+.act-copy[data-copied] .copy-done {
+	visibility: visible;
+}
+.chev {
+	width: 7px;
+	height: 7px;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	transform: translateY(-2px) rotate(45deg);
+}
+@media (hover: hover) {
+	.act:hover {
+		box-shadow: var(--e1);
+	}
+}
+.act:active {
+	transform: translateY(1px);
+	box-shadow: var(--hl);
+}
+@media (pointer: fine) and (min-width: 600px) {
+	.act {
+		min-height: 38px;
+		padding: 0 12px;
+	}
+}
+@media (max-width: 599px), (orientation: landscape) and (max-height: 500px) {
+	.actions {
+		flex-wrap: nowrap;
+		gap: 6px;
+	}
+	.act {
+		min-width: 44px;
+		min-height: 44px;
+		padding: 0 13px;
+		gap: 6px;
+	}
+	.act .icon {
+		width: 18px;
+		height: 18px;
+		color: var(--ink);
+	}
+	.act-label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+	.act-open {
+		padding: 0 10px 0 13px;
+	}
+}
+@media (scripting: none) {
+	.act-copy {
+		display: none;
+	}
+}
+
+/* Open in: anchored under its button where the browser can; a sheet on
+   phones and where it can't */
+.act-open {
+	anchor-name: --open-in;
+}
+.open-in {
+	inset: auto 0 0 0;
+	width: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+	border: 0;
+	border-radius: 10px 10px 0 0;
+	background: var(--surface);
+	box-shadow: var(--e2);
+	color: var(--ink);
+	/* never taller than the screen, so the note and Close stay reachable */
+	max-height: calc(100dvh - 16px);
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+.open-in::backdrop {
+	background: var(--scrim);
+}
+.open-in-note {
+	margin: 10px 12px 6px;
+	font-size: 14px;
+	line-height: 20px;
+	color: var(--quiet);
+}
+.open-in ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.open-in a {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 48px;
+	padding: 0 12px;
+	border-radius: 6px;
+	font-size: 17px;
+	line-height: 24px;
+	font-weight: 480;
+	color: var(--ink);
+}
+/* hairlines between rows sit on the rows, inset from the rounded hover */
+.open-in li + li,
+.search-results li + li {
+	position: relative;
+}
+.open-in li + li::before,
+.search-results li + li::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 12px;
+	right: 12px;
+	height: 1px;
+	background: var(--divide);
+}
+.open-in li:hover::before,
+.open-in li:hover + li::before,
+.search-results li:has(a:focus-visible)::before,
+.search-results li:has(a:focus-visible) + li::before,
+.search-results li:hover::before,
+.search-results li:hover + li::before {
+	visibility: hidden;
+}
+@media (hover: hover) {
+	.open-in a:hover {
+		background: var(--well);
+	}
+}
+.open-in .app-mark {
+	width: 20px;
+	height: 20px;
+}
+.open-in .app-name {
+	flex: 1;
+}
+.open-in .app-go {
+	color: var(--quiet);
+}
+.open-in-close {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 48px;
+	margin-top: 6px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--well);
+	color: var(--ink);
+	font: inherit;
+	font-size: 16px;
+	font-weight: 520;
+	cursor: pointer;
+}
+@media (min-width: 600px) {
+	@supports (position-area: bottom) {
+		.open-in {
+			position-anchor: --open-in;
+			position-area: bottom span-right;
+			position-try-fallbacks: flip-block;
+			inset: auto;
+			width: 260px;
+			margin: 8px 0;
+			padding: 6px;
+			border-radius: 10px;
+		}
+		.open-in::backdrop {
+			background: none;
+		}
+		.open-in-note {
+			margin: 8px 10px 6px;
+		}
+		.open-in a {
+			min-height: 44px;
+			padding: 0 10px;
+			font-size: 15px;
+		}
+		.open-in-close {
+			display: none;
+		}
+	}
+}
+
+/* SHORT: a panel at the top right with the five apps in two columns, so
+   the note, every app and Close fit a 320px screen without scrolling */
+@media (orientation: landscape) and (max-height: 500px) {
+	.open-in {
+		position-area: none;
+		inset: 8px 8px auto auto;
+		width: min(420px, calc(100vw - 16px));
+		margin: 0;
+		padding: 6px 8px 8px;
+		border-radius: 10px;
+	}
+	.open-in::backdrop {
+		background: var(--scrim);
+	}
+	.open-in ul {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: 4px;
+	}
+	.open-in li + li::before {
+		display: none;
+	}
+	.open-in-note {
+		margin: 6px 10px 4px;
+	}
+	.open-in a {
+		min-height: 44px;
+		padding: 0 10px;
+		font-size: 15px;
+	}
+	.open-in-close {
+		display: flex;
+		min-height: 44px;
+	}
+}
+
+/* ---------- prose ---------- */
+
+.prose {
+	font-size: 17px;
+	line-height: 27px;
+	letter-spacing: 0.002em;
+	font-stretch: 100%;
+	color: var(--body);
+}
+/* an opening quote hangs into the margin in running text only: on a code
+   line Safari would hang stetdoc's own "{" output 8px left of its prompt */
+.prose :is(p, li, blockquote) {
+	hanging-punctuation: first;
+}
+.prose :is(figure.code, table) {
+	hanging-punctuation: none;
+}
+@media (min-width: 600px) {
+	.prose {
+		font-size: 18px;
+		line-height: 29px;
+		font-stretch: 104%;
+	}
+}
+@media (min-width: 1920px) {
+	.prose {
+		font-size: 19px;
+		line-height: 31px;
+	}
+}
+/* WebKit's text-wrap: pretty evens the whole paragraph, not its last
+   lines, and left phone paragraphs at 81% of the column (globals.css sets
+   it on every p); reading text wraps greedily, so lines run full */
+.prose :is(p, li),
+.doc-foot p {
+	text-wrap: auto;
+}
+.prose p,
+.prose ul,
+.prose ol,
+.prose h2,
+.prose h3,
+.prose h4 {
+	max-width: var(--measure);
+}
+.prose p {
+	margin: 16px 0 0;
+}
+/* the lead ends where the body's lines end: its measure is the body's
+   31em at the body's size, not its own */
+.prose .lead {
+	max-width: calc(var(--measure) * 17 / 19);
+	margin-top: 20px;
+	font-size: 19px;
+	line-height: 29px;
+	font-stretch: 110%;
+	letter-spacing: -0.01em;
+	color: var(--muted);
+}
+@media (min-width: 600px) {
+	.prose .lead {
+		max-width: calc(var(--measure) * 18 / 21);
+		margin-top: 24px;
+		font-size: 21px;
+		line-height: 32px;
+	}
+}
+@media (min-width: 1920px) {
+	.prose .lead {
+		max-width: calc(var(--measure) * 19 / 22);
+		font-size: 22px;
+		line-height: 34px;
+	}
+}
+.prose strong {
+	font-weight: 600;
+	color: var(--ink);
+}
+.prose em {
+	font-style: italic;
+}
+
+/* headings: the whole heading links to itself, a tap target on phones;
+   a # in the margin shows on hover and focus on wide screens */
+.prose h2,
+.prose h3,
+.prose h4 {
+	color: var(--ink);
+	text-wrap: balance;
+	scroll-margin-top: 24px;
+}
+.prose h2 {
+	margin: 48px 0 0;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 600;
+	font-size: 24px;
+	line-height: 30px;
+	letter-spacing: -0.012em;
+}
+.prose h3 {
+	margin: 36px 0 0;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 560;
+	font-size: 19px;
+	line-height: 26px;
+	letter-spacing: -0.005em;
+}
+.prose h4 {
+	margin: 28px 0 0;
+	font-stretch: 110%;
+	font-weight: 600;
+	font-size: 17px;
+	line-height: 26px;
+}
+.prose h2 + *,
+.prose h3 + *,
+.prose h4 + * {
+	margin-top: 12px;
+}
+@media (min-width: 600px) {
+	.prose h2 {
+		margin-top: 56px;
+		font-size: 28px;
+		line-height: 34px;
+	}
+	.prose h2 + * {
+		margin-top: 16px;
+	}
+	.prose h3 {
+		font-size: 21px;
+		line-height: 28px;
+	}
+	.prose h3 + *,
+	.prose h4 + * {
+		margin-top: 10px;
+	}
+	.prose h4 {
+		font-size: 18px;
+		line-height: 28px;
+	}
+}
+@media (min-width: 1024px) {
+	.prose h2,
+	.prose h3,
+	.prose h4 {
+		scroll-margin-top: calc(var(--dh) + 24px);
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) {
+	.prose h2,
+	.prose h3,
+	.prose h4 {
+		scroll-margin-top: 16px;
+	}
+}
+.prose .anchor {
+	position: relative;
+	display: block;
+	color: inherit;
+	text-decoration: none;
+	border-radius: 4px;
+}
+.prose .anchor code {
+	font-size: 0.94em;
+}
+@media (hover: hover) and (min-width: 600px) {
+	.prose .anchor::before {
+		content: '#';
+		position: absolute;
+		right: 100%;
+		top: 0;
+		padding-right: 0.32em;
+		font-weight: 450;
+		color: var(--quiet);
+		opacity: 0;
+		transition: opacity 140ms var(--ease);
+	}
+	.prose .anchor:hover::before,
+	.prose .anchor:focus-visible::before {
+		opacity: 1;
+	}
+}
+
+/* links in running text: the launch page's 1px underline, clear of the
+   descenders, darker under the pointer */
+.prose a:not(.anchor),
+.doc-foot a,
+.nf-home a {
+	color: var(--ink);
+	font-weight: 500;
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-decoration-color: var(--line);
+	text-underline-offset: 0.26em;
+	transition: text-decoration-color 140ms var(--ease);
+	border-radius: 2px;
+}
+@media (hover: hover) {
+	.prose a:not(.anchor):hover,
+	.doc-foot a:hover,
+	.nf-home a:hover {
+		text-decoration-color: var(--line-strong);
+	}
+}
+
+/* inline code: Anek narrowed, a faint well tint so identifiers that are
+   also English words read as code */
+.prose :not(pre) > code {
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-weight: 560;
+	font-size: 1em;
+	font-variant-numeric: tabular-nums;
+	color: var(--ink);
+	padding: 0.06em 0.12em;
+	border-radius: 4px;
+	background: var(--well);
+	box-decoration-break: clone;
+	-webkit-box-decoration-break: clone;
+	/* a flag split at its dashes reads as two tokens: short code never
+	   breaks; the pipeline marks code over 28 characters .long, and only
+	   that may wrap */
+	white-space: nowrap;
+}
+.prose :not(pre) > code.long {
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+/* inside long code, each short token (a flag, a name) holds together;
+   lines break at the spaces between them */
+.prose code.long .w {
+	white-space: nowrap;
+}
+/* a --flag in running text, outside code, the same way: WebKit breaks a
+   line after a hyphen, which split --ops into "--" and "ops" */
+.dx .nobr {
+	white-space: nowrap;
+}
+.prose h2 code,
+.prose h3 code,
+.prose h4 code {
+	background: none;
+	padding: 0;
+	font-weight: inherit;
+}
+
+/* a plain quote: in the docs these are notes such as "Generated by cargo
+   xtask docs", so they sit quieter than the text, behind a hairline */
+.prose blockquote {
+	max-width: var(--measure);
+	margin: 20px 0 0;
+	padding: 2px 0 2px 18px;
+	box-shadow: inset 1px 0 0 var(--line);
+	font-size: 15px;
+	line-height: 24px;
+	color: var(--muted);
+}
+.prose blockquote > :first-child {
+	margin-top: 0;
+}
+.prose blockquote p {
+	margin-top: 8px;
+}
+.prose hr {
+	height: 1px;
+	margin: 40px 0;
+	border: 0;
+	background: var(--divide);
+	max-width: var(--measure);
+}
+.prose del {
+	text-decoration-thickness: 1.5px;
+	color: var(--quiet);
+}
+.prose img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin-top: 24px;
+	border-radius: 4px;
+}
+.prose h5,
+.prose h6 {
+	margin: 24px 0 0;
+	font-size: 1em;
+	font-weight: 600;
+	color: var(--ink);
+	max-width: var(--measure);
+}
+.prose input[type='checkbox'] {
+	accent-color: var(--ink);
+	margin: 0 0.4em 0 0;
+}
+
+/* lists */
+.prose ul,
+.prose ol {
+	margin: 16px 0 0;
+	padding-left: 1.3em;
+}
+.prose li + li {
+	margin-top: 8px;
+}
+.prose li > ul,
+.prose li > ol {
+	margin-top: 8px;
+}
+.prose li::marker {
+	color: var(--quiet);
+}
+.prose ol li::marker {
+	font-variant-numeric: tabular-nums;
+	font-weight: 520;
+}
+.prose li p {
+	margin-top: 8px;
+}
+
+/* key-value lists: the key over its value on S, two columns from M, rows
+   divided by a hairline */
+.prose ul.kv {
+	list-style: none;
+	padding: 0;
+	max-width: none;
+}
+.prose ul.kv li {
+	margin: 0;
+	padding: 12px 0;
+	box-shadow: inset 0 -1px 0 var(--divide);
+}
+.prose ul.kv li:first-child {
+	box-shadow:
+		inset 0 1px 0 var(--divide),
+		inset 0 -1px 0 var(--divide);
+}
+.kv-key {
+	display: block;
+	font-weight: 600;
+	color: var(--ink);
+}
+/* from M the key hangs in its own column; a float, not a grid, so the
+   value's text, code blocks and paragraphs all stay in the second column */
+@media (min-width: 600px) {
+	.prose ul.kv li {
+		--kv: 8.5em;
+		display: flow-root;
+		padding-left: calc(var(--kv) + 24px);
+	}
+	.prose ul.kv .kv-key {
+		float: left;
+		width: var(--kv);
+		margin-left: calc(-1 * (var(--kv) + 24px));
+		overflow-wrap: break-word;
+	}
+	.prose ul.kv li > :first-child:not(.kv-key),
+	.prose ul.kv .kv-key + * {
+		margin-top: 0;
+	}
+}
+
+/* the glossary's entries. Every size: the "Avoid" note starts its own line,
+   in the muted tone. From M the term hangs in its own column beside the
+   definition, as a key-value list's key does, so the eye runs down the
+   terms; the paragraph widens by that column so the definition keeps the
+   reading measure. On S the term stays run-in, in ink */
+.prose .gl-entry .gl-avoid {
+	display: block;
+	margin-top: 4px;
+	color: var(--muted);
+}
+@media (min-width: 600px) {
+	.prose p.gl-entry {
+		--tk: 9em;
+		display: flow-root;
+		max-width: calc(var(--measure) + var(--tk) + 24px);
+		margin-top: 20px;
+		padding-left: calc(var(--tk) + 24px);
+	}
+	.prose .gl-term {
+		float: left;
+		width: var(--tk);
+		margin-left: calc(-1 * (var(--tk) + 24px));
+		text-wrap: balance;
+	}
+}
+
+/* ---------- code ---------- */
+
+.prose figure.code {
+	position: relative;
+	margin: 24px 0 0;
+	padding: 0;
+	border-radius: 10px;
+	background: var(--well);
+	box-shadow: var(--set-in);
+	color: var(--muted);
+	font-family: var(--code-font);
+	font-stretch: 100%;
+	font-weight: 400;
+	font-size: 13px;
+	line-height: 21px;
+	letter-spacing: 0;
+	white-space: normal;
+	-webkit-font-smoothing: antialiased;
+}
+@media (min-width: 600px) {
+	.prose figure.code {
+		font-size: 14px;
+		line-height: 23px;
+	}
+}
+@media (min-width: 1920px) {
+	.prose figure.code {
+		font-size: 15px;
+		line-height: 24px;
+	}
+}
+/* S: the well runs to the screen's edges so code gets every pixel */
+@media (max-width: 599px) {
+	.prose figure.code {
+		margin-left: calc(-1 * var(--gutter));
+		margin-right: calc(-1 * var(--gutter));
+		border-radius: 0;
+	}
+}
+.code-head {
+	display: flex;
+	align-items: center;
+	min-height: 44px;
+	padding: 0 4px 0 20px;
+	font-family: var(--font);
+	font-stretch: 100%;
+}
+.code-lang {
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-size: 13px;
+	line-height: 18px;
+	font-weight: 520;
+	color: var(--quiet);
+}
+.code-head .copy {
+	min-height: 44px;
+	min-width: 44px;
+	margin-left: auto;
+	padding: 0 14px;
+	border-radius: 6px;
+	background: none;
+	box-shadow: none;
+	color: var(--quiet);
+	font-family: var(--font);
+	font-stretch: 100%;
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 520;
+}
+@media (hover: hover) {
+	.code-head .copy:hover {
+		background: var(--inset);
+		color: var(--ink);
+	}
+}
+.code-head .copy:active {
+	transform: translateY(1px);
+	box-shadow: none;
+}
+.code-head .copy[data-copied] {
+	color: var(--ink);
+}
+/* the code block's Copy carries the copy icon, and a check once copied */
+.code-head .copy > span {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+.code-head .copy > span::before {
+	content: '';
+	width: 15px;
+	height: 15px;
+	background: currentColor;
+	-webkit-mask: var(--i-copy) center / contain no-repeat;
+	mask: var(--i-copy) center / contain no-repeat;
+}
+.code-head .copy > .copy-done::before {
+	-webkit-mask-image: var(--i-check);
+	mask-image: var(--i-check);
+}
+.code-head {
+	--i-copy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect width='14' height='14' x='8' y='8' rx='2'/%3E%3Cpath d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2'/%3E%3C/svg%3E");
+	--i-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.75' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+}
+@media (scripting: none) {
+	.code-head .copy {
+		display: none;
+	}
+	.code-head:not(:has(.code-lang)) {
+		min-height: 16px;
+	}
+}
+.prose figure.code pre {
+	margin: 0;
+	padding: 0 20px 18px;
+	font: inherit;
+	tab-size: 4;
+	border-radius: 0 0 10px 10px;
+}
+.prose figure.code pre:focus-visible {
+	outline-offset: -2px;
+}
+.prose figure.code code {
+	display: grid;
+	font: inherit;
+	background: none;
+	padding: 0;
+}
+.prose figure.code .ln {
+	display: block;
+	min-height: 1lh;
+	margin: 0;
+}
+
+/* console and text: wrap inside the well, each continuation hanging, so
+   a long command is never cut off on a phone */
+.prose figure.code:is([data-kind='console'], [data-kind='text']) .ln {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	padding-left: 1.1em;
+	text-indent: -1.1em;
+}
+.prose figure.code .ln.cmd {
+	color: var(--ink);
+	font-weight: 500;
+}
+.prose figure.code .ln.cmd:not(.cont) + .ln:not(.cmd),
+.prose figure.code .ln.cont + .ln:not(.cmd) {
+	margin-top: 6px;
+}
+.prose figure.code .ln:not(.cmd) + .ln.cmd:not(.cont) {
+	margin-top: 14px;
+}
+.prose figure.code .ln.out {
+	color: var(--muted);
+}
+.prose figure.code .ln.err {
+	color: var(--ink);
+	font-weight: 650;
+}
+.prose figure.code .ln.next {
+	color: var(--quiet);
+}
+/* stetdoc's redline in its output: an insertion waits for review in court
+   yellow, a deletion is struck, a passed check is court green */
+.prose figure.code .rl-ins {
+	color: var(--ink);
+	text-decoration: underline 2px var(--yellow-line);
+	text-underline-offset: 3px;
+}
+.prose figure.code .rl-del {
+	text-decoration: line-through;
+	text-decoration-color: var(--quiet);
+}
+.prose figure.code .nw {
+	white-space: nowrap;
+}
+.prose figure.code .rl-ok {
+	color: var(--green-text);
+	font-weight: 620;
+}
+.prose figure.code .prompt {
+	color: var(--quiet);
+	font-weight: 400;
+	user-select: none;
+	-webkit-user-select: none;
+}
+
+/* source and shell scripts: no wrapping, so a command to copy stays whole
+   on its line ("brew install clauseo-ai/tap/stetdoc" never splits at its
+   hyphen); the well scrolls sideways, with a shade at the edge that has
+   more */
+.prose figure.code:is([data-kind='source'], [data-kind='shell']) pre {
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scrollbar-width: thin;
+}
+.prose figure.code:is([data-kind='source'], [data-kind='shell']) code {
+	width: max-content;
+	min-width: 100%;
+}
+.prose figure.code:is([data-kind='source'], [data-kind='shell']) .ln {
+	white-space: pre;
+}
+@supports (animation-timeline: scroll(self inline)) {
+	.prose figure.code:is([data-kind='source'], [data-kind='shell']) pre {
+		animation: edge linear both;
+		animation-timeline: scroll(self inline);
+	}
+}
+/* S: 4px less on the right, so the quickstart's brew line (281px at 320)
+   fits its well instead of scrolling by 1px under a shade */
+@media (max-width: 599px) {
+	.prose figure.code:is([data-kind='source'], [data-kind='shell']) pre {
+		padding-right: 16px;
+	}
+}
+@keyframes edge {
+	from {
+		box-shadow: inset -18px 0 14px -14px var(--edge-shade);
+	}
+	10%,
+	90% {
+		box-shadow:
+			inset -18px 0 14px -14px var(--edge-shade),
+			inset 18px 0 14px -14px var(--edge-shade);
+	}
+	to {
+		box-shadow: inset 18px 0 14px -14px var(--edge-shade);
+	}
+}
+.dx {
+	--edge-shade: color-mix(in srgb, var(--ink) 28%, transparent);
+}
+@media (prefers-color-scheme: dark) {
+	.dx {
+		--edge-shade: color-mix(in srgb, var(--inset) 95%, transparent);
+	}
+}
+
+/* M and up: a one-line well sets its command beside its label and Copy,
+   one 44px row instead of two (the quickstart has nine of them) */
+@media (min-width: 600px) {
+	.prose figure.code:has(> .code-head):has(code > .ln:only-child) {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		align-items: center;
+	}
+	.prose figure.code:has(> .code-head):has(code > .ln:only-child) .code-head {
+		grid-column: 2;
+		grid-row: 1;
+		padding-left: 12px;
+		gap: 4px;
+	}
+	.prose figure.code:has(> .code-head):has(code > .ln:only-child) pre {
+		grid-column: 1;
+		grid-row: 1;
+		padding: 10px 0 11px 20px;
+		border-radius: 10px 0 0 10px;
+	}
+}
+
+/* tokens: weight and tone, never hue */
+.t-keyword {
+	color: var(--ink);
+	font-weight: 700;
+}
+.t-type,
+.t-function,
+.t-property {
+	color: var(--ink);
+	font-weight: 600;
+}
+.t-string {
+	color: var(--muted);
+}
+.t-constant {
+	color: var(--ink);
+}
+.t-comment,
+.t-punct {
+	color: var(--quiet);
+}
+.t-comment {
+	font-style: normal;
+}
+.t-param {
+	color: var(--body);
+}
+.t-plain {
+	color: var(--muted);
+}
+
+/* ---------- tables ---------- */
+
+.prose .table {
+	margin: 24px 0 0;
+	overflow-x: auto;
+	overscroll-behavior-x: contain;
+	scrollbar-width: thin;
+	border-radius: 4px;
+}
+.prose .table:focus-visible {
+	outline-offset: 2px;
+}
+.prose table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 15px;
+	line-height: 22px;
+	font-stretch: 100%;
+	font-variant-numeric: tabular-nums;
+}
+.prose th {
+	padding: 10px 14px;
+	text-align: left;
+	vertical-align: bottom;
+	font-stretch: 110%;
+	font-weight: 520;
+	font-size: 13px;
+	line-height: 18px;
+	color: var(--quiet);
+	box-shadow: inset 0 -1px 0 var(--line);
+	white-space: nowrap;
+}
+.prose td {
+	padding: 10px 14px;
+	vertical-align: top;
+	color: var(--body);
+	box-shadow: inset 0 -1px 0 var(--divide);
+}
+.prose th:first-child,
+.prose td:first-child {
+	padding-left: 0;
+}
+.prose th:last-child,
+.prose td:last-child {
+	padding-right: 0;
+}
+.prose [data-align='right'] {
+	text-align: right;
+}
+.prose [data-align='center'] {
+	text-align: center;
+}
+.prose table[data-keyed] td:first-child code {
+	font-weight: 560;
+	background: none;
+	padding: 0;
+	white-space: nowrap;
+}
+.prose td code.long {
+	overflow-wrap: anywhere;
+}
+@supports (animation-timeline: scroll(self inline)) {
+	.prose .table {
+		animation: edge linear both;
+		animation-timeline: scroll(self inline);
+	}
+}
+
+/* S: a table can't keep its columns in 280 to 560px, so its rows stack.
+   A two-column table (a flag and its meaning, a command and what it does)
+   becomes a list of pairs between hairlines: the first cell in ink, the
+   second under it, no label to repeat. Three columns or more become cards
+   in the well tone, each cell under its column's label. */
+@media (max-width: 599px) {
+	.prose .table {
+		overflow: visible;
+		animation: none;
+	}
+	.prose table,
+	.prose tbody,
+	.prose tr,
+	.prose td {
+		display: block;
+	}
+	.prose thead {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+	}
+	.prose tr {
+		position: relative;
+		padding: 12px 16px 14px;
+		border-radius: 6px;
+		background: var(--well);
+	}
+	.prose tr + tr {
+		margin-top: 8px;
+	}
+	.prose td,
+	.prose td:first-child,
+	.prose td:last-child {
+		padding: 0;
+		box-shadow: none;
+		text-align: left;
+	}
+	.prose td + td {
+		margin-top: 10px;
+	}
+	.prose td::before {
+		content: attr(data-label);
+		display: block;
+		font-stretch: 110%;
+		font-weight: 520;
+		font-size: 13px;
+		line-height: 18px;
+		color: var(--quiet);
+	}
+	.prose td:first-child::before {
+		display: none;
+	}
+	.prose td:first-child {
+		font-weight: 600;
+		color: var(--ink);
+	}
+	.prose table[data-keyed] td:first-child code.long {
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+	.prose td:empty {
+		display: none;
+	}
+
+	/* two columns: pairs between hairlines */
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) tr {
+		padding: 12px 0;
+		border-radius: 0;
+		background: none;
+		box-shadow: inset 0 -1px 0 var(--divide);
+	}
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) tr:first-child {
+		box-shadow:
+			inset 0 1px 0 var(--line),
+			inset 0 -1px 0 var(--divide);
+	}
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) tr + tr {
+		margin-top: 0;
+	}
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) td + td {
+		margin-top: 4px;
+	}
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) td::before {
+		display: none;
+	}
+
+	/* a row whose title is a link (the CLI's commands) is wholly that link,
+	   as the overview's doors are; other links in it stay on top */
+	.prose td:first-child a:first-child:not(.anchor)::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: 6px;
+	}
+	.prose td + td a {
+		position: relative;
+		z-index: 1;
+	}
+}
+/* M, SHORT, and any touch screen: a row titled by a link (the CLI's
+   commands) is wholly that link, as on S, so the 16px link becomes a row
+   target of 44px or more; other links in the row stay on top */
+@media (min-width: 600px) and (max-width: 1023px), (min-width: 600px) and (pointer: coarse) {
+	.prose tr {
+		position: relative;
+	}
+	.prose td {
+		padding-top: 11px;
+		padding-bottom: 11px;
+	}
+	.prose td:first-child a:first-child:not(.anchor)::after {
+		content: '';
+		position: absolute;
+		inset: 0;
+		border-radius: 4px;
+	}
+	.prose td + td a {
+		position: relative;
+		z-index: 1;
+	}
+}
+/* L and up: every two-column reference table shares one first column, so
+   the meanings start at the same x down the whole CLI page */
+@media (min-width: 1024px) {
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) {
+		table-layout: fixed;
+	}
+	.prose table:not(:has(th:nth-child(3), td:nth-child(3))) th:first-child {
+		width: 26%;
+		white-space: normal;
+	}
+}
+
+/* ---------- callouts ---------- */
+
+.prose .callout {
+	margin: 24px 0 0;
+	padding: 16px 20px 18px;
+	border-radius: 10px;
+	background: var(--surface);
+	box-shadow: var(--shadow-flat);
+}
+.prose .callout > :first-child,
+.prose .callout .callout-label + * {
+	margin-top: 0;
+}
+.prose .callout p {
+	margin-top: 10px;
+}
+.prose .callout-label {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 4px;
+	font-stretch: 116%;
+	font-weight: 560;
+	font-size: 15px;
+	line-height: 22px;
+	color: var(--ink);
+}
+/* a warning carries the stet bar before its label */
+.prose .callout[data-kind='warning'] .callout-label::before {
+	content: '';
+	width: 14px;
+	height: 3px;
+	border-radius: 2px;
+	background: var(--bar);
+}
+.prose .callout :not(pre) > code {
+	background: var(--well);
+}
+
+/* ---------- the overview's doors ---------- */
+
+.prose .doors {
+	display: grid;
+	gap: 12px;
+	margin: 16px 0 0;
+}
+.prose .door {
+	position: relative;
+	padding: 18px 20px 20px;
+	border-radius: 10px;
+	background: var(--surface);
+	box-shadow: var(--shadow-flat);
+	font-size: 16px;
+	line-height: 24px;
+	transition:
+		box-shadow 140ms var(--ease),
+		transform 140ms var(--ease);
+}
+.prose .door p {
+	margin: 0;
+}
+.prose .door strong {
+	display: block;
+	margin-bottom: 8px;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 600;
+	font-size: 18px;
+	line-height: 24px;
+	letter-spacing: -0.008em;
+	text-wrap: balance;
+}
+/* the whole block is its first link */
+.prose .door a:first-of-type::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 10px;
+}
+.prose .door a:not(:first-of-type) {
+	position: relative;
+	z-index: 1;
+}
+.prose .door a:focus-visible {
+	outline: none;
+}
+.prose .door:has(a:first-of-type:focus-visible) {
+	outline: 2px solid var(--ink);
+	outline-offset: 3px;
+}
+@media (hover: hover) {
+	.prose .door:hover {
+		box-shadow: var(--e1);
+	}
+}
+.prose .door:active {
+	transform: translateY(1px);
+}
+@media (min-width: 600px) {
+	.prose .door strong {
+		font-size: 19px;
+		line-height: 25px;
+	}
+}
+/* M and up: each door is a full-width row with its title beside its text.
+   Three across left each title three lines in a 212 to 256px door at 744,
+   1024 and 1133. A float, not a grid, as in the key-value lists, because
+   the text after the title holds links */
+@media (min-width: 600px) {
+	.prose .doors {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 12px;
+	}
+	.prose .door {
+		--dk: clamp(220px, 12vw + 130px, 300px);
+		padding: 18px 24px 20px;
+	}
+	.prose .door p {
+		display: flow-root;
+		max-width: none;
+		padding-left: calc(var(--dk) + 32px);
+	}
+	.prose .door strong {
+		float: left;
+		width: var(--dk);
+		margin: 0 0 0 calc(-1 * (var(--dk) + 32px));
+		padding-top: 1px;
+	}
+}
+
+/* ---------- page foot, end mark, pager ---------- */
+
+.doc-foot {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 56px;
+	padding-top: 20px;
+	box-shadow: inset 0 1px 0 var(--divide);
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 450;
+	color: var(--quiet);
+}
+.doc-foot p {
+	margin: 0;
+	max-width: var(--measure);
+}
+.doc-foot a {
+	display: inline;
+	color: var(--muted);
+	padding: 12px 0;
+	margin: -12px 0;
+}
+/* on S and on touch screens the foot's links stand as 44px rows */
+@media (max-width: 599px), (pointer: coarse) {
+	.doc-foot {
+		gap: 0;
+	}
+	.doc-foot a,
+	.nf-home a {
+		display: inline-flex;
+		align-items: center;
+		min-height: 44px;
+		padding: 0;
+		margin: 0;
+	}
+}
+.doc-foot time {
+	font-variant-numeric: tabular-nums;
+}
+
+.end-mark {
+	display: flex;
+	justify-content: center;
+	margin: 48px 0 0;
+}
+.end-mark svg {
+	display: block;
+	width: 22px;
+	height: auto;
+	fill: var(--bar);
+}
+
+.pager {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr);
+	gap: 10px;
+	margin: 48px 0 0;
+}
+.pager > span {
+	display: none;
+}
+@media (min-width: 600px) {
+	.pager {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+	}
+	.pager > span {
+		display: block;
+	}
+}
+.pg {
+	display: grid;
+	grid-template-areas: 'dir sec' 'title title';
+	grid-template-columns: auto 1fr;
+	align-content: start;
+	gap: 2px 10px;
+	min-height: 44px;
+	padding: 14px 18px 16px;
+	border-radius: 10px;
+	background: var(--surface);
+	box-shadow: var(--shadow-flat);
+	transition: box-shadow 140ms var(--ease);
+}
+.pg-next {
+	grid-column: -2;
+	text-align: right;
+	grid-template-areas: 'sec dir' 'title title';
+	grid-template-columns: 1fr auto;
+}
+.pg-dir {
+	grid-area: dir;
+	font-size: 13px;
+	line-height: 18px;
+	font-weight: 520;
+	color: var(--ink);
+}
+.pg-sec {
+	grid-area: sec;
+	font-size: 13px;
+	line-height: 18px;
+	color: var(--quiet);
+}
+.pg-title {
+	grid-area: title;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 560;
+	font-size: 19px;
+	line-height: 26px;
+	color: var(--ink);
+}
+@media (hover: hover) {
+	.pg:hover {
+		box-shadow: var(--e1);
+	}
+}
+
+/* ---------- footer under the docs ---------- */
+
+/* the hairline runs between the text edges, the same at every band */
+.dx .foot {
+	position: relative;
+	width: 100%;
+	margin: 80px auto 0;
+	padding: 28px var(--gutter) 40px;
+}
+.dx .foot::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: var(--gutter);
+	right: var(--gutter);
+	height: 1px;
+	background: var(--divide);
+}
+@media (max-width: 1023px) {
+	.dx .foot {
+		padding-bottom: calc(var(--dock-h) + env(safe-area-inset-bottom) + 40px);
+	}
+}
+/* S: the five links as three over two, from the left edge, rather than
+   four and "Sitemap" alone */
+@media (max-width: 599px) {
+	.dx .foot nav {
+		display: grid;
+		grid-template-columns: repeat(3, max-content);
+		column-gap: 20px;
+		margin: 0 0 0 -6px;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+	.dx .foot {
+		padding-bottom: 40px;
+	}
+}
+
+/* ---------- dock ----------
+   S: a full-width ground plane in the thumb zone. M: a raised plane that
+   floats 16px up. L and up: gone, the header and sidebar do its work.
+   SHORT on S and M: its three keys sit in the header row and scroll away
+   with it, so nothing covers the text on a 320px-tall screen. */
+
+.dock {
+	position: fixed;
+	z-index: 20;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	display: flex;
+	padding: 0 8px env(safe-area-inset-bottom);
+	background: var(--ground);
+	box-shadow: var(--lift);
+}
+.dock button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	flex: 1 1 auto;
+	min-width: 0;
+	min-height: var(--dock-h);
+	padding: 0 6px;
+	border: 0;
+	background: none;
+	color: var(--ink);
+	font: inherit;
+	font-size: 15px;
+	line-height: 20px;
+	font-weight: 520;
+	white-space: nowrap;
+	cursor: pointer;
+	border-radius: 6px;
+	-webkit-tap-highlight-color: transparent;
+}
+.dock button:active {
+	background: var(--inset);
+}
+.dock button + button {
+	box-shadow: inset 1px 0 0 var(--divide);
+}
+.dock button:active + button,
+.dock button + button:active {
+	box-shadow: none;
+}
+/* the narrowest phones: "On this page" keeps one line at 320 */
+@media (max-width: 374px) {
+	.dock {
+		padding-inline: 4px;
+	}
+	.dock button {
+		gap: 6px;
+		padding: 0 4px;
+	}
+}
+@media (min-width: 600px) {
+	.dock {
+		left: 50%;
+		right: auto;
+		bottom: calc(16px + env(safe-area-inset-bottom));
+		width: min(480px, calc(100% - 2 * var(--gutter)));
+		padding: 4px;
+		transform: translateX(-50%);
+		border-radius: 10px;
+		background: var(--surface);
+		box-shadow: var(--e2);
+	}
+	.dock button {
+		flex: 1;
+		min-height: 48px;
+	}
+	.dx {
+		--dock-h: 72px;
+	}
+}
+@media (min-width: 1024px) {
+	.dock {
+		display: none;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+	.dock {
+		position: absolute;
+		top: 2px;
+		bottom: auto;
+		left: auto;
+		right: max(calc(var(--gutter) - 10px), 4px);
+		width: auto;
+		padding: 0;
+		transform: none;
+		background: none;
+		box-shadow: none;
+		border-radius: 0;
+	}
+	.dock button {
+		flex: none;
+		min-height: 44px;
+		padding: 0 10px;
+	}
+	.dock button + button {
+		box-shadow: none;
+	}
+	.dx {
+		--dock-h: 0px;
+	}
+}
+
+/* ---------- the rail ----------
+   SHORT on S and M: the header scrolls away, so once it has, the same three
+   keys stand at the bottom right, in the margin the text column leaves
+   (the grid keeps 76px clear for them), clear of the home indicator and a
+   side notch. Where scroll timelines exist they fade in over the header's
+   height and can't be tapped or reached by Tab while the header shows;
+   elsewhere they simply stay. */
+.rail {
+	display: none;
+}
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+	.docs,
+	.dx .foot {
+		padding-right: max(var(--gutter), calc(76px + env(safe-area-inset-right)));
+	}
+	.rail {
+		position: fixed;
+		z-index: 20;
+		right: calc(12px + env(safe-area-inset-right));
+		bottom: calc(12px + env(safe-area-inset-bottom));
+		display: flex;
+		flex-direction: column;
+		padding: 4px;
+		border-radius: 10px;
+		background: var(--surface);
+		box-shadow: var(--e2);
+	}
+	.rail button {
+		display: grid;
+		place-items: center;
+		width: 44px;
+		height: 44px;
+		padding: 0;
+		border: 0;
+		border-radius: 6px;
+		background: none;
+		color: var(--ink);
+		cursor: pointer;
+		-webkit-tap-highlight-color: transparent;
+	}
+	.rail button + button {
+		box-shadow: inset 0 1px 0 var(--divide);
+	}
+	.rail button:active {
+		background: var(--inset);
+		box-shadow: none;
+	}
+	.rail .icon {
+		width: 20px;
+		height: 20px;
+	}
+	@supports (animation-timeline: scroll()) {
+		.rail {
+			animation: rail-in linear both;
+			animation-timeline: scroll(root block);
+			animation-range: 0px var(--dh);
+		}
+	}
+}
+@keyframes rail-in {
+	from {
+		opacity: 0;
+		visibility: hidden;
+	}
+	to {
+		opacity: 1;
+		visibility: visible;
+	}
+}
+
+/* ---------- sheets ---------- */
+
+.dsheet {
+	inset: auto 0 0 0;
+	width: 100%;
+	max-width: none;
+	max-height: 85dvh;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: 10px 10px 0 0;
+	background: var(--surface);
+	color: var(--ink);
+	box-shadow: var(--e2);
+	flex-direction: column;
+	overflow: hidden;
+}
+.dsheet:popover-open {
+	display: flex;
+}
+.dsheet::backdrop {
+	background: var(--scrim);
+}
+.sheet-title {
+	margin: 0;
+	padding: 14px 24px 10px;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 600;
+	font-size: 19px;
+	line-height: 24px;
+	letter-spacing: -0.008em;
+	color: var(--ink);
+	box-shadow: inset 0 -1px 0 var(--divide);
+}
+.sheet-body {
+	position: relative;
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 16px 24px 16px;
+}
+.sheet-body .dnav a,
+.sheet-body .toc-list a {
+	padding-top: 10px;
+	padding-bottom: 10px;
+	font-size: 17px;
+	line-height: 24px;
+}
+.sheet-body .toc-list [data-depth='3'] a {
+	font-size: 16px;
+}
+.sheet-body .nav-sec + .nav-sec {
+	margin-top: 20px;
+}
+.sheet-foot {
+	padding: 8px 16px calc(12px + env(safe-area-inset-bottom));
+	box-shadow: inset 0 1px 0 var(--divide);
+}
+.sheet-close,
+.search-close,
+.search-menu {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 100%;
+	min-height: 48px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--well);
+	color: var(--ink);
+	font: inherit;
+	font-size: 16px;
+	line-height: 20px;
+	font-weight: 520;
+	cursor: pointer;
+}
+@media (hover: hover) {
+	.sheet-close:hover,
+	.search-close:hover,
+	.search-menu:hover {
+		background: var(--inset);
+	}
+}
+/* a short phone screen: the sheet takes all but 16px of it, so the menu
+   shows eight rows at 320x460 and the whole quickstart TOC at 375x550 */
+@media (max-height: 620px) {
+	.dsheet {
+		max-height: calc(100dvh - 16px);
+	}
+}
+@media (min-width: 600px) {
+	.dsheet:not(.search) {
+		left: 50%;
+		right: auto;
+		bottom: calc(16px + env(safe-area-inset-bottom));
+		width: min(480px, calc(100% - 2 * var(--gutter)));
+		max-height: min(85dvh, 760px);
+		transform: translateX(-50%);
+		border-radius: 10px;
+	}
+	.dsheet:not(.search) .sheet-foot {
+		padding-bottom: 12px;
+	}
+}
+/* L: "On this page" hangs under its header key, a menu rather than a
+   sheet; Esc and a tap outside close it, as with Open in */
+@media (min-width: 1024px) {
+	#toc-sheet {
+		inset: calc(var(--dh) + 4px) auto auto calc(50% + 40px);
+		bottom: auto;
+		width: 340px;
+		max-height: calc(100dvh - var(--dh) - 24px);
+		transform: none;
+	}
+	@supports (position-area: bottom) {
+		#toc-sheet {
+			position-anchor: --toc;
+			position-area: bottom span-right;
+			position-try-fallbacks: flip-inline;
+			inset: auto;
+			margin: 4px 0 0;
+		}
+	}
+	#toc-sheet::backdrop {
+		background: none;
+	}
+	#toc-sheet .sheet-title,
+	#toc-sheet .sheet-foot {
+		display: none;
+	}
+	#toc-sheet .sheet-body {
+		padding: 8px 16px 8px 24px;
+	}
+	#toc-sheet .toc-list a {
+		font-size: 15px;
+		line-height: 20px;
+	}
+}
+/* SHORT on S and M: side sheets at full height, Close in the title row
+   (a phone held sideways in two hands has no thumb zone at the bottom);
+   the menu sets its sections in two columns, the TOC sits at the right */
+@media (orientation: landscape) and (max-height: 500px) and (max-width: 1023px) {
+	.dsheet:not(.search) {
+		display: none;
+		grid-template-columns: minmax(0, 1fr) auto;
+		grid-template-rows: auto minmax(0, 1fr);
+		inset: 0 auto 0 0;
+		width: min(600px, 82vw);
+		height: 100dvh;
+		max-height: none;
+		transform: none;
+		border-radius: 0 10px 10px 0;
+	}
+	.dsheet:not(.search):popover-open {
+		display: grid;
+	}
+	#toc-sheet {
+		inset: 0 0 0 auto;
+		width: min(380px, 60vw);
+		border-radius: 10px 0 0 10px;
+	}
+	.dsheet:not(.search) .sheet-title {
+		grid-column: 1;
+		grid-row: 1;
+		align-self: stretch;
+		display: flex;
+		align-items: center;
+		padding: 0 8px 0 24px;
+	}
+	.dsheet:not(.search) .sheet-foot {
+		grid-column: 2;
+		grid-row: 1;
+		padding: 2px 8px 2px 0;
+		box-shadow: inset 0 -1px 0 var(--divide);
+	}
+	.dsheet:not(.search) .sheet-close {
+		width: auto;
+		min-height: 44px;
+		padding: 0 16px;
+		background: none;
+	}
+	.dsheet:not(.search) .sheet-body {
+		grid-column: 1 / -1;
+		grid-row: 2;
+		padding: 12px 24px;
+	}
+	#menu-sheet .sheet-body > .dnav {
+		columns: 2;
+		column-gap: 32px;
+	}
+	#menu-sheet .nav-sec {
+		break-inside: avoid;
+	}
+	#menu-sheet .sheet-body .nav-sec + .nav-sec {
+		margin-top: 0;
+	}
+	#menu-sheet .sheet-body .nav-sec {
+		padding-bottom: 16px;
+	}
+}
+
+/* the rise: 200ms with the site's ease; none with reduced motion */
+@media (prefers-reduced-motion: no-preference) {
+	.dsheet:not(.search),
+	.open-in {
+		transition:
+			translate 220ms var(--ease),
+			opacity 220ms var(--ease),
+			overlay 220ms allow-discrete,
+			display 220ms allow-discrete;
+		translate: 0 0;
+		opacity: 1;
+	}
+	@starting-style {
+		.dsheet:not(.search):popover-open,
+		.open-in:popover-open {
+			translate: 0 24px;
+			opacity: 0;
+		}
+	}
+	.dsheet:not(.search):not(:popover-open),
+	.open-in:not(:popover-open) {
+		translate: 0 24px;
+		opacity: 0;
+	}
+	.dsheet::backdrop,
+	.open-in::backdrop {
+		transition:
+			background-color 220ms var(--ease),
+			overlay 220ms allow-discrete,
+			display 220ms allow-discrete;
+	}
+	@starting-style {
+		.dsheet:popover-open::backdrop,
+		.open-in:popover-open::backdrop {
+			background-color: transparent;
+		}
+	}
+}
+
+/* a menu hung under its key (Open in from M, "On this page" on L) drops
+   6px from the key instead of rising 24px from below, so it never opens
+   with a gap under the key that then closes */
+@media (prefers-reduced-motion: no-preference) and (min-width: 600px) {
+	@supports (position-area: bottom) {
+		.open-in:not(:popover-open) {
+			translate: 0 -6px;
+		}
+		@starting-style {
+			.open-in:popover-open {
+				translate: 0 -6px;
+			}
+		}
+	}
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 1024px) {
+	#toc-sheet:not(:popover-open) {
+		translate: 0 -6px;
+	}
+	@starting-style {
+		#toc-sheet:popover-open {
+			translate: 0 -6px;
+		}
+	}
+}
+
+/* ---------- search ---------- */
+
+.search {
+	inset: 0;
+	height: 100dvh;
+	max-height: none;
+	border-radius: 0;
+}
+.search-bar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 12px 12px 12px 16px;
+	padding-top: calc(12px + env(safe-area-inset-top));
+	box-shadow: inset 0 -1px 0 var(--divide);
+}
+.search-field {
+	flex: 1;
+	min-width: 0;
+}
+.search-field input {
+	width: 100%;
+	min-height: 48px;
+	padding: 0 16px;
+	border: 0;
+	border-radius: 6px;
+	background: var(--well);
+	box-shadow: var(--set-in);
+	color: var(--ink);
+	font: inherit;
+	/* 16px or more, so iOS doesn't zoom the page on focus */
+	font-size: 17px;
+	line-height: 24px;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.search-field input::placeholder {
+	color: var(--quiet);
+	opacity: 1;
+}
+.search-field input:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 1px;
+}
+.search-field input::-webkit-search-cancel-button {
+	-webkit-appearance: none;
+}
+.search-close {
+	width: auto;
+	flex: none;
+	padding: 0 16px;
+	background: none;
+}
+.search-body {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	padding: 8px 8px calc(24px + env(safe-area-inset-bottom));
+}
+.search-status {
+	margin: 0;
+	padding: 8px 12px;
+	font-size: 14px;
+	line-height: 20px;
+	color: var(--quiet);
+}
+.search-status:empty {
+	display: none;
+}
+.search-results {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.search-results a {
+	display: block;
+	padding: 12px;
+	border-radius: 6px;
+	color: var(--body);
+}
+.search-results a:focus-visible {
+	outline: none;
+	background: var(--well);
+	box-shadow: inset 0 0 0 2px var(--ink);
+}
+@media (hover: hover) {
+	.search-results a:hover {
+		background: var(--well);
+	}
+}
+.sr-title {
+	display: block;
+	font-weight: 560;
+	font-size: 17px;
+	line-height: 24px;
+	color: var(--ink);
+}
+.sr-where {
+	display: block;
+	font-size: 13px;
+	line-height: 18px;
+	font-weight: 450;
+	color: var(--quiet);
+}
+.sr-where:empty {
+	display: none;
+}
+.sr-ex {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+	margin-top: 4px;
+	font-size: 15px;
+	line-height: 22px;
+	color: var(--muted);
+}
+.sr-ex mark {
+	background: none;
+	color: var(--ink);
+	font-weight: 600;
+}
+.search-hint {
+	margin: 0;
+	padding: 8px 12px;
+	font-size: 14px;
+	line-height: 20px;
+	color: var(--quiet);
+}
+.search-body:has(.search-results li) .search-hint {
+	display: none;
+}
+.search-off {
+	display: none;
+	padding: 8px 12px;
+}
+.search-off p {
+	margin: 0 0 16px;
+	font-size: 16px;
+	line-height: 24px;
+	color: var(--body);
+	max-width: 36em;
+}
+@media (scripting: none) {
+	.dh-search kbd,
+	.nf-search kbd {
+		display: none;
+	}
+	.search-field,
+	.search-status,
+	.search-results,
+	.search-hint {
+		display: none;
+	}
+	.search-off {
+		display: block;
+	}
+	.search-bar {
+		justify-content: flex-end;
+	}
+}
+@media (min-width: 600px) {
+	.search {
+		inset: 10dvh auto auto 50%;
+		width: min(640px, calc(100% - 2 * var(--gutter)));
+		height: auto;
+		max-height: 76dvh;
+		transform: translateX(-50%);
+		border-radius: 10px;
+	}
+	.search-bar {
+		padding-top: 12px;
+	}
+	.search-body {
+		padding-bottom: 12px;
+	}
+}
+/* L and up: the panel opens over the header's search key, its right edge
+   on the key's, so it grows out of the field that opened it */
+@media (min-width: 1024px) {
+	@supports (position-area: bottom) {
+		.search {
+			position-anchor: --dsearch;
+			inset: auto;
+			top: anchor(top, 10dvh);
+			right: anchor(right, 24px);
+			transform: none;
+			margin: -6px -12px 0 0;
+			max-height: calc(100dvh - 24px);
+		}
+	}
+}
+/* XL and up: the key starts the reading column, so the panel opens from
+   its left edge over the article, clear of the TOC column */
+@media (min-width: 1440px) {
+	@supports (position-area: bottom) {
+		.search {
+			right: auto;
+			left: anchor(left, 24px);
+			margin: -6px 0 0 -12px;
+		}
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) and (min-width: 600px) {
+	.search {
+		top: 8px;
+		max-height: calc(100dvh - 16px);
+	}
+}
+
+/* ---------- 404 ----------
+   The mark over "Stet." at the word's width, as a stet stands over the
+   word it saves. S and M stack it, the mark capped by the screen's height
+   so the words reach the first screen. From L, and on a phone on its side,
+   mark and word stand on the left and the way back sits beside them. */
+
+.nf {
+	--nf: max(120px, min(40vw, 30svh));
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+	padding: 24px 0 0;
+}
+.nf-id,
+.nf-body {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: 0;
+}
+.nf-body {
+	width: 100%;
+}
+.nf-mark {
+	display: block;
+	width: var(--nf);
+	height: auto;
+	fill: var(--bar);
+}
+.nf-head {
+	margin: 0.22em 0 0;
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	font-weight: 620;
+	font-size: calc(var(--nf) / 2.62);
+	line-height: 0.9;
+	letter-spacing: -0.032em;
+	color: var(--ink);
+}
+.nf-line {
+	margin: 20px 0 0;
+	font-size: 21px;
+	line-height: 30px;
+	font-stretch: 110%;
+	color: var(--muted);
+	text-wrap: balance;
+}
+.nf-s {
+	white-space: nowrap;
+}
+.nf-search {
+	display: inline-flex;
+	width: min(100%, 360px);
+	margin-top: 28px;
+}
+.nf-home a {
+	white-space: nowrap;
+}
+.nf-home {
+	margin: 20px 0 0;
+	font-size: 15px;
+	line-height: 22px;
+	color: var(--quiet);
+}
+.nf-pages-head {
+	margin: 64px 0 0;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 600;
+	font-size: 22px;
+	line-height: 28px;
+	color: var(--ink);
+}
+/* S: the sections stacked, each section's pages in two columns, so the
+   list isn't one 1164px column of short labels; M: three balanced columns
+   of sections; from L: two beside the mark, three from XL */
+.nf-pages {
+	width: 100%;
+	margin-top: 24px;
+	text-align: left;
+}
+.nf-pages .nav-sec {
+	break-inside: avoid;
+	padding-bottom: 24px;
+}
+.nf-pages .nav-sec + .nav-sec {
+	margin-top: 0;
+}
+@media (max-width: 599px) {
+	.nf-pages ul {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		column-gap: 20px;
+	}
+	/* the one long row, "Contributing, on GitHub", takes the whole width */
+	.nf-pages li:has(> a[data-external]) {
+		grid-column: 1 / -1;
+	}
+	.nf-pages a {
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+}
+@media (min-width: 600px) {
+	.nf {
+		--nf: min(40vw, 420px, 30svh);
+		padding-top: 48px;
+	}
+	.nf-line {
+		font-size: 24px;
+		line-height: 34px;
+	}
+	.nf-pages {
+		columns: 3;
+		column-gap: 32px;
+	}
+}
+@media (min-width: 1024px), (orientation: landscape) and (max-height: 500px) {
+	.nf {
+		--nf: min(28vw, 440px, 36svh);
+		display: grid;
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		column-gap: clamp(48px, 5vw, 96px);
+		align-items: start;
+		text-align: left;
+		padding-top: clamp(32px, 7svh, 88px);
+	}
+	.nf-id {
+		position: sticky;
+		top: calc(var(--dh) + 32px);
+	}
+	.nf-body {
+		align-items: flex-start;
+	}
+	.nf-line {
+		margin-top: 0;
+		text-wrap: auto;
+	}
+	.nf-pages-head {
+		margin-top: 56px;
+	}
+	.nf-pages {
+		columns: 2;
+	}
+}
+@media (min-width: 1440px) {
+	.nf-pages {
+		columns: 3;
+	}
+}
+@media (orientation: landscape) and (max-height: 500px) {
+	.nf {
+		--nf: min(40svh, 200px);
+		grid-template-columns: var(--nf) minmax(0, 1fr);
+		column-gap: 40px;
+		padding-top: 16px;
+	}
+	.nf-id {
+		top: 16px;
+	}
+	.nf-line {
+		font-size: 21px;
+		line-height: 30px;
+	}
+	.nf-search {
+		margin-top: 16px;
+	}
+	.nf-home {
+		margin-top: 12px;
+	}
+	.nf-pages-head {
+		margin-top: 40px;
+	}
+}

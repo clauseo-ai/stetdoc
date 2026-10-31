@@ -1,0 +1,10 @@
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+.vercel/
+.impeccable/review/
+# written by scripts/docs-artifacts.ts
+public/docs/
+public/docs.md

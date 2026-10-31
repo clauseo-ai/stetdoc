@@ -1,0 +1,143 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "installCommand": "bun install",
+  "buildCommand": "bun run build",
+  "outputDirectory": "out",
+  "routes": [
+    {
+      "src": "^/docs/self-hosting-mcp/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/docs/self-hosting"
+      }
+    },
+    {
+      "src": "^/docs/build-on-stetdoc/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/docs/build"
+      }
+    },
+    {
+      "src": "^/docs/README/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/docs"
+      }
+    },
+    {
+      "src": "^/docs/mcp/?$",
+      "status": 308,
+      "headers": {
+        "Location": "/docs/reference/mcp-tools"
+      }
+    },
+    {
+      "src": "^/(.*)\\.md$",
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept",
+        "X-Robots-Tag": "noindex"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/llms(-full)?\\.txt$",
+      "headers": {
+        "Content-Type": "text/plain; charset=utf-8"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/$",
+      "headers": {
+        "Link": "</index.md>; rel=\"alternate\"; type=\"text/markdown\", </llms.txt>; rel=\"describedby\"",
+        "Vary": "Accept"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/docs/?$",
+      "headers": {
+        "Link": "</docs.md>; rel=\"alternate\"; type=\"text/markdown\", </llms.txt>; rel=\"describedby\"",
+        "Vary": "Accept"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/docs/(?!.*\\.[A-Za-z0-9]+$)(.+?)/?$",
+      "headers": {
+        "Link": "</docs/$1.md>; rel=\"alternate\"; type=\"text/markdown\", </llms.txt>; rel=\"describedby\"",
+        "Vary": "Accept"
+      },
+      "continue": true
+    },
+    {
+      "src": "^/$",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": {
+            "re": "text/markdown"
+          }
+        }
+      ],
+      "dest": "/index.md",
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept"
+      }
+    },
+    {
+      "src": "^/docs/?$",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": {
+            "re": "text/markdown"
+          }
+        }
+      ],
+      "dest": "/docs.md",
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept"
+      }
+    },
+    {
+      "src": "^/docs/(?!.*\\.[A-Za-z0-9]+$)(.+?)/?$",
+      "has": [
+        {
+          "type": "header",
+          "key": "accept",
+          "value": {
+            "re": "text/markdown"
+          }
+        }
+      ],
+      "dest": "/docs/$1.md",
+      "headers": {
+        "Content-Type": "text/markdown; charset=utf-8",
+        "Vary": "Accept"
+      }
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "^/(.+?)/?$",
+      "dest": "/$1.html",
+      "check": true
+    },
+    {
+      "handle": "error"
+    },
+    {
+      "src": "^/.*$",
+      "status": 404,
+      "dest": "/404.html"
+    }
+  ]
+}

@@ -1,0 +1,1436 @@
+/*
+ * The parts between the hero and the closing bar. Each part is composed
+ * for its own content, and no two neighbours share a composition:
+ *
+ *   unreadable  the heading beside Word's dialog, the argument under it
+ *   bench       the stet bar at full bleed carrying the race, the three
+ *               facts hanging under it on the mark's dots
+ *   bytes       the paragraph stack leads; the heading across from it
+ *   clauses     a wide display heading with the argument at its foot,
+ *               then the search across the whole frame
+ *   ambiguous   a narrow column of argument beside the long refusal
+ *   xml         one display line across the frame, then the blocked
+ *               attempt and the guard's bar beside the argument
+ *   agents      the argument beside the For agents block
+ *
+ * Every verdict is one device: a stet bar that rises 18px out of the foot
+ * of what it answers, 40px in (16px on phones), Anek 90% at 16px.
+ */
+
+.part {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	column-gap: 32px;
+	align-items: start;
+	padding: 0 var(--edge);
+	margin-top: 200px;
+}
+.part h2 {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	margin: 0;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 620;
+	line-height: 1;
+	letter-spacing: -0.025em;
+}
+/* every size below is a band token (globals.css, .launch) */
+.part-body > p {
+	margin: 0 0 18px;
+	max-width: 33em;
+	font-size: var(--p-fs);
+	line-height: var(--p-lh);
+	color: var(--body);
+}
+.part-body > p:last-child {
+	margin-bottom: 0;
+}
+.part-art {
+	min-width: 0;
+}
+
+/* the display voice, for the parts whose heading is the statement */
+.part-clauses h2,
+.part-xml h2,
+.part-bench h2 {
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	line-height: 0.9;
+	letter-spacing: -0.032em;
+}
+
+/* ---------- wells and verdicts ---------- */
+
+.part .code {
+	padding: 28px 32px;
+	font-size: 16px;
+	line-height: 26px;
+}
+.verdict {
+	position: relative;
+	z-index: 1;
+	margin: 0;
+	padding: 16px 22px;
+	border-radius: 6px;
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-size: 16px;
+	line-height: 25px;
+	font-variant-numeric: tabular-nums;
+}
+.verdict b {
+	font-weight: 620;
+}
+/* a check that passed: the verdict lit court green, its words white, a
+   neutral lit-tile shadow. Refusals stay on graphite. */
+.verdict-passed {
+	background: var(--green);
+	color: var(--on-colour);
+	box-shadow: var(--lit);
+}
+.verdict-pair {
+	display: grid;
+}
+.verdict-pair > .verdict {
+	margin: -18px 0 0 40px;
+}
+
+/* ---------- unreadable: the heading beside the dialog ---------- */
+
+/* the problem at left under the heading, stetdoc's answer at right under
+   the verdict it gives */
+.part-unreadable h2 {
+	grid-column: 1 / 7;
+	max-width: 9em;
+	font-size: var(--h-unreadable);
+}
+.part-unreadable .part-body {
+	display: contents;
+}
+.part-unreadable .part-body > p {
+	grid-row: 2;
+	margin: 48px 0 0;
+}
+.part-unreadable .part-body > p:first-child {
+	grid-column: 1 / 6;
+}
+.part-unreadable .part-body > p + p {
+	grid-column: 8 / -1;
+	padding-left: 40px;
+}
+.part-unreadable .part-art {
+	grid-column: 8 / -1;
+	grid-row: 1;
+	align-self: end;
+}
+.dialog {
+	position: relative;
+	padding: 24px 26px 22px;
+	border-radius: 10px;
+	background: var(--surface);
+	box-shadow: var(--e2);
+	font-size: 16px;
+	line-height: 24px;
+}
+.dialog p {
+	margin: 0;
+}
+.dialog-title {
+	font-weight: 600;
+	color: var(--ink);
+}
+.dialog .dialog-text {
+	margin-top: 8px;
+	color: var(--body);
+}
+.dialog .dialog-buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 10px;
+	margin-top: 22px;
+	/* room for the verdict that rises over the dialog's foot */
+	padding-bottom: 18px;
+}
+.dialog-buttons span {
+	min-width: 76px;
+	padding: 5px 14px;
+	border-radius: 8px;
+	background: var(--ground);
+	box-shadow: var(--e1);
+	text-align: center;
+	font-weight: 500;
+	color: var(--ink);
+}
+
+/* ---------- bench: the stet bar at full bleed, the dots under it ---------- */
+
+.part-bench {
+	display: block;
+	padding: 0;
+}
+.bench-bar {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	column-gap: 32px;
+	padding: 112px var(--edge) 88px;
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+}
+.part-bench h2 {
+	grid-column: 1 / 8;
+	font-size: var(--h-bench);
+}
+.part-bench .part-body {
+	grid-column: 8 / -1;
+	grid-row: 1;
+	align-self: end;
+}
+.part-bench .part-body > p {
+	font-size: min(18px, var(--p-fs));
+	line-height: 1.556;
+	color: var(--on-bar-quiet);
+}
+.race {
+	grid-column: 1 / -1;
+	margin-top: 88px;
+}
+.race-table {
+	display: block;
+	width: 100%;
+	border-collapse: collapse;
+}
+/* one grid for every row, so a column sits at one x down the table; from
+   L up a row runs on one line: the model, stetdoc's time, the track, the
+   others' range, the two times head to head across the track */
+.race-table tbody {
+	display: grid;
+	grid-template-columns: max-content max-content minmax(0, 1fr) max-content;
+	column-gap: 48px;
+}
+.race-table th,
+.race-table td {
+	padding: 0;
+	text-align: left;
+	font: inherit;
+}
+.race-caption {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px 28px;
+	margin: 0 0 20px;
+	font-size: 15px;
+	line-height: 22px;
+	font-weight: 520;
+	color: var(--on-bar-quiet);
+}
+.race-key {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 24px;
+	font-weight: 400;
+}
+.key {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	text-align: left;
+}
+.key::before {
+	flex: none;
+}
+.key::before {
+	content: '';
+	width: 28px;
+	height: 14px;
+	border-radius: 2px;
+}
+.key-stet {
+	font-weight: 600;
+	color: var(--on-bar);
+}
+/* stetdoc lit court green; the other setups, the other side, in red */
+.key-stet::before {
+	background: var(--green);
+	box-shadow: var(--lit);
+}
+.key-others::before {
+	background: var(--on-bar-red-band);
+	box-shadow:
+		inset 3px 0 0 var(--red),
+		inset -3px 0 0 var(--red);
+}
+.race-row {
+	display: grid;
+	grid-column: 1 / -1;
+	grid-template-columns: subgrid;
+	align-items: end;
+	padding: 32px 0 44px;
+	box-shadow: inset 0 1px 0 var(--on-bar-fill);
+}
+/* the model's name sits level with the middle of stetdoc's figure */
+.race-table .race-model {
+	grid-column: 1;
+	grid-row: 1;
+	align-self: end;
+	margin-bottom: max(0px, calc((var(--fig-race) * 0.82 - 26px) / 2));
+	font-weight: 560;
+	font-size: 20px;
+	line-height: 26px;
+	color: var(--on-bar);
+}
+.race-num {
+	grid-column: 2;
+	grid-row: 1;
+}
+.race-others {
+	grid-column: 4;
+	grid-row: 1;
+}
+.race-label {
+	display: block;
+	margin-bottom: 12px;
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 520;
+	color: var(--on-bar-quiet);
+}
+.race-fig {
+	display: block;
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.race-num .race-fig {
+	font-weight: 620;
+	font-size: var(--fig-race);
+	line-height: 0.82;
+	letter-spacing: -0.035em;
+	color: var(--on-bar-green);
+}
+.race-unit {
+	font-size: 0.4em;
+	font-weight: 560;
+	letter-spacing: 0;
+	color: var(--on-bar-quiet);
+}
+/* the range's box is as tall as stetdoc's figure, its words at the foot,
+   so the two labels over them sit on one line */
+.race-others .race-fig {
+	display: flex;
+	align-items: flex-end;
+	height: calc(var(--fig-race) * 0.82);
+	font-weight: 560;
+	font-size: var(--fig-range);
+	line-height: 0.86;
+	letter-spacing: -0.025em;
+	color: var(--on-bar-red);
+}
+/* the track sits level with the middle of the figures, its two ends
+   hanging under it */
+.race-scale {
+	grid-column: 3;
+	grid-row: 1;
+	position: relative;
+	display: block;
+	margin-bottom: calc((var(--fig-race) * 0.82 - 40px) / 2);
+}
+/* the track: a groove cut into the bar; stetdoc's bar in the bar's light
+   ink at its true length, the others a quiet band with marked ends */
+.race-track {
+	position: relative;
+	display: block;
+	height: 40px;
+	border-radius: 4px;
+	background: var(--bar-groove);
+	box-shadow: var(--bar-groove-shade);
+}
+.race-bar,
+.race-band {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.race-bar {
+	left: 0;
+	width: calc(var(--stet) * 100%);
+	display: flex;
+	align-items: center;
+	padding: 0 14px;
+	border-radius: 2px;
+	background: var(--green);
+	color: var(--on-colour);
+	box-shadow: var(--lit);
+}
+.race-bar-label {
+	font-weight: 620;
+	font-size: 14px;
+	line-height: 20px;
+	white-space: nowrap;
+}
+.race-band {
+	left: calc(var(--from) * 100%);
+	right: 0;
+	border-radius: 2px;
+	background: var(--on-bar-red-band);
+	box-shadow:
+		inset 3px 0 0 var(--red),
+		inset -3px 0 0 var(--red);
+}
+/* the scale's two ends; the far end names the row's slowest setup */
+.race-ends {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	right: 0;
+	display: flex;
+	justify-content: space-between;
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-size: 16px;
+	line-height: 20px;
+	font-weight: 520;
+	font-variant-numeric: tabular-nums;
+	color: var(--on-bar-quiet);
+}
+/* the far end sits under the red band's end, in its colour: the track
+   stops at this row's slowest setup */
+.race-ends > :last-child {
+	color: var(--on-bar-red);
+}
+.method {
+	max-width: 62ch;
+	margin: 48px 0 0;
+	font-size: 14px;
+	line-height: 21px;
+	color: var(--on-bar-quiet);
+}
+
+/* the three facts hang under the bar on the mark's three dots */
+.facts {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 40px 32px;
+	margin: 0;
+	padding: 36px var(--edge) 0;
+	list-style: none;
+}
+/* each fact centred under its dot, the three spaced across the bar's
+   width as the mark spaces its dots; one subgrid, so the lines sit level
+   whether or not a fact has a wall */
+.facts {
+	grid-template-rows: repeat(4, auto);
+}
+.fact {
+	display: grid;
+	grid-row: span 4;
+	grid-template-rows: subgrid;
+	row-gap: 0;
+	justify-items: center;
+	align-content: start;
+	text-align: center;
+}
+/* every line on the fourth row, level across the three, whether or not
+   its fact has a wall */
+.fact-line {
+	grid-row: 4;
+}
+/* the walls: every tile lit court green and staying lit, a neutral shadow
+   under each. 118 runs as small tiles, six markups as large ones, both
+   walls the same width */
+.wall {
+	display: grid;
+	grid-template-columns: repeat(20, minmax(0, 1fr));
+	gap: 4px;
+	width: min(100%, 304px);
+	margin-top: 32px;
+}
+.wall i {
+	aspect-ratio: 1;
+	border-radius: 2px;
+	background: var(--green);
+	box-shadow: var(--lit);
+}
+/* six markups as a three by two block of large tiles, as tall as the 118 */
+.fact-wall-6 .wall {
+	grid-template-columns: repeat(3, 40px);
+	gap: 8px;
+	width: auto;
+}
+.fact-wall-6 .wall i {
+	border-radius: 6px;
+}
+.fact-dot {
+	width: 44px;
+	height: 44px;
+	margin-bottom: 36px;
+	border-radius: 50%;
+	background: var(--bar);
+}
+.part-bench + .part {
+	margin-top: 168px;
+}
+.fact-figure {
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	font-weight: 620;
+	font-size: var(--fig-fact);
+	line-height: 0.92;
+	letter-spacing: -0.03em;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+.fact-line {
+	max-width: 17em;
+	margin-top: 24px;
+	font-size: 18px;
+	line-height: 27px;
+	color: var(--body);
+}
+
+/* ---------- bytes: the stack leads, the heading across from it ---------- */
+
+.part-bytes h2 {
+	grid-column: 8 / -1;
+	font-size: var(--h-bytes);
+	line-height: 1.02;
+}
+.part-bytes .part-body {
+	grid-column: 8 / -1;
+	grid-row: 2;
+	margin-top: 32px;
+}
+/* the stack keeps a page's measure, about 70 characters a line */
+.part-bytes .part-art {
+	grid-column: 1 / 7;
+	grid-row: 1 / 4;
+}
+.part-body > .proof {
+	margin-top: 32px;
+	font-stretch: 112%;
+	font-size: 24px;
+	line-height: 34px;
+	letter-spacing: -0.008em;
+	color: var(--muted);
+}
+.proof b {
+	font-weight: 640;
+	color: var(--ink);
+}
+.stack {
+	display: grid;
+	gap: 8px;
+	margin-bottom: 32px;
+}
+.plane {
+	display: grid;
+	grid-template-columns: 76px minmax(0, 1fr);
+	gap: 16px;
+	align-items: start;
+	padding: 14px 20px;
+	border-radius: 4px;
+	background: var(--sheet);
+}
+.plane.locked {
+	margin: 0 20px;
+	box-shadow: var(--shadow-flat);
+}
+.plane-p {
+	font-family: var(--serif);
+	font-size: 15px;
+	line-height: 25px;
+}
+.plane-head {
+	font-weight: 700;
+	font-size: 13px;
+	letter-spacing: 0.02em;
+}
+.plane-ref {
+	font-stretch: 90%;
+	font-size: 13px;
+	line-height: 24px;
+	font-variant-numeric: tabular-nums;
+	color: var(--quiet);
+}
+.plane-ref b {
+	font-weight: 620;
+	color: var(--ink);
+}
+.plane.lifted {
+	position: relative;
+	z-index: 1;
+	margin: 6px 0;
+	padding: 20px 24px 22px;
+	box-shadow: var(--e2);
+}
+.plane.lifted .doc-p {
+	font-family: var(--serif);
+	font-size: 16px;
+	line-height: 26px;
+	color: var(--on-yellow);
+}
+.plane.lifted .change-bar {
+	left: -12px;
+}
+/* the one paragraph stetdoc touched waits for your review: it lifts and
+   lights court yellow, and everything on it is ink */
+.plane.lifted {
+	background: var(--yellow);
+	color: var(--on-yellow);
+}
+.plane.lifted .plane-ref {
+	color: var(--on-yellow-quiet);
+}
+.plane.lifted .plane-ref b {
+	color: var(--on-yellow);
+}
+.plane.lifted .doc-p del {
+	color: var(--on-yellow-quiet);
+}
+.plane.lifted .doc-p del::after,
+.plane.lifted .change-bar {
+	background: var(--on-yellow);
+}
+.plane.lifted .doc-p ins {
+	box-shadow: inset 0 -1.5px 0 var(--on-yellow);
+}
+.plane.lifted ::selection {
+	background: var(--on-colour);
+	color: var(--on-yellow);
+}
+.cmp {
+	padding-bottom: 42px;
+}
+
+/* ---------- clauses: a display heading, the search across the frame ---- */
+
+.part-clauses h2 {
+	grid-column: 1 / 9;
+	font-size: var(--h-clauses);
+}
+.part-clauses .part-body {
+	grid-column: 9 / -1;
+	grid-row: 1;
+	align-self: end;
+}
+.part-clauses .part-body > p {
+	font-size: min(18px, var(--p-fs));
+	line-height: 1.556;
+}
+.part-clauses .part-art {
+	grid-column: 1 / -1;
+	margin-top: 64px;
+}
+.part-clauses .code {
+	padding: 36px 40px;
+	font-size: 20px;
+	line-height: 32px;
+}
+.hits {
+	display: grid;
+	grid-template-columns: auto auto minmax(0, 1fr);
+	gap: 10px 28px;
+	align-items: baseline;
+}
+.hit {
+	display: contents;
+}
+.code .ln + .hits,
+.code .hits + .ln {
+	margin-top: 4px;
+}
+.code .cmd + .hits {
+	margin-top: 16px;
+}
+.find .ref {
+	color: var(--quiet);
+}
+/* the clause numbers are the point: set at display width and size */
+.find .hits .cl {
+	font-family: var(--font-display);
+	font-stretch: 125%;
+	font-weight: 620;
+	font-size: 38px;
+	line-height: 44px;
+	letter-spacing: -0.02em;
+	color: var(--ink);
+}
+
+/* ---------- ambiguous: a narrow argument beside the refusal ---------- */
+
+.part-ambiguous h2 {
+	grid-column: 1 / 5;
+	font-size: var(--h-ambiguous);
+	line-height: 1.04;
+}
+.part-ambiguous .part-body {
+	grid-column: 1 / 5;
+	grid-row: 2;
+	margin-top: 28px;
+}
+.part-ambiguous .part-body > p {
+	font-size: min(18px, var(--p-fs));
+	line-height: 1.556;
+}
+.part-ambiguous .part-art {
+	grid-column: 5 / -1;
+	grid-row: 1 / 3;
+	padding-top: 6px;
+}
+.ambiguous {
+	padding-bottom: 46px;
+}
+.code .ln + .places,
+.code .places + .ln {
+	margin-top: 4px;
+}
+.places .ln {
+	margin-left: 1.1em;
+}
+
+/* ---------- xml: one display line, then the attempt and the guard ------ */
+
+.part-xml h2 {
+	font-size: var(--h-xml);
+	white-space: nowrap;
+}
+.part-xml .part-art {
+	grid-column: 1 / 8;
+	grid-row: 2;
+	margin-top: 64px;
+}
+.part-xml .part-body {
+	grid-column: 9 / -1;
+	grid-row: 2;
+	margin-top: 64px;
+}
+/* the attempt is set large, prompt and all, so the prompt sits on the
+   command's baseline */
+/* the attempt is not a terminal well: it is the command itself, struck
+   large on the concrete, and the guard's bar sits square under it, the one
+   verdict that does not rise out of a well */
+.part-xml .code.guard-try {
+	padding: 0;
+	background: none;
+	box-shadow: none;
+	border-radius: 0;
+	font-size: var(--guard);
+	line-height: 1.2;
+}
+.part-xml .verdict-pair > .verdict {
+	margin: 28px 0 0;
+}
+.struck {
+	position: relative;
+	white-space: nowrap;
+	text-decoration: none;
+	color: var(--muted);
+	font-weight: 500;
+}
+.struck::after {
+	content: '';
+	position: absolute;
+	left: -3px;
+	right: -3px;
+	top: 52%;
+	height: max(2px, 0.06em);
+	background: var(--ink);
+	transform-origin: left;
+}
+
+/* ---------- agents: the argument beside the For agents block ---------- */
+
+.part-agents h2 {
+	grid-column: 1 / 6;
+	font-size: var(--h-agents);
+}
+.part-agents .part-body {
+	grid-column: 1 / 6;
+	grid-row: 2;
+	margin-top: 36px;
+}
+.part-agents,
+.part-ambiguous {
+	grid-template-rows: auto 1fr;
+}
+.part-bytes {
+	grid-template-rows: auto auto 1fr;
+}
+.part-agents .part-art {
+	grid-column: 6 / -1;
+	grid-row: 1 / 3;
+	padding-top: 8px;
+}
+.for-agents-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+.for-agents h3 {
+	margin: 0;
+	font-family: var(--font-head);
+	font-stretch: 116%;
+	font-weight: 620;
+	font-size: 30px;
+	line-height: 36px;
+	letter-spacing: -0.015em;
+}
+/* 18px under the head row, so the key, taller than the h3, has room */
+.for-agents-lede {
+	max-width: 40em;
+	margin: 18px 0 22px;
+	font-size: 17px;
+	line-height: 27px;
+	color: var(--body);
+}
+/* each line of the block hangs: a step's wrapped lines align under its
+   text, a sub-line's under the sub-line. The block wraps at every width,
+   never scrolls, and breaks a long URL or the JSON anywhere */
+.agents-code .al {
+	display: block;
+	padding-left: 3ch;
+	text-indent: -3ch;
+}
+.agents-code .al-sub {
+	padding-left: 5ch;
+	text-indent: -2ch;
+}
+.part .agents-code {
+	padding: 26px 30px;
+	font-size: 15px;
+	line-height: 24px;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	color: var(--ink);
+}
+/* the well is one plane; its two pres carry no box of their own */
+.agents-code pre {
+	margin: 0;
+	font: inherit;
+	white-space: inherit;
+}
+/* from M up the whole prompt shows: the disclosure stays open in effect
+   and its summary is gone */
+@media (width >= 600px) {
+	.agents-more > summary {
+		display: none;
+	}
+	.agents-more::details-content {
+		content-visibility: visible;
+		display: contents;
+	}
+}
+/* on the concrete the key is graphite, the bar's own material */
+.for-agents .copy {
+	min-height: 44px;
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+}
+@media (hover: hover) {
+	.for-agents .copy:hover {
+		background: var(--ink-hover);
+	}
+}
+
+/* ---------- motion ----------
+   Played by the scroll, from the resting end state, and finished by the
+   time the element is wholly on screen: a bar in view is always drawn.
+   Fill is backwards only, so past its range, or with no timeline at all,
+   the resting style shows. Reduced motion skips all of it (globals.css). */
+
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) {
+		.race-bar {
+			animation: draw linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 100%;
+		}
+		.race-band {
+			animation: appear linear backwards;
+			animation-timeline: view();
+			animation-range: entry 30% entry 100%;
+		}
+		/* the dots seat in turn, each done once it is wholly on screen */
+		.fact-dot {
+			animation: seat linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 60%;
+		}
+		.fact:nth-child(2) .fact-dot {
+			animation-range: entry 20% entry 80%;
+		}
+		.fact:nth-child(3) .fact-dot {
+			animation-range: entry 40% entry 100%;
+		}
+		/* each tile lights as it comes on screen, row by row, and stays lit */
+		.wall i {
+			animation: light linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 100%;
+		}
+		.plane.lifted {
+			animation: lift linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 100%;
+		}
+		.plane.lifted .doc-p del::after,
+		.struck::after {
+			animation: strike linear backwards;
+			animation-timeline: view();
+			animation-range: entry 30% entry 100%;
+		}
+		.plane.lifted .doc-p ins,
+		.plane.lifted .change-bar {
+			animation: appear linear backwards;
+			animation-timeline: view();
+			animation-range: entry 60% entry 100%;
+		}
+		.verdict {
+			animation: verdict linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 100%;
+		}
+	}
+}
+
+/* ---------- bands ----------
+   The sizes are band tokens (globals.css); these blocks hold layout only.
+   The base rules above are the XL composition, which L, XL and XXL share. */
+
+/* L, XL, XXL: the sheet hangs below the run, so the hero's foot is the
+   sheet's; the first part starts a step closer to make up for it */
+@media (width >= 1024px) {
+	.hero + .part {
+		margin-top: 152px;
+	}
+}
+
+/* L: the twelve columns are narrower, so each body takes five of them and
+   no measure falls under about 40 characters */
+@media (1024px <= width < 1440px) {
+	/* the two paragraphs read as one column under the heading, the dialog
+	   beside them */
+	.part-unreadable h2 {
+		grid-column: 1 / 8;
+	}
+	.part-unreadable .part-body > p:first-child,
+	.part-unreadable .part-body > p + p {
+		grid-column: 1 / 8;
+		padding-left: 0;
+	}
+	.part-unreadable .part-body > p:first-child {
+		margin-top: 40px;
+	}
+	.part-unreadable .part-body > p + p {
+		grid-row: 3;
+		margin-top: 18px;
+	}
+	.part-unreadable .part-art {
+		grid-column: 8 / -1;
+		grid-row: 1 / 4;
+		align-self: center;
+	}
+	.part-clauses h2 {
+		grid-column: 1 / 8;
+	}
+	.part-clauses .part-body {
+		grid-column: 8 / -1;
+	}
+	.part-ambiguous h2,
+	.part-ambiguous .part-body {
+		grid-column: 1 / 6;
+	}
+	.part-ambiguous .part-art {
+		grid-column: 6 / -1;
+	}
+	.part-xml .part-art {
+		grid-column: 1 / 8;
+	}
+	.part-xml .part-body {
+		grid-column: 8 / -1;
+	}
+	.race-table tbody {
+		column-gap: 36px;
+	}
+	.race-table .race-model {
+		font-size: 18px;
+		line-height: 24px;
+	}
+}
+
+/* M and S: one column. Each part keeps a shape of its own, so the page
+   never settles into heading, text, well, verdict, and no two neighbours
+   share an order.
+   unreadable  the artifact leads: Word's dialog and the green verdict
+               rising out of it, then the heading, the problem, the answer
+   bench       the full-bleed graphite plane, its times giant
+   facts       each fact hangs from its own dot (the M and S blocks below)
+   bytes       the artifact leads: the stack edge to edge, the yellow
+               paragraph off both sides, then the heading and argument
+   clauses     a display heading, then the search, its clause numbers
+               giant, the argument under it as its caption
+   ambiguous   the artifact leads again: the refusal, then the heading
+   xml         a display heading, the blocked attempt struck large on the
+               concrete with the guard's bar under it, then the argument
+   agents      the argument, then the For agents block */
+@media (width < 1024px) {
+	.part,
+	.bench-bar {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.part {
+		margin-top: 152px;
+	}
+	.part > *,
+	.bench-bar > *,
+	.part .part-art,
+	.part .part-body,
+	.part h2 {
+		grid-column: 1 / -1;
+		grid-row: auto;
+	}
+	.part h2 {
+		line-height: 1.04;
+	}
+	.part-clauses h2,
+	.part-xml h2,
+	.part-bench h2 {
+		line-height: 0.92;
+	}
+	.part-unreadable h2 {
+		max-width: none;
+	}
+	.part-xml h2 {
+		white-space: normal;
+	}
+	.part .part-body {
+		margin-top: 32px;
+		align-self: start;
+	}
+	.part,
+	.part-agents,
+	.part-ambiguous,
+	.part-bytes {
+		grid-template-rows: none;
+	}
+	.part .part-art {
+		margin-top: 44px;
+		padding-top: 0;
+	}
+	.part-body > p {
+		max-width: 36em;
+	}
+	.part-unreadable .part-body {
+		display: contents;
+	}
+	.part-unreadable .part-body > p,
+	.part-unreadable .part-body > p + p,
+	.part-unreadable .part-body > p:first-child {
+		grid-column: 1 / -1;
+		grid-row: auto;
+		max-width: 36em;
+	}
+	.part-unreadable .part-body > p:first-child {
+		order: 1;
+		margin: 24px 0 0;
+	}
+	.part-unreadable .part-art,
+	.part-bytes .part-art,
+	.part-ambiguous .part-art {
+		order: -1;
+		margin-top: 0;
+	}
+	.part-unreadable .part-body > p + p {
+		order: 3;
+		margin: 18px 0 0;
+		padding-left: 0;
+	}
+	.part-unreadable h2,
+	.part-bytes h2,
+	.part-ambiguous h2 {
+		order: 0;
+		margin-top: 44px;
+	}
+	.part-bytes .part-body,
+	.part-ambiguous .part-body {
+		order: 2;
+		margin-top: 28px;
+	}
+	/* the stack runs edge to edge: the lifted paragraph off both sides,
+	   square, the locked ones inset on the concrete */
+	.part-bytes .stack {
+		margin-inline: calc(-1 * var(--gutter));
+	}
+	.part-bytes .plane.lifted {
+		margin: 0 0 8px;
+		padding-inline: var(--gutter);
+		border-radius: 0;
+	}
+	.part-bytes .plane.locked {
+		margin: 0 var(--gutter);
+	}
+	/* the stack starts at the yellow paragraph, the one stetdoc touched,
+	   so it never arrives as a stray fragment of contract */
+	.part-bytes .plane.locked:nth-child(-n + 2) {
+		display: none;
+	}
+	.part-bytes .plane.lifted .change-bar {
+		left: -10px;
+	}
+	/* the search leads straight off the heading, and the argument follows
+	   it as its caption */
+	.part-clauses .part-art {
+		order: 1;
+		margin-top: 32px;
+	}
+	.part-clauses .part-body {
+		order: 2;
+		margin-top: 20px;
+	}
+	.part-clauses .part-body > p {
+		font-size: 16px;
+		line-height: 25px;
+		color: var(--quiet);
+	}
+	/* the blocked attempt comes straight after the heading, the argument
+	   under the guard's bar */
+	.part-xml .part-art {
+		order: 1;
+		margin-top: 32px;
+	}
+	.part-xml .part-body {
+		order: 2;
+		margin-top: 40px;
+	}
+	.bench-bar {
+		padding: 88px var(--edge) 72px;
+	}
+	.race {
+		margin-top: 64px;
+	}
+	/* the track goes under the two times, full width */
+	.race-scale {
+		position: static;
+		margin: 28px 0 0;
+	}
+	.race-track {
+		height: 44px;
+	}
+	.race-ends {
+		position: static;
+		margin-top: 10px;
+	}
+}
+
+/* M: a row is the model and the two times head to head, the track under
+   them */
+@media (600px <= width < 1024px) {
+	.race-table tbody {
+		grid-template-columns: fit-content(200px) max-content minmax(0, 1fr);
+		column-gap: 40px;
+	}
+	.race-others .race-fig {
+		white-space: normal;
+		line-height: 0.92;
+	}
+	.race-others {
+		grid-column: 3;
+	}
+	.race-scale {
+		grid-column: 1 / -1;
+		grid-row: 2;
+	}
+	/* the facts, on a screen tall enough for them: each a row, its dot at
+	   left, the figure and its line, then its wall */
+	@media (orientation: portrait), (height > 500px) {
+		.facts {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-rows: none;
+			gap: 56px;
+			padding-top: 48px;
+		}
+		.fact {
+			grid-row: auto;
+			grid-template-rows: none;
+			grid-template-columns: 44px calc(var(--fig-fact) * 4.8) minmax(0, 1fr);
+			column-gap: 24px;
+			justify-items: start;
+			align-items: start;
+			text-align: left;
+		}
+		.fact-dot {
+			grid-column: 1;
+			grid-row: 1;
+			margin: calc(var(--fig-fact) * 0.46 - 22px) 0 0;
+		}
+		.fact-figure {
+			grid-column: 2;
+			grid-row: 1;
+		}
+		.fact-line {
+			grid-column: 2;
+			grid-row: 2;
+			margin-top: 16px;
+		}
+		.fact .wall {
+			grid-column: 3;
+			grid-row: 1 / 3;
+			width: 100%;
+			margin: 0;
+		}
+		.fact-wall-6 .wall {
+			width: auto;
+		}
+		/* the last fact has no wall: its line takes the wall's column,
+		   level with the figure, so no quarter of the grid stands empty */
+		.fact:not([class*='fact-wall']) .fact-line {
+			grid-column: 3;
+			grid-row: 1;
+			align-self: center;
+			margin-top: 0;
+		}
+		/* and the stack follows at the facts' own rhythm */
+		.part-bench + .part {
+			margin-top: 112px;
+		}
+	}
+}
+
+/* S */
+@media (width < 600px) {
+	.part {
+		margin-top: 128px;
+	}
+	.part-bench + .part {
+		margin-top: 112px;
+	}
+	.part h2 {
+		line-height: 1.06;
+	}
+	.part-clauses h2,
+	.part-xml h2,
+	.part-bench h2 {
+		line-height: 0.94;
+	}
+	.part .part-body {
+		margin-top: 24px;
+	}
+	.part-body > .proof {
+		font-size: 22px;
+		line-height: 31px;
+	}
+	.part .part-art {
+		margin-top: 36px;
+	}
+	.part .code,
+	.part-clauses .code {
+		padding: 20px;
+		font-size: 15.5px;
+		line-height: 25px;
+	}
+	.part-clauses .find {
+		margin-inline: calc(-1 * var(--gutter));
+		padding-inline: var(--gutter);
+		border-radius: 0;
+	}
+	.cmp,
+	.ambiguous {
+		padding-bottom: 40px;
+	}
+	.verdict-pair > .verdict {
+		margin-left: 16px;
+	}
+	.hits {
+		grid-template-columns: auto minmax(0, 1fr);
+		gap: 2px 12px;
+	}
+	.hits .tx {
+		grid-column: 1 / -1;
+		margin-bottom: 10px;
+	}
+	.part-clauses .find .hits .cl {
+		font-size: 42px;
+		line-height: 44px;
+	}
+	.places .ln {
+		margin-left: 0.6em;
+	}
+	.part-xml .struck {
+		font-weight: 560;
+	}
+	.dialog .dialog-buttons {
+		padding-bottom: 14px;
+	}
+	.plane {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 2px;
+		padding: 12px 16px;
+	}
+	.plane.locked {
+		margin: 0 12px;
+	}
+	.plane.lifted {
+		padding: 16px 18px 18px;
+	}
+	.bench-bar {
+		padding: 64px var(--edge) 56px;
+	}
+	.race {
+		margin-top: 48px;
+	}
+	.race-caption {
+		margin-bottom: 8px;
+	}
+	/* a row: the model over the two times, the track under them; the
+	   others' range may take two lines inside the figure's height */
+	.race-table tbody {
+		grid-template-columns: max-content minmax(0, 1fr);
+		column-gap: 22px;
+	}
+	.race-row {
+		padding: 32px 0 28px;
+	}
+	.race-table .race-model {
+		grid-column: 1 / -1;
+		grid-row: 1;
+		margin-bottom: 16px;
+	}
+	.race-num {
+		grid-column: 1;
+		grid-row: 2;
+	}
+	.race-others {
+		grid-column: 2;
+		grid-row: 2;
+	}
+	.race-others .race-fig {
+		/* each range on one line: "274 to 538 s" is 6.81em, and its size
+		   stops where that fills the column beside stetdoc's figure, which
+		   is 2.48 of its own em wide */
+		font-size: min(
+			var(--fig-range),
+			calc((var(--frame) - var(--fig-race) * 2.48 - 22px) / 6.9)
+		);
+		line-height: 0.92;
+	}
+	.race-scale {
+		grid-column: 1 / -1;
+		grid-row: 3;
+		margin-top: 20px;
+	}
+	.race-label {
+		margin-bottom: 8px;
+	}
+	.race-track {
+		height: 40px;
+	}
+	.race-ends {
+		font-size: 15px;
+	}
+	.method {
+		margin-top: 32px;
+	}
+	/* the facts, on a screen tall enough for them: each hangs from its own
+	   dot, the dot beside the figure; both walls stand in the text column
+	   beside the dots, the 118 across it, the six markups as a block */
+	@media (orientation: portrait), (height > 500px) {
+		.facts {
+			grid-template-columns: minmax(0, 1fr);
+			grid-template-rows: none;
+			gap: 48px;
+			padding-top: 32px;
+		}
+		.fact {
+			grid-row: auto;
+			grid-template-rows: none;
+			grid-template-columns: 44px minmax(0, 1fr);
+			column-gap: 16px;
+			justify-items: start;
+			align-items: center;
+			text-align: left;
+		}
+		.fact-dot {
+			grid-column: 1;
+			grid-row: 1;
+			margin: 0;
+		}
+		.fact-figure {
+			grid-column: 2;
+			grid-row: 1;
+		}
+		.fact .wall {
+			grid-column: 2;
+			grid-row: 2;
+			width: 100%;
+			margin-top: 20px;
+			gap: 3px;
+		}
+		.fact-wall-6 .wall {
+			grid-column: 2;
+			width: auto;
+			gap: 8px;
+		}
+		.fact-line {
+			grid-column: 2;
+			grid-row: 3;
+			margin-top: 14px;
+		}
+	}
+	.for-agents h3 {
+		font-size: 26px;
+		line-height: 32px;
+	}
+	.part .agents-code {
+		padding: 20px;
+		font-size: 15.5px;
+		line-height: 25px;
+	}
+	.agents-code .al-sub {
+		padding-left: 4ch;
+		text-indent: -1.5ch;
+	}
+	.agents-code .al + .al:not(.al-sub),
+	.agents-more .al:first-child:not(.al-sub) {
+		margin-top: 6px;
+	}
+	/* on a phone the prompt stops after step 2; the rest opens under a
+	   text key in the well, which goes once it has done its job */
+	.agents-more > summary {
+		display: flex;
+		align-items: center;
+		width: fit-content;
+		min-height: 44px;
+		margin: 6px 0 -12px;
+		list-style: none;
+		font-family: var(--font);
+		font-stretch: 104%;
+		font-weight: 560;
+		font-size: 16px;
+		line-height: 24px;
+		white-space: nowrap;
+		color: var(--ink);
+		text-decoration: underline;
+		text-decoration-thickness: 1px;
+		text-decoration-color: var(--line);
+		text-underline-offset: 5px;
+		cursor: pointer;
+	}
+	.agents-more > summary::-webkit-details-marker {
+		display: none;
+	}
+	.agents-more[open] > summary {
+		display: none;
+	}
+	.end h2 {
+		scroll-margin-top: 64px;
+	}
+}

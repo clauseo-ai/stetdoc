@@ -1,0 +1,1152 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-31T00:00:00Z",
+  "title": "Design System: stetdoc",
+  "extensions": {
+    "colorMeta": {
+      "ground": {
+        "role": "neutral",
+        "displayName": "Warm Concrete",
+        "canonical": "#E5E2DC",
+        "tonalRamp": [
+          "oklch(15% 0.003 85)",
+          "oklch(26% 0.005 85)",
+          "oklch(38% 0.007 85)",
+          "oklch(49% 0.009 85)",
+          "oklch(61% 0.007 85)",
+          "oklch(72% 0.005 85)",
+          "oklch(84% 0.003 85)",
+          "oklch(95% 0.002 85)"
+        ]
+      },
+      "inset": {
+        "role": "neutral",
+        "displayName": "Concrete Inset",
+        "canonical": "#DCD8D1",
+        "tonalRamp": [
+          "oklch(15% 0.003 82)",
+          "oklch(26% 0.006 82)",
+          "oklch(38% 0.008 82)",
+          "oklch(49% 0.010 82)",
+          "oklch(61% 0.008 82)",
+          "oklch(72% 0.006 82)",
+          "oklch(84% 0.003 82)",
+          "oklch(95% 0.003 82)"
+        ]
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Well",
+        "canonical": "#F3F1ED",
+        "tonalRamp": [
+          "oklch(15% 0.002 85)",
+          "oklch(26% 0.003 85)",
+          "oklch(38% 0.004 85)",
+          "oklch(49% 0.006 85)",
+          "oklch(61% 0.005 85)",
+          "oklch(72% 0.003 85)",
+          "oklch(84% 0.002 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Surface",
+        "canonical": "#FDFCFA",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "sheet": {
+        "role": "neutral",
+        "displayName": "Sheet White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Graphite",
+        "canonical": "#23201D",
+        "tonalRamp": [
+          "oklch(15% 0.002 67)",
+          "oklch(26% 0.004 67)",
+          "oklch(38% 0.005 67)",
+          "oklch(49% 0.007 67)",
+          "oklch(61% 0.006 67)",
+          "oklch(72% 0.004 67)",
+          "oklch(84% 0.002 67)",
+          "oklch(95% 0.002 67)"
+        ]
+      },
+      "ink-hover": {
+        "role": "neutral",
+        "displayName": "Graphite Hover",
+        "canonical": "#3A3631",
+        "tonalRamp": [
+          "oklch(15% 0.003 74)",
+          "oklch(26% 0.005 74)",
+          "oklch(38% 0.008 74)",
+          "oklch(49% 0.010 74)",
+          "oklch(61% 0.008 74)",
+          "oklch(72% 0.006 74)",
+          "oklch(84% 0.003 74)",
+          "oklch(95% 0.003 74)"
+        ]
+      },
+      "ink-press": {
+        "role": "neutral",
+        "displayName": "Graphite Press",
+        "canonical": "#4A453F",
+        "tonalRamp": [
+          "oklch(15% 0.004 72)",
+          "oklch(26% 0.006 72)",
+          "oklch(38% 0.009 72)",
+          "oklch(49% 0.012 72)",
+          "oklch(61% 0.009 72)",
+          "oklch(72% 0.007 72)",
+          "oklch(84% 0.004 72)",
+          "oklch(95% 0.003 72)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted Umber",
+        "canonical": "#48423B",
+        "tonalRamp": [
+          "oklch(15% 0.004 72)",
+          "oklch(26% 0.008 72)",
+          "oklch(38% 0.011 72)",
+          "oklch(49% 0.014 72)",
+          "oklch(61% 0.011 72)",
+          "oklch(72% 0.008 72)",
+          "oklch(84% 0.005 72)",
+          "oklch(95% 0.004 72)"
+        ]
+      },
+      "quiet": {
+        "role": "neutral",
+        "displayName": "Quiet Umber",
+        "canonical": "#5F584F",
+        "tonalRamp": [
+          "oklch(15% 0.005 74)",
+          "oklch(26% 0.009 74)",
+          "oklch(38% 0.013 74)",
+          "oklch(49% 0.017 74)",
+          "oklch(61% 0.013 74)",
+          "oklch(72% 0.009 74)",
+          "oklch(84% 0.006 74)",
+          "oklch(95% 0.004 74)"
+        ]
+      },
+      "body": {
+        "role": "neutral",
+        "displayName": "Body Umber",
+        "canonical": "#3A3631",
+        "tonalRamp": [
+          "oklch(15% 0.003 74)",
+          "oklch(26% 0.005 74)",
+          "oklch(38% 0.008 74)",
+          "oklch(49% 0.010 74)",
+          "oklch(61% 0.008 74)",
+          "oklch(72% 0.006 74)",
+          "oklch(84% 0.003 74)",
+          "oklch(95% 0.003 74)"
+        ]
+      },
+      "on-ink": {
+        "role": "neutral",
+        "displayName": "On Graphite",
+        "canonical": "#FDFCFA",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "select": {
+        "role": "neutral",
+        "displayName": "Selection Sand",
+        "canonical": "#E2D9C4",
+        "tonalRamp": [
+          "oklch(15% 0.009 88)",
+          "oklch(26% 0.016 88)",
+          "oklch(38% 0.023 88)",
+          "oklch(49% 0.029 88)",
+          "oklch(61% 0.023 88)",
+          "oklch(72% 0.017 88)",
+          "oklch(84% 0.010 88)",
+          "oklch(95% 0.007 88)"
+        ]
+      },
+      "divide": {
+        "role": "neutral",
+        "displayName": "Divide Hairline",
+        "canonical": "rgba(56, 44, 30, 0.1)",
+        "tonalRamp": [
+          "oklch(15% 0.009 71)",
+          "oklch(26% 0.016 71)",
+          "oklch(38% 0.022 71)",
+          "oklch(49% 0.029 71)",
+          "oklch(61% 0.023 71)",
+          "oklch(72% 0.016 71)",
+          "oklch(84% 0.010 71)",
+          "oklch(95% 0.007 71)"
+        ]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "Link Line",
+        "canonical": "rgba(56, 44, 30, 0.3)",
+        "tonalRamp": [
+          "oklch(15% 0.009 71)",
+          "oklch(26% 0.016 71)",
+          "oklch(38% 0.022 71)",
+          "oklch(49% 0.029 71)",
+          "oklch(61% 0.023 71)",
+          "oklch(72% 0.016 71)",
+          "oklch(84% 0.010 71)",
+          "oklch(95% 0.007 71)"
+        ]
+      },
+      "line-strong": {
+        "role": "neutral",
+        "displayName": "Link Line Strong",
+        "canonical": "rgba(35, 32, 29, 0.6)",
+        "tonalRamp": [
+          "oklch(15% 0.002 67)",
+          "oklch(26% 0.004 67)",
+          "oklch(38% 0.005 67)",
+          "oklch(49% 0.007 67)",
+          "oklch(61% 0.006 67)",
+          "oklch(72% 0.004 67)",
+          "oklch(84% 0.002 67)",
+          "oklch(95% 0.002 67)"
+        ]
+      },
+      "brand": {
+        "role": "tertiary",
+        "displayName": "Clauseo Brick",
+        "canonical": "#A3482F",
+        "tonalRamp": [
+          "oklch(15% 0.038 36)",
+          "oklch(26% 0.067 36)",
+          "oklch(38% 0.096 36)",
+          "oklch(49% 0.125 36)",
+          "oklch(61% 0.100 36)",
+          "oklch(72% 0.071 36)",
+          "oklch(84% 0.042 36)",
+          "oklch(95% 0.032 36)"
+        ]
+      },
+      "bar": {
+        "role": "primary",
+        "displayName": "Stet Bar Graphite",
+        "canonical": "#23201D",
+        "tonalRamp": [
+          "oklch(15% 0.002 67)",
+          "oklch(26% 0.004 67)",
+          "oklch(38% 0.005 67)",
+          "oklch(49% 0.007 67)",
+          "oklch(61% 0.006 67)",
+          "oklch(72% 0.004 67)",
+          "oklch(84% 0.002 67)",
+          "oklch(95% 0.002 67)"
+        ]
+      },
+      "on-bar": {
+        "role": "primary",
+        "displayName": "Concrete Through the Bar",
+        "canonical": "#E5E2DC",
+        "tonalRamp": [
+          "oklch(15% 0.003 85)",
+          "oklch(26% 0.005 85)",
+          "oklch(38% 0.007 85)",
+          "oklch(49% 0.009 85)",
+          "oklch(61% 0.007 85)",
+          "oklch(72% 0.005 85)",
+          "oklch(84% 0.003 85)",
+          "oklch(95% 0.002 85)"
+        ]
+      },
+      "on-bar-quiet": {
+        "role": "neutral",
+        "displayName": "Quiet Bar Text",
+        "canonical": "rgba(229, 226, 220, 0.72)",
+        "tonalRamp": [
+          "oklch(15% 0.003 85)",
+          "oklch(26% 0.005 85)",
+          "oklch(38% 0.007 85)",
+          "oklch(49% 0.009 85)",
+          "oklch(61% 0.007 85)",
+          "oklch(72% 0.005 85)",
+          "oklch(84% 0.003 85)",
+          "oklch(95% 0.002 85)"
+        ]
+      },
+      "on-bar-line": {
+        "role": "neutral",
+        "displayName": "Bar Line",
+        "canonical": "rgba(229, 226, 220, 0.45)",
+        "tonalRamp": [
+          "oklch(15% 0.003 85)",
+          "oklch(26% 0.005 85)",
+          "oklch(38% 0.007 85)",
+          "oklch(49% 0.009 85)",
+          "oklch(61% 0.007 85)",
+          "oklch(72% 0.005 85)",
+          "oklch(84% 0.003 85)",
+          "oklch(95% 0.002 85)"
+        ]
+      },
+      "on-bar-fill": {
+        "role": "neutral",
+        "displayName": "Bar Fill",
+        "canonical": "rgba(229, 226, 220, 0.09)",
+        "tonalRamp": [
+          "oklch(15% 0.003 85)",
+          "oklch(26% 0.005 85)",
+          "oklch(38% 0.007 85)",
+          "oklch(49% 0.009 85)",
+          "oklch(61% 0.007 85)",
+          "oklch(72% 0.005 85)",
+          "oklch(84% 0.003 85)",
+          "oklch(95% 0.002 85)"
+        ]
+      },
+      "edge-shade": {
+        "role": "neutral",
+        "displayName": "Well Edge Shade",
+        "canonical": "rgba(56, 44, 30, 0.36)",
+        "tonalRamp": [
+          "oklch(15% 0.009 71)",
+          "oklch(26% 0.016 71)",
+          "oklch(38% 0.022 71)",
+          "oklch(49% 0.029 71)",
+          "oklch(61% 0.023 71)",
+          "oklch(72% 0.016 71)",
+          "oklch(84% 0.010 71)",
+          "oklch(95% 0.007 71)"
+        ]
+      },
+      "groove": {
+        "role": "neutral",
+        "displayName": "Benchmark Groove",
+        "canonical": "#DCD8D1",
+        "tonalRamp": [
+          "oklch(15% 0.003 82)",
+          "oklch(26% 0.006 82)",
+          "oklch(38% 0.008 82)",
+          "oklch(49% 0.010 82)",
+          "oklch(61% 0.008 82)",
+          "oklch(72% 0.006 82)",
+          "oklch(84% 0.003 82)",
+          "oklch(95% 0.003 82)"
+        ]
+      },
+      "range": {
+        "role": "neutral",
+        "displayName": "Other Setups Range",
+        "canonical": "rgba(56, 44, 30, 0.2)",
+        "tonalRamp": [
+          "oklch(15% 0.009 71)",
+          "oklch(26% 0.016 71)",
+          "oklch(38% 0.022 71)",
+          "oklch(49% 0.029 71)",
+          "oklch(61% 0.023 71)",
+          "oklch(72% 0.016 71)",
+          "oklch(84% 0.010 71)",
+          "oklch(95% 0.007 71)"
+        ]
+      },
+      "range-end": {
+        "role": "neutral",
+        "displayName": "Range End",
+        "canonical": "rgba(56, 44, 30, 0.5)",
+        "tonalRamp": [
+          "oklch(15% 0.009 71)",
+          "oklch(26% 0.016 71)",
+          "oklch(38% 0.022 71)",
+          "oklch(49% 0.029 71)",
+          "oklch(61% 0.023 71)",
+          "oklch(72% 0.016 71)",
+          "oklch(84% 0.010 71)",
+          "oklch(95% 0.007 71)"
+        ]
+      },
+      "doc-ink": {
+        "role": "neutral",
+        "displayName": "Document Ink",
+        "canonical": "#23201D",
+        "tonalRamp": [
+          "oklch(15% 0.002 67)",
+          "oklch(26% 0.004 67)",
+          "oklch(38% 0.005 67)",
+          "oklch(49% 0.007 67)",
+          "oklch(61% 0.006 67)",
+          "oklch(72% 0.004 67)",
+          "oklch(84% 0.002 67)",
+          "oklch(95% 0.002 67)"
+        ]
+      },
+      "balloon": {
+        "role": "neutral",
+        "displayName": "Comment Balloon",
+        "canonical": "#F3F1ED",
+        "tonalRamp": [
+          "oklch(15% 0.002 85)",
+          "oklch(26% 0.003 85)",
+          "oklch(38% 0.004 85)",
+          "oklch(49% 0.006 85)",
+          "oklch(61% 0.005 85)",
+          "oklch(72% 0.003 85)",
+          "oklch(84% 0.002 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-ground": {
+        "role": "neutral",
+        "displayName": "Warm Concrete (Night)",
+        "canonical": "#1B1A18",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-inset": {
+        "role": "neutral",
+        "displayName": "Concrete Inset (Night)",
+        "canonical": "#161513",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-well": {
+        "role": "neutral",
+        "displayName": "Well (Night)",
+        "canonical": "#31302E",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-surface": {
+        "role": "neutral",
+        "displayName": "Surface (Night)",
+        "canonical": "#3D3C39",
+        "tonalRamp": [
+          "oklch(15% 0.002 92)",
+          "oklch(26% 0.003 92)",
+          "oklch(38% 0.004 92)",
+          "oklch(49% 0.005 92)",
+          "oklch(61% 0.004 92)",
+          "oklch(72% 0.003 92)",
+          "oklch(84% 0.002 92)",
+          "oklch(95% 0.001 92)"
+        ]
+      },
+      "night-sheet": {
+        "role": "neutral",
+        "displayName": "Sheet White (Night)",
+        "canonical": "#474644",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-ink": {
+        "role": "primary",
+        "displayName": "Graphite (Night)",
+        "canonical": "#ECEBE9",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-ink-hover": {
+        "role": "neutral",
+        "displayName": "Graphite Hover (Night)",
+        "canonical": "#D5D4D2",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-ink-press": {
+        "role": "neutral",
+        "displayName": "Graphite Press (Night)",
+        "canonical": "#C5C4C2",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-muted": {
+        "role": "neutral",
+        "displayName": "Muted Umber (Night)",
+        "canonical": "#CBCAC8",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-quiet": {
+        "role": "neutral",
+        "displayName": "Quiet Umber (Night)",
+        "canonical": "#B5B4B2",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-body": {
+        "role": "neutral",
+        "displayName": "Body Umber (Night)",
+        "canonical": "#D5D4D2",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-on-ink": {
+        "role": "neutral",
+        "displayName": "On Graphite (Night)",
+        "canonical": "#1B1A18",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-select": {
+        "role": "neutral",
+        "displayName": "Selection Sand (Night)",
+        "canonical": "#575552",
+        "tonalRamp": [
+          "oklch(15% 0.002 78)",
+          "oklch(26% 0.003 78)",
+          "oklch(38% 0.004 78)",
+          "oklch(49% 0.005 78)",
+          "oklch(61% 0.004 78)",
+          "oklch(72% 0.003 78)",
+          "oklch(84% 0.002 78)",
+          "oklch(95% 0.001 78)"
+        ]
+      },
+      "night-divide": {
+        "role": "neutral",
+        "displayName": "Divide Hairline (Night)",
+        "canonical": "rgba(255, 255, 255, 0.08)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "night-line": {
+        "role": "neutral",
+        "displayName": "Link Line (Night)",
+        "canonical": "rgba(236, 235, 233, 0.35)",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-line-strong": {
+        "role": "neutral",
+        "displayName": "Link Line Strong (Night)",
+        "canonical": "rgba(236, 235, 233, 0.7)",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-brand": {
+        "role": "tertiary",
+        "displayName": "Clauseo Brick (Night)",
+        "canonical": "#D07455",
+        "tonalRamp": [
+          "oklch(15% 0.037 39)",
+          "oklch(26% 0.066 39)",
+          "oklch(38% 0.094 39)",
+          "oklch(49% 0.122 39)",
+          "oklch(61% 0.097 39)",
+          "oklch(72% 0.069 39)",
+          "oklch(84% 0.041 39)",
+          "oklch(95% 0.031 39)"
+        ]
+      },
+      "night-bar": {
+        "role": "primary",
+        "displayName": "Stet Bar Graphite (Night)",
+        "canonical": "#ECEBE9",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-on-bar": {
+        "role": "primary",
+        "displayName": "Concrete Through the Bar (Night)",
+        "canonical": "#1B1A18",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-on-bar-quiet": {
+        "role": "neutral",
+        "displayName": "Quiet Bar Text (Night)",
+        "canonical": "rgba(27, 26, 24, 0.74)",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-on-bar-line": {
+        "role": "neutral",
+        "displayName": "Bar Line (Night)",
+        "canonical": "rgba(27, 26, 24, 0.45)",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-on-bar-fill": {
+        "role": "neutral",
+        "displayName": "Bar Fill (Night)",
+        "canonical": "rgba(27, 26, 24, 0.08)",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-edge-shade": {
+        "role": "neutral",
+        "displayName": "Well Edge Shade (Night)",
+        "canonical": "rgba(0, 0, 0, 0.6)",
+        "tonalRamp": [
+          "oklch(15% 0.000 0)",
+          "oklch(26% 0.000 0)",
+          "oklch(38% 0.000 0)",
+          "oklch(49% 0.000 0)",
+          "oklch(61% 0.000 0)",
+          "oklch(72% 0.000 0)",
+          "oklch(84% 0.000 0)",
+          "oklch(95% 0.000 0)"
+        ]
+      },
+      "night-groove": {
+        "role": "neutral",
+        "displayName": "Benchmark Groove (Night)",
+        "canonical": "#2C2B29",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.003 85)",
+          "oklch(49% 0.004 85)",
+          "oklch(61% 0.003 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-range": {
+        "role": "neutral",
+        "displayName": "Other Setups Range (Night)",
+        "canonical": "rgba(255, 255, 255, 0.14)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "night-range-end": {
+        "role": "neutral",
+        "displayName": "Range End (Night)",
+        "canonical": "rgba(255, 255, 255, 0.42)",
+        "tonalRamp": [
+          "oklch(15% 0.000 90)",
+          "oklch(26% 0.000 90)",
+          "oklch(38% 0.000 90)",
+          "oklch(49% 0.000 90)",
+          "oklch(61% 0.000 90)",
+          "oklch(72% 0.000 90)",
+          "oklch(84% 0.000 90)",
+          "oklch(95% 0.000 90)"
+        ]
+      },
+      "night-doc-ink": {
+        "role": "neutral",
+        "displayName": "Document Ink (Night)",
+        "canonical": "#ECEBE9",
+        "tonalRamp": [
+          "oklch(15% 0.001 85)",
+          "oklch(26% 0.002 85)",
+          "oklch(38% 0.002 85)",
+          "oklch(49% 0.003 85)",
+          "oklch(61% 0.002 85)",
+          "oklch(72% 0.002 85)",
+          "oklch(84% 0.001 85)",
+          "oklch(95% 0.001 85)"
+        ]
+      },
+      "night-balloon": {
+        "role": "neutral",
+        "displayName": "Comment Balloon (Night)",
+        "canonical": "#3D3C39",
+        "tonalRamp": [
+          "oklch(15% 0.002 92)",
+          "oklch(26% 0.003 92)",
+          "oklch(38% 0.004 92)",
+          "oklch(49% 0.005 92)",
+          "oklch(61% 0.004 92)",
+          "oklch(72% 0.003 92)",
+          "oklch(84% 0.002 92)",
+          "oklch(95% 0.001 92)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "\"Let it stand.\" on the hero bar and the closing h2. Anek at 125% width, sized to the frame."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Each part's h2. Anek at 116%."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "The \"for agents\" head."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Benchmark times and the three facts, tabular, at 125%."
+      },
+      "lead": {
+        "displayName": "Lead",
+        "purpose": "The hero sub."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Part paragraphs, at most 33em."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Captions, keys, notes, footer."
+      },
+      "code": {
+        "displayName": "Code",
+        "purpose": "Terminal text in wells and verdict bars. Anek at 90%, tabular."
+      },
+      "command": {
+        "displayName": "Command",
+        "purpose": "The command on an install bar."
+      },
+      "document": {
+        "displayName": "Document",
+        "purpose": "Text inside the depicted Word file only."
+      }
+    },
+    "shadows": [
+      {
+        "name": "shadow-bar",
+        "value": "inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4)",
+        "purpose": "Every stet bar and the graphite key in the closing bar."
+      },
+      {
+        "name": "shadow-key",
+        "value": "inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5)",
+        "purpose": "The concrete Copy key on a bar and the chosen picker tab."
+      },
+      {
+        "name": "shadow-page",
+        "value": "inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34)",
+        "purpose": "The Word sheet."
+      },
+      {
+        "name": "e2",
+        "value": "inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.08), 0 4px 10px -6px rgba(56, 44, 30, 0.12), 0 30px 64px -30px rgba(56, 44, 30, 0.38), 18px 26px 56px -30px rgba(56, 44, 30, 0.26)",
+        "purpose": "The Word dialog and the lifted paragraph."
+      },
+      {
+        "name": "e1",
+        "value": "inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(56, 44, 30, 0.1), 0 4px 10px -4px rgba(56, 44, 30, 0.2)",
+        "purpose": "The dialog buttons."
+      },
+      {
+        "name": "shadow-flat",
+        "value": "inset 0 1px 0 #ffffff, 0 1px 1px rgba(56, 44, 30, 0.08)",
+        "purpose": "Locked paragraph planes."
+      },
+      {
+        "name": "set-in",
+        "value": "inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7)",
+        "purpose": "Wells, the benchmark groove, the inverted install plate."
+      },
+      {
+        "name": "edge-shade",
+        "value": "inset -32px 0 24px -16px rgba(56, 44, 30, 0.36)",
+        "purpose": "Right-edge shade on a scrolling well on phones, added to set-in."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Exponential ease out for every load animation and state change."
+      },
+      {
+        "name": "ease-strike",
+        "value": "cubic-bezier(0.65, 0, 0.35, 1)",
+        "purpose": "The hero strike drawing across the deleted words (260ms)."
+      },
+      {
+        "name": "state",
+        "value": "140ms",
+        "purpose": "Hover and colour transitions."
+      },
+      {
+        "name": "load-dots",
+        "value": "200ms each, delays 200ms, 280ms, 360ms",
+        "purpose": "The three dots under \"stand\" scale in from 0.3."
+      },
+      {
+        "name": "load-run",
+        "value": "output lines 220ms at 180ms + step x 130ms; strike 940ms; insertion and change bar 1180ms; balloon 1340ms",
+        "purpose": "The hero run, about 1.6s, once."
+      },
+      {
+        "name": "scroll-reveal",
+        "value": "animation-timeline: view()",
+        "purpose": "Benchmark bars draw, fact dots seat, the changed paragraph lifts, strikes draw, verdicts slide 24px in. Linear, bound to scroll."
+      },
+      {
+        "name": "scroll-edge",
+        "value": "animation-timeline: scroll(self inline)",
+        "purpose": "The well edge shade lifts as a phone well scrolls to its end. Kept under reduced motion."
+      },
+      {
+        "name": "reduced",
+        "value": "prefers-reduced-motion: reduce",
+        "purpose": "All animations and transitions off; the resting style is the end state."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "columns-narrow",
+        "value": "1100px"
+      },
+      {
+        "name": "single-column",
+        "value": "900px"
+      },
+      {
+        "name": "phone",
+        "value": "740px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Install bar",
+      "kind": "custom",
+      "refersTo": "install-bar",
+      "description": "A small stet bar carrying the install command and its concrete Copy key.",
+      "html": "<div class=\"ds-install\"><code class=\"ds-install-cmd\"><span class=\"ds-prompt\">$ </span>cargo install stetdoc --locked</code><button class=\"ds-copy\">Copy</button></div>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-install{display:flex;align-items:center;gap:8px;padding:6px 6px 6px 0;border-radius:6px;background:var(--bar);color:var(--on-bar);box-shadow:var(--shadow-bar);font-family:var(--font)} .ds-install-cmd{flex:1;padding:12px 8px 12px 20px;font:520 18px/24px var(--font);font-stretch:90%;font-variant-numeric:tabular-nums} .ds-prompt{color:var(--on-bar-quiet);font-weight:400;user-select:none} .ds-copy{min-height:48px;padding:0 24px;border:0;border-radius:4px;background:var(--ground);color:var(--ink);box-shadow:var(--shadow-key);font:560 16px/24px var(--font);cursor:pointer;transition:background-color 140ms var(--ease),transform 140ms var(--ease)} .ds-copy:hover{background:var(--surface)} .ds-copy:active{transform:translateY(1px)} .ds-copy:focus-visible{outline:2px solid var(--on-bar);outline-offset:2px}"
+    },
+    {
+      "name": "Copy key",
+      "kind": "button",
+      "refersTo": "copy-key",
+      "description": "The concrete key that copies a command; graphite when it sits on a concrete plate.",
+      "html": "<button class=\"ds-key\">Copy</button> <button class=\"ds-key ds-key-ink\">Copy</button>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-key{min-height:48px;padding:0 24px;border:0;border-radius:4px;background:var(--ground);color:var(--ink);box-shadow:var(--shadow-key);font:560 16px/24px var(--font);cursor:pointer;transition:background-color 140ms var(--ease),transform 140ms var(--ease)} .ds-key:hover{background:var(--surface)} .ds-key:active{transform:translateY(1px)} .ds-key:focus-visible{outline:2px solid var(--ink);outline-offset:2px} .ds-key-ink{background:var(--bar);color:var(--on-bar);box-shadow:var(--shadow-bar)} .ds-key-ink:hover{background:var(--ink-hover)}"
+    },
+    {
+      "name": "Verdict bar",
+      "kind": "custom",
+      "refersTo": "verdict",
+      "description": "stetdoc's answer on a stet bar, overlapping the foot of the failure it answers.",
+      "html": "<div class=\"ds-pair\"><pre class=\"ds-well\"><span class=\"ds-cmd\">$ stetdoc replace msa.docx '30 days' '45 days'</span>\nambiguous_match: 4 places</pre><p class=\"ds-verdict\">next: <b>Nothing was applied</b>, so retry at once.</p></div>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-pair{display:grid} .ds-well{margin:0;padding:24px 28px 40px;border-radius:14px;background:var(--well);box-shadow:var(--set-in);font:400 15px/24px var(--font);font-stretch:90%;color:var(--muted);white-space:pre-wrap} .ds-cmd{color:var(--ink);font-weight:500} .ds-verdict{margin:-18px 0 0 40px;padding:16px 22px;border-radius:6px;background:var(--bar);color:var(--on-bar);box-shadow:var(--shadow-bar);font:400 16px/25px var(--font);font-stretch:90%;font-variant-numeric:tabular-nums} .ds-verdict b{font-weight:620}"
+    },
+    {
+      "name": "Well",
+      "kind": "card",
+      "refersTo": "well",
+      "description": "Terminal text set into the wall, Anek at 90% with tabular figures.",
+      "html": "<pre class=\"ds-term\"><span class=\"ds-ln ds-c\"><span class=\"ds-p\">$ </span>stetdoc view msa.docx --find \"Payment\"</span><span class=\"ds-ln\">p145 <b>11.1</b> Payment for each Shipment of Products</span><span class=\"ds-ln\">p146 <b>11.2</b> Invoices shall be issued</span></pre>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-term{margin:0;padding:24px 28px;border-radius:14px;background:var(--well);box-shadow:var(--set-in);font:400 15px/24px var(--font);font-stretch:90%;font-variant-numeric:tabular-nums;color:var(--muted)} .ds-ln{display:block;padding-left:1.1em;text-indent:-1.1em} .ds-ln+.ds-ln{margin-top:4px} .ds-c{color:var(--ink);font-weight:500} .ds-c+.ds-ln{margin-top:12px} .ds-p{color:var(--quiet);font-weight:400} .ds-term b{color:var(--ink);font-weight:620}"
+    },
+    {
+      "name": "Word sheet",
+      "kind": "card",
+      "refersTo": "word-sheet",
+      "description": "The depicted Word file: a white turned page with a tracked change drawn in ink.",
+      "html": "<div class=\"ds-sheet\"><p class=\"ds-sheet-bar\">msa.edited.docx</p><div class=\"ds-page\"><p class=\"ds-doc\">11.1 Payment shall be due within <del>thirty (30)</del><ins>forty-five (45)</ins> days.</p></div></div>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-sheet{max-width:420px;border-radius:4px;background:var(--sheet);box-shadow:var(--shadow-page);overflow:hidden} .ds-sheet-bar{margin:0;padding:9px 16px;font:480 13px/18px var(--font);text-align:center;color:var(--quiet);box-shadow:inset 0 -1px 0 rgba(56,44,30,.1)} .ds-page{padding:32px 28px 36px 48px;font:15.5px/26px Charter,\"Bitstream Charter\",\"Sitka Text\",Cambria,Georgia,serif;color:var(--doc-ink)} .ds-doc{position:relative;margin:0} .ds-doc::before{content:\"\";position:absolute;left:-22px;top:4px;bottom:4px;width:2px;background:var(--doc-ink)} .ds-doc del,.ds-doc ins{text-decoration:none;position:relative} .ds-doc del{color:var(--quiet)} .ds-doc del::after{content:\"\";position:absolute;left:-1px;right:-1px;top:54%;height:1.5px;background:var(--doc-ink)} .ds-doc ins{box-shadow:inset 0 -1.5px 0 var(--doc-ink)}"
+    },
+    {
+      "name": "Install picker",
+      "kind": "chip",
+      "refersTo": "picker-tab",
+      "description": "Radio keys on the bar; the chosen channel is a concrete key.",
+      "html": "<div class=\"ds-bar\"><div class=\"ds-tabs\"><label class=\"ds-tab ds-on\">Homebrew <span class=\"ds-tag\">Suggested</span></label><label class=\"ds-tab\">uv</label><label class=\"ds-tab\">npm</label><label class=\"ds-tab\">cargo</label></div></div>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-bar{padding:24px;background:var(--bar);font-family:var(--font)} .ds-tabs{display:flex;flex-wrap:wrap;gap:6px} .ds-tab{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:4px;background:var(--on-bar-fill);color:var(--on-bar);font:520 16px/20px var(--font);cursor:pointer;transition:background-color 140ms var(--ease),color 140ms var(--ease)} .ds-tab:hover{background:var(--on-bar-line)} .ds-tab:focus-visible{outline:2px solid var(--on-bar);outline-offset:2px} .ds-tag{font-size:13px;font-weight:560;color:var(--on-bar-quiet)} .ds-on,.ds-on:hover{background:var(--ground);color:var(--ink);box-shadow:var(--shadow-key)} .ds-on .ds-tag{color:var(--quiet)}"
+    },
+    {
+      "name": "Benchmark row",
+      "kind": "custom",
+      "refersTo": "race-bar",
+      "description": "A stetdoc time at true scale: a graphite bar in a groove, the other setups as a pale band.",
+      "html": "<div class=\"ds-row\"><span class=\"ds-model\">Claude Haiku 5.5</span><span class=\"ds-num\">21<span class=\"ds-unit\"> s</span></span><span class=\"ds-track\"><span class=\"ds-rbar\">stetdoc</span><span class=\"ds-band\"></span></span></div>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-row{display:grid;gap:8px;font-family:var(--font)} .ds-model{font-weight:520;font-size:17px;color:var(--muted)} .ds-num{font:620 72px/.82 var(--font);font-stretch:125%;letter-spacing:-.035em;font-variant-numeric:tabular-nums;color:var(--ink)} .ds-unit{font-size:.32em;font-weight:520;letter-spacing:0;color:var(--muted)} .ds-track{position:relative;height:52px;border-radius:4px;background:var(--groove);box-shadow:var(--set-in)} .ds-rbar,.ds-band{position:absolute;top:0;bottom:0;border-radius:2px} .ds-rbar{left:0;width:46.7%;display:flex;align-items:center;padding:0 14px;background:var(--bar);color:var(--on-bar);font-weight:600;font-size:14px} .ds-band{left:91.1%;right:0;background:var(--range);box-shadow:inset 2px 0 0 var(--range-end),inset -2px 0 0 var(--range-end)}"
+    },
+    {
+      "name": "Fact on a dot",
+      "kind": "custom",
+      "refersTo": "fact-dot",
+      "description": "One of the three facts, under one of the mark's dots.",
+      "html": "<div class=\"ds-fact\"><span class=\"ds-dot\"></span><span class=\"ds-fig\">0 of 118</span><span class=\"ds-line\">stetdoc runs that wrote a file Word offered to repair.</span></div>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-fact{display:grid;font-family:var(--font)} .ds-dot{width:40px;height:40px;margin-bottom:32px;border-radius:50%;background:var(--bar)} .ds-fig{font:620 64px/.92 var(--font);font-stretch:125%;letter-spacing:-.03em;font-variant-numeric:tabular-nums;color:var(--ink)} .ds-line{max-width:17em;margin-top:16px;font-size:18px;line-height:27px;color:#3a3631}"
+    },
+    {
+      "name": "Navigation",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "The stet mark and lowercase wordmark, with quiet links.",
+      "html": "<header class=\"ds-top\"><a class=\"ds-brand\" href=\"#\"><svg viewBox=\"0 0 32 22\" width=\"26\"><rect width=\"32\" height=\"8\"/><circle cx=\"4\" cy=\"18\" r=\"4\"/><circle cx=\"16\" cy=\"18\" r=\"4\"/><circle cx=\"28\" cy=\"18\" r=\"4\"/></svg>stetdoc</a><nav class=\"ds-nav\"><a href=\"#\">Docs</a><a href=\"#\">GitHub</a></nav></header>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-top{display:flex;align-items:center;justify-content:space-between;min-height:72px;padding:0 24px;background:var(--ground);font-family:var(--font)} .ds-brand{display:inline-flex;align-items:center;gap:11px;min-height:44px;color:var(--ink);text-decoration:none;font:600 25px/32px var(--font);font-stretch:125%;letter-spacing:-.015em} .ds-brand svg{fill:currentColor;transform:translateY(1px)} .ds-nav{display:flex;gap:32px} .ds-nav a{display:inline-flex;align-items:center;min-height:44px;color:var(--quiet);font-weight:450;text-decoration:none;transition:color 140ms var(--ease)} .ds-nav a:hover{color:var(--ink)} .ds-nav a:focus-visible,.ds-brand:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}"
+    },
+    {
+      "name": "Text link",
+      "kind": "button",
+      "refersTo": "text-link",
+      "description": "A 1px underline clear of the descenders, darker on hover, with a 44px target.",
+      "html": "<p class=\"ds-p\"><a class=\"ds-link\" href=\"#\">Read the docs</a></p>",
+      "css": ":host{--ground:#e5e2dc;--well:#f3f1ed;--surface:#fdfcfa;--sheet:#fff;--ink:#23201d;--ink-hover:#3a3631;--muted:#48423b;--quiet:#5f584f;--bar:#23201d;--on-bar:#e5e2dc;--on-bar-quiet:rgba(229,226,220,.72);--on-bar-line:rgba(229,226,220,.45);--on-bar-fill:rgba(229,226,220,.09);--groove:#dcd8d1;--range:rgba(56,44,30,.2);--range-end:rgba(56,44,30,.5);--line:rgba(56,44,30,.3);--line-strong:rgba(35,32,29,.6);--doc-ink:#23201d;--ease:cubic-bezier(.16,1,.3,1);--shadow-bar:inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2), 0 4px 10px -4px rgba(35, 32, 29, 0.4), 0 24px 44px -24px rgba(40, 28, 16, 0.4);--shadow-key:inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3), 0 3px 8px -4px rgba(0, 0, 0, 0.5);--shadow-page:inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1), 0 2px 6px -2px rgba(56, 44, 30, 0.1), 0 22px 44px -24px rgba(56, 44, 30, 0.34);--set-in:inset 0 1px 3px rgba(56, 44, 30, 0.14), inset 0 -1px 0 rgba(255, 255, 255, 0.7);--font:'Anek Latin','Segoe UI',system-ui,sans-serif} .ds-p{font:480 16px/24px var(--font);background:var(--ground);padding:16px} .ds-link{display:inline-block;padding:10px 0;margin:-10px 0;color:var(--ink);text-decoration:underline;text-decoration-thickness:1px;text-decoration-color:var(--line);text-underline-offset:5px;transition:text-decoration-color 140ms var(--ease)} .ds-link:hover{text-decoration-color:var(--line-strong)} .ds-link:focus-visible{outline:2px solid var(--ink);outline-offset:3px;border-radius:4px}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The mark is the page",
+    "overview": "The page is stetdoc's mark, the proofreader's stet, built at the scale of the screen. The bar is a full-bleed graphite plane, and stetdoc's own words are reversed out of it: the claim \"Let it stand.\", the install command, every verdict, the benchmark times, and the closing install section. The three dots are graphite discs on the concrete: they hang once under the word \"stand\" and they hold the three facts of the benchmark. Everything else sits on Clauseo's warm concrete as planes, wells and one white sheet.\n\nThe world is inherited. Ground, planes, ink tones, depth recipes and the brick comma are Clauseo's design system, unchanged. stetdoc adds one material, the stet bar, and a small grammar around it: terminal text set into wells in Anek at 90% width, a depicted Word file as a white turned page, tracked changes drawn in ink, and motion that plays once on load or is driven by the scroll and then stops. Night is the same concrete with the light gone, chosen by `prefers-color-scheme`. At night the mark turns light, so every bar turns light with it and its words turn dark.\n\nDensity is low and type is large. The page is long, with wide gaps between parts, and each part pairs a short argument with the real artifact: a terminal run, a Word dialog, a paragraph stack, a benchmark table.",
+    "keyCharacteristics": [
+      "One material carries stetdoc's voice: the graphite bar, at every scale from a 20px key to the full-bleed h1.",
+      "The stet mark's dots are structure, never decoration: under \"stand\" once, and on the three facts.",
+      "Anek Latin is the only interface family, and width carries the voice (125%, 116%, 104%, 90%).",
+      "Depth comes from planes, a top-edge highlight and warm-brown shadows. No glass, blur, glow, gradients or outlined boxes.",
+      "Tracked-change marks are drawn in ink, never in red or green.",
+      "Motion is CSS only: one load moment, scroll-driven reveals, then stillness."
+    ],
+    "rules": [
+      {
+        "name": "The One Brick Rule",
+        "body": "Brick appears only on Clauseo's comma. It is never a fill, a state, an accent or a tracked-change colour.",
+        "section": "colors"
+      },
+      {
+        "name": "The Ink Marks Rule",
+        "body": "Deletions, insertions, change bars and strikes are drawn in `doc-ink` or `ink`. A tracked change on this page is never red or green.",
+        "section": "colors"
+      },
+      {
+        "name": "The Bar Inverts Rule",
+        "body": "Whatever sits on a bar takes the bar's inverse: concrete words, concrete keys, concrete-tinted fills. Inside the closing bar the install plate inverts too, a concrete plate with a graphite key.",
+        "section": "colors"
+      },
+      {
+        "name": "The Width Carries Voice Rule",
+        "body": "Hierarchy comes from Anek's width axis as much as its size. Do not add a second family to make a voice.",
+        "section": "typography"
+      },
+      {
+        "name": "The Depicted Document Rule",
+        "body": "The serif belongs to the Word file being depicted, the sheet and the bytes stack. It never sets the page's own words.",
+        "section": "typography"
+      },
+      {
+        "name": "The Narrow Terminal Rule",
+        "body": "Anything a terminal or stetdoc prints is Anek at 90% with tabular figures, including commands quoted in running text, which take 580 weight and no box.",
+        "section": "typography"
+      },
+      {
+        "name": "The Phone Mark Rule",
+        "body": "On a phone the three fact dots line up as one strip at the head of the facts, as the mark draws them, rather than splitting one per figure.",
+        "section": "layout"
+      },
+      {
+        "name": "The Well Scrolls, Not the Page Rule",
+        "body": "On phones long terminal lines never wrap and never push the page sideways. They scroll inside their well, and a right-edge shade says there is more.",
+        "section": "layout"
+      },
+      {
+        "name": "The Planes Not Lines Rule",
+        "body": "Separation comes from a plane's height or a 1px inset hairline, never from an outlined box or a hard rule.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Lift Means Changed Rule",
+        "body": "In the bytes stack the changed paragraph alone is raised; locked paragraphs stay flat. Height marks what stetdoc touched.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "**Do** put stetdoc's own words on a graphite bar (`bar` with `on-bar` text and the bar shadow): claims, commands, verdicts, results.",
+      "**Do** use the mark's dots only where the mark would put them: hanging under a bar, or holding exactly three items.",
+      "**Do** set terminal output and commands in Anek at 90% width with tabular figures, inside a set-in well.",
+      "**Do** draw tracked changes in ink: a 1.5px strike, a 1.5px underline, a 2px change bar.",
+      "**Do** keep every motion either a single load moment or driven by the scroll, with the resting style as the end state.",
+      "**Do** give every key, tab and link a 44px target."
+    ],
+    "donts": [
+      "**Don't** use brick anywhere except Clauseo's comma.",
+      "**Don't** colour tracked changes red or green.",
+      "**Don't** add a monospace or a second sans; Anek's width axis is the range.",
+      "**Don't** use the serif outside the depicted Word file.",
+      "**Don't** separate with outlined boxes or hard rules; use planes and 1px inset hairlines.",
+      "**Don't** use glass, blur, glow or gradients.",
+      "**Don't** make the page scroll sideways on a phone; long terminal lines scroll inside their well."
+    ]
+  }
+}

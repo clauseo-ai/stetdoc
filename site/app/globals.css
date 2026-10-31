@@ -1,0 +1,1744 @@
+/*
+ * stetdoc's launch page. Clauseo's design system (DESIGN.md) on a developer
+ * page: warm concrete by day, the same concrete unlit by night, depth from
+ * planes and warm shadows, Anek as the one family. The concept: the stet
+ * mark is the page. Its bar is a graphite plane that carries stetdoc's
+ * words, the claim, the install command, the verdicts and the benchmark
+ * times; its dots mark where each part begins and hold the three facts.
+ * By night the mark turns light, so every bar does too.
+ *
+ * Bands (the site's one responsive system, DESIGN.md "Bands"):
+ *   S    under 600px          phones in portrait
+ *   M    600 to 1023px        tablets in portrait, Split View, small windows
+ *   L    1024 to 1439px       tablets in landscape, laptops
+ *   XL   1440 to 1919px       desktops
+ *   XXL  1920px and up        large desktops; the frame grows to 1760px
+ *   SHORT  landscape and at most 500px tall: phones on their side. It
+ *          comes last and changes only what a short screen needs.
+ * Each band sets the launch page's sizes once, as tokens on .launch (at
+ * the foot of this file); the parts read the tokens. Sizes run from the
+ * frame inside a band and are capped by the screen's height, so nothing
+ * steps between two widths in one band. The :root layout tokens stay as
+ * the docs read them.
+ */
+
+/* metric fallbacks: Arial scaled to Anek's width at each voice, with Anek's
+   ascent and descent (2000 upm, 1800 up, 400 down), so text set before the
+   font arrives takes the same room and the swap moves nothing. Widths
+   measured against Anek at 125% 620, 116% 620, 104% 400 and 90% 400. */
+@font-face {
+	font-family: 'Anek Display Fallback';
+	src: local('Arial Bold'), local('Arial-BoldMT');
+	font-weight: 500 800;
+	size-adjust: 120.8%;
+	ascent-override: 74.5%;
+	descent-override: 16.56%;
+	line-gap-override: 0%;
+}
+@font-face {
+	font-family: 'Anek Head Fallback';
+	src: local('Arial Bold'), local('Arial-BoldMT');
+	font-weight: 500 800;
+	size-adjust: 109.05%;
+	ascent-override: 82.53%;
+	descent-override: 18.34%;
+	line-gap-override: 0%;
+}
+@font-face {
+	font-family: 'Anek Fallback';
+	src: local('Arial'), local('ArialMT');
+	size-adjust: 97.3%;
+	ascent-override: 92.5%;
+	descent-override: 20.56%;
+	line-gap-override: 0%;
+}
+@font-face {
+	font-family: 'Anek Narrow Fallback';
+	src: local('Arial'), local('ArialMT');
+	size-adjust: 81.87%;
+	ascent-override: 109.93%;
+	descent-override: 24.43%;
+	line-gap-override: 0%;
+}
+
+:root {
+	/* colour, day */
+	--ground: #e5e2dc;
+	--inset: #dcd8d1;
+	--well: #f3f1ed;
+	--surface: #fdfcfa;
+	--sheet: #ffffff;
+	--ink: #23201d;
+	--ink-hover: #3a3631;
+	--ink-press: #4a453f;
+	--muted: #48423b;
+	--quiet: #5f584f;
+	--body: #3a3631;
+	--on-ink: #fdfcfa;
+	--select: #e2d9c4;
+	--divide: rgba(56, 44, 30, 0.1);
+	--line: rgba(56, 44, 30, 0.3);
+	--line-strong: rgba(35, 32, 29, 0.6);
+	--brand: #a3482f;
+	/* the bar: graphite, its words the concrete showing through */
+	--bar: var(--ink);
+	--on-bar: var(--ground);
+	--on-bar-quiet: rgba(229, 226, 220, 0.72);
+	--on-bar-line: rgba(229, 226, 220, 0.45);
+	--on-bar-fill: rgba(229, 226, 220, 0.09);
+	--on-bar-hover: rgba(229, 226, 220, 0.24);
+	--groove: var(--inset);
+	/* the benchmark on the bar: a groove cut into the bar */
+	--bar-groove: rgba(0, 0, 0, 0.32);
+	--bar-groove-shade: inset 0 2px 4px rgba(0, 0, 0, 0.5), inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+	/* the depicted Word file */
+	--doc-ink: #23201d;
+
+	/* the court's three colours (Clauseo tokens-colour.css), lit only where
+	   they mean something: green, checked; yellow, waiting for your hand;
+	   red, the other side. Words on green and red are white, on yellow ink */
+	--green: #2d774a;
+	--green-text: #22603a;
+	--yellow: #f2b800;
+	--on-yellow: #23201d;
+	--on-yellow-quiet: rgba(35, 32, 29, 0.8);
+	--chip-yellow: #d7a404;
+	--yellow-line: #b88a00;
+	--red: #c2362b;
+	--red-text: #9e2b22;
+	--on-colour: #ffffff;
+	/* an unlit tile */
+	--flat: #e9e6e1;
+	/* on the bar the court's word tones invert with the bar: light green and
+	   light red on graphite by day, the deep tones on the light bar by night */
+	--on-bar-green: #a1dfb6;
+	--on-bar-red: #f9c1ba;
+	--on-bar-red-band: rgba(194, 54, 43, 0.4);
+
+	/* depth (DESIGN.md, day) */
+	--hl: inset 0 1px 0 rgba(255, 255, 255, 0.55);
+	--e1:
+		var(--hl), 0 1px 1px rgba(56, 44, 30, 0.1),
+		0 4px 10px -4px rgba(56, 44, 30, 0.2);
+	--e2:
+		inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.08),
+		0 4px 10px -6px rgba(56, 44, 30, 0.12),
+		0 30px 64px -30px rgba(56, 44, 30, 0.38),
+		18px 26px 56px -30px rgba(56, 44, 30, 0.26);
+	--shadow-page:
+		inset 0 1px 0 #ffffff, 0 1px 2px rgba(56, 44, 30, 0.1),
+		0 2px 6px -2px rgba(56, 44, 30, 0.1),
+		0 22px 44px -24px rgba(56, 44, 30, 0.34);
+	--shadow-flat:
+		inset 0 1px 0 #ffffff, 0 1px 1px rgba(56, 44, 30, 0.08);
+	--set-in:
+		inset 0 2px 5px -1px rgba(56, 44, 30, 0.2),
+		inset 0 1px 0 rgba(56, 44, 30, 0.12),
+		inset 0 0 0 1px rgba(56, 44, 30, 0.04),
+		inset 0 -1px 0 rgba(255, 255, 255, 0.8);
+	--shadow-bar:
+		inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 1px rgba(35, 32, 29, 0.2),
+		0 4px 10px -4px rgba(35, 32, 29, 0.4),
+		0 24px 44px -24px rgba(40, 28, 16, 0.4);
+	--shadow-key:
+		inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 1px 1px rgba(0, 0, 0, 0.3),
+		0 3px 8px -4px rgba(0, 0, 0, 0.5);
+	/* a lit tile: a neutral shadow, never one in its own colour */
+	--lit:
+		inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 1px 1px rgba(40, 28, 16, 0.2),
+		0 4px 10px -6px rgba(40, 28, 16, 0.3);
+	--lit-y:
+		inset 0 1px 0 rgba(255, 255, 255, 0.42), 0 1px 1px rgba(40, 28, 16, 0.22),
+		0 8px 16px -8px rgba(40, 28, 16, 0.36);
+
+	/* type */
+	--font:
+		var(--font-anek), var(--font-anek-ext), 'Anek Fallback', 'Segoe UI',
+		system-ui, sans-serif;
+	--font-display:
+		var(--font-anek), var(--font-anek-ext), 'Anek Display Fallback',
+		'Segoe UI', system-ui, sans-serif;
+	--font-head:
+		var(--font-anek), var(--font-anek-ext), 'Anek Head Fallback', 'Segoe UI',
+		system-ui, sans-serif;
+	--font-narrow:
+		var(--font-anek), var(--font-anek-ext), 'Anek Narrow Fallback',
+		'Segoe UI', system-ui, sans-serif;
+	--serif:
+		Charter, 'Bitstream Charter', 'Sitka Text', Cambria, Georgia, serif;
+
+	/* motion: exponential ease out, once */
+	--ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+	/* layout: the company site's frame, 1440 max with a 48px gutter */
+	--gutter: 48px;
+	--frame-max: 1440px;
+	--edge: max(var(--gutter), calc(50% - var(--frame-max) / 2 + var(--gutter)));
+	--frame: calc(min(100vw, var(--frame-max)) - 2 * var(--gutter));
+
+	/* the site's frame, shared by the launch page and the docs: the gutter
+	   and the left inset of the header's logo at every band. The frame is
+	   1440px up to a 1440px screen, grows two thirds of every pixel past it
+	   and reaches 1760px at 1920, with no step. The bands below set the
+	   gutter for M and S. */
+	--site-gutter: 48px;
+	--site-frame-max: clamp(1440px, calc(1440px + (100vw - 1440px) * 2 / 3), 1760px);
+	--site-edge: max(
+		var(--site-gutter),
+		calc(50% - var(--site-frame-max) / 2 + var(--site-gutter))
+	);
+
+	color-scheme: light;
+	background: var(--ground);
+	scrollbar-color: rgba(56, 44, 30, 0.35) var(--ground);
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--ground: #1b1a18;
+		--inset: #161513;
+		--well: #31302e;
+		--surface: #3d3c39;
+		--sheet: #474644;
+		--ink: #ecebe9;
+		--ink-hover: #d5d4d2;
+		--ink-press: #c5c4c2;
+		--muted: #cbcac8;
+		--quiet: #b5b4b2;
+		--body: #d5d4d2;
+		--on-ink: #1b1a18;
+		--select: #575552;
+		--divide: rgba(255, 255, 255, 0.08);
+		--line: rgba(236, 235, 233, 0.35);
+		--line-strong: rgba(236, 235, 233, 0.7);
+		--brand: #d07455;
+		--on-bar-quiet: rgba(27, 26, 24, 0.74);
+		--on-bar-line: rgba(27, 26, 24, 0.45);
+		--on-bar-fill: rgba(27, 26, 24, 0.08);
+		--on-bar-hover: rgba(27, 26, 24, 0.2);
+		--groove: #2c2b29;
+		--bar-groove: rgba(27, 26, 24, 0.1);
+		--bar-groove-shade: inset 0 2px 4px rgba(27, 26, 24, 0.22), inset 0 -1px 0 rgba(255, 255, 255, 0.6);
+		--doc-ink: #ecebe9;
+		--green: #317549;
+		--green-text: #a1dfb6;
+		--yellow: #e4b336;
+		--on-yellow: #1b1a18;
+		--on-yellow-quiet: rgba(27, 26, 24, 0.8);
+		--chip-yellow: #c89e32;
+		--yellow-line: #cfa43a;
+		--red: #b73e35;
+		--red-text: #f9c1ba;
+		--flat: #2f2e2c;
+		--on-bar-green: #22603a;
+		--on-bar-red: #9e2b22;
+		--on-bar-red-band: rgba(183, 62, 53, 0.24);
+
+		--hl: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+		--e1:
+			var(--hl), 0 1px 1px rgba(0, 0, 0, 0.36),
+			0 4px 10px -4px rgba(0, 0, 0, 0.52);
+		--e2:
+			inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 1px 2px rgba(0, 0, 0, 0.32),
+			0 4px 10px -6px rgba(0, 0, 0, 0.42),
+			0 30px 64px -30px rgba(0, 0, 0, 0.8),
+			18px 26px 56px -30px rgba(0, 0, 0, 0.66);
+		--shadow-page:
+			inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 1px 2px rgba(0, 0, 0, 0.32),
+			0 2px 6px -2px rgba(0, 0, 0, 0.32),
+			0 22px 44px -24px rgba(0, 0, 0, 0.74);
+		--shadow-flat:
+			inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.3);
+		--set-in:
+			inset 0 2px 6px -1px rgba(0, 0, 0, 0.6),
+			inset 0 1px 0 rgba(0, 0, 0, 0.5),
+			inset 0 -1px 0 rgba(255, 255, 255, 0.07);
+		--shadow-bar:
+			inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 1px rgba(0, 0, 0, 0.42),
+			0 4px 10px -4px rgba(0, 0, 0, 0.58),
+			0 24px 44px -24px rgba(0, 0, 0, 0.7);
+		--shadow-key:
+			inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 1px rgba(0, 0, 0, 0.4),
+			0 3px 8px -4px rgba(0, 0, 0, 0.5);
+		--lit:
+			inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 1px rgba(0, 0, 0, 0.42),
+			0 4px 10px -6px rgba(0, 0, 0, 0.58);
+		--lit-y:
+			inset 0 1px 0 rgba(255, 255, 255, 0.36), 0 1px 1px rgba(0, 0, 0, 0.44),
+			0 8px 16px -8px rgba(0, 0, 0, 0.62);
+
+		color-scheme: dark;
+		scrollbar-color: rgba(255, 255, 255, 0.3) var(--ground);
+	}
+}
+
+/* ---------- base ---------- */
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	background: var(--ground);
+	color: var(--ink);
+	font-family: var(--font);
+	font-stretch: 104%;
+	font-weight: 400;
+	font-size: 16px;
+	line-height: 24px;
+	-webkit-text-size-adjust: 100%;
+	overflow-x: clip;
+}
+
+::selection {
+	background: var(--select);
+	color: var(--ink);
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+:focus-visible {
+	outline: 2px solid var(--ink);
+	outline-offset: 3px;
+	border-radius: 4px;
+}
+
+main {
+	flex: 1;
+}
+
+h1,
+h2 {
+	text-wrap: balance;
+}
+
+p {
+	text-wrap: pretty;
+}
+
+.sr-only {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+.nobr {
+	white-space: nowrap;
+}
+
+/* links: a 1px underline set clear of the descenders, darker on hover; the
+   padding makes a 44px target without moving the line */
+.text-link {
+	display: inline-block;
+	padding: 10px 0;
+	margin: -10px 0;
+	color: var(--ink);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-decoration-color: var(--line);
+	text-underline-offset: 5px;
+	transition: text-decoration-color 140ms var(--ease);
+}
+@media (hover: hover) {
+	.text-link:hover {
+		text-decoration-color: var(--line-strong);
+	}
+}
+
+/* commands named in running text: Anek narrowed, in primary, no box */
+p code {
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-weight: 580;
+	font-size: 1em;
+	color: var(--ink);
+	/* a command never splits at its hyphen: stetdoc-core, --mcp */
+	white-space: nowrap;
+}
+
+/* ---------- the nav ---------- */
+
+.top {
+	min-height: 72px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	padding: 0 var(--site-edge);
+}
+.brand {
+	font-family: var(--font-display);
+	min-height: 44px;
+	display: inline-flex;
+	align-items: center;
+	gap: 11px;
+	font-stretch: 125%;
+	font-weight: 600;
+	font-size: 25px;
+	line-height: 32px;
+	letter-spacing: -0.015em;
+}
+.mark {
+	display: block;
+	width: 26px;
+	height: auto;
+	fill: currentColor;
+	transform: translateY(1px);
+}
+.nav {
+	display: flex;
+	gap: 20px;
+	margin-right: -6px;
+}
+.nav a {
+	min-width: 44px;
+	justify-content: center;
+	padding: 0 6px;
+}
+.nav a,
+.foot nav a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px;
+	font-weight: 450;
+	color: var(--quiet);
+	transition: color 140ms var(--ease);
+}
+@media (hover: hover) {
+	.nav a:hover,
+	.foot nav a:hover {
+		color: var(--ink);
+	}
+}
+/* GitHub's mark in place of the word, 20px in a 44px target, in the link's
+   colour */
+.gh svg {
+	display: block;
+	width: 20px;
+	height: 20px;
+	fill: currentColor;
+}
+
+/* ---------- the first screen: the mark at the scale of the page ---------- */
+
+/* the claim's size, --h1, is a band token: "Let it stand." runs about 6.3
+   of its own em wide, so from L up the bar sets it to the frame's width */
+.hero {
+	padding-top: 20px;
+}
+
+/* the bar: full bleed, the claim reversed out of it, set to the frame's
+   width. "Let it stand." runs about 6.1 of its own em wide. */
+.bar {
+	font-family: var(--font-display);
+	margin: 0;
+	padding: 0 0 0 var(--edge);
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+	font-stretch: 125%;
+	font-weight: 620;
+	font-size: var(--h1);
+	line-height: 0.84;
+	letter-spacing: -0.032em;
+	/* When the screen's height caps the claim, it no longer fills the
+	   frame, and the bar measures its words instead: it still runs off the
+	   left edge, but ends one gutter after "stand.", with a word bar's
+	   corners. --claim-short is how far the size falls short of the one
+	   that fills the frame, one line (frame / 6.4) or two (frame / 3.6);
+	   at 0 the bar is full bleed. --claim-w is the words' width: "Let it
+	   stand." is 6.32em on one line, "stand." 3.31em on the second. */
+	--claim-one: calc(var(--frame) / 6.4 - var(--h1));
+	--claim-short: min(
+		calc(var(--frame) / 3.6 - var(--h1)),
+		max(var(--claim-one), calc(-1 * var(--claim-one)))
+	);
+	--claim-w: max(
+		calc(var(--h1) * 3.31),
+		min(
+			calc(var(--h1) * 6.32),
+			calc((var(--frame) - var(--h1) * 6.32 + 1px) * 10000)
+		)
+	);
+	width: min(
+		100%,
+		max(
+			calc(var(--edge) + var(--claim-w) + var(--gutter)),
+			calc(100% - var(--claim-short) * 40)
+		)
+	);
+	border-radius: 0 clamp(0px, calc(var(--claim-short) * 6), 6px)
+		clamp(0px, calc(var(--claim-short) * 6), 6px) 0;
+}
+.bar-in {
+	display: block;
+	/* the cap top and the baseline sit an equal step in from the bar's edges */
+	padding: 0.075em 0 0.1em;
+	margin-left: -0.045em;
+}
+
+/* the signature: the proofreader's three dots under "stand", hanging from
+   the bar on the concrete as the mark's dots hang from its bar, one after
+   another once, then still */
+.stet {
+	position: relative;
+}
+.stet-dots {
+	position: absolute;
+	left: 50%;
+	/* the inline box ends at the font's descent, about 0.2em under the
+	   baseline; the bar ends 0.1em under it, and the dots hang 0.12em lower */
+	top: calc(100% - 0.1em + 0.12em);
+	width: 0.72em;
+	height: auto;
+	margin-left: -0.36em;
+	fill: var(--bar);
+	overflow: visible;
+}
+.stet-dots circle {
+	transform-box: fill-box;
+	transform-origin: center;
+}
+
+.hero-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	align-items: start;
+	gap: 48px;
+	padding: 0 var(--edge);
+	/* clears the dots, which hang about a quarter of the h1's em */
+	margin-top: calc(var(--h1) * 0.34 + 12px);
+}
+.sub {
+	margin: 0;
+	max-width: 30em;
+	font-size: var(--sub-fs);
+	line-height: var(--sub-lh);
+	color: var(--muted);
+}
+.cta {
+	justify-self: end;
+	width: min(100%, 540px);
+}
+
+/* the install bar: a small stet bar carrying the command, and its key */
+.install {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 6px 6px 0;
+	border-radius: 6px;
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+}
+.install-cmd {
+	flex: 1;
+	min-width: 0;
+	padding: 12px 8px 12px 20px;
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-weight: 520;
+	font-size: 18px;
+	line-height: 24px;
+	font-variant-numeric: tabular-nums;
+}
+.install .prompt {
+	color: var(--on-bar-quiet);
+}
+.prompt {
+	color: var(--quiet);
+	font-weight: 400;
+	user-select: none;
+	-webkit-user-select: none;
+}
+.copy {
+	display: grid;
+	flex: none;
+	min-height: 48px;
+	padding: 0 24px;
+	border: 0;
+	border-radius: 4px;
+	background: var(--ground);
+	color: var(--ink);
+	box-shadow: var(--shadow-key);
+	font: inherit;
+	font-weight: 560;
+	font-size: 16px;
+	line-height: 24px;
+	align-items: center;
+	justify-items: center;
+	cursor: pointer;
+	transition:
+		background-color 140ms var(--ease),
+		transform 140ms var(--ease);
+}
+.copy > span {
+	grid-area: 1 / 1;
+}
+.copy .copy-done,
+.copy[data-copied] .copy-idle {
+	visibility: hidden;
+}
+.copy[data-copied] .copy-done {
+	visibility: visible;
+}
+@media (hover: hover) {
+	.copy:hover {
+		background: var(--surface);
+	}
+}
+.copy:active {
+	transform: translateY(1px);
+	box-shadow: var(--hl);
+}
+.install .copy:focus-visible {
+	outline-color: var(--on-bar);
+	outline-offset: 2px;
+}
+/* the suggested install waits for the reader's choice: its key is court
+   yellow, ink words, the yellow lit shadow, until it is used once; then
+   the yellow goes and the key is plain again. The For agents key is the
+   same install for an agent, and waits the same way. */
+.cta .copy:not([data-chosen]),
+.end .panel-brew .copy:not([data-chosen]),
+.for-agents .copy:not([data-chosen]) {
+	background: var(--yellow);
+	color: var(--on-yellow);
+	box-shadow: var(--lit-y);
+}
+@media (hover: hover) {
+	.cta .copy:not([data-chosen]):hover,
+	.end .panel-brew .copy:not([data-chosen]):hover,
+	.for-agents .copy:not([data-chosen]):hover {
+		background: var(--chip-yellow);
+	}
+}
+.cta-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 28px;
+	margin: 18px 0 0;
+	font-weight: 480;
+}
+/* above the hero's install bar: what it is, and the way to the others */
+.cta-head {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 0 20px;
+	margin: 0 0 12px;
+	font-size: 15px;
+	line-height: 22px;
+}
+/* "Suggested" waits for the reader's choice: a court-yellow chip, its
+   words in ink */
+.suggested,
+.picker-tag {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 8px;
+	border-radius: 4px;
+	background: var(--yellow);
+	color: var(--on-yellow);
+	box-shadow: var(--lit-y);
+	font-size: 13px;
+	line-height: 1;
+	font-weight: 600;
+	white-space: nowrap;
+}
+.cta-head {
+	align-items: center;
+}
+.cta-head .text-link {
+	padding: 11px 0;
+	margin: -11px 0;
+	font-weight: 480;
+}
+/* a command breaks at its spaces and after a slash, never inside a word */
+.word {
+	white-space: nowrap;
+}
+.install-cmd {
+	overflow-wrap: anywhere;
+}
+.licence {
+	margin: 10px 0 0;
+	font-size: 15px;
+	line-height: 22px;
+	color: var(--quiet);
+}
+
+/* ---------- the hero scene: the terminal behind, the Word file in front --- */
+
+/* one grid for the run, the file and the caption: the run and its caption
+   sit level with the middle of the sheet, so no field opens under them */
+.scene {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	grid-template-rows: 1fr auto auto 1fr;
+	align-items: start;
+	margin: 48px 0 0;
+	padding: 0 var(--edge);
+}
+.stage {
+	display: contents;
+}
+
+/* terminal text: a well set into the wall, Anek narrowed, tabular figures */
+.code {
+	margin: 0;
+	padding: 24px 28px;
+	border-radius: 10px;
+	background: var(--well);
+	box-shadow: var(--set-in);
+	font-family: var(--font-narrow);
+	font-stretch: 90%;
+	font-weight: 400;
+	font-size: 15px;
+	line-height: 24px;
+	font-variant-numeric: tabular-nums;
+	color: var(--muted);
+	white-space: normal;
+	overflow-wrap: break-word;
+}
+.code code {
+	font: inherit;
+	display: block;
+}
+.code .ln {
+	display: block;
+	padding-left: 1.1em;
+	text-indent: -1.1em;
+}
+.code .ln + .ln,
+.code .ln + .hits,
+.code .hits + .ln,
+.code .ln + .places,
+.code .places + .ln {
+	margin-top: 4px;
+}
+.code .cmd {
+	color: var(--ink);
+	font-weight: 500;
+}
+.code .cmd + .out,
+.code .cmd + .hits {
+	margin-top: 12px;
+}
+.code b {
+	font-weight: 620;
+	color: var(--ink);
+}
+/* stetdoc reporting a check that passed: its verdict in court green */
+.code .passed b {
+	color: var(--green-text);
+}
+
+/* the run, set in: the sheet covers the well's last column, so the text
+   stops short of it; its size runs from 15px at 1024 to 16px at 1440, and
+   a long line wraps between tokens */
+.term {
+	grid-column: 1 / 9;
+	grid-row: 2;
+	align-self: start;
+	padding: 34px calc(var(--frame) / 12 + 32px) 36px 40px;
+	font-size: clamp(15px, calc(var(--frame) / 416 + 12.77px), 16px);
+	line-height: 26px;
+}
+/* terminal text wraps only between tokens */
+.code .tok {
+	white-space: nowrap;
+}
+.term .cmd + .out {
+	margin-top: 18px;
+}
+.term .ln + .ln {
+	margin-top: 6px;
+}
+
+/* the Word file: a turned page in front, overlapping the well at right */
+.sheet {
+	grid-column: 8 / 13;
+	grid-row: 1 / -1;
+	z-index: 1;
+	border-radius: 4px;
+	background: var(--sheet);
+	box-shadow: var(--shadow-page);
+	/* clip, not hidden: hidden would make the sheet a scroll container, and
+	   the phone's view() timelines would measure it instead of the page */
+	overflow: clip;
+}
+.sheet-bar {
+	padding: 9px 16px;
+	font-size: 13px;
+	line-height: 18px;
+	font-weight: 480;
+	text-align: center;
+	color: var(--quiet);
+	box-shadow: inset 0 -1px 0 var(--divide);
+}
+.sheet-page {
+	padding: 40px 32px 48px 56px;
+	font-family: var(--serif);
+	font-stretch: normal;
+	font-size: 15.5px;
+	line-height: 26px;
+	color: var(--doc-ink);
+}
+.doc-head {
+	margin: 0 0 14px;
+	font-weight: 700;
+}
+/* the balloon sits under the change, at the page's right edge */
+.doc-change {
+	display: grid;
+	gap: 14px;
+	align-items: start;
+}
+.doc-text,
+.plane-text {
+	position: relative;
+}
+.doc-p {
+	margin: 0;
+	text-wrap: auto;
+}
+/* Word's change bar, in the left margin beside the changed lines */
+.change-bar {
+	position: absolute;
+	left: -22px;
+	top: 4px;
+	bottom: 4px;
+	width: 2px;
+	background: var(--doc-ink);
+	transform-origin: top;
+}
+/* the marks Word draws, in ink: struck through, underlined */
+.doc-p del,
+.doc-p ins {
+	position: relative;
+	text-decoration: none;
+}
+.doc-p del,
+.doc-p ins {
+	white-space: nowrap;
+}
+.doc-p del {
+	color: var(--quiet);
+}
+.doc-p del::after {
+	content: '';
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	top: 54%;
+	height: 1.5px;
+	background: var(--doc-ink);
+	transform-origin: left;
+}
+.doc-p ins {
+	box-shadow: inset 0 -1.5px 0 var(--doc-ink);
+}
+/* in the file the run wrote, the change waits for your review: court
+   yellow on the change bar and the balloon, the insertion underlined in
+   the yellow line's deeper tone. The strike stays ink. */
+.sheet .change-bar {
+	width: 3px;
+	border-radius: 1px;
+	background: var(--yellow);
+}
+.sheet .doc-p ins {
+	box-shadow: inset 0 -2px 0 var(--yellow-line);
+}
+/* the paragraph after, untouched, quiet; cut at two lines */
+.doc-next,
+.plane-p {
+	display: -webkit-box;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
+	line-clamp: 2;
+	overflow: hidden;
+	margin: 0;
+	color: var(--quiet);
+}
+.doc-next {
+	margin: 18px 0 0;
+}
+
+/* the margin balloon: who, what, when */
+.balloon {
+	position: relative;
+	justify-self: end;
+	width: min(100%, 236px);
+	display: grid;
+	padding: 10px 12px 11px;
+	border-radius: 4px;
+	background: var(--yellow);
+	box-shadow: var(--lit-y);
+	font-family: var(--font);
+	font-stretch: 100%;
+	font-size: 13px;
+	line-height: 18px;
+	color: var(--on-yellow);
+}
+/* the dotted lead from the change down to its balloon */
+.balloon::before {
+	content: '';
+	position: absolute;
+	bottom: 100%;
+	left: 22px;
+	height: 14px;
+	border-left: 1.5px dotted var(--yellow-line);
+}
+.balloon-who {
+	font-weight: 640;
+}
+.balloon-what b {
+	font-weight: 600;
+}
+.balloon-when {
+	margin-top: 2px;
+	font-size: 12px;
+	color: var(--on-yellow-quiet);
+}
+
+.scene figcaption {
+	grid-column: 1 / 8;
+	grid-row: 3;
+	margin-top: 22px;
+	font-size: 14px;
+	line-height: 20px;
+	color: var(--quiet);
+}
+
+/* ---------- the end: the bar again, carrying the install ---------- */
+
+.end {
+	margin-top: 220px;
+}
+.end-bar {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 600px);
+	align-items: start;
+	gap: 40px 64px;
+	padding: 96px var(--edge) 88px;
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+}
+.end h2 {
+	font-family: var(--font-display);
+	margin: 0;
+	/* "Other ways to install" lands at the top of the bar, not on the word */
+	scroll-margin-top: 96px;
+	font-stretch: 125%;
+	font-weight: 620;
+	/* a band token, sized to its own column: "stetdoc." runs about 4.3 of
+	   its em */
+	font-size: var(--h-end);
+	line-height: 0.88;
+	letter-spacing: -0.032em;
+}
+/* inside the bar the install inverts: a concrete plate, its key graphite */
+.end-intro {
+	max-width: 22em;
+	margin: 32px 0 0;
+	font-size: 21px;
+	line-height: 31px;
+	color: var(--on-bar-quiet);
+}
+.end p code {
+	color: var(--on-bar);
+}
+.why {
+	max-width: 62ch;
+	margin: 32px 0 0;
+	font-size: 16px;
+	line-height: 26px;
+	color: var(--on-bar-quiet);
+}
+.end .cta-links {
+	margin-top: 28px;
+}
+
+/* the picker: radios as keys on the bar; the chosen one is a concrete key */
+.picker {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.picker-label {
+	padding: 0;
+	margin: 0 0 12px;
+	font-size: 15px;
+	line-height: 22px;
+	font-weight: 520;
+	color: var(--on-bar-quiet);
+}
+.picker-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-bottom: 16px;
+}
+/* the six keys need 594px on one row; in a narrower picker (the foot of M,
+   and L up to about 1170) they stand three over three, never five over one */
+.picker {
+	container-type: inline-size;
+}
+@container (width < 600px) {
+	.picker-tabs {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+.picker-input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: 0;
+	opacity: 0;
+	pointer-events: none;
+}
+.picker-tab {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0 6px;
+	min-height: 44px;
+	padding: 0 16px;
+	border-radius: 4px;
+	background: var(--on-bar-fill);
+	color: var(--on-bar);
+	font-weight: 520;
+	font-size: 16px;
+	line-height: 20px;
+	cursor: pointer;
+	transition:
+		background-color 140ms var(--ease),
+		color 140ms var(--ease);
+}
+
+.picker-input:checked + .picker-tab {
+	background: var(--ground);
+	color: var(--ink);
+	box-shadow: var(--shadow-key);
+}
+
+.picker-input:focus-visible + .picker-tab {
+	outline: 2px solid var(--on-bar);
+	outline-offset: 2px;
+}
+@media (hover: hover) {
+	.picker-input:not(:checked) + .picker-tab:hover {
+		background: var(--on-bar-hover);
+	}
+}
+.picker-note {
+	margin: 16px 0 0;
+	font-size: 15px;
+	line-height: 23px;
+	color: var(--on-bar-quiet);
+}
+/* every panel is in the page; with :has, only the chosen one shows */
+.picker:has(.picker-input:checked) .picker-panel {
+	display: none;
+}
+.picker:has(#ch-brew:checked) .panel-brew,
+.picker:has(#ch-uv:checked) .panel-uv,
+.picker:has(#ch-pipx:checked) .panel-pipx,
+.picker:has(#ch-npm:checked) .panel-npm,
+.picker:has(#ch-script:checked) .panel-script,
+.picker:has(#ch-cargo:checked) .panel-cargo {
+	display: block;
+}
+.picker-panel + .picker-panel {
+	margin-top: 20px;
+}
+.picker:has(.picker-input:checked) .picker-panel + .picker-panel {
+	margin-top: 0;
+}
+
+.end .install {
+	background: var(--ground);
+	color: var(--ink);
+	box-shadow: var(--set-in);
+}
+.end .install .prompt {
+	color: var(--quiet);
+}
+.end .copy {
+	background: var(--bar);
+	color: var(--on-bar);
+	box-shadow: var(--shadow-bar);
+}
+@media (hover: hover) {
+	.end .copy:hover {
+		background: var(--ink-hover);
+		box-shadow:
+			inset 0 1px 0 rgba(255, 255, 255, 0.28),
+			var(--shadow-bar);
+	}
+}
+.end .install .copy:focus-visible {
+	outline-color: var(--ink);
+}
+.end .text-link {
+	color: var(--on-bar);
+	text-decoration-color: var(--on-bar-line);
+}
+@media (hover: hover) {
+	.end .text-link:hover {
+		text-decoration-color: var(--on-bar);
+	}
+}
+.end .text-link:focus-visible {
+	outline-color: var(--on-bar);
+}
+/* the measure is the text's own: the frame's edges are margins, not
+   padding, so the edge, which grows past 1440px, never eats into the 31em,
+   and on a phone the text still stops at the right gutter */
+.footnote {
+	max-width: 31em;
+	margin: 0 var(--edge);
+	padding: 56px 0 0;
+	font-size: 16px;
+	line-height: 25px;
+	color: var(--quiet);
+}
+
+/* ---------- the footer ---------- */
+
+.foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 20px 32px;
+	margin-top: 72px;
+	padding: 32px var(--edge) 56px;
+	font-size: 15px;
+	line-height: 22px;
+	color: var(--quiet);
+}
+.from {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 6px 10px;
+	margin: 0;
+}
+.lockup-link {
+	display: block;
+	padding: 12px 0;
+	margin: -12px 0;
+	border-radius: 4px;
+}
+.lockup {
+	display: block;
+	height: 20px;
+	width: auto;
+	aspect-ratio: 8163 / 1639;
+}
+.lockup .name {
+	fill: var(--ink);
+}
+.lockup .comma {
+	fill: var(--brand);
+}
+.foot nav {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0 12px;
+	/* the links' tap padding hangs outside the text column */
+	margin: 0 -6px 0 auto;
+}
+.foot nav a {
+	min-width: 44px;
+	justify-content: center;
+	padding: 0 6px;
+}
+/* the launch page's footer sits on the site's edge, as the docs' does */
+.launch .foot {
+	padding-inline: var(--site-edge);
+}
+
+/* ---------- motion ----------
+   One load moment and one scroll grammar. The resting styles above are the
+   end state; nothing here hides content without an animation to bring it
+   back, and reduced motion skips all of it. */
+
+@media (prefers-reduced-motion: no-preference) {
+	/* load: the h1's dots, one after another, under 400ms */
+	.stet-dots circle {
+		animation: dot 200ms var(--ease) both;
+		animation-delay: 200ms;
+	}
+	.stet-dots circle:nth-child(2) {
+		animation-delay: 280ms;
+	}
+	.stet-dots circle:nth-child(3) {
+		animation-delay: 360ms;
+	}
+
+	/* load: the hero run, 1.6s. The receipt arrives line by line, the strike
+	   draws over the old words, the new words come in underlined, then the
+	   balloon. */
+	.term .out {
+		animation: rise 220ms var(--ease) both;
+		animation-delay: calc(180ms + var(--step, 0) * 130ms);
+	}
+	.sheet .doc-p del::after {
+		animation: strike 260ms cubic-bezier(0.65, 0, 0.35, 1) both;
+		animation-delay: 940ms;
+	}
+	.sheet .doc-p ins {
+		animation: appear 240ms var(--ease) both;
+		animation-delay: 1180ms;
+	}
+	.sheet .change-bar {
+		animation: bar-down 240ms var(--ease) both;
+		animation-delay: 1180ms;
+	}
+	.sheet .balloon {
+		animation: balloon 260ms var(--ease) both;
+		animation-delay: 1340ms;
+	}
+}
+
+/* under 1024px the scene stacks and the hero's sheet sits at the foot of
+   the first screen, so its change plays as it scrolls into view rather
+   than on load, out of sight */
+@supports (animation-timeline: view()) {
+	@media (prefers-reduced-motion: no-preference) and (width < 1024px) {
+		.sheet .doc-p del::after {
+			animation: strike linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 70%;
+			animation-delay: 0s;
+		}
+		.sheet .doc-p ins,
+		.sheet .change-bar {
+			animation: appear linear backwards;
+			animation-timeline: view();
+			animation-range: entry 50% entry 100%;
+			animation-delay: 0s;
+		}
+		.sheet .balloon {
+			animation: balloon linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 100%;
+			animation-delay: 0s;
+		}
+		.term .out {
+			animation: rise linear backwards;
+			animation-timeline: view();
+			animation-range: entry 0% entry 100%;
+			animation-delay: 0s;
+		}
+	}
+}
+
+@keyframes dot {
+	from {
+		opacity: 0;
+		transform: scale(0.3);
+	}
+}
+@keyframes rise {
+	from {
+		opacity: 0;
+		transform: translateY(5px);
+	}
+}
+@keyframes strike {
+	from {
+		transform: scaleX(0);
+	}
+}
+@keyframes appear {
+	from {
+		opacity: 0;
+	}
+}
+@keyframes bar-down {
+	from {
+		transform: scaleY(0);
+	}
+}
+@keyframes balloon {
+	from {
+		opacity: 0;
+		transform: translateX(8px);
+	}
+}
+@keyframes seat {
+	from {
+		transform: scale(0);
+	}
+}
+@keyframes draw {
+	from {
+		clip-path: inset(0 100% 0 0);
+	}
+}
+@keyframes lift {
+	from {
+		transform: translateY(10px) scale(0.965);
+		box-shadow: var(--shadow-flat);
+	}
+}
+@keyframes light {
+	from {
+		background-color: var(--flat);
+		box-shadow: none;
+	}
+}
+@keyframes verdict {
+	from {
+		transform: translateX(-24px);
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+
+/* ---------- bands ---------- */
+
+/* the docs' own steps, which they read from :root and .foot; the launch
+   page sets its own on .launch */
+@media (max-width: 739px) {
+	:root {
+		--gutter: 20px;
+	}
+	.foot nav {
+		margin: 0 0 0 -6px;
+	}
+}
+
+/* the launch page's tokens. .launch wraps the page and makes no box; the
+   values here are XL's (1440 to 1919px), and each band below sets its own.
+   The gutter, the frame and the edge are the site's, from :root.
+   Heads run from the frame and stop at a share of the screen's height:
+   12svh for an argument head, 15svh for a display head. */
+.launch {
+	display: contents;
+	--gutter: var(--site-gutter);
+	--frame-max: var(--site-frame-max);
+	--edge: var(--site-edge);
+	--frame: calc(min(100vw, var(--frame-max)) - 2 * var(--gutter));
+	/* the claim on one line across the frame */
+	--h1: min(calc(var(--frame) / 6.4), 25svh);
+	--sub-fs: 22px;
+	--sub-lh: 33px;
+	--p-fs: 19px;
+	--p-lh: 30px;
+	--h-unreadable: min(calc(var(--frame) * 0.0588), 12svh);
+	--h-bench: min(calc(var(--frame) * 0.0677), 15svh);
+	--h-bytes: min(calc(var(--frame) * 0.0449), 12svh);
+	--h-clauses: min(calc(var(--frame) * 0.098), 15svh);
+	--h-ambiguous: min(max(36px, calc(var(--frame) * 0.0364)), 12svh);
+	--h-xml: min(calc(var(--frame) / 12.6), 24svh);
+	--h-agents: min(calc(var(--frame) * 0.0474), 12svh);
+	/* the end's column is the frame less the picker's 600px and the gap */
+	--h-end: min(calc(var(--frame) / 9.6), calc((var(--frame) - 680px) / 4.4), 15svh);
+	/* the bench's times, the others' range, the facts, the blocked attempt */
+	--fig-race: min(max(64px, calc(var(--frame) * 0.05)), 12svh);
+	--fig-range: max(30px, calc(var(--frame) * 0.026));
+	--fig-fact: min(calc(var(--frame) * 0.057), 12svh);
+	--guard: calc(var(--frame) * 0.046);
+}
+
+/* L, XL, XXL: the claim never wraps, even under a classic scrollbar */
+@media (width >= 1024px) {
+	.bar-in {
+		white-space: nowrap;
+	}
+}
+
+/* XL, XXL: the run rises toward the lead. It starts 12px under the install
+   column's foot, 36px above the sheet, which overlaps its right end from
+   above; the gap under the lead falls from about 210px to 80px. The
+   caption follows the run. */
+@media (width >= 1440px) {
+	.scene {
+		grid-template-rows: auto auto 1fr;
+	}
+	.term {
+		grid-row: 1;
+		margin-top: -36px;
+	}
+	.scene figcaption {
+		grid-row: 2;
+	}
+}
+/* a tall desktop screen holds the whole first screen and nothing of the
+   next part, so the fold never cuts a heading. (Capped at 1800px, so a
+   page measured as one tall viewport keeps its own hero.) */
+@media (width >= 1440px) and (1300px <= height <= 1800px) {
+	.hero {
+		min-height: calc(100svh - 72px);
+	}
+}
+
+/* L: the XL composition on a narrower frame. The lead takes a step down
+   to keep its measure in half the frame; the end's head and the picker
+   split the bar five to seven. */
+@media (1024px <= width < 1440px) {
+	.launch {
+		--sub-fs: 20px;
+		--sub-lh: 30px;
+		--h-end: min(calc((var(--frame) - 48px) * 5 / 12 / 4.4), 15svh);
+		/* "It knows where" on one line in the head's seven columns: the
+		   line is about 6.4 of its own em */
+		--h-clauses: min(
+			calc(((var(--frame) - 352px) * 7 / 12 + 192px) / 6.6),
+			15svh
+		);
+	}
+	.end-bar {
+		grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+		gap: 40px 48px;
+	}
+}
+/* Rohan, on an iPad in landscape: the claim "feels a little too huge". On
+   a touch screen in L it stops at 19% of the visible height; a laptop, with
+   a fine pointer, keeps the claim across the frame */
+@media (1024px <= width < 1440px) and (pointer: coarse) {
+	.launch {
+		--h1: min(calc(var(--frame) / 6.4), 19svh);
+	}
+}
+
+/* M and S: the claim takes two lines, "Let it" over "stand.", so the bar
+   stands tall; the scene stacks, the Word file first, the well tucked
+   under it; the end bar is one column */
+@media (width < 1024px) {
+	.top {
+		min-height: 64px;
+	}
+	.bar {
+		line-height: 0.86;
+	}
+	.bar-in {
+		padding: 0.08em 0 0.1em;
+	}
+	/* the stet dots at this scale: the mark's dots, bigger, still centred
+	   under "stand" as a proofreader sets them under the word */
+	.stet-dots {
+		width: 1.12em;
+		margin-left: -0.56em;
+	}
+	.hero-row {
+		grid-template-columns: minmax(0, 640px);
+		gap: 32px;
+		margin-top: calc(var(--h1) * 0.42 + 24px);
+	}
+	/* the lead and the install share one right edge */
+	.sub {
+		max-width: none;
+	}
+	.cta {
+		justify-self: stretch;
+		width: auto;
+	}
+	.scene {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: none;
+	}
+	.scene figcaption {
+		grid-column: 1;
+		grid-row: 3;
+	}
+	.sheet {
+		grid-column: 1;
+		grid-row: 1;
+		justify-self: end;
+		width: min(100% - 48px, 720px);
+		margin: 0 24px 0 0;
+	}
+	.term {
+		grid-column: 1;
+		grid-row: 2;
+		margin-top: -32px;
+		padding: 68px 36px 32px;
+		font-size: 15px;
+		line-height: 25px;
+	}
+	.end-bar {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.end-intro {
+		max-width: 30em;
+	}
+	/* the footer stacks on purpose: the lockup, then the links under it,
+	   from the left */
+	.launch .foot {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.launch .foot nav {
+		margin: 0 0 0 -6px;
+	}
+}
+
+/* M: the gutter grows from 32px at 600 to 48px at 1024. The claim takes two
+   lines on a tall screen, one line across the frame on a wide one. */
+@media (600px <= width < 1024px) {
+	:root {
+		--site-gutter: clamp(32px, calc(9.36px + 3.774vw), 48px);
+	}
+	.launch {
+		--h1: max(min(calc(var(--frame) / 3.6), 12.5svh), min(calc(var(--frame) / 6.4), 25svh));
+		--sub-fs: 20px;
+		--sub-lh: 30px;
+		--p-fs: 18px;
+		--p-lh: 28px;
+		/* two steps of head: the argument and the display */
+		--h-arg: min(max(46px, calc(var(--frame) * 0.062)), 12svh);
+		--h-display: min(max(72px, calc(var(--frame) * 0.11)), 15svh);
+		--h-unreadable: var(--h-arg);
+		--h-bytes: var(--h-arg);
+		--h-ambiguous: var(--h-arg);
+		--h-agents: var(--h-arg);
+		--h-bench: var(--h-display);
+		--h-clauses: var(--h-display);
+		--h-xml: var(--h-display);
+		/* "Install stetdoc." on one line */
+		--h-end: min(calc(var(--frame) / 8.4), 15svh);
+		--fig-race: min(max(64px, calc(var(--frame) * 0.085)), 12svh);
+		--fig-range: calc(var(--fig-race) * 0.5);
+		--fig-fact: min(max(64px, calc(var(--frame) * 0.105)), 12svh);
+		--guard: calc(var(--frame) / 12.4);
+	}
+}
+
+/* S: a 20px gutter; the lead, the body and the heads run from the frame
+   and the screen's height, in two steps of head */
+@media (width < 600px) {
+	:root {
+		--site-gutter: 20px;
+	}
+	.launch {
+		--h1: min(calc(var(--frame) / 3.6), 14.5svh);
+		--sub-fs: clamp(17px, calc(1.4svh + 10px), 19px);
+		--sub-lh: 1.5;
+		--p-fs: clamp(17px, calc(var(--frame) / 55 + 11.9px), 18px);
+		--p-lh: 1.56;
+		/* an argument head keeps its line count across the band ("Twelve
+		   matches" holds one line at 320); a display head sets "where 11.1
+		   is." on one line, so none leaves a word alone */
+		--h-arg: min(clamp(32px, calc(var(--frame) * 0.12), 46px), 12svh);
+		--h-display: min(clamp(40px, calc(var(--frame) / 6.6), 72px), 15svh);
+		--h-unreadable: var(--h-arg);
+		--h-bytes: var(--h-arg);
+		--h-ambiguous: var(--h-arg);
+		--h-agents: var(--h-arg);
+		--h-bench: var(--h-display);
+		--h-clauses: var(--h-display);
+		--h-xml: var(--h-display);
+		--h-end: var(--h-display);
+		--fig-race: min(calc(var(--frame) / 5.6), 64px);
+		--fig-range: min(calc(var(--frame) / 13.4), 32px);
+		--fig-fact: min(calc(var(--frame) * 0.15), 64px);
+		--guard: calc(var(--frame) / 12.4);
+	}
+	/* WebKit's pretty shortens every line of a paragraph in a narrow
+	   column, not just the last; on a phone the lines run full */
+	p {
+		text-wrap: auto;
+	}
+	.top {
+		min-height: 56px;
+	}
+	.hero {
+		padding-top: 8px;
+	}
+	.hero-row {
+		gap: 24px;
+	}
+	.scene {
+		margin-top: 28px;
+	}
+	.doc-head {
+		display: none;
+	}
+	.sheet {
+		width: auto;
+		justify-self: stretch;
+		margin: 0 10px;
+	}
+	/* the run is a plane edge to edge, and the sheet lies on it, inset */
+	.term {
+		margin: -20px calc(-1 * var(--gutter)) 0;
+		border-radius: 0;
+		padding: 48px var(--gutter) 24px;
+		font-size: 15.5px;
+	}
+	.sheet-page {
+		padding: 18px 20px 26px 32px;
+		font-size: 15px;
+		line-height: 25px;
+	}
+	.doc-change {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 14px;
+	}
+	.change-bar {
+		left: -16px;
+	}
+	.balloon {
+		justify-self: end;
+		width: min(100%, 220px);
+	}
+	.balloon::before {
+		display: none;
+	}
+	.end {
+		margin-top: 160px;
+	}
+	.end-bar {
+		padding: 64px var(--edge) 56px;
+	}
+	.end h2 {
+		line-height: 0.9;
+	}
+	.end-intro {
+		margin-top: 20px;
+		font-size: 18px;
+		line-height: 27px;
+	}
+	.picker-tabs {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+	/* every key on one line down to 320 */
+	.picker-tab {
+		flex-direction: column;
+		padding: 6px 4px;
+		min-height: 52px;
+		text-align: center;
+		font-size: clamp(14px, calc(var(--frame) / 20), 15px);
+	}
+	.picker-tag {
+		height: 18px;
+		padding: 0 6px;
+		font-size: 12px;
+	}
+	.install {
+		padding: 5px 5px 5px 0;
+	}
+	.install-cmd {
+		padding: 10px 6px 10px 14px;
+		font-size: 16px;
+		line-height: 22px;
+	}
+	.copy {
+		padding: 0 16px;
+	}
+	.footnote {
+		padding-top: 40px;
+	}
+	/* the links as a deliberate three over two */
+	.launch .foot nav {
+		display: grid;
+		grid-template-columns: repeat(3, max-content);
+		column-gap: 20px;
+	}
+	.launch .foot nav a {
+		justify-content: flex-start;
+	}
+}
+
+/* SHORT: a phone on its side, at most 500px tall. The claim goes back to
+   one line across the frame, at most a quarter of the screen, so the lead
+   and the install bar share the first screen beside each other; the
+   facts stand three up. Everything else keeps its width's band. */
+@media (orientation: landscape) and (max-height: 500px) {
+	.launch {
+		--h1: min(calc(var(--frame) / 6.4), 24svh);
+		--sub-fs: 17px;
+		--sub-lh: 25px;
+		--fig-fact: min(calc((var(--frame) - 64px) / 3 / 4.5), 14svh);
+	}
+	.top {
+		min-height: 56px;
+	}
+	.hero {
+		padding-top: 8px;
+	}
+	.bar {
+		line-height: 0.84;
+	}
+	.bar-in {
+		padding: 0.075em 0 0.1em;
+		white-space: nowrap;
+	}
+	.stet-dots {
+		width: 0.72em;
+		margin-left: -0.36em;
+	}
+	.hero-row {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+		gap: 24px;
+		margin-top: calc(var(--h1) * 0.34 + 12px);
+	}
+	.cta {
+		justify-self: stretch;
+	}
+	.install {
+		padding: 5px 5px 5px 0;
+	}
+	.install-cmd {
+		padding: 10px 6px 10px 14px;
+		font-size: 16px;
+		line-height: 22px;
+	}
+	.copy {
+		padding: 0 16px;
+	}
+}
+/* SHORT under 760px wide: the command keeps one line beside the lead, and
+   the lead a size down, so both end above the fold at 667 by 320 */
+@media (orientation: landscape) and (max-height: 500px) and (width < 760px) {
+	.hero-row {
+		grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr);
+	}
+	.launch {
+		--sub-fs: 16px;
+		--sub-lh: 23px;
+	}
+	.hero .install-cmd {
+		padding-left: 12px;
+		font-size: 15px;
+		white-space: nowrap;
+	}
+	.hero .copy {
+		padding: 0 12px;
+	}
+}

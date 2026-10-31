@@ -235,13 +235,16 @@ impl Compiler<'_, '_> {
         }
     }
 
-    /// The boundary at the very start of the paragraph's content, after `w:pPr`.
+    /// The boundary at the very start of the paragraph's content, after `w:pPr`. A comment or processing
+    /// instruction before `w:pPr` (Word drops them, other tools write them) is passed too, or the new
+    /// content would land before `w:pPr`, which must be the first element; `settle` passes such nodes
+    /// anyway, so this changes nothing where `w:pPr` is the first child.
     pub(super) fn boundary_at_start(&self, p: &ParaView) -> Result<Boundary, StetError> {
         let tree = self.tree_ro(&p.part)?;
         let para = tree.node_ref(p.node);
         let mut cur = first_content(&para);
         while let Some(c) = cur {
-            if is_w(&c, "pPr") {
+            if !c.is_element() || is_w(&c, "pPr") {
                 cur = next_content(&c);
             } else {
                 break;

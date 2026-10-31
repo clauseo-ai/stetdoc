@@ -201,3 +201,43 @@ fn an_empty_rpr_of_the_input_that_a_new_revision_wraps_is_carried() {
         s.assert_clean();
     }
 }
+
+// --- a comment or processing instruction before w:pPr
+
+#[test]
+fn an_insert_at_the_start_of_a_paragraph_whose_ppr_follows_a_comment_goes_after_the_ppr() {
+    // Word drops XML comments and processing instructions when it saves, but other tools write them, and one may stand before
+    // `w:pPr`. New text at offset 0 goes after `w:pPr`, which must stay the first element, and the node is kept.
+    let ppr = "<w:pPr><w:rPr><w:sz w:val=\"24\"/></w:rPr></w:pPr>";
+    for lead in ["<!-- special -->", "<?tool hint?>"] {
+        for tracked in [true, false] {
+            let body = p(&format!("{lead}{ppr}{}", r("bar")));
+            let track = if tracked {
+                super::stamp::Track::Tracked(stamp())
+            } else {
+                super::stamp::Track::Untracked
+            };
+            let s = with_compiler(&body, track, |c, _, ks| {
+                vec![c.replace_text(&ks[0], 0..0, "foo ")]
+            });
+            assert!(
+                s.effects[0].is_ok(),
+                "{lead} tracked: {tracked}: {:?}",
+                s.effects[0]
+            );
+            assert!(
+                s.schema.is_empty(),
+                "{lead} tracked: {tracked}: {:?} {}",
+                s.schema,
+                s.xml
+            );
+            assert_eq!(s.fin, ["foo bar"], "{lead} tracked: {tracked}");
+            assert!(s.xml.contains(&format!("{lead}{ppr}")), "{}", s.xml);
+            let new = s.xml.find("foo ").unwrap();
+            assert!(s.xml.find("</w:pPr>").unwrap() < new, "{}", s.xml);
+            if tracked {
+                assert!(s.xml.contains("</w:pPr><w:ins "), "{}", s.xml);
+            }
+        }
+    }
+}

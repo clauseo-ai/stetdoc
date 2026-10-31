@@ -67,7 +67,10 @@ pub(super) fn revision_ids_in(tree: &SpanTree, node: NodeId) -> Vec<i64> {
 /// A range marker may stand between blocks, but a run may not: when `el` is a block-level element (a
 /// row, a cell, a table) and a comment reference run is among what stays, what stays goes to the end of
 /// the paragraph before `el` in document order, or the start of the one after it, in order, and that
-/// paragraph is what is returned as the parent.
+/// paragraph is what is returned as the parent. The range markers that stand between `el` and that
+/// paragraph go into it too, on the same side of what stays as they were, so that a range whose start was
+/// in `el` and whose end stood between the blocks (or the other way round) keeps its start before its end,
+/// as `join::place_leftovers` does with the markers between two paragraphs.
 pub(super) fn remove_hoisting(
     tree: &mut SpanTree,
     el: NodeId,
@@ -118,12 +121,12 @@ pub(super) fn hoist_out(tree: &mut SpanTree, el: NodeId) -> Result<Hoisted, Stet
     let mut to = parent;
     let mut made = false;
     if has_run && !within_paragraph(tree, parent) {
-        if let Some(p) = paragraph_beside(tree, el, false) {
-            for &k in &keep {
+        if let Some((p, between)) = paragraph_beside(tree, el, false) {
+            for &k in between.iter().chain(&keep) {
                 move_to(tree, k, p, None)?;
             }
             to = p;
-        } else if let Some(p) = paragraph_beside(tree, el, true) {
+        } else if let Some((p, between)) = paragraph_beside(tree, el, true) {
             // After the paragraph's properties, and any white space before them.
             let ppr = tree
                 .node_ref(p)
@@ -134,7 +137,7 @@ pub(super) fn hoist_out(tree: &mut SpanTree, el: NodeId) -> Result<Hoisted, Stet
                 Some(pp) => next_sibling_of(tree, pp),
                 None => tree.node_ref(p).first_child().map(|c| c.id()),
             };
-            for &k in &keep {
+            for &k in keep.iter().chain(&between) {
                 move_to(tree, k, p, first)?;
             }
             to = p;
@@ -254,10 +257,10 @@ fn within_paragraph(tree: &SpanTree, node: NodeId) -> bool {
 }
 
 /// The paragraph next to `el` in document order within its story, outside it: the one before it, or the
-/// one after it if `after`.
-fn paragraph_beside(tree: &SpanTree, el: NodeId, after: bool) -> Option<NodeId> {
-    // The outermost paragraph of a subtree, first or last in document order.
-    fn edge(n: &crate::xml::NodeRef<'_>, after: bool) -> Option<NodeId> {
+/// one after it if `after`, with the range markers that stand between `el` and it, in document order.
+fn paragraph_beside(tree: &SpanTree, el: NodeId, after: bool) -> Option<(NodeId, Vec<NodeId>)> {
+    // The outermost paragraph of a subtree, first or last in document order, collecting the markers passed.
+    fn edge(n: &crate::xml::NodeRef<'_>, after: bool, passed: &mut Vec<NodeId>) -> Option<NodeId> {
         let kids: Vec<_> = n.child_elements().collect();
         let ordered: Box<dyn Iterator<Item = _>> = if after {
             Box::new(kids.into_iter())
@@ -268,12 +271,22 @@ fn paragraph_beside(tree: &SpanTree, el: NodeId, after: bool) -> Option<NodeId> 
             if is_w(&c, "p") {
                 return Some(c.id());
             }
-            if let Some(p) = edge(&c, after) {
+            if is_leftover(&c) {
+                passed.push(c.id());
+            } else if let Some(p) = edge(&c, after, passed) {
                 return Some(p);
             }
         }
         None
     }
+    // In the order walked: backwards when the paragraph is before `el`.
+    let mut passed = Vec::new();
+    let found = |p: NodeId, mut passed: Vec<NodeId>| {
+        if !after {
+            passed.reverse();
+        }
+        Some((p, passed))
+    };
     let mut cur = tree.node_ref(el);
     loop {
         let mut sib = if after {
@@ -284,10 +297,12 @@ fn paragraph_beside(tree: &SpanTree, el: NodeId, after: bool) -> Option<NodeId> 
         while let Some(s) = sib {
             if s.is_element() {
                 if is_w(&s, "p") {
-                    return Some(s.id());
+                    return found(s.id(), passed);
                 }
-                if let Some(p) = edge(&s, after) {
-                    return Some(p);
+                if is_leftover(&s) {
+                    passed.push(s.id());
+                } else if let Some(p) = edge(&s, after, &mut passed) {
+                    return found(p, passed);
                 }
             }
             sib = if after {

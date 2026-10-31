@@ -4,8 +4,7 @@ stetdoc is a projection layer between Word and AI agents. It turns a `.docx` int
 working copy an agent can read and edit with its ordinary tools, and turns the edits
 back into the same `.docx` with real Word tracked changes.
 
-**Status:** under development toward 1.0.0. Nothing has been released yet. The CLI below
-works today, `compare` included. The [changelog](CHANGELOG.md) lists what is done so far.
+Read the docs at https://stetdoc.clauseo.chat/docs. The [changelog](CHANGELOG.md) lists every release.
 
 ## Why
 
@@ -28,15 +27,25 @@ Markdown lose formatting, tracked changes and comments.
 
 ## Usage
 
-One `stetdoc` binary and a skill that works in any agent with a shell. Install it with `cargo install stetdoc --locked`,
-or see [docs/agents.md](docs/agents.md) for Homebrew, PyPI, npm and the install script.
+One `stetdoc` binary and a skill that works in any agent with a shell. Install it with Homebrew:
 
 ```
-export STETDOC_AUTHOR="Jane Doe"   # every revision has an author (or save yours once with stetdoc init)
-stetdoc view contract.docx --find 'net 30' --find 'governing law'   # each hit: ref, clause, exact text
-stetdoc replace contract.docx 'net 30' 'net 45'   # writes contract.edited.docx; each OLD found once, all pairs or none
+brew install clauseo-ai/tap/stetdoc
+```
+
+On a machine without Homebrew, run `uv tool install stetdoc`. [Install](docs/install.md) lists every channel, Windows
+included, and [the quickstart](docs/quickstart.md) walks through a first edit in five minutes.
+
+```
+# Every revision has an author. Set it here, or save yours once with stetdoc init.
+export STETDOC_AUTHOR="Jane Doe"
+# Each hit shows its ref, its clause and the exact text.
+stetdoc view contract.docx --find 'net 30' --find 'governing law'
+# Writes contract.edited.docx. Each OLD must match once, and all pairs apply or none do.
+stetdoc replace contract.docx 'net 30' 'net 45'
 stetdoc comment contract.edited.docx 'Liability Cap' 'Is this mutual?' --in-place
-stetdoc compare old.docx new.docx -o redline.docx   # a redline of any two versions
+# A redline of any two versions.
+stetdoc compare old.docx new.docx -o redline.docx
 ```
 
 An edit of a .docx writes `NAME.edited.docx` beside it (then `NAME.edited-2.docx`, never overwriting) and leaves the
@@ -48,10 +57,14 @@ no tracked changes, for readers who ask for one. Receipts and views name tracked
 report them. For longer work, unpack a working copy and edit its readable files:
 
 ```
-stetdoc unpack contract.docx             # writes contract.stet/: readable files and a hidden complement
-$EDITOR contract.stet/document.md        # edit the text after each ref with any tool
-stetdoc check contract.stet              # the redline that pack will write, validated
-stetdoc pack contract.stet               # writes contract.edited.docx with real tracked changes
+# Writes contract.stet/, which holds the readable files and a hidden complement.
+stetdoc unpack contract.docx
+# Edit the text after each ref with any tool.
+$EDITOR contract.stet/document.md
+# Shows the redline that pack will write, validated.
+stetdoc check contract.stet
+# Writes contract.edited.docx with real tracked changes.
+stetdoc pack contract.stet
 ```
 
 For anything else, such as inserting paragraphs, accepting or rejecting revisions or formatting, agents send a batch of
@@ -79,8 +92,9 @@ string replacement or `apply_patch`, and the complement (`.stet/`) that holds ev
 package. Every block has a stable short ref such as `p42`. Every write to a working copy survives a crash, and a second
 process waits for the first.
 
-**For agents.** `stetdoc init` installs the skill stub in your home folder for the agents you pick (Claude Code, Codex,
-Cursor, OpenCode, Antigravity CLI, Gemini CLI, Copilot, Amp, OpenClaw, Hermes, Grok Build, cmx2, Factory), or for the ones it detects;
+**For agents.** `stetdoc init` installs the skill stub in your home folder for the agents you pick, or for the ones it
+detects. It knows Claude Code, Codex, Cursor, OpenCode, OpenClaw, Hermes Agent, Grok Build, cmx2, Antigravity CLI, GitHub
+Copilot CLI, Amp and Factory, and still installs for Gemini CLI, which Google retired in favour of Antigravity CLI.
 `stetdoc init --project` installs it in a project and adds a short block to `AGENTS.md`. `--list` shows what is installed
 and `--remove` takes it out. The full skill is embedded in the binary: `stetdoc skills get core`. For agents that take
 tools rather than a shell, `stetdoc mcp` serves the same commands over the Model Context Protocol, and `stetdoc init --mcp`
@@ -96,7 +110,9 @@ unzipping a .docx or rewriting its XML (the binary must still be on the PATH; Cl
 
 ## Use it with your agent
 
-- [Use stetdoc with your agent](docs/agents.md): install, `stetdoc init`, and the setup for each agent.
+- [Quickstart](docs/quickstart.md): install, find, replace and comment on a sample contract, then open it in Word.
+- [Install](docs/install.md): every channel, Windows, updating and uninstalling.
+- [Use stetdoc with your agent](docs/agents.md): `stetdoc init`, the author, and the setup for each agent.
 - [Self-hosting the MCP server](docs/self-hosting-mcp.md): serve `stetdoc mcp` to cloud apps, with auth and TLS.
 - [Build on stetdoc](docs/build-on-stetdoc.md): the Rust crate, the Node package, the CLI and MCP, for products.
 
@@ -111,8 +127,10 @@ The same engine is a Rust library, `stetdoc-core`, built around one handle:
 ```rust
 let mut doc = Document::open(bytes, &OpenOptions::default())?;
 let view = doc.view(&ViewSpec::default())?;
-let receipt = doc.edit(Edit::ops(batch, stamp))?;   // tracked by default
-let saved = doc.save()?;                            // unedited => the input bytes
+// Tracked by default.
+let receipt = doc.edit(Edit::ops(batch, stamp))?;
+// Unedited, it returns the input bytes.
+let saved = doc.save()?;
 ```
 
 Node and Bun use it through the npm package `@clauseo/stetdoc` (`crates/stetdoc-napi/npm`), with TypeScript types generated
@@ -122,9 +140,12 @@ from the same definitions:
 import { Document } from "@clauseo/stetdoc";
 
 const doc = Document.open(bytes);
-const receipt = doc.edit({ base: doc.base(), ops, author: "Jane Doe", date });  // offsets count UTF-16 units
-const copy = doc.export();                                                      // keep it between turns
-const result = doc.textEditor(toolUse.input, { author: "Jane Doe", date });     // Claude's text editor tool
+// Offsets count UTF-16 units.
+const receipt = doc.edit({ base: doc.base(), ops, author: "Jane Doe", date });
+// Keep it between turns.
+const copy = doc.export();
+// The backend of Claude's text editor tool.
+const result = doc.textEditor(toolUse.input, { author: "Jane Doe", date });
 ```
 
 Its documentation is [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-napi/npm/README.md). The backend of Claude's

@@ -7,21 +7,28 @@ library: the stetdoc engine as a native addon, with TypeScript types generated f
 ```ts
 import { Document, compare } from "@clauseo/stetdoc";
 
-const doc = Document.open(bytes);                                  // a Uint8Array of a .docx
-const view = doc.view();                                           // the body, or its outline when it is long
+// bytes is a Uint8Array of a .docx.
+const doc = Document.open(bytes);
+// The body, or its outline when it is long.
+const view = doc.view();
+// Tracked by default.
 const receipt = doc.edit({
   base: doc.base(),
   ops: [{ op: "replace", ref: "p4", find: "thirty", with: "sixty" }],
   author: "Jane Doe",
   date: "2026-10-06T10:00:00",
-});                                                                // tracked by default
-const { bytes: saved } = doc.save();                               // unedited, it returns the input bytes
-const copy = doc.export();                                         // keep it between turns
-const again = Document.resume(copy);                               // refs such as p4 stay valid
+});
+// Unedited, it returns the input bytes.
+const { bytes: saved } = doc.save();
+// Keep it between turns. Refs such as p4 stay valid in the resumed document.
+const copy = doc.export();
+const again = Document.resume(copy);
 const { document: redline, receipt: diff } = compare(original, revised, { stamp: { author: "Jane Doe", date } });
 ```
 
 ## Requirements
+
+Install it with `npm install @clauseo/stetdoc` or `bun add @clauseo/stetdoc`.
 
 Node 22.18 or later, or Bun 1.3.13 or later, on one of seven targets: `linux-x64-gnu`, `linux-arm64-gnu`,
 `linux-x64-musl`, `linux-arm64-musl`, `darwin-x64`, `darwin-arm64` and `win32-x64-msvc`. The addon for each target is its
@@ -88,11 +95,16 @@ try {
   doc.edit(request);
 } catch (error) {
   if (error instanceof StetdocError) {
-    error.code;     // stable from 1.0, such as "stale_ref" or "ambiguous_match"
-    error.message;  // one line
-    error.next;     // what to do about it
-    error.opIndex;  // the failing operation of a batch, when there is one
-    error.file;     // the readable file and the line of a failing edit of files, when there is one
+    // A code such as "stale_ref" or "ambiguous_match". Codes are frozen from 1.0.
+    error.code;
+    // One line.
+    error.message;
+    // What to do about it.
+    error.next;
+    // The failing operation of a batch, when there is one.
+    error.opIndex;
+    // The readable file and the line of a failing edit of files, when there is one.
+    error.file;
     error.line;
   }
 }

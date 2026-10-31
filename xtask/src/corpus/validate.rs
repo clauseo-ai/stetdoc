@@ -21,6 +21,11 @@ fn is_hex(s: &str, len: usize) -> bool {
 /// third-party document, and fixtures come from the testkit fixture builder.
 const DOCUMENT_EXTENSIONS: &[&str] = &["docx", "docm", "dotx", "dotm"];
 
+/// The committed documents that are allowed, each by exact path: the quickstart's downloadable sample, which is
+/// built from the testkit's `contract::package()`. A test in `crates/stetdoc-cli/tests/cli.rs` keeps its bytes equal
+/// to that fixture. There is no wildcard and no directory match: a new document needs a new entry here.
+const ALLOWED_DOCUMENTS: &[&str] = &["site/public/samples/contract.docx"];
+
 /// The `ErrorCode` wire names, read from the core's `error.rs` without compiling it.
 fn wire_names_of(error_rs: &str) -> Res<BTreeSet<String>> {
     let specs = crate::enumspec::parse(error_rs).map_err(|v| v.to_string())?;
@@ -32,7 +37,9 @@ fn committed_documents(repo: &Repo) -> Res<Vec<Violation>> {
     let mut found = Vec::new();
     for file in repo.files()? {
         let ext = file.rsplit_once('.').map(|(_, e)| e).unwrap_or("");
-        if DOCUMENT_EXTENSIONS.contains(&ext.to_ascii_lowercase().as_str()) {
+        if DOCUMENT_EXTENSIONS.contains(&ext.to_ascii_lowercase().as_str())
+            && !ALLOWED_DOCUMENTS.contains(&file.as_str())
+        {
             found.push(Violation::new(
                 &file,
                 0,

@@ -178,18 +178,28 @@ fn run_docs(check_only: bool) -> ExitCode {
         Err(e) => return fail(&e),
     };
     if check_only {
-        return match errors::check_generated(&repo) {
-            Ok(found) if found.is_empty() => {
-                println!("generated docs are up to date");
-                ExitCode::SUCCESS
-            }
+        let code = match errors::check_generated(&repo) {
+            Ok(found) if found.is_empty() => ExitCode::SUCCESS,
             Ok(found) => {
                 for v in found {
                     eprintln!("{v}");
                 }
                 ExitCode::FAILURE
             }
-            Err(e) => fail(&e),
+            Err(e) => return fail(&e),
+        };
+        if code != ExitCode::SUCCESS {
+            return code;
+        }
+        return match cli_docs(&repo, false) {
+            Ok(true) => {
+                println!("generated docs are up to date");
+                ExitCode::SUCCESS
+            }
+            Ok(false) => fail(&format!(
+                "{CLI_DOCS} or skills/stetdoc/SKILL.md is out of date, or the stetdoc test that checks them failed: run `cargo xtask docs` and commit the result"
+            )),
+            Err(e) => fail(&format!("could not run cargo to check the CLI docs: {e}")),
         };
     }
     match errors::write_generated(&repo) {
@@ -203,36 +213,49 @@ fn run_docs(check_only: bool) -> ExitCode {
     write_cli_docs(&repo)
 }
 
-/// The CLI reference and the skill stub are generated from the `stetdoc` binary's own definitions, which this binary is built
-/// without, so a test of `stetdoc` writes them under `STETDOC_BLESS=1`. Without it, that test is their drift check, and
-/// `cargo xtask check` runs it.
+/// The files generated from the `stetdoc` binary's own definitions, besides the skill stub.
+const CLI_DOCS: &str = "docs/reference/cli.md, docs/reference/mcp-tools.md";
+
+/// The CLI reference, the MCP tool reference and the skill stub are generated from the `stetdoc` binary's own definitions,
+/// which this binary is built without, so a test of `stetdoc` writes them under `STETDOC_BLESS=1`.
 fn write_cli_docs(repo: &repo::Repo) -> ExitCode {
-    let status =
-        std::process::Command::new(std::env::var("CARGO").unwrap_or_else(|_| "cargo".into()))
-            .args([
-                "test",
-                "--locked",
-                "-q",
-                "-p",
-                "stetdoc",
-                "--bin",
-                "stetdoc",
-                "generated",
-            ])
-            .env("STETDOC_BLESS", "1")
-            .current_dir(repo.root())
-            .status();
-    match status {
-        Ok(s) if s.success() => {
+    match cli_docs(repo, true) {
+        Ok(true) => {
             println!("wrote docs/reference/cli.md");
+            println!("wrote docs/reference/mcp-tools.md");
             println!("wrote skills/stetdoc/SKILL.md");
             ExitCode::SUCCESS
         }
-        Ok(_) => fail(
-            "the stetdoc test that writes docs/reference/cli.md and skills/stetdoc/SKILL.md failed",
-        ),
+        Ok(false) => fail(&format!(
+            "the stetdoc test that writes {CLI_DOCS} and skills/stetdoc/SKILL.md failed"
+        )),
         Err(e) => fail(&format!("could not run cargo to write the CLI docs: {e}")),
     }
+}
+
+/// Runs the `stetdoc` tests named `generated`: with `bless` they write the files, without it they are their drift check,
+/// which `cargo xtask check` also runs. Whether they passed.
+fn cli_docs(repo: &repo::Repo, bless: bool) -> std::io::Result<bool> {
+    let mut cargo =
+        std::process::Command::new(std::env::var("CARGO").unwrap_or_else(|_| "cargo".into()));
+    cargo
+        .args([
+            "test",
+            "--locked",
+            "-q",
+            "-p",
+            "stetdoc",
+            "--bin",
+            "stetdoc",
+            "generated",
+        ])
+        .current_dir(repo.root());
+    if bless {
+        cargo.env("STETDOC_BLESS", "1");
+    } else {
+        cargo.env_remove("STETDOC_BLESS");
+    }
+    Ok(cargo.status()?.success())
 }
 
 fn fail(message: &str) -> ExitCode {

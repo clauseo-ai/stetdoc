@@ -2,9 +2,8 @@
 
 ## Supported versions
 
-stetdoc is under development toward 1.0.0, and nothing has been released. Until the first
-release, fixes go to the main branch only. After 1.0.0, this section will list the
-supported release lines.
+Security fixes go into the latest release. Upgrade to it to get them. [Install](docs/install.md#update-and-uninstall)
+says how for each channel.
 
 ## Reporting a vulnerability
 

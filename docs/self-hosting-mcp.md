@@ -113,35 +113,47 @@ See [`SECURITY.md`](../SECURITY.md) for how hostile input is tested and how to r
 
 ## A container
 
-This Dockerfile builds stetdoc from a checkout and runs it behind supergateway as an unprivileged user, with `/data` as
-the root. Save it outside the repository, and build from a fresh clone so that `target/` is not sent to Docker:
+This Dockerfile downloads the release archive for the platform it builds on, checks the archive's SHA-256 against the
+release's `.sha256` file the way [`packaging/install.sh`](../packaging/install.sh) does, and runs stetdoc behind
+supergateway as an unprivileged user, with `/data` as the root. Linux gets the static musl build, as it does from the
+install script. `STETDOC_VERSION` pins the release.
 
 ```dockerfile
-# Build stetdoc from a checkout. After the first release, download the release archive instead.
-FROM rust:1-bookworm AS build
-WORKDIR /src
-COPY . .
-RUN cargo build --release --locked -p stetdoc-cli
+FROM debian:bookworm-slim AS download
+ARG STETDOC_VERSION=0.9.0
+ARG TARGETARCH
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
+ && arch="${TARGETARCH:-$(dpkg --print-architecture)}" \
+ && case "$arch" in amd64) cpu=x86_64 ;; arm64) cpu=aarch64 ;; *) echo "no stetdoc build for $arch" >&2; exit 1 ;; esac \
+ && name="stetdoc-$cpu-unknown-linux-musl" \
+ && base="https://github.com/clauseo-ai/stetdoc/releases/download/v$STETDOC_VERSION" \
+ && cd /tmp \
+ && curl -fsSLO "$base/$name.tar.gz" \
+ && curl -fsSLO "$base/$name.tar.gz.sha256" \
+ && sha256sum -c "$name.tar.gz.sha256" \
+ && tar -xzf "$name.tar.gz" \
+ && install -m 0755 "$name/stetdoc" /usr/local/bin/stetdoc
 
 FROM node:22-bookworm-slim
 RUN npm install -g supergateway@4.1.0 \
  && useradd --system --create-home --uid 10001 stetdoc \
  && mkdir /data && chown stetdoc /data
-COPY --from=build /src/target/release/stetdoc /usr/local/bin/stetdoc
+COPY --from=download /usr/local/bin/stetdoc /usr/local/bin/stetdoc
 USER stetdoc
 EXPOSE 8000
 CMD ["supergateway", "--stdio", "stetdoc mcp --root /data", "--outputTransport", "streamableHttp", "--stateful", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
+A checksum that does not match stops the build at `sha256sum -c`, before anything copies the binary. Build and run it
+from the folder that holds the Dockerfile:
+
 ```
-git clone https://github.com/clauseo-ai/stetdoc && cd stetdoc
-docker build -f /path/to/Dockerfile -t stetdoc-mcp .
+docker build -t stetdoc-mcp .
 docker run -d --name stetdoc-alice -p 127.0.0.1:8001:8000 -v /srv/stetdoc/alice:/data \
   -e STETDOC_AUTHOR="Alice Example" -e TZ=Europe/London stetdoc-mcp
 ```
 
 The image sets no author and holds no config file, so each container gets its user's name from `STETDOC_AUTHOR`, or
-from the calls. The mounted folder must be writable by uid 10001. Publish the port on `127.0.0.1` only, run one container per user with
-that user's folder mounted at `/data`, and point
-the proxy at each one. Inside the container the bridge listens on every interface, because the container's network is
-the boundary.
+from the calls. uid 10001 must be able to write to the mounted folder. Publish the port on `127.0.0.1` only, run one
+container per user with that user's folder mounted at `/data`, and point the proxy at each one. Inside the container
+the bridge listens on every interface, because the container's network is the boundary.

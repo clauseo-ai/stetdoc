@@ -1,6 +1,7 @@
 //! The files generated from the binary's own sources, and their drift checks: `skills/stetdoc/SKILL.md` (the stub that
-//! `stetdoc init` installs) and `docs/reference/cli.md`. Each test compares the committed file with what the source gives, and fails with the command
-//! that regenerates it. `STETDOC_BLESS=1` writes the files instead, which is what `cargo xtask docs` runs.
+//! `stetdoc init` installs), `docs/reference/cli.md`, and `docs/reference/mcp-tools.md` (written in
+//! `commands/mcp/reference.rs`). Each test compares the committed file with what the source gives, and fails with the
+//! command that regenerates it. `STETDOC_BLESS=1` writes the files instead, which is what `cargo xtask docs` runs.
 
 use crate::cli::Cli;
 use crate::skill;
@@ -81,14 +82,25 @@ fn cli_reference() -> String {
     let mut cmd = Cli::command();
     cmd.build();
     let mut out = String::from(
-        "# CLI reference\n\n\
-         Generated from the `stetdoc` binary's own definitions by `cargo xtask docs`: do not edit it by hand. The \
-         command and flag descriptions are the `--help` text, and every example runs as a test \
-         (`crates/stetdoc-cli/doc/`). The workflow and the rules for agents are in the skill: `stetdoc skills get core`.\n\n\
+        "<!-- Generated from the stetdoc binary's own definitions by `cargo xtask docs`: do not edit it by hand. The \
+         examples come from crates/stetdoc-cli/doc/. -->\n\n\
+         # CLI reference\n\n\
+         Each stetdoc command is here with its flags and examples, followed by the exit codes, the JSON output and the \
+         environment variables. The descriptions are the `--help` text, and every example runs as a test. The workflow \
+         and the rules for agents are in the skill: `stetdoc skills get core`.\n\n\
          Every command takes `--json`, which prints the result, or the error, as JSON on stdout. Data goes to stdout and \
          diagnostics to stderr. Document text never goes in an argument: batches come from stdin or `--ops`.\n\n## Commands\n\n",
     );
-    out.push_str(&skill::commands());
+    // the index links each command to its section below
+    let mut index = skill::commands();
+    for sub in cmd.get_subcommands() {
+        let name = sub.get_name();
+        index = index.replace(
+            &format!("| `stetdoc {name}` |"),
+            &format!("| [`stetdoc {name}`](#stetdoc-{name}) |"),
+        );
+    }
+    out.push_str(&index);
     for sub in cmd.get_subcommands() {
         let name = sub.get_name();
         let _ = write!(out, "\n## `stetdoc {name}`\n\n");
@@ -117,12 +129,20 @@ fn cli_reference() -> String {
                 .map(|a| a.to_string())
                 .unwrap_or_default();
             let usage = action.clone().render_usage().to_string();
-            let _ = writeln!(out, "\n`{}`: {help}.", usage.trim_start_matches("Usage: "));
-            for arg in action
+            let _ = writeln!(
+                out,
+                "\n`{}`: {help}.\n",
+                usage.trim_start_matches("Usage: ")
+            );
+            let args: Vec<_> = action
                 .get_arguments()
-                .filter(|a| a.get_id().as_str() != "help")
-            {
-                let _ = writeln!(out, "- {}: {}", arg_form(arg), arg_help(arg));
+                .filter(|a| !matches!(a.get_id().as_str(), "help" | "version" | "json"))
+                .collect();
+            if !args.is_empty() {
+                out.push_str("| Argument | Meaning |\n|---|---|\n");
+                for arg in args {
+                    let _ = writeln!(out, "| {} | {} |", arg_form(arg), arg_help(arg));
+                }
             }
         }
         let examples = examples(name);

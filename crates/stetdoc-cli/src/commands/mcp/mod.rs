@@ -13,6 +13,8 @@ mod call;
 mod confine;
 mod describe;
 mod ops;
+#[cfg(test)]
+mod reference;
 mod tools;
 
 use crate::cli::{Cli, Command, McpArgs};

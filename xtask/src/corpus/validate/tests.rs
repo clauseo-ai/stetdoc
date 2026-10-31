@@ -17,6 +17,17 @@ fn a_committed_document_is_a_violation() {
     assert!(v[0].message.contains("committed"), "{}", v[0]);
 }
 
+#[test]
+fn the_quickstart_sample_is_the_only_committed_document_allowed() {
+    assert_eq!(
+        violations(&[("site/public/samples/contract.docx", "x")]),
+        vec![]
+    );
+    let v = violations(&[("site/public/samples/other.docx", "x")]);
+    assert_eq!(v.len(), 1, "{v:?}");
+    assert!(v[0].message.contains("committed"), "{}", v[0]);
+}
+
 pub(crate) fn row(tier: &str, expect: &str, stage: &str, reason: &str) -> String {
     let part = if matches!(stage, "read" | "xml") {
         "word/document.xml"

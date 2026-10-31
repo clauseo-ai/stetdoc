@@ -1,12 +1,15 @@
 # Glossary
 
-These are the exact words stetdoc uses in code, docs, errors and agent instructions.
-A type, module or message should use the term listed here, not a synonym. When a new
-concept appears, add it here in the same change.
+These are the exact words stetdoc uses in its code, docs, errors and agent instructions, with what each one means and
+the words it avoids.
 
-Architecture vocabulary (module, interface, seam, adapter, depth, leverage, locality)
-follows common usage, and depth in the sense of John Ousterhout's *A Philosophy of Software
-Design*. `ARCHITECTURE.md` defines the terms briefly.
+<!--
+For contributors: a type, module or message should use the term listed here, not a synonym. When a new concept appears,
+add it here in the same change.
+
+Architecture vocabulary (module, interface, seam, adapter, depth, leverage, locality) follows common usage, and depth in
+the sense of John Ousterhout's *A Philosophy of Software Design*. ARCHITECTURE.md defines the terms briefly.
+-->
 
 ## Package and XML
 

@@ -5,10 +5,18 @@
 //! testkit, before the cases run, and an empty `<name>.out/` so that every case runs in a sandbox. Both are ignored by git.
 //! The date of every stamp is fixed with `STETDOC_DATE`. To update the expected output of a case after an intended
 //! change, run `TRYCMD=overwrite cargo test -p stetdoc --test cli` and review the diff.
+//!
+//! The console blocks of `docs/quickstart.md` run too (`quickstart`), with the same conventions, on the testkit's
+//! `contract::package()`, which is the same bytes as the sample a reader downloads, `site/public/samples/contract.docx`.
+//! `site_sample_is_the_fixture` keeps that file equal to the fixture. The page is copied into a sandbox under
+//! `CARGO_TARGET_TMPDIR`, with the fixture as its `quickstart.in/contract.docx`, and `TRYCMD=overwrite` writes that copy,
+//! not the page. The home and config folders are the sandbox's, so `stetdoc init` touches nothing of the person running
+//! the tests, and the saved author is Jane Doe, the name the page's examples sign with. The install and download commands
+//! (`curl`, `brew`, `cargo` and the like) are skipped. While the page is missing, the test says so and passes.
 #![allow(clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 
 use std::fs;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use stetdoc_testkit::fixtures::{contract, parts, zip::Zip};
 
 /// The revised version of the contract: two words changed in `p4` and a sentence added to `p5`.
@@ -67,4 +75,97 @@ fn cli_cases() {
         .case(root.join("*.toml"))
         .case(root.join("*.trycmd"))
         .case(doc.join("*.md"));
+}
+
+/// The commands of the quickstart that are not run: installing stetdoc, downloading the sample, opening the result in Word.
+const SKIPPED: [&str; 10] = [
+    "curl", "wget", "brew", "cargo", "npm", "npx", "pipx", "uv", "open", "start",
+];
+
+/// The repository root, two levels above this crate's manifest.
+fn repo_root() -> PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .ancestors()
+        .nth(2)
+        .unwrap()
+        .to_path_buf()
+}
+
+#[test]
+fn quickstart() {
+    run_page(
+        &repo_root().join("docs/quickstart.md"),
+        &contract::package(),
+    );
+}
+
+/// The downloadable sample is the testkit fixture, byte for byte. Set `STETDOC_UPDATE_SAMPLE=1` to write the fixture to
+/// the sample: `STETDOC_UPDATE_SAMPLE=1 cargo test -p stetdoc --test cli site_sample_is_the_fixture`.
+#[test]
+fn site_sample_is_the_fixture() {
+    let path = repo_root().join("site/public/samples/contract.docx");
+    let fixture = contract::package();
+    if std::env::var("STETDOC_UPDATE_SAMPLE").as_deref() == Ok("1") {
+        fs::write(&path, &fixture).unwrap();
+        return;
+    }
+    let regenerate = "regenerate it with `STETDOC_UPDATE_SAMPLE=1 cargo test -p stetdoc --test cli site_sample_is_the_fixture`";
+    let sample = fs::read(&path)
+        .unwrap_or_else(|e| panic!("{} cannot be read ({e}): {regenerate}", path.display()));
+    assert!(
+        sample == fixture,
+        "{} is not stetdoc_testkit::fixtures::contract::package(): {regenerate}",
+        path.display()
+    );
+}
+
+/// Runs the console blocks of a page on a sample `contract.docx` (the fixture's bytes), in a sandbox of its own, or says
+/// why it cannot.
+fn run_page(page: &Path, fixture: &[u8]) {
+    if !page.exists() {
+        eprintln!(
+            "skipping the examples of {}: the page does not exist",
+            page.display()
+        );
+        return;
+    }
+    let name = page.file_stem().unwrap().to_str().unwrap();
+    let dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join(format!("page-{name}"));
+    let _ = fs::remove_dir_all(&dir);
+    let input = dir.join(format!("{name}.in"));
+    let home = dir.join("home");
+    for d in [
+        &input,
+        &dir.join(format!("{name}.out")),
+        &home.join(".config"),
+    ] {
+        fs::create_dir_all(d).unwrap();
+    }
+    fs::write(input.join("contract.docx"), fixture).unwrap();
+    fs::create_dir_all(home.join(".config/stetdoc")).unwrap();
+    fs::write(
+        home.join(".config/stetdoc/config.toml"),
+        "author = \"Jane Doe\"\n",
+    )
+    .unwrap();
+    let copy = dir.join(format!("{name}.md"));
+    fs::copy(page, &copy).unwrap();
+    eprintln!(
+        "running the examples of {} from {}",
+        page.display(),
+        copy.display()
+    );
+    let cases = trycmd::TestCases::new();
+    cases
+        .register_bin("stetdoc", Path::new(env!("CARGO_BIN_EXE_stetdoc")))
+        .env("STETDOC_DATE", "2026-10-06T09:30:00")
+        .env("HOME", home.display().to_string())
+        .env(
+            "XDG_CONFIG_HOME",
+            home.join(".config").display().to_string(),
+        );
+    for bin in SKIPPED {
+        cases.register_bin(bin, trycmd::schema::Bin::Ignore);
+    }
+    cases.case(copy);
 }

@@ -1,6 +1,6 @@
 # Build on stetdoc
 
-This page is for products that put stetdoc inside their own system. There are four ways in. All four
+A product can build stetdoc into its own system in four ways. All four
 run the same engine, give the same refs and base tokens, and fail with the same stable error codes, so a product can mix
 them: a server that edits through the library while an agent in a sandbox uses the CLI on the same documents.
 
@@ -17,16 +17,16 @@ the name a user saved with `stetdoc init`. A product that serves several users p
 it per session (`STETDOC_AUTHOR` in that session's environment, or `stetdoc mcp --author`). It never relies on the config
 file, which holds one name for the whole machine. Nothing falls back to git or the operating system.
 
-Nothing has been released yet, so each example below builds from a checkout of the repository. Each one was run against
-the same one-paragraph document, `contract.docx`, which reads "Payment is due within thirty days."
+Every example below runs against the same one-paragraph document, `contract.docx`, which reads "Payment is due within
+thirty days."
 
 ## The Rust crate
 
-`stetdoc-core` is one handle, `Document`: open, view, edit, save. Depend on it by path or by git until it is published:
+`stetdoc-core` is one handle, `Document`, which opens, views, edits and saves. Add it to `Cargo.toml`:
 
 ```toml
 [dependencies]
-stetdoc-core = { git = "https://github.com/clauseo-ai/stetdoc" }
+stetdoc-core = "0.9"
 ```
 
 ```rust
@@ -58,8 +58,8 @@ public interface is listed in [`ARCHITECTURE.md`](../ARCHITECTURE.md), and why i
 ## The Node and Bun package
 
 `@clauseo/stetdoc` is the engine as a native addon, with TypeScript types generated from the engine's definitions. It needs
-Node 22.18 or Bun 1.3.13 or later. Until it is published, build the addon from a checkout with `node scripts/build.mjs`
-in `crates/stetdoc-napi/npm`, and depend on that folder.
+Node 22.18 or Bun 1.3.13 or later. Install it with `npm install @clauseo/stetdoc` or `bun add @clauseo/stetdoc`. The
+package manager picks the addon for your platform.
 
 ```js
 import { readFileSync, writeFileSync } from "node:fs";
@@ -149,3 +149,6 @@ agent](agents.md). To serve it to a cloud app, see [Self-hosting the MCP server]
 A legal drafting product can use two of the four ways together: the CLI and the skill in the
 model's sandbox, and `@clauseo/stetdoc` in the server for its own document tools and for Claude's text editor tool, with one
 pinned version for both.
+
+Before you build on it, read [what stetdoc keeps exactly](../FIDELITY.md), feature by feature, and
+[how it handles hostile input](../SECURITY.md).

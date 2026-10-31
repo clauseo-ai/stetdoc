@@ -6,38 +6,27 @@ the rest, all as real tracked changes. Any agent with a shell can use it that wa
 Agents that take tools rather than a shell can use `stetdoc mcp`, which serves the same commands over the Model Context
 Protocol. Claude Code uses the command and the skill, not MCP.
 
-This page covers installing the binary, installing the skill with one command, and then each agent: where the skill
+This page covers the one command that installs the skill, and then each agent. For each agent it says where the skill
 goes, how to register the MCP server if the agent uses one, and how to check that the agent sees it. Each section links
 the agent's own docs, which were read on 2026-10-11. Agents change their folders and config files, so trust their docs
 over this page when the two disagree.
 
+Agents: [Claude Code](#claude-code) · [Codex](#codex) · [Cursor](#cursor) · [OpenCode](#opencode) ·
+[OpenClaw](#openclaw) · [Hermes Agent](#hermes-agent) · [Grok](#grok) · [cmx2](#cmx2) ·
+[Antigravity CLI](#antigravity-cli) · [GitHub Copilot CLI](#github-copilot-cli) · [Amp](#amp) · [Factory](#factory) ·
+[Dots](#dots-chatgpt-desktop) · [Cloud apps](#cloud-apps) · [Gemini CLI, retired](#gemini-cli-retired)
+
 ## Install stetdoc
 
-Any of these works.
-
-| Channel | Command | Notes |
-| --- | --- | --- |
-| Homebrew | `brew install clauseo-ai/tap/stetdoc` | macOS and Linux, from the tap `clauseo-ai/homebrew-tap` |
-| PyPI | `uv tool install stetdoc` | Or `pipx install stetdoc`, or `pip install stetdoc`. The wheel holds the native binary, so no Python runs after the install. `uvx stetdoc` runs it without installing |
-| npm | `npx stetdoc --version` | Runs the binary for your platform without installing it. `npm install -g stetdoc` puts it on the PATH |
-| Install script | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | macOS and Linux. Checks the SHA-256 and installs to `~/.local/bin`, or `$STETDOC_INSTALL_DIR` |
-| Cargo | `cargo install stetdoc --locked` | Builds from source on crates.io. Needs a Rust toolchain |
-
-An agent may run `stetdoc` dozens of times in one task, so pick a channel that puts the binary itself on the PATH:
-Homebrew, the install script, or `uv tool install` / `pipx`. Each call then starts in about 5 ms. Through `npx` each call
-also starts Node and npm, about a tenth of a second or more, so keep `npx stetdoc mcp` for the MCP server, which starts
-once per session. `npm install -g stetdoc` replaces its Node launcher with the binary when npm runs install scripts, and
-keeps the launcher (about 0.1 s per call) when it does not.
-
-[`packaging/README.md`](../packaging/README.md) says how each channel is built and published, and has the measurements.
-
-Every revision needs an author. `stetdoc init` sets it once (see below).
+Install stetdoc first. [Install](install.md) lists every channel. Then run `stetdoc init`.
 
 ## The one command
 
 ```
-stetdoc init             # the skill stub in your home folder, for the agents you pick
-stetdoc init --project   # the skill stub in this project, plus a short block in AGENTS.md
+# the skill stub in your home folder, for the agents you pick
+stetdoc init
+# the skill stub in this project, plus a short block in AGENTS.md
+stetdoc init --project
 ```
 
 In a terminal, `init` asks which agents to install for. Otherwise it installs for the agents it detects. `--agent`
@@ -50,9 +39,12 @@ so the skill always matches the version you run. In Claude Code the stub sends t
 another agent with stetdoc's MCP tools, it sends the agent to the `skills_get` tool instead.
 
 ```
-stetdoc init --list        # each agent, whether it is detected, its skill folder, and the stetdoc version there
-stetdoc init --mcp         # also print how to register `stetdoc mcp` with each agent
-stetdoc init --remove      # remove the skill folders stetdoc wrote, and nothing else
+# each agent, whether it is detected, its skill folder, and the stetdoc version there
+stetdoc init --list
+# also print how to register `stetdoc mcp` with each agent
+stetdoc init --mcp
+# remove the skill folders stetdoc wrote, and nothing else
+stetdoc init --remove
 ```
 
 `init` never edits an agent's own config. `--mcp` prints the line to add, and the sections below give the same lines.
@@ -129,13 +121,13 @@ XML with its own scripts.
 `stetdoc mcp` speaks MCP on stdin and stdout. Every snippet below runs it as a local stdio server. On your own machine
 the server finds the author you saved with `stetdoc init`, so the snippets need nothing more. To use another name for one
 agent, add `--author "Name"` after `mcp` in its snippet. Before the binary is on the PATH, `npx stetdoc mcp` works in
-place of `stetdoc mcp` once the npm package is published.
+place of `stetdoc mcp`.
 
 ## Claude Code
 
 - **Skill:** `~/.claude/skills/stetdoc/SKILL.md`, or `.claude/skills/stetdoc/SKILL.md` in a project. `stetdoc init
   --agent claude-code` writes it.
-- **Or the plugin**, which carries the skill and the [guard hook](#the-claude-code-guard-hook) (the binary must still be
+- **Or the plugin:** it carries the skill and the [guard hook](#the-claude-code-guard-hook) (the binary must still be
   on the PATH). It has no MCP server: in Claude Code the command and the skill are the route. Claude Code keeps MCP tools
   behind its tool search, so with both an agent switched between them and the command, and the server is the same binary,
   so it is no fallback when the command is missing. In a session of Claude Code 2.1.275 or later, one line installs it:
@@ -154,7 +146,7 @@ place of `stetdoc mcp` once the npm package is published.
 - **MCP:** not needed, and the command works better. If you want it anyway: `claude mcp add --scope user stetdoc --
   stetdoc mcp`, or `--scope project` for a project.
 - **Check:** type `/stetdoc` in a session to load the skill. `/hooks` lists the plugin's PreToolUse hook.
-- Docs: [skills](https://code.claude.com/docs/en/skills), [hooks](https://code.claude.com/docs/en/hooks),
+- **Docs:** [skills](https://code.claude.com/docs/en/skills), [hooks](https://code.claude.com/docs/en/hooks),
   [plugins](https://code.claude.com/docs/en/plugins).
 
 ### The Claude Code guard hook
@@ -213,7 +205,7 @@ curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
 - **Skill:** `~/.agents/skills/stetdoc/SKILL.md`, or `.agents/skills/stetdoc/SKILL.md` in a repository.
 - **MCP:** `codex mcp add stetdoc -- stetdoc mcp`. It writes `[mcp_servers.stetdoc]` in `~/.codex/config.toml`.
 - **Check:** `/skills` in a session, or type `$` to mention a skill. `codex mcp list`, or `/mcp` in a session.
-- Docs: [skills](https://developers.openai.com/codex/skills), [MCP](https://developers.openai.com/codex/mcp).
+- **Docs:** [skills](https://developers.openai.com/codex/skills), [MCP](https://developers.openai.com/codex/mcp).
 
 ## Cursor
 
@@ -222,11 +214,18 @@ curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
 - **MCP:** in `~/.cursor/mcp.json`, or `.cursor/mcp.json` in a project:
 
   ```json
-  { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } }
+  {
+    "mcpServers": {
+      "stetdoc": {
+        "command": "stetdoc",
+        "args": ["mcp"]
+      }
+    }
+  }
   ```
 
 - **Check:** open Customize in the sidebar. Skills lists the stub, and MCP lists the server.
-- Docs: [skills](https://cursor.com/docs/context/skills), [MCP](https://cursor.com/docs/mcp).
+- **Docs:** [skills](https://cursor.com/docs/context/skills), [MCP](https://cursor.com/docs/mcp).
 
 ## OpenCode
 
@@ -235,12 +234,20 @@ curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
 - **MCP:** in `~/.config/opencode/opencode.json`, or `opencode.json` in a project:
 
   ```json
-  { "mcp": { "stetdoc": { "type": "local", "command": ["stetdoc", "mcp"], "enabled": true } } }
+  {
+    "mcp": {
+      "stetdoc": {
+        "type": "local",
+        "command": ["stetdoc", "mcp"],
+        "enabled": true
+      }
+    }
+  }
   ```
 
 - **Check:** ask the agent which skills it has. OpenCode lists them in its `skill` tool. `opencode mcp list` shows the
   server.
-- Docs: [skills](https://opencode.ai/docs/skills), [MCP servers](https://opencode.ai/docs/mcp-servers).
+- **Docs:** [skills](https://opencode.ai/docs/skills), [MCP servers](https://opencode.ai/docs/mcp-servers).
 
 ## OpenClaw
 
@@ -249,11 +256,20 @@ curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
 - **MCP:** `openclaw mcp add stetdoc --command stetdoc --arg mcp`, or by hand in `~/.openclaw/openclaw.json`:
 
   ```json
-  { "mcp": { "servers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } } }
+  {
+    "mcp": {
+      "servers": {
+        "stetdoc": {
+          "command": "stetdoc",
+          "args": ["mcp"]
+        }
+      }
+    }
+  }
   ```
 
 - **Check:** `openclaw skills list --eligible` lists the stub. `openclaw mcp probe stetdoc` connects and lists the tools.
-- Docs: [skills](https://docs.openclaw.ai/tools/skills), [MCP](https://docs.openclaw.ai/cli/mcp).
+- **Docs:** [skills](https://docs.openclaw.ai/tools/skills), [MCP](https://docs.openclaw.ai/cli/mcp).
 
 ## Hermes Agent
 
@@ -270,7 +286,7 @@ curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
 
 - **Check:** `hermes skills list`. Each skill is also a slash command, so `/stetdoc` works in a session. After an MCP
   change, run `/reload-mcp` or start a new session.
-- Docs: [skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills),
+- **Docs:** [skills](https://hermes-agent.nousresearch.com/docs/user-guide/features/skills),
   [MCP](https://hermes-agent.nousresearch.com/docs/user-guide/features/mcp).
 
 ## Grok
@@ -280,13 +296,12 @@ curl -fsSL -o ~/.claude/hooks/stetdoc-docx-guard.sh \
 - **Skill:** `~/.grok/skills/stetdoc/SKILL.md`, or `.grok/skills/stetdoc/SKILL.md` in a project.
 - **MCP:** `grok mcp add stetdoc -- stetdoc mcp`. Add `--scope project` to write `.grok/config.toml` instead.
 - **Check:** `/skills` or `/mcps` in the TUI. `grok mcp list` and `grok mcp doctor stetdoc` from the shell.
-- Docs: [skills, plugins and marketplaces](https://docs.x.ai/build/features/skills-plugins-marketplaces.md),
+- **Docs:** [skills, plugins and marketplaces](https://docs.x.ai/build/features/skills-plugins-marketplaces.md),
   [MCP servers](https://docs.x.ai/build/features/mcp-servers.md).
 
 **Grok Bot** works from its own persistent cloud computer with a command line, so it can install stetdoc there itself.
-Once releases exist, ask it to run the install script (or `npx stetdoc`), then `stetdoc init --agent grok` or simply
-`stetdoc skills get core` before it works on a `.docx`. The files it edits live on that cloud computer, so upload the
-document to it and download the result. Docs: [computer and apps](https://docs.x.ai/grok-bot/computer-and-apps.md).
+Ask it to run the install script, then `stetdoc init --agent grok` or `stetdoc skills get core` before it works on a
+`.docx`. The files it edits live on that cloud computer, so upload the document to it and download the result. Docs: [computer and apps](https://docs.x.ai/grok-bot/computer-and-apps.md).
 
 ## cmx2
 
@@ -295,12 +310,16 @@ document to it and download the result. Docs: [computer and apps](https://docs.x
 - **MCP:** under `mcp` in `~/.config/cmx2/cmx2.jsonc`:
 
   ```jsonc
-  "mcp": { "stetdoc": { "command": ["stetdoc", "mcp"] } }
+  "mcp": {
+    "stetdoc": {
+      "command": ["stetdoc", "mcp"]
+    }
+  }
   ```
 
 - **Check:** `cmx2 mcp` lists each server with its status and tool count. The tools appear in sessions as
   `stetdoc_<tool>`. Ask a session which skills it has to see the stub.
-- Docs: `cmx2 mcp --help`. These folders were read from cmx2 0.8.11.
+- **Docs:** `cmx2 mcp --help`. These folders were read from cmx2 0.8.11.
 
 ## Antigravity CLI
 
@@ -315,7 +334,14 @@ or by `~/.gemini/antigravity-cli` or `~/.gemini/antigravity`.
 - **MCP:** in `~/.gemini/config/mcp_config.json`, which the CLI, the app and the IDE share:
 
   ```json
-  { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } }
+  {
+    "mcpServers": {
+      "stetdoc": {
+        "command": "stetdoc",
+        "args": ["mcp"]
+      }
+    }
+  }
   ```
 
   `agy mcp add stetdoc stetdoc mcp` writes the same entry. For a stetdoc server you host yourself (see
@@ -323,14 +349,23 @@ or by `~/.gemini/antigravity-cli` or `~/.gemini/antigravity`.
   ignores (`agy mcp add --header "Authorization: Bearer TOKEN" stetdoc https://stetdoc.example.com/mcp` writes it):
 
   ```json
-  { "mcpServers": { "stetdoc": { "serverUrl": "https://stetdoc.example.com/mcp", "headers": { "Authorization": "Bearer TOKEN" } } } }
+  {
+    "mcpServers": {
+      "stetdoc": {
+        "serverUrl": "https://stetdoc.example.com/mcp",
+        "headers": {
+          "Authorization": "Bearer TOKEN"
+        }
+      }
+    }
+  }
   ```
 
   The docs also name a workspace file, `.agents/mcp_config.json`, but Antigravity CLI reads it and then ignores its
   servers ([antigravity-cli#60](https://github.com/google-antigravity/antigravity-cli/issues/60)), so
   `init --project --mcp` prints the global file too.
 - **Check:** `/skills` in a session lists the skills and where each comes from. `/mcp` opens the MCP manager.
-- Docs: [skills](https://antigravity.google/docs/skills), [MCP](https://antigravity.google/docs/mcp), read on 2026-10-27.
+- **Docs:** [skills](https://antigravity.google/docs/skills), [MCP](https://antigravity.google/docs/mcp), read on 2026-10-27.
 
 ## Gemini CLI (retired)
 
@@ -342,12 +377,19 @@ run it, and says so when it is picked. Install for Antigravity with `stetdoc ini
 - **MCP:** in `~/.gemini/settings.json`, or `.gemini/settings.json` in a project:
 
   ```json
-  { "mcpServers": { "stetdoc": { "command": "stetdoc", "args": ["mcp"] } } }
+  {
+    "mcpServers": {
+      "stetdoc": {
+        "command": "stetdoc",
+        "args": ["mcp"]
+      }
+    }
+  }
   ```
 
   `gemini mcp add stetdoc stetdoc mcp` writes the same entry.
 - **Check:** `/skills list` in a session, or `gemini skills list --all`. `gemini mcp list`, or `/mcp` in a session.
-- Docs: [skills](https://geminicli.com/docs/cli/skills), [MCP servers](https://geminicli.com/docs/tools/mcp-server/).
+- **Docs:** [skills](https://geminicli.com/docs/cli/skills), [MCP servers](https://geminicli.com/docs/tools/mcp-server/).
 
 ## GitHub Copilot CLI
 
@@ -356,12 +398,21 @@ run it, and says so when it is picked. Install for Antigravity with `stetdoc ini
 - **MCP:** in `~/.copilot/mcp-config.json`:
 
   ```json
-  { "mcpServers": { "stetdoc": { "type": "local", "command": "stetdoc", "args": ["mcp"], "tools": ["*"] } } }
+  {
+    "mcpServers": {
+      "stetdoc": {
+        "type": "local",
+        "command": "stetdoc",
+        "args": ["mcp"],
+        "tools": ["*"]
+      }
+    }
+  }
   ```
 
   `copilot mcp add stetdoc -- stetdoc mcp` writes it for you.
 - **Check:** `/mcp list` or `/mcp show stetdoc` in a session. Ask the agent which skills it has to see the stub.
-- Docs: [skills](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-skills),
+- **Docs:** [skills](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/create-skills),
   [MCP servers](https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers).
 
 ## Amp
@@ -369,7 +420,7 @@ run it, and says so when it is picked. Install for Antigravity with `stetdoc ini
 - **Skill:** `~/.agents/skills/stetdoc/SKILL.md`, or `.agents/skills/stetdoc/SKILL.md` in a project.
 - **MCP:** `amp mcp add stetdoc -- stetdoc mcp`.
 - **Check:** ask the agent which skills and tools it has.
-- Docs: [skills](https://ampcode.com/docs/markdown/customize/skills), [MCP](https://ampcode.com/docs/markdown/customize/mcp).
+- **Docs:** [skills](https://ampcode.com/docs/markdown/customize/skills), [MCP](https://ampcode.com/docs/markdown/customize/mcp).
 
 ## Factory
 
@@ -378,12 +429,20 @@ run it, and says so when it is picked. Install for Antigravity with `stetdoc ini
 - **MCP:** in `~/.factory/mcp.json`, or `.factory/mcp.json` in a project:
 
   ```json
-  { "mcpServers": { "stetdoc": { "type": "stdio", "command": "stetdoc", "args": ["mcp"] } } }
+  {
+    "mcpServers": {
+      "stetdoc": {
+        "type": "stdio",
+        "command": "stetdoc",
+        "args": ["mcp"]
+      }
+    }
+  }
   ```
 
   `droid mcp add stetdoc stetdoc mcp` writes a stdio server as well.
 - **Check:** `/mcp` in a session shows the server. Ask the agent which skills it has to see the stub.
-- Docs: [skills](https://docs.factory.ai/cli/configuration/skills), [MCP](https://docs.factory.ai/cli/configuration/mcp).
+- **Docs:** [skills](https://docs.factory.ai/cli/configuration/skills), [MCP](https://docs.factory.ai/cli/configuration/mcp).
 
 ## Dots (ChatGPT desktop)
 

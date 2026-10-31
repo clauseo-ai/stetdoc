@@ -1,6 +1,7 @@
 # Fidelity
 
-This file says, feature by feature, how faithfully stetdoc 1.0 keeps, shows and writes a Word document. It uses four words:
+Each Word feature below is rated by how faithfully the current release of stetdoc keeps it, shows it and writes it.
+Four words cover every case:
 
 - **Exact.** Kept byte for byte, or written the way Word writes it, with nothing changed.
 - **Normalized.** Kept or written in an equivalent form that Word reads the same way. Each case below says what changes.

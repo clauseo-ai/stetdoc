@@ -1,6 +1,8 @@
+<!-- Generated from the stetdoc binary's own definitions by `cargo xtask docs`: do not edit it by hand. The examples come from crates/stetdoc-cli/doc/. -->
+
 # CLI reference
 
-Generated from the `stetdoc` binary's own definitions by `cargo xtask docs`: do not edit it by hand. The command and flag descriptions are the `--help` text, and every example runs as a test (`crates/stetdoc-cli/doc/`). The workflow and the rules for agents are in the skill: `stetdoc skills get core`.
+Each stetdoc command is here with its flags and examples, followed by the exit codes, the JSON output and the environment variables. The descriptions are the `--help` text, and every example runs as a test. The workflow and the rules for agents are in the skill: `stetdoc skills get core`.
 
 Every command takes `--json`, which prints the result, or the error, as JSON on stdout. Data goes to stdout and diagnostics to stderr. Document text never goes in an argument: batches come from stdin or `--ops`.
 
@@ -8,20 +10,20 @@ Every command takes `--json`, which prints the result, or the error, as JSON on 
 
 | Command | Does |
 |---|---|
-| `stetdoc unpack` | Write a working copy of a .docx: readable files beside a .stet/ folder that you never touch |
-| `stetdoc pack` | Compile the edits of a working copy into tracked changes, validate them and write the .docx |
-| `stetdoc view` | Show a document or a working copy: an outline of a large document, or a range, a search, the revisions, the comments |
-| `stetdoc inspect` | Show the effective formatting of a block and where each value comes from, or the styles, lists or sections |
-| `stetdoc edit` | Apply a batch of operations, read from stdin or --ops, to a working copy or a .docx |
-| `stetdoc replace` | Replace text in one step, as tracked changes or, with --manual, as manual markup: each OLD, found once in the document as it reads now, becomes NEW |
-| `stetdoc comment` | Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now |
-| `stetdoc compare` | Write a redline of the differences between two documents as tracked changes |
-| `stetdoc check` | Validate, and show every revision that pack would write, by author |
-| `stetdoc lookup` | Find a defined term, a cross-reference, or what refers to a clause |
-| `stetdoc skills` | Print the agent skill embedded in this binary |
-| `stetdoc init` | Install the skill stub for the agents you pick, in your home folder or (with --project) in a project |
-| `stetdoc capabilities` | List the operations, whether each is tracked, the refusal codes and the format version |
-| `stetdoc mcp` | Serve the commands as tools over the Model Context Protocol, on stdin and stdout |
+| [`stetdoc unpack`](#stetdoc-unpack) | Write a working copy of a .docx: readable files beside a .stet/ folder that you never touch |
+| [`stetdoc pack`](#stetdoc-pack) | Compile the edits of a working copy into tracked changes, validate them and write the .docx |
+| [`stetdoc view`](#stetdoc-view) | Show a document or a working copy: an outline of a large document, or a range, a search, the revisions, the comments |
+| [`stetdoc inspect`](#stetdoc-inspect) | Show the effective formatting of a block and where each value comes from, or the styles, lists or sections |
+| [`stetdoc edit`](#stetdoc-edit) | Apply a batch of operations, read from stdin or --ops, to a working copy or a .docx |
+| [`stetdoc replace`](#stetdoc-replace) | Replace text in one step, as tracked changes or, with --manual, as manual markup: each OLD, found once in the document as it reads now, becomes NEW |
+| [`stetdoc comment`](#stetdoc-comment) | Comment on text in one step: the comment is anchored to ANCHOR, found once in the document as it reads now |
+| [`stetdoc compare`](#stetdoc-compare) | Write a redline of the differences between two documents as tracked changes |
+| [`stetdoc check`](#stetdoc-check) | Validate, and show every revision that pack would write, by author |
+| [`stetdoc lookup`](#stetdoc-lookup) | Find a defined term, a cross-reference, or what refers to a clause |
+| [`stetdoc skills`](#stetdoc-skills) | Print the agent skill embedded in this binary |
+| [`stetdoc init`](#stetdoc-init) | Install the skill stub for the agents you pick, in your home folder or (with --project) in a project |
+| [`stetdoc capabilities`](#stetdoc-capabilities) | List the operations, whether each is tracked, the refusal codes and the format version |
+| [`stetdoc mcp`](#stetdoc-mcp) | Serve the commands as tools over the Model Context Protocol, on stdin and stdout |
 
 ## `stetdoc unpack`
 
@@ -640,9 +642,11 @@ stetdoc skills [OPTIONS] <COMMAND>
 
 
 `stetdoc skills get [OPTIONS] [NAME]`: Print a skill: core (the default), operations or errors.
-- `<NAME>`: The skill's name.
-- `--full`: Print every part of the skill.
-- `--json`: Print the result, or the error, as JSON on stdout.
+
+| Argument | Meaning |
+|---|---|
+| `<NAME>` | The skill's name. |
+| `--full` | Print every part of the skill. |
 
 ### Examples
 

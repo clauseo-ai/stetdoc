@@ -13,7 +13,6 @@
   "bugs": {
     "url": "https://github.com/clauseo-ai/stetdoc/issues"
   },
-  "private": true,
   "main": "index.js",
   "types": "index.d.ts",
   "exports": {

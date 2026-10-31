@@ -267,8 +267,8 @@ the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch 
 
 1. **npm names (decided).** Everything but the CLI lives under the Clauseo organisation's scope. The CLI is the unscoped
    `stetdoc`, so `npx stetdoc` works, with platform packages `@clauseo/stetdoc-cli-<target>`. The napi library is
-   `@clauseo/stetdoc`, with platform packages `@clauseo/stetdoc-<target>`, and stays `"private": true` until the maintainers
-   decide to publish it. On 2026-10-27 the registry returned 404 for `stetdoc`, `@clauseo/stetdoc`,
+   `@clauseo/stetdoc`, with platform packages `@clauseo/stetdoc-<target>`. It ships with this release, so its
+   package.json is no longer marked private. On 2026-10-27 the registry returned 404 for `stetdoc`, `@clauseo/stetdoc`,
    `@clauseo/stetdoc-cli-darwin-arm64` and `@clauseo/stetdoc-darwin-arm64`, and "Scope not found" for
    `https://registry.npmjs.org/-/org/clauseo/package`, so a maintainer must create the npm organisation `clauseo` before
    any `@clauseo/*` package can be published. Check again before publishing, because a 404 is not a reservation. The

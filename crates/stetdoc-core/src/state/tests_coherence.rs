@@ -49,9 +49,17 @@ pub(super) fn incoherent(view: &PartsView<'_>) -> Vec<String> {
     }
     for spec in &list.0 {
         let part = view.id(&spec.part).unwrap();
-        let fresh = Story::scan(&spec.part, spec.kind, view.tree(part).unwrap()).unwrap();
-        if !view.story(part).unwrap().same_as(&fresh) {
+        let tree = view.tree(part).unwrap();
+        let fresh = Story::scan(&spec.part, spec.kind, tree).unwrap();
+        let cached = view.story(part).unwrap();
+        if !cached.same_as(&fresh) {
             bad.push(format!("story {}", spec.part));
+        }
+        // `same_as` leaves out the field index a refresh rebuilt from the previous one, so it is compared on its own.
+        if cached.fields(tree) != fresh.fields(tree)
+            || cached.field_anomalies(tree) != fresh.field_anomalies(tree)
+        {
+            bad.push(format!("fields {}", spec.part));
         }
     }
     for kind in [IdKind::ParaId, IdKind::TextId, IdKind::AnnotationId] {

@@ -253,6 +253,8 @@ pub(super) fn join(
             keep_first_in_second(tree, first, second)?;
         }
         detach(tree, first)?;
+        // The second holds what was left of the first now: its own bytes changed.
+        tx.touch(&second_key);
         return Ok(Joined::FirstRemoved);
     }
     // The properties: the later paragraph's, in the first element.
@@ -310,6 +312,11 @@ pub(super) fn join(
     if let (Some(a), Some(b)) = (last_before, first_after) {
         merge_shells(tree, a, b)?;
     }
+    // The first holds the second's content now. It is touched here, after the move, and not only by the
+    // caller before the join: a story built in between (to find the next paragraph, say) has seen the
+    // earlier touch, and the refresh after the join is told only of what was touched since, so without
+    // this it would not look at the first again and would miss the fields that came into it.
+    tx.touch(&first_key);
     match (first_ref, second_ref, why) {
         (Some(_), Some(_), Why::Merge | Why::Keep) => {
             tx.merge(&first_key, &second_key, first_key.clone())?

@@ -18,13 +18,13 @@ fn table(inner: &str) -> String {
     )
 }
 
-fn main_xml(doc: &Document) -> String {
+pub(super) fn main_xml(doc: &Document) -> String {
     let view = doc.state.parts();
     let id = view.id("word/document.xml").unwrap();
     String::from_utf8(view.tree(id).unwrap().serialize()).unwrap()
 }
 
-fn comments_xml(doc: &Document) -> String {
+pub(super) fn comments_xml(doc: &Document) -> String {
     let view = doc.state.parts();
     let id = view.id("word/comments.xml").unwrap();
     String::from_utf8(view.tree(id).unwrap().serialize()).unwrap()

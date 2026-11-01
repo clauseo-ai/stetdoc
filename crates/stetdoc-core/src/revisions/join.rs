@@ -3,8 +3,9 @@
 //! inserted mark, or untracked), and the resolver does it for every mark that is accepted or rejected.
 //!
 //! The first element survives with its attributes, its ref and its place. The later paragraph's
-//! properties, mark and section break win, and its content follows the first's. A first paragraph with
-//! no content left is removed instead, and the second is untouched.
+//! properties, mark and section break win, and its content follows the first's, after the range markers
+//! that stood between the two. A first paragraph with no content left is removed instead, and the second
+//! is untouched.
 
 use super::names::{is_blank, is_w};
 use super::tree_ops::{detach, move_to};
@@ -288,6 +289,13 @@ pub(super) fn join(
             let before = tree.node_ref(first).first_child().map(|c| c.id());
             super::tree_ops::insert(tree, first, before, new)?;
         }
+    }
+    // The range markers between the two (as Word writes a `w:bookmarkEnd`, or as a paragraph that went from between
+    // them left them, such as one deleted whole from a range) come into the first, after its content and before the
+    // second's, as they stood. Left between blocks, they would end up after the joined paragraph, past the second's
+    // content: a comment that starts there and ends in the second would end before it starts.
+    for n in markers_between(tree, first, second) {
+        move_to(tree, n, first, None)?;
     }
     // The content: after the first's, in order.
     let moving: Vec<NodeId> = tree

@@ -191,6 +191,8 @@ mod tests_compare;
 #[cfg(test)]
 mod tests_edit;
 #[cfg(test)]
+mod tests_edit_comment_ranges;
+#[cfg(test)]
 mod tests_edit_comment_tables;
 #[cfg(test)]
 mod tests_edit_comments;

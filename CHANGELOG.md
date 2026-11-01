@@ -23,6 +23,9 @@ All notable changes to stetdoc are recorded here. The format follows
   rejected file would: a pending paragraph mark that joins two of its paragraphs is counted as joined.
 - After a tracked split and a delete of the same paragraph, the view keeps the fields that come back into the
   paragraph. It used to drop them until the document was opened again.
+- A delete from the middle of one paragraph to the middle of another keeps a comment whose range starts or ends in a
+  paragraph the delete takes whole, or at a marker between paragraphs, as an empty-range comment if all its text goes.
+  The edit used to be refused with `validation_failed`, and accepting such a tracked delete failed the same way.
 
 ## [0.9.0] - 2026-10-30
 

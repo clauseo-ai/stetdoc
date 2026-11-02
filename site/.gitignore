@@ -8,3 +8,4 @@ next-env.d.ts
 # written by scripts/docs-artifacts.ts
 public/docs/
 public/docs.md
+.vercel

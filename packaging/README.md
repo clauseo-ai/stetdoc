@@ -287,9 +287,10 @@ and `description` is under 1024 characters. The `skills-ref validate` tool named
 
 - Files: `site/`, a static Next.js export with the launch page, the docs (rendered from `docs/`), markdown twins of every
   page, `llms.txt` and pagefind search. `site/README.md` covers running, building and deploying it.
-- Hosting: Vercel, with the project's root directory set to `site`; `site/vercel.json` sets the install and build
+- Hosting: Vercel, with the project's root directory set to `site`, deployed with `vercel deploy --prod` from the
+  repository root (not from `site/`); `site/vercel.json` sets the install and build
   commands, the output folder and the redirects. `stetdoc.clauseo.chat` points at the project.
-- Publish: a push to `main` deploys. A release needs no step of its own, but the site quotes the version and the install
+- Publish: `vercel deploy --prod` from the repository root (the project is not connected to Git). A release needs no step of its own, but the site quotes the version and the install
   commands, so check the page after each release.
 - Every manifest's `homepage` (Cargo, npm, PyPI, the plugins and the MCP listing) points at https://stetdoc.clauseo.chat,
   and the repository stays the `repository` link.

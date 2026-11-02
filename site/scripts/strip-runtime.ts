@@ -38,13 +38,17 @@ for (const file of walk(join(root, '.next', 'server', 'app')).filter((f) =>
 	f.endsWith('_client-reference-manifest.js'),
 )) {
 	const text = readFileSync(file, 'utf8');
-	const json = text.slice(text.indexOf('{', text.indexOf('] =')));
-	const manifest = JSON.parse(json.replace(/;\s*$/, '')) as {
-		clientModules: Record<string, unknown>;
-	};
-	for (const id of Object.keys(manifest.clientModules)) {
-		if (!id.startsWith('[project]/node_modules/'))
-			fail(`client component ${id} in ${relative(root, file)}`);
+	// The manifest is a script that assigns into globalThis.__RSC_MANIFEST. Run it against a stand-in object rather than
+	// slicing out the JSON, because Vercel's Next.js adapter wraps the assignment differently from a local build.
+	const scope: { __RSC_MANIFEST?: Record<string, { clientModules?: Record<string, unknown> }> } = {};
+	new Function('globalThis', 'self', text)(scope, scope);
+	const manifests = Object.values(scope.__RSC_MANIFEST ?? {});
+	if (manifests.length === 0) fail(`no client reference manifest assigned in ${relative(root, file)}`);
+	for (const manifest of manifests) {
+		for (const id of Object.keys(manifest.clientModules ?? {})) {
+			if (!id.startsWith('[project]/node_modules/'))
+				fail(`client component ${id} in ${relative(root, file)}`);
+		}
 	}
 }
 for (const dir of ['app', 'content']) {

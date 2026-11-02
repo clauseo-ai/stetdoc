@@ -7,3 +7,5 @@
 /crates/stetdoc-cli/tests/cmd/*.out/
 /crates/stetdoc-cli/doc/*.in/*.docx
 /crates/stetdoc-cli/doc/*.out/
+.vercel
+.env*

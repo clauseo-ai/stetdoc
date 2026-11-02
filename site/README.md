@@ -22,7 +22,14 @@ The window sits off screen, so WebKit treats the page as hidden and never ticks 
 
 ## Deploy on Vercel
 
-Import the repo and set **Root Directory** to `site`. [vercel.json](vercel.json) sets the install command (`bun install`), the build command (`bun run build`) and the output directory (`out`), so a Vercel build and a local build come out the same. Point `stetdoc.clauseo.chat` at the project.
+The Vercel project `stetdoc` has **Root Directory** set to `site`, and it deploys from the CLI at the repository root, not from `site/`: the build reads `docs/`, the changelog and `Cargo.toml` one level up, so `vercel deploy` run inside `site/` uploads too little and fails. From the root:
+
+```sh
+vercel link            # once: the existing stetdoc project
+vercel deploy --prod
+```
+
+The root `.vercelignore` keeps `target/` and other build output out of the upload. [vercel.json](vercel.json) sets the install command (`bun install`), the build command (`bun run build`), the output directory (`out`) and `"framework": null`, so the site is served as the static files in `out/`. Vercel still applies its Next.js adapter during `next build`, which writes the client reference manifests differently from a local build; `scripts/strip-runtime.ts` runs each manifest rather than parsing its text, so both forms work. An upload has no `.git`, so the docs pages carry no "Updated" dates there. `stetdoc.clauseo.chat` points at the project.
 
 ## How it stays fast
 

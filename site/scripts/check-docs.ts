@@ -95,7 +95,7 @@ const validator = new HtmlValidate({
 		'attr-case': 'off',
 		// the contract's tables are <div role="region"> wrappers, as GitHub's are
 		'prefer-native-element': ['error', { exclude: ['region'] }],
-		// GitHub's ids, such as the changelog's 090---2026-10-30, start with a digit; HTML allows it
+		// GitHub's ids, such as the changelog's 090---2026-11-02, start with a digit; HTML allows it
 		'valid-id': ['error', { relaxed: true }],
 	},
 });

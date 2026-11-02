@@ -5,29 +5,7 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
-## Unreleased
-
-### Fixed
-
-- The Claude Code guard hook reads the tool call to the end when `STETDOC_GUARD=off` turns it off, so Claude Code
-  never writes into a closed pipe. Its test failed now and then in CI for that reason.
-- A comment added to a package that binds `w15` to the namespace of Word 2013's preview
-  (`http://schemas.microsoft.com/office/word/2010/11/wordml`) and has no `commentsExtended.xml` no longer creates that
-  part, which made desktop Word report unreadable content. A reply, resolve or reopen there is refused as `unsupported`,
-  since a thread and its done state live only in that part.
-- An insert at the very start of a paragraph goes after `w:pPr` when an XML comment or processing instruction stands
-  before it. It used to land before `w:pPr`, and the edit was refused with `validation_failed`.
-- Deleting a table that is the first or last block keeps a comment whose range runs from inside the table to a marker
-  between blocks, as an empty-range comment like the others. It used to remove that comment.
-- The Final and Original views collapse a long field, such as a table of contents, exactly when the accepted or
-  rejected file would: a pending paragraph mark that joins two of its paragraphs is counted as joined.
-- After a tracked split and a delete of the same paragraph, the view keeps the fields that come back into the
-  paragraph. It used to drop them until the document was opened again.
-- A delete from the middle of one paragraph to the middle of another keeps a comment whose range starts or ends in a
-  paragraph the delete takes whole, or at a marker between paragraphs, as an empty-range comment if all its text goes.
-  The edit used to be refused with `validation_failed`, and accepting such a tracked delete failed the same way.
-
-## [0.9.0] - 2026-10-30
+## [0.9.0] - 2026-11-02
 
 The first release: the `stetdoc` CLI with its MCP server and the agent plugins, built for seven targets, from GitHub
 Releases, npm, PyPI, Homebrew and crates.io (`cargo install stetdoc --locked`, which also publishes the engine as the
@@ -656,5 +634,22 @@ Releases, npm, PyPI, Homebrew and crates.io (`cargo install stetdoc --locked`, w
   properties under their formatting change, a run they inserted, or a paragraph or row that holds their
   changes is `readonly_region`, and the message says to accept or reject that change first. Untracked still
   means your own changes go untracked.
+- The Claude Code guard hook reads the tool call to the end when `STETDOC_GUARD=off` turns it off, so Claude Code
+  never writes into a closed pipe. Its test failed now and then in CI for that reason.
+- A comment added to a package that binds `w15` to the namespace of Word 2013's preview
+  (`http://schemas.microsoft.com/office/word/2010/11/wordml`) and has no `commentsExtended.xml` no longer creates that
+  part, which made desktop Word report unreadable content. A reply, resolve or reopen there is refused as `unsupported`,
+  since a thread and its done state live only in that part.
+- An insert at the very start of a paragraph goes after `w:pPr` when an XML comment or processing instruction stands
+  before it. It used to land before `w:pPr`, and the edit was refused with `validation_failed`.
+- Deleting a table that is the first or last block keeps a comment whose range runs from inside the table to a marker
+  between blocks, as an empty-range comment like the others. It used to remove that comment.
+- The Final and Original views collapse a long field, such as a table of contents, exactly when the accepted or
+  rejected file would: a pending paragraph mark that joins two of its paragraphs is counted as joined.
+- After a tracked split and a delete of the same paragraph, the view keeps the fields that come back into the
+  paragraph. It used to drop them until the document was opened again.
+- A delete from the middle of one paragraph to the middle of another keeps a comment whose range starts or ends in a
+  paragraph the delete takes whole, or at a marker between paragraphs, as an empty-range comment if all its text goes.
+  The edit used to be refused with `validation_failed`, and accepting such a tracked delete failed the same way.
 
 [0.9.0]: https://github.com/clauseo-ai/stetdoc/releases/tag/v0.9.0

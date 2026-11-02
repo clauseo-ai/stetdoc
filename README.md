@@ -81,7 +81,7 @@ $ cmp msa.docx roundtrip.docx && echo identical
 identical
 ```
 
-Every build checks this on 306 documents, and every night random edits run on all 48,666 in the corpus.
+Every build checks this on 306 documents, and every night random edits run on 48,595 public documents.
 [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it normalizes, what it shows
 read-only and what it leaves out.
 
@@ -248,7 +248,7 @@ package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-
 Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the laws on the curated
 corpus of 306 documents. Every unedited round trip must come back byte-identical. On each document, 50 seeded random
 edit batches must keep the [laws](GLOSSARY.md#quality): they change only what they edit, the edits stick, accepting or
-rejecting them restores the expected text, and the file stays valid. The full corpus of 48,666 documents runs nightly in
+rejecting them restores the expected text, and the file stays valid. Every night they run on 48,595 public documents in
 CI, and CI fuzzes all four targets on every pull request.
 
 ## Licence

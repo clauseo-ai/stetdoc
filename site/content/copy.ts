@@ -170,7 +170,7 @@ export const PARTS = {
 		body: [
 			"Run a document through stetdoc without editing it and you get the identical file back, byte for byte. Edit one clause and only that clause's elements change. Styles, numbering, comments, other people's tracked changes and macros stay where their authors left them.",
 		],
-		proof: 'Every build checks this on **306** documents, and every night random edits run on all **48,666** in the corpus.',
+		proof: 'Every build checks this on **306** documents, and every night random edits run on **48,595** public documents.',
 		/** the paragraphs around 11.1 in the supply agreement, as stetdoc reads them */
 		stack: [
 			{

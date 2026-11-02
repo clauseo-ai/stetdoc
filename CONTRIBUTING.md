@@ -121,7 +121,7 @@ of `laws::edits` stay as a smoke set.
 ### The nightly laws run
 
 `.github/workflows/laws.yml` runs the three corpus tests of `laws_random` (random batches, random edits of files, L2 by
-block) every night on the full corpora, 48,666 documents, in 40 shards. A document's shard is the first 16
+block) every night on the full corpora, the 48,595 of its 48,666 documents that must open, in 40 shards. A document's shard is the first 16
 hexadecimal digits of its SHA-256 in `INDEX.tsv`, modulo 40, so a shard reads and opens only its own documents and holds
 the same ones every night. `laws::sweep` prints, with `laws:` in front, each failure the moment it is found (`FAILED
 <document id>: seed <seed>, batch <k>: ...`), progress every 3 minutes, a line for a document still running after 120 s,

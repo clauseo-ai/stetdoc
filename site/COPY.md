@@ -68,8 +68,8 @@ We gave agents eight contract tasks and three long markups, five ways: with stet
 
 Run a document through stetdoc without editing it and you get the identical file back, byte for byte. Edit one clause and only that clause's elements change. Styles, numbering, comments, other people's tracked changes and macros stay where their authors left them.
 
-**Proof line:** Every build checks this on 306 documents, and every night random edits run on all 48,666 in the corpus.
-<!-- corpus/curated.tsv (306 rows), corpus/manifest/*.tsv (48,666 rows), .github/workflows/laws.yml (nightly) -->
+**Proof line:** Every build checks this on 306 documents, and every night random edits run on 48,595 public documents.
+<!-- corpus/curated.tsv (306 rows), corpus/manifest/*.tsv (48,666 rows, of which the nightly sweeps check the 48,595 that must open), .github/workflows/laws.yml (nightly) -->
 
 **Artifact:** a short stack of paragraph planes. One paragraph lifts and takes the tracked change, and the rest stay locked and identical. Then:
 ```

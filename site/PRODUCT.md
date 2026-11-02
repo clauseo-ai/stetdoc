@@ -43,7 +43,7 @@ Terminal and agent sessions; Word documents, mostly contracts (a Harvey LAB supp
 
 - Real CLI output from a run on a Harvey LAB supply agreement (replace, view --find, ambiguous_match refusal), quoted in the brief.
 - 5 ms for each stetdoc call to start (docs/install.md). Quote no time for the replace itself.
-- Every build checks the round trip on 306 documents; every night random edits run on all 48,666 in the corpus.
+- Every build checks the round trip on 306 documents; every night random edits run on 48,595 public documents.
 - docx-agent-bench: 639 runs across three models; stetdoc fastest on every model; 0 of 118 stetdoc runs left Word anything to repair; 6 of 6 long Harvey LAB markups passed their checks and opened clean in Word, on every model (content/bench.ts). The detail lives in the bench README. Invent no others.
 
 ## Product Principles

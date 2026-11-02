@@ -28,6 +28,12 @@ It is drawn in Clauseo's design language, as a sibling of Clauseo's comma (`desi
 uv run --no-project --with resvg-py --with pillow python packaging/brand/render.py
 ```
 
+`readme/` holds the art in the root README, each piece by day and by night, wide and narrow for phones. The banner sets the lockup, then "Let it stand." on the bar with the dots under "stand". The chart draws the benchmark. `readme/render.py` writes them all and outlines every word in them from the site's Anek Latin, because GitHub loads no web font in an SVG. The chart's green and red are the one place stetdoc uses the court's colours. They mean what they mean on the launch page, as `site/DESIGN.md` sets out under Colors. Green is stetdoc's result, and red is the other setups. The README's `<picture>` picks night when the system is dark. It picks the narrow banner at 600 px and under, and the narrow chart at 767 px and under. A renderer without `<picture>` shows the day wide file. To change the art, edit `readme/render.py` and run it from the repository root:
+
+```sh
+uv run --no-project --with fonttools --with brotli --with uharfbuzz python packaging/brand/readme/render.py
+```
+
 To use the icons on a page:
 
 ```html

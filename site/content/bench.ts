@@ -6,6 +6,8 @@
  * Anthropic's legal plugin, Adeu): fastest to slowest.
  */
 
+import { BENCH_URL } from '../app/links';
+
 export type BenchRow = {
 	model: string;
 	/** stetdoc's median time per task, in seconds */
@@ -42,5 +44,9 @@ export const BENCH_FACTS: BenchFact[] = [
 	{ figure: '1 ms', line: 'from launch to a ready MCP server.' },
 ];
 
-export const BENCH_METHOD =
-	'docx-agent-bench, 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run, and every file opened in Microsoft Word for Mac 16.114.3.';
+/** the method line: `name` links to `href`, and `rest` follows it */
+export const BENCH_METHOD = {
+	name: 'docx-agent-bench',
+	href: BENCH_URL,
+	rest: ', 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run, and every file opened in Microsoft Word for Mac 16.114.3.',
+};

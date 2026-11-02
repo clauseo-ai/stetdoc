@@ -59,7 +59,7 @@ We gave agents eight contract-editing tasks five ways: with stetdoc, with no plu
 - **6 of 6:** long Harvey LAB markups, fully correct on every model. <!-- tables.md long tasks -->
 - **1 ms:** from launch to a ready MCP server. <!-- engine-bench.md, MCP cold start -->
 
-**Method line:** docx-agent-bench, 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run, and every file opened in Microsoft Word for Mac 16.114.3.
+**Method line:** [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench), 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run, and every file opened in Microsoft Word for Mac 16.114.3.
 
 ---
 

@@ -122,7 +122,14 @@ export function Bench() {
 							})}
 						</tbody>
 					</table>
-					<p className='method'>{p.method}</p>
+					<p className='method'>
+						<a
+							className='text-link'
+							href={p.method.href}>
+							{p.method.name}
+						</a>
+						{p.method.rest}
+					</p>
 				</div>
 			</div>
 			<ul className='facts'>

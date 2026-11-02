@@ -6,6 +6,11 @@ type, and graders check the result. It is also the benchmark for the plugin: eac
 tokens, cost and wall time per run, so a change to the CLI, the skill or the MCP server can be measured for speed and
 accuracy as well as correctness.
 
+The figures on the website come from a separate benchmark,
+[docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench), which compares stetdoc with other setups on
+contract-editing tasks. It checks the files the agents write with
+[ooxml-validate](https://github.com/clauseo-ai/ooxml-validate), a CLI around Microsoft's Open XML SDK validator.
+
 Every run is a real model call on your account. The suite never runs in CI or in `cargo xtask check`.
 
 ## Running it

@@ -24,6 +24,10 @@ and uploads to PyPI when a maintainer publishes the GitHub release. A maintainer
 | Hermes | skill in this repository | `hermes skills install clauseo-ai/stetdoc/skills/stetdoc` | works from `main`; no hub listing |
 | ClawHub | none | none | not listed: its sign-in failed on its side on 2026-11-02 |
 
+Related repositories: [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench) is the benchmark behind the
+figures on the website, and [ooxml-validate](https://github.com/clauseo-ai/ooxml-validate)
+(`brew install clauseo-ai/tap/ooxml-validate`) is the validity check it uses.
+
 ## Release checklist
 
 The order 0.9.0 was released in. Each step's detail is in its channel's section below.

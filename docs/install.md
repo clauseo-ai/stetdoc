@@ -65,7 +65,7 @@ saves your name under `%APPDATA%` unless `XDG_CONFIG_HOME` is set.
 
 ```console
 $ stetdoc --version
-stetdoc 0.9.1
+stetdoc 0.9.2
 
 ```
 
@@ -112,10 +112,10 @@ stetdoc init --list
 To pin a release, name it in the install:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | STETDOC_VERSION=v0.9.1 sh
-uv tool install stetdoc==0.9.1
-npm install -g stetdoc@0.9.1
-cargo install stetdoc --version 0.9.1 --locked
+curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | STETDOC_VERSION=v0.9.2 sh
+uv tool install stetdoc==0.9.2
+npm install -g stetdoc@0.9.2
+cargo install stetdoc --version 0.9.2 --locked
 ```
 
 The install script reads `STETDOC_VERSION`, which defaults to `latest`, and `STETDOC_INSTALL_DIR`, which defaults to

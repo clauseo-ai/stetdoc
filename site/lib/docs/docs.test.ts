@@ -375,7 +375,7 @@ describe('reading on phones', () => {
 describe('twins', () => {
 	test('{{version}} and the skill tables are filled; a leftover placeholder fails', () => {
 		const skill = readSource('crates/stetdoc-cli/skill/core.md');
-		expect(skill).toContain('stetdoc 0.9.1 turns a .docx');
+		expect(skill).toContain('stetdoc 0.9.2 turns a .docx');
 		expect(skill).not.toMatch(/\{\{/);
 		expect(skill).toContain('| `stetdoc unpack` |');
 		expect(skill).toMatch(/\| `replace` \| yes \| /);

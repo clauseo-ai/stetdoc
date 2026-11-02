@@ -13,7 +13,7 @@ included. Check that the binary is on your PATH:
 
 ```console
 $ stetdoc --version
-stetdoc 0.9.1
+stetdoc 0.9.2
 
 ```
 

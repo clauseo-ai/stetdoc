@@ -1,42 +1,180 @@
-# stetdoc
+<picture>
+  <source media="(prefers-color-scheme: dark) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-night-narrow.svg">
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-day-narrow.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-night.svg">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-day.svg" alt="stetdoc. Let it stand.">
+</picture>
 
-stetdoc is a projection layer between Word and AI agents. It turns a `.docx` into a
-working copy an agent can read and edit with its ordinary tools, and turns the edits
-back into the same `.docx` with real Word tracked changes.
+stetdoc is how AI agents work in Word. Every change your agent makes lands in Word as a tracked change with its name on
+it, and everything it didn't touch comes back exactly as it was.
 
-Read the docs at https://stetdoc.clauseo.chat/docs. The [changelog](CHANGELOG.md) lists every release.
-
-## Why
-
-Word's file format is hostile to agents. Text is fragmented across runs, tracked changes
-are XML structure, the clause numbers lawyers cite ("4.2(a)") are computed and appear
-nowhere in the file, and Word rejects a file whose XML is slightly out of schema order.
-Agents that edit raw XML are slow and fragile, and agents that round-trip through
-Markdown lose formatting, tracked changes and comments.
-
-## What it guarantees
-
-- **Byte identity.** An unedited round trip returns identical bytes. An edited round trip
-  changes only the edited elements.
-- **No silent changes.** Editing is tracked by default: every change to text, formatting
-  or structure is a Word revision with an author and date.
-- **Validated before commit.** An edit may not introduce schema or Word-rule violations,
-  and a batch applies completely or not at all.
-- **Safe on hostile input.** Bad input fails with a stable error code. It never panics,
-  hangs or touches the network.
-
-## Usage
-
-One `stetdoc` binary and a skill that works in any agent with a shell. Install it with Homebrew:
-
-```
+```sh
 brew install clauseo-ai/tap/stetdoc
+stetdoc init
 ```
 
-On a machine without Homebrew, run `uv tool install stetdoc`. [Install](docs/install.md) lists every channel, Windows
-included, and [the quickstart](docs/quickstart.md) walks through a first edit in five minutes.
+`stetdoc init` puts the skill in every agent it finds. Without Homebrew, run `uv tool install stetdoc`, or pick another
+of the [channels below](#install-stetdoc).
+
+**[Read the docs](https://stetdoc.clauseo.chat/docs)** · [Quickstart](docs/quickstart.md) · [Changelog](CHANGELOG.md) ·
+Free and open source, MIT or Apache-2.0
+
+```console
+$ stetdoc replace msa.docx 'due within thirty (30) days' 'due within forty-five (45) days'
+replace "due within thirty (30) days" with "due within forty-five (45) days": once, at p145 (clause 11.1)
+applied 1 operation, tracked as Claude 2026-11-02T07:44:07Z. base 96c462d4a556723b:0:96c462d4a556723b
+0 replace p145: deletion #54, insertion #55
+p145 {style "First Paragraph"} 11.1 Payment for each Shipment of Products shall be due within {--thirty (30--}{#54 C}{++forty-five (45++}{#55 C}) days from the date of the Bill of Lading …
+validated 1 unit: no problems, and this file needs no separate check.
+wrote msa.edited.docx
+msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one, or pass -o FILE or --in-place to choose.
+```
+
+<sub>stetdoc 0.9.0 on a supply agreement from Harvey LAB, the long paragraph cut short. `{--…--}` is the deletion and
+`{++…++}` the insertion, each a Word revision by Claude.</sub>
+
+## Word found unreadable content.
+
+Every agent that edits a .docx's XML meets this dialog sooner or later. Word splits a sentence across many runs and
+stores tracked changes as XML structure. It refuses a file whose elements fall out of schema order. One slip in the XML
+and the document won't open.
+
+stetdoc checks every edit against the schema and Word's own rules before it writes a byte. A batch of edits applies
+completely or not at all. Bad input, a hostile file included, fails with a stable error code: stetdoc never panics,
+hangs or touches the network.
+
+## Done first, on every model.
+
+We gave agents eight contract-editing tasks five ways: with stetdoc, with no plugin, with Anthropic's docx skill, with
+Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc finished
+first on all three models.
+
+<picture>
+  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night-narrow.svg">
+  <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day-narrow.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night.svg">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day.svg" alt="Median time per task. Claude Haiku 5.5: stetdoc 21 s, the other four setups 41 to 45 s. Claude Opus 5.5: stetdoc 25 s, the other four setups 37 to 56 s. Gemini 3.8 Flash: stetdoc 135 s, the other four setups 274 to 538 s.">
+</picture>
+
+- **0 of 118** stetdoc runs wrote a file Word offered to repair.
+- **6 of 6** long Harvey LAB markups came out fully correct, on every model.
+- **1 ms** from launch to a ready MCP server.
+
+<sub>docx-agent-bench, 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run,
+and every file opened in Microsoft Word for Mac 16.114.3.</sub>
+
+## Open, save, same bytes.
+
+Run a document through stetdoc without editing it and you get the identical file back, byte for byte. Edit one clause
+and only that clause's elements change. Styles, numbering, comments, other people's tracked changes and macros stay
+where their authors left them.
+
+```console
+$ stetdoc unpack msa.docx && stetdoc pack msa.stet -o roundtrip.docx
+$ cmp msa.docx roundtrip.docx && echo identical
+identical
+```
+
+We test this every night on about 48,600 documents from 58 public sources. Every build also puts 306 more through 50
+random edit batches each. [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it
+normalizes, what it shows read-only and what it leaves out.
+
+## It knows where 11.1 is.
+
+Lawyers cite clauses by number. Word works those numbers out when it draws the page, so they appear nowhere in the
+file. stetdoc computes them, and a search hands your agent the clause, a stable paragraph ref and the exact text.
+
+```console
+$ stetdoc view msa.docx --find 'thirty' --find 'governing law'
+…
+{in p144 "Clause 11 — PAYMENT"}
+p145 {§11.1} …each Shipment of Products shall be due within thirty (30) days from the date of the Bill of Lading… {~ "thirty" 1}
+{in p167 "Clause 14 — FORCE MAJEURE"}
+p182 {§14.3} …Party may terminate this Agreement by giving thirty (30) days’ written notice to the other Party.… {~ "thirty" 1}
+…
+p272 CLAUSE 23 — GOVERNING LAW {~ "governing law" 1}
+{position: p81..p466 of find "thirty" (13), "governing law" (3): 16 matches in 15 blocks (15 of 15 blocks)}
+```
+
+## Twelve matches is not one.
+
+`replace` matches text the way it reads, across bold, italics and run breaks. When the text appears more than once,
+stetdoc writes nothing and lists every match with its clause. Missing text gets the same refusal. stetdoc also refuses
+an edit aimed at a paragraph that changed after the agent read it, so a change never lands in the wrong place.
+
+```console
+$ stetdoc replace msa.docx 'thirty (30) days' 'forty-five (45) days'
+error[ambiguous_match]: "thirty (30) days" is in the document 12 times, and it must be there once:
+  p81 (clause 3.3) …d to the Seller not less than [thirty (30) days] prior to the first day of the…
+  p81 (clause 3.3) …ders submitted with less than [thirty (30) days]’ notice may be accepted by th…
+  p126 (clause 7.5(a)) …cement to be completed within [thirty (30) days] of the date on which the non-…
+  …
+next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, pass --range with its ref, such as --range p81..p81, or make OLD longer so it matches once.
+```
+
+## Hands off the XML.
+
+stetdoc gives your agent the document as text, with a ref on every paragraph and a number on every clause. The zip and
+its XML stay with stetdoc. In Claude Code, the plugin adds a hook that stops Claude from unzipping a .docx, scripting it
+with python-docx or rewriting its XML. The only way into the file is the one stetdoc checks.
+
+In Claude Code 2.1.275 or later, one line installs the plugin. It carries the skill and the hook. The binary must still
+be on the PATH, because Claude Code runs the command rather than MCP.
 
 ```
+/plugin install stetdoc --marketplace clauseo-ai/stetdoc
+```
+
+## One install for every agent you run.
+
+`stetdoc init` installs the skill for the agents you pick, or for the ones it detects. It knows Claude Code, Codex,
+Cursor, OpenCode, OpenClaw, Hermes Agent, Grok Build, cmx2, Antigravity CLI, GitHub Copilot CLI, Amp and Factory. It
+still installs for Gemini CLI, which Google retired in favour of Antigravity CLI.
+
+```sh
+stetdoc init --project   # in this project, plus a short block in AGENTS.md
+stetdoc init --list      # what is installed, and where
+stetdoc init --remove    # take it out again
+stetdoc skills get core  # the full skill, embedded in the binary
+```
+
+Agents that take tools instead of a shell get the same commands over the Model Context Protocol from `stetdoc mcp`, and
+`stetdoc init --mcp` prints how to register it with each agent. Install the skill with the server, so an agent whose
+server fails to start stops rather than editing the XML. [Use stetdoc with your agent](docs/agents.md) has the setup
+for each one, and [Self-hosting the MCP server](docs/self-hosting-mcp.md) serves `stetdoc mcp` to cloud apps, with auth
+and TLS.
+
+## Install stetdoc.
+
+Pick any channel. Every one installs the same binary.
+
+```sh
+# Homebrew, on macOS and Linux
+brew install clauseo-ai/tap/stetdoc
+
+# uv or pipx, on macOS, Linux and Windows. The wheel holds the native binary, so no Python runs after the install.
+uv tool install stetdoc
+pipx install stetdoc
+
+# npm swaps its Node launcher for the binary when install scripts run
+npm install -g stetdoc
+
+# The install script, on macOS and Linux. It checks the SHA-256 and installs to ~/.local/bin.
+curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh
+
+# Cargo builds it from source
+cargo install stetdoc --locked
+```
+
+An agent can run stetdoc dozens of times in one task. Homebrew, uv, pipx and the install script put the binary itself
+on your PATH, so each call starts in about 5 ms. Through npx, every call starts Node and npm first, which costs a tenth
+of a second or more, so keep `npx stetdoc mcp` for the MCP server, which starts once per session. `uvx stetdoc` runs
+stetdoc once without installing it. [Install](docs/install.md) covers Windows, updating, uninstalling and pinning a
+version.
+
+## The commands
+
+```sh
 # Every revision has an author. Set it here, or save yours once with stetdoc init.
 export STETDOC_AUTHOR="Jane Doe"
 # Each hit shows its ref, its clause and the exact text.
@@ -48,26 +186,27 @@ stetdoc comment contract.edited.docx 'Liability Cap' 'Is this mutual?' --in-plac
 stetdoc compare old.docx new.docx -o redline.docx
 ```
 
-An edit of a .docx writes `NAME.edited.docx` beside it (then `NAME.edited-2.docx`, never overwriting) and leaves the
-input unchanged, unless `-o FILE` names the output or `--in-place` writes back. `replace` matches OLD in the text as it
-reads, across formatting. Text that is missing or there more than once is refused with every place listed; `--clause
-11.1` or `--range p40..p60` narrows the search, `--ignore-case` ignores case, and `--all` or `--expect N` replaces (or
-comments on) every occurrence. `--manual` writes a manual redline instead, old text struck and new text underlined with
-no tracked changes, for readers who ask for one. Receipts and views name tracked changes made by others, so the agent can
-report them. For longer work, unpack a working copy and edit its readable files:
+An edit writes `NAME.edited.docx` beside the input, then `NAME.edited-2.docx`, and never overwrites. `-o FILE` names
+the output and `--in-place` writes back. `--clause 11.1` or `--range p40..p60` narrows a search, `--ignore-case`
+ignores case, and `--all` or `--expect N` replaces or comments on every occurrence. `--manual` writes a manual redline
+for readers who ask for one: old text struck, new text underlined, no tracked changes. Receipts and views name the
+tracked changes other people made, so the agent can report them.
 
-```
-# Writes contract.stet/, which holds the readable files and a hidden complement.
-stetdoc unpack contract.docx
-# Edit the text after each ref with any tool.
-$EDITOR contract.stet/document.md
-# Shows the redline that pack will write, validated.
-stetdoc check contract.stet
-# Writes contract.edited.docx with real tracked changes.
-stetdoc pack contract.stet
+For longer work, unpack a working copy and edit its readable files with any tool:
+
+```sh
+stetdoc unpack contract.docx        # writes contract.stet/
+$EDITOR contract.stet/document.md   # edit the text after each ref
+stetdoc check contract.stet         # the redline pack will write, validated
+stetdoc pack contract.stet          # writes contract.edited.docx with real tracked changes
 ```
 
-For anything else, such as inserting paragraphs, accepting or rejecting revisions or formatting, agents send a batch of
+The working copy holds `document.md`, `notes.md`, `headers.md` and `comments.md`, which agents edit with string
+replacement or `apply_patch`, and a hidden complement, `.stet/`, that holds everything needed to rebuild the exact
+package. Every block has a stable short ref such as `p42`. Every write survives a crash, and a second process waits for
+the first.
+
+Anything else, such as inserting paragraphs, formatting, or accepting and rejecting revisions, goes in a batch of
 operations:
 
 ```
@@ -84,45 +223,13 @@ EOF
 ```
 
 The base is the token the last view or receipt printed. A batch whose base comes from another document or another
-history, or that names a block changed since its base, is refused rather than misapplied; a batch from an older state
-that touches only blocks unchanged since still applies. `stetdoc compare original.docx revised.docx -o redline.docx` writes a redline of two versions.
+history, or that names a block changed since, is refused rather than misapplied. A batch from an older state that
+touches only unchanged blocks still applies. [How stetdoc works](docs/concepts.md) explains refs, bases and receipts,
+and the [CLI reference](docs/reference/cli.md) lists every command and flag, with examples that run as tests.
 
-The working copy holds readable files (`document.md`, `notes.md`, `headers.md`, `comments.md`) that agents edit with
-string replacement or `apply_patch`, and the complement (`.stet/`) that holds everything needed to rebuild the exact
-package. Every block has a stable short ref such as `p42`. Every write to a working copy survives a crash, and a second
-process waits for the first.
+## Build on stetdoc
 
-**For agents.** `stetdoc init` installs the skill stub in your home folder for the agents you pick, or for the ones it
-detects. It knows Claude Code, Codex, Cursor, OpenCode, OpenClaw, Hermes Agent, Grok Build, cmx2, Antigravity CLI, GitHub
-Copilot CLI, Amp and Factory, and still installs for Gemini CLI, which Google retired in favour of Antigravity CLI.
-`stetdoc init --project` installs it in a project and adds a short block to `AGENTS.md`. `--list` shows what is installed
-and `--remove` takes it out. The full skill is embedded in the binary: `stetdoc skills get core`. For agents that take
-tools rather than a shell, `stetdoc mcp` serves the same commands over the Model Context Protocol, and `stetdoc init --mcp`
-prints how to register it with each agent. Install the skill with the MCP server, so an agent whose server fails to
-start stops rather than editing the XML.
-
-In Claude Code 2.1.275 or later, one line installs the plugin, which carries the skill and a hook that stops Claude from
-unzipping a .docx or rewriting its XML (the binary must still be on the PATH; Claude Code uses it rather than MCP):
-
-```
-/plugin install stetdoc --marketplace clauseo-ai/stetdoc
-```
-
-## Use it with your agent
-
-- [Quickstart](docs/quickstart.md): install, find, replace and comment on a sample contract, then open it in Word.
-- [Install](docs/install.md): every channel, Windows, updating and uninstalling.
-- [Use stetdoc with your agent](docs/agents.md): `stetdoc init`, the author, and the setup for each agent.
-- [Self-hosting the MCP server](docs/self-hosting-mcp.md): serve `stetdoc mcp` to cloud apps, with auth and TLS.
-- [Build on stetdoc](docs/build-on-stetdoc.md): the Rust crate, the Node package, the CLI and MCP, for products.
-
-**Reference.** The [CLI reference](docs/reference/cli.md) lists every command and flag, with examples that run as
-tests. [`FIDELITY.md`](FIDELITY.md) says, per feature, what is kept exactly, what is normalized, what is read-only and
-what is left out.
-
-## The library
-
-The same engine is a Rust library, `stetdoc-core`, built around one handle:
+The engine is a Rust library, `stetdoc-core`, built around one handle:
 
 ```rust
 let mut doc = Document::open(bytes, &OpenOptions::default())?;
@@ -133,8 +240,8 @@ let receipt = doc.edit(Edit::ops(batch, stamp))?;
 let saved = doc.save()?;
 ```
 
-Node and Bun use it through the npm package `@clauseo/stetdoc` (`crates/stetdoc-napi/npm`), with TypeScript types generated
-from the same definitions:
+Node and Bun use it through the npm package `@clauseo/stetdoc`, with TypeScript types generated from the same
+definitions:
 
 ```ts
 import { Document } from "@clauseo/stetdoc";
@@ -148,9 +255,11 @@ const copy = doc.export();
 const result = doc.textEditor(toolUse.input, { author: "Jane Doe", date });
 ```
 
-Its documentation is [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-napi/npm/README.md). The backend of Claude's
-text editor tool is the Rust crate `stetdoc-editor`. Errors carry a stable code, a message and a `next` hint, and the
-library throws them as `StetdocError`. See the [error reference](docs/reference/errors.md).
+The Rust crate `stetdoc-editor` is the same backend for Claude's text editor tool. Errors carry a stable code, a message
+and a `next` hint, and the npm package throws them as `StetdocError`. [Build on stetdoc](docs/build-on-stetdoc.md)
+compares the crate, the npm package, the CLI and MCP for products; the npm package's own guide is
+[`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-napi/npm/README.md), and the
+[error reference](docs/reference/errors.md) lists every code.
 
 ## Repository
 
@@ -158,20 +267,19 @@ library throws them as `StetdocError`. See the [error reference](docs/reference/
 - [`GLOSSARY.md`](GLOSSARY.md): the exact domain terms
 - [`docs/decisions/`](docs/decisions/0001-core-interface.md) and [`docs/design/`](docs/design/revisions.md): the
   decision records and the design notes behind each module
-- [`docs/agents.md`](docs/agents.md), [`docs/self-hosting-mcp.md`](docs/self-hosting-mcp.md) and
-  [`docs/build-on-stetdoc.md`](docs/build-on-stetdoc.md): using stetdoc with agents, cloud apps and products
 - [`AGENTS.md`](AGENTS.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md): how to work here
-- [`FIDELITY.md`](FIDELITY.md): what is kept exactly, normalized, read-only or left out
 - [`SECURITY.md`](SECURITY.md): how to report a vulnerability, and how hostile input is tested
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): how we expect people to treat each other here
 
-Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the
-laws on a curated corpus of about 300 documents: every unedited round trip is byte-identical, and
-50 seeded random edit batches per document keep their laws (locality, validity, accept and reject
-restore the expected text). The full corpora, about 48,000 documents, run nightly in CI, and each
-fuzz target runs for 24 hours before a release.
+Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the laws on the curated
+corpus of 306 documents. Every unedited round trip must be byte-identical, and on each document 50 seeded random edit
+batches must change only what they edit, stick, restore the expected text when accepted or rejected, and leave the file
+valid. The full corpora run nightly in CI, and each fuzz target runs for at least 24 hours before a release.
 
 ## Licence
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or
-[MIT licence](LICENSE-MIT), at your option. See [`NOTICE`](NOTICE).
+Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT licence](LICENSE-MIT), at your option.
+See [`NOTICE`](NOTICE).
+
+<sub>Stet is the proofreader's mark for "let it stand". It goes under a word that was struck out by mistake, and the
+word stays. stetdoc is open source, from [Clauseo](https://www.clauseo.chat).</sub>

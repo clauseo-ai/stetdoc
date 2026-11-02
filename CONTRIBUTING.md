@@ -131,16 +131,18 @@ document that runs over 600 s is a failure: a performance bug. After `STETDOC_DE
 failures and each sweep's summary are also on the run page. `STETDOC_WATCH_SECS`, `STETDOC_LIMIT_SECS` and
 `STETDOC_PROGRESS_SECS` change the watchdog, the limit and the progress interval.
 
-To run a failure again, take the seed from the top of the shard's log (`random edit batches: seed ...`) and a piece of the
-document's id:
+To run a failure again, fetch the full set once (`cargo xtask corpus fetch --full`), then take the seed from the top of the
+shard's log (`random edit batches: seed ...`) and a piece of the document's id:
 
 ```
-STETDOC_CORPUS_SET=full STETDOC_ONLY=RP052-Deleted-Para-Mark STETDOC_SEED=10390364666906268427 \
+STETDOC_CORPUS_DIR="$(cargo xtask corpus path)" STETDOC_CORPUS_SET=full \
+  STETDOC_ONLY=RP052-Deleted-Para-Mark STETDOC_SEED=10390364666906268427 \
   cargo test --release -p stetdoc-testkit --test laws_random -- random_batches_on_the_curated --nocapture
 ```
 
 Use `random_edits_of_files_on_the_curated` for a failure of the random edits of files, and `STETDOC_SHARD=<i>/40` instead of
-`STETDOC_ONLY` to run the whole shard (about an hour on a laptop).
+`STETDOC_ONLY` to run the whole shard (about an hour on a laptop). Without `STETDOC_CORPUS_DIR` a corpus sweep skips and
+passes, so a sweep that `STETDOC_ONLY` or `STETDOC_SHARD` asks for fails instead and says how to set it.
 
 The size was measured in October 2026 with `/usr/bin/time` on a Mac. Per document, the three tests cost 4.8 seconds of an
 Apple M-series core on shard 0 of 64 (763 documents: 3.6 for the random batches, 1.3 for the random edits of files, 0.02

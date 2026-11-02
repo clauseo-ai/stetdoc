@@ -3,17 +3,9 @@
   "displayName": "stetdoc",
   "version": "0.9.2",
   "description": "Read, redline and compare Word .docx files with real tracked changes. Agents edit a .docx as a working copy, and every edit becomes a Word revision with an author.",
-  "author": {
-    "name": "Clauseo"
-  },
+  "author": { "name": "Clauseo" },
   "homepage": "https://stetdoc.clauseo.chat",
   "repository": "https://github.com/clauseo-ai/stetdoc",
   "license": "MIT OR Apache-2.0",
-  "keywords": [
-    "docx",
-    "word",
-    "tracked-changes",
-    "redline",
-    "mcp"
-  ]
+  "keywords": ["docx", "word", "tracked-changes", "redline", "mcp"]
 }

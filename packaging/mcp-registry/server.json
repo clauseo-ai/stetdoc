@@ -16,14 +16,9 @@
       "version": "0.9.2",
       "runtimeHint": "npx",
       "packageArguments": [
-        {
-          "type": "positional",
-          "value": "mcp"
-        }
+        { "type": "positional", "value": "mcp" }
       ],
-      "transport": {
-        "type": "stdio"
-      }
+      "transport": { "type": "stdio" }
     }
   ]
 }

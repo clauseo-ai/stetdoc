@@ -207,8 +207,10 @@ repository-based channels work from the repository at its default branch, so a m
   `"mcpName": "io.github.clauseo-ai/stetdoc"`, which the registry checks against the server name.
 - Release fills: nothing. The version comes from the stamp script.
 - Publish, after channel 3 is on npm: `brew install mcp-publisher`, then from `packaging/mcp-registry/`:
-  `mcp-publisher login github` (a device code in the browser, nothing stored in the repository), then `mcp-publisher publish`.
-  The GitHub account must be a member of the `clauseo-ai` organisation. Check with `curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.clauseo-ai/stetdoc"`.
+  `mcp-publisher login github --token "$(gh auth token)"`, then `mcp-publisher publish`, then `mcp-publisher logout`.
+  The GitHub account must be an owner of the `clauseo-ai` organisation, and the token must carry the `read:org` scope
+  (`gh auth status` lists it). The interactive `mcp-publisher login github` (a device code) cannot read organisation roles,
+  so the registry answers 403 and offers only `io.github.<your-login>/*`; it did so for 0.9.0 on 2026-11-02. Check with `curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.clauseo-ai/stetdoc"`.
 - Sources: https://modelcontextprotocol.io/registry/quickstart, https://modelcontextprotocol.io/registry/package-types,
   https://modelcontextprotocol.io/registry/faq.md
 

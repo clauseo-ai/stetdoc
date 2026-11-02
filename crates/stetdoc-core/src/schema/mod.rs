@@ -157,8 +157,8 @@ pub(crate) use span::Refs;
 pub use tables::display_qname;
 pub use tree::{Attr, Nodes, QName, SchemaTree};
 pub use validate::{
-    MAX_DETAILS, MC_NS, Report, Violation, ViolationKey, ViolationKind, ViolationSet, XML_NS,
-    unit_root, validate_part, validate_subtree, validate_unit,
+    DIFFERING_REPEAT, MAX_DETAILS, MC_NS, Report, Violation, ViolationKey, ViolationKind,
+    ViolationSet, XML_NS, unit_root, validate_part, validate_subtree, validate_unit,
 };
 pub use walk::{in_taken_branch, is_unit_boundary, is_word_namespace, read_children, walk_unit};
 

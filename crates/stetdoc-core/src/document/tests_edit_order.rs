@@ -195,3 +195,62 @@ fn a_copy_of_out_of_order_properties_is_refused_as_a_problem_the_edit_added() {
         FindingCode::SchemaNonCanonicalOrder
     );
 }
+
+/// A paragraph mark whose run properties repeat `w:b` and `w:sz`, as LibreOffice wrote them in `table-ltr.docx`.
+const REPEATED_MARK: &str = concat!(
+    r#"<w:pPr><w:rPr><w:rFonts w:ascii="Amiri" w:hAnsi="Amiri" w:cs="Amiri"/><w:b/><w:b/><w:bCs/>"#,
+    r#"<w:position w:val="0"/><w:sz w:val="24"/><w:sz w:val="26"/><w:szCs w:val="26"/><w:u w:val="none"/>"#,
+    r#"<w:vertAlign w:val="baseline"/><w:lang w:val="en-GB" w:bidi="ar-AE"/></w:rPr></w:pPr>"#
+);
+
+#[test]
+fn a_tracked_set_on_a_mark_whose_properties_repeat_an_element_adds_no_problem() {
+    // table-ltr.docx, seed 6078227462138920513: a tracked `set` of `w:i` on such a mark was refused as `validation_failed`
+    // ("w:sz is not in the order Word writes in w:rPr").
+    let body = format!(r#"<w:p>{REPEATED_MARK}<w:r><w:t>Heading text.</w:t></w:r></w:p>"#);
+    let xml = parts::Doc::new().body(&body).bytes();
+    let mut doc = open(Zip::new(parts::entries_doc(&xml)).build());
+    // The input repeats `w:b` exactly and `w:sz` with another value. A copy drops the exact repeat, and keeps both sizes.
+    let messages = |doc: &Document| -> Vec<String> {
+        doc.check()
+            .findings
+            .iter()
+            .filter(|f| f.code == FindingCode::SchemaNonCanonicalOrder)
+            .map(|f| f.message.clone())
+            .collect()
+    };
+    let before = messages(&doc);
+    // The record of the tracked change copies the mark's properties, both sizes and all: which one Word reads is not the
+    // compiler's to decide, so the copy is carried, as a copy of any other problem is.
+    let op = r#"{"op":"set","ref":"p1","target":"mark","props":[{"name":"i"}]}"#;
+    let receipt = doc
+        .edit(Edit::ops(batch(&doc, op), stamp()))
+        .unwrap_or_else(|e| panic!("{e}"));
+    let after = messages(&doc);
+    assert_eq!(before.len(), 2, "{before:?}");
+    assert!(
+        before.contains(&"w:sz repeats an earlier w:sz with other values in w:rPr".to_string()),
+        "{before:?}"
+    );
+    // The mark keeps its own repeats; the record adds only a copy of the differing one, the exact one being dropped from it.
+    assert!(
+        after
+            .iter()
+            .all(|m| m.contains("with other values") || before.contains(m)),
+        "{after:?}"
+    );
+    assert!(
+        receipt
+            .validation
+            .carried
+            .iter()
+            .any(|f| f.code == FindingCode::SchemaNonCanonicalOrder),
+        "{:?}",
+        receipt.validation
+    );
+    let after = main_xml(&doc);
+    assert!(
+        after.contains("<w:i/>") && after.contains("w:rPrChange"),
+        "{after}"
+    );
+}

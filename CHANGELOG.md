@@ -5,6 +5,17 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
+## [Unreleased]
+
+### Fixed
+
+- A tracked edit of properties whose `w:rPr` repeats a property with another value, such as the paragraph mark of
+  LibreOffice's `table-ltr.docx` with `<w:sz w:val="24"/>` and then `<w:sz w:val="26"/>`, is applied. The record of the
+  change keeps both sizes, since which one Word reads is not stetdoc's to decide, and `check` counted that copy as a
+  property out of the order Word writes that the edit added, and refused the edit with `validation_failed`. Such a repeat is
+  now carried as a problem the input had, and `check` names it ("`w:sz` repeats an earlier `w:sz` with other values"). An
+  exact repeat is still dropped from every copy, and a copy that keeps one is still refused.
+
 ## [0.9.1] - 2026-11-02
 
 ### Fixed

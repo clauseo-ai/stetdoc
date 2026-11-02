@@ -12,7 +12,8 @@
 //!
 //! A child of a `w:rPr` or `w:trPr` that repeats an earlier one exactly (`<w:i/><w:i/>`, a tool's slip) is
 //! the same defect to the validator, so a created container keeps the first of them and drops the rest. Repeats that
-//! differ are kept, since which one Word reads is not this module's to decide.
+//! differ are kept, since which one Word reads is not this module's to decide, and `check` carries a copy of them
+//! (`schema::DIFFERING_REPEAT`) instead of counting it as new.
 
 use super::props_edit::{canon, ctx_of, restore_order};
 use super::tree_ops::detach;

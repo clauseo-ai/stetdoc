@@ -1,9 +1,9 @@
 <p>
 <picture>
-  <source media="(prefers-color-scheme: dark) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-night-narrow.svg">
-  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-day-narrow.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-night.svg">
-  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-day.svg" alt="stetdoc. Let it stand.">
+  <source media="(prefers-color-scheme: dark) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/banner-night-narrow.svg">
+  <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/banner-day-narrow.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/banner-night.svg">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/banner-day.svg" alt="stetdoc. Let it stand.">
 </picture>
 </p>
 
@@ -54,10 +54,10 @@ first on all three models.
 
 <p>
 <picture>
-  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night-narrow.svg">
-  <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day-narrow.svg">
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night.svg">
-  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other four setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
+  <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-night-narrow.svg">
+  <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day-narrow.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-night.svg">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other four setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
 </picture>
 </p>
 

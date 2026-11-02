@@ -1,9 +1,11 @@
+<p>
 <picture>
   <source media="(prefers-color-scheme: dark) and (max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-night-narrow.svg">
   <source media="(max-width: 600px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-day-narrow.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-night.svg">
   <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/banner-day.svg" alt="stetdoc. Let it stand.">
 </picture>
+</p>
 
 stetdoc is how AI agents work in Word. Every change your agent makes lands in Word as a tracked change with its name on
 it, and everything it didn't touch comes back exactly as it was.
@@ -19,18 +21,18 @@ of the [channels below](#install-stetdoc).
 **[Read the docs](https://stetdoc.clauseo.chat/docs)** · [Quickstart](docs/quickstart.md) · [Changelog](CHANGELOG.md) ·
 Free and open source, MIT or Apache-2.0
 
-```console
+```
 $ stetdoc replace msa.docx 'due within thirty (30) days' 'due within forty-five (45) days'
 replace "due within thirty (30) days" with "due within forty-five (45) days": once, at p145 (clause 11.1)
 applied 1 operation, tracked as Claude 2026-11-02T07:44:07Z. base 96c462d4a556723b:0:96c462d4a556723b
 0 replace p145: deletion #54, insertion #55
-p145 {style "First Paragraph"} 11.1 Payment for each Shipment of Products shall be due within {--thirty (30--}{#54 C}{++forty-five (45++}{#55 C}) days from the date of the Bill of Lading …
+p145 {style "First Paragraph"} 11.1 Payment … shall be due within {--thirty (30--}{#54 C}{++forty-five (45++}{#55 C}) days …
 validated 1 unit: no problems, and this file needs no separate check.
 wrote msa.edited.docx
-msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one, or pass -o FILE or --in-place to choose.
+msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one, …
 ```
 
-<sub>stetdoc 0.9.0 on a supply agreement from Harvey LAB, the long paragraph cut short. `{--…--}` is the deletion and
+<sub>stetdoc 0.9.0 on a supply agreement from Harvey LAB, with the long lines cut short. `{--…--}` is the deletion and
 `{++…++}` the insertion, each a Word revision by Claude.</sub>
 
 ## Word found unreadable content.
@@ -40,7 +42,7 @@ stores tracked changes as XML structure. It refuses a file whose elements fall o
 and the document won't open.
 
 stetdoc checks every edit against the schema and Word's own rules before it writes a byte. A batch of edits applies
-completely or not at all. Bad input, a hostile file included, fails with a stable error code: stetdoc never panics,
+completely or not at all. Bad input, a hostile file included, fails with a stable error code. stetdoc never panics,
 hangs or touches the network.
 
 ## Done first, on every model.
@@ -49,12 +51,14 @@ We gave agents eight contract-editing tasks five ways: with stetdoc, with no plu
 Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc finished
 first on all three models.
 
+<p>
 <picture>
   <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night-narrow.svg">
   <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day-narrow.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night.svg">
   <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day.svg" alt="Median time per task. Claude Haiku 5.5: stetdoc 21 s, the other four setups 41 to 45 s. Claude Opus 5.5: stetdoc 25 s, the other four setups 37 to 56 s. Gemini 3.8 Flash: stetdoc 135 s, the other four setups 274 to 538 s.">
 </picture>
+</p>
 
 - **0 of 118** stetdoc runs wrote a file Word offered to repair.
 - **6 of 6** long Harvey LAB markups came out fully correct, on every model.
@@ -69,7 +73,7 @@ Run a document through stetdoc without editing it and you get the identical file
 and only that clause's elements change. Styles, numbering, comments, other people's tracked changes and macros stay
 where their authors left them.
 
-```console
+```
 $ stetdoc unpack msa.docx && stetdoc pack msa.stet -o roundtrip.docx
 $ cmp msa.docx roundtrip.docx && echo identical
 identical
@@ -84,13 +88,13 @@ normalizes, what it shows read-only and what it leaves out.
 Lawyers cite clauses by number. Word works those numbers out when it draws the page, so they appear nowhere in the
 file. stetdoc computes them, and a search hands your agent the clause, a stable paragraph ref and the exact text.
 
-```console
+```
 $ stetdoc view msa.docx --find 'thirty' --find 'governing law'
 …
 {in p144 "Clause 11 — PAYMENT"}
-p145 {§11.1} …each Shipment of Products shall be due within thirty (30) days from the date of the Bill of Lading… {~ "thirty" 1}
+p145 {§11.1} …each Shipment of Products shall be due within thirty (30) days from the date… {~ "thirty" 1}
 {in p167 "Clause 14 — FORCE MAJEURE"}
-p182 {§14.3} …Party may terminate this Agreement by giving thirty (30) days’ written notice to the other Party.… {~ "thirty" 1}
+p182 {§14.3} …Party may terminate this Agreement by giving thirty (30) days’ written notice… {~ "thirty" 1}
 …
 p272 CLAUSE 23 — GOVERNING LAW {~ "governing law" 1}
 {position: p81..p466 of find "thirty" (13), "governing law" (3): 16 matches in 15 blocks (15 of 15 blocks)}
@@ -102,14 +106,14 @@ p272 CLAUSE 23 — GOVERNING LAW {~ "governing law" 1}
 stetdoc writes nothing and lists every match with its clause. Missing text gets the same refusal. stetdoc also refuses
 an edit aimed at a paragraph that changed after the agent read it, so a change never lands in the wrong place.
 
-```console
+```
 $ stetdoc replace msa.docx 'thirty (30) days' 'forty-five (45) days'
 error[ambiguous_match]: "thirty (30) days" is in the document 12 times, and it must be there once:
   p81 (clause 3.3) …d to the Seller not less than [thirty (30) days] prior to the first day of the…
   p81 (clause 3.3) …ders submitted with less than [thirty (30) days]’ notice may be accepted by th…
   p126 (clause 7.5(a)) …cement to be completed within [thirty (30) days] of the date on which the non-…
   …
-next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, pass --range with its ref, such as --range p81..p81, or make OLD longer so it matches once.
+next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, …
 ```
 
 ## Hands off the XML.
@@ -187,12 +191,11 @@ stetdoc compare old.docx new.docx -o redline.docx
 ```
 
 An edit writes `NAME.edited.docx` beside the input, then `NAME.edited-2.docx`, and never overwrites. `-o FILE` names
-the output and `--in-place` writes back. `--clause 11.1` or `--range p40..p60` narrows a search, `--ignore-case`
-ignores case, and `--all` or `--expect N` replaces or comments on every occurrence. `--manual` writes a manual redline
-for readers who ask for one: old text struck, new text underlined, no tracked changes. Receipts and views name the
-tracked changes other people made, so the agent can report them.
+the output and `--in-place` writes back. Receipts and views name the tracked changes other people made, so the agent
+can report them.
 
-For longer work, unpack a working copy and edit its readable files with any tool:
+For longer work, unpack a working copy and edit its readable files with any tool, string replacement and `apply_patch`
+included:
 
 ```sh
 stetdoc unpack contract.docx        # writes contract.stet/
@@ -201,31 +204,10 @@ stetdoc check contract.stet         # the redline pack will write, validated
 stetdoc pack contract.stet          # writes contract.edited.docx with real tracked changes
 ```
 
-The working copy holds `document.md`, `notes.md`, `headers.md` and `comments.md`, which agents edit with string
-replacement or `apply_patch`, and a hidden complement, `.stet/`, that holds everything needed to rebuild the exact
-package. Every block has a stable short ref such as `p42`. Every write survives a crash, and a second process waits for
-the first.
-
-Anything else, such as inserting paragraphs, formatting, or accepting and rejecting revisions, goes in a batch of
-operations:
-
-```
-stetdoc edit contract.stet <<'EOF'
-base: 5737b772923cf8d3:0:5737b772923cf8d3
----
-@insert
-ref: p4
-place: after
-paragraphs: <<END
-A new paragraph after p4.
-END
-EOF
-```
-
-The base is the token the last view or receipt printed. A batch whose base comes from another document or another
-history, or that names a block changed since, is refused rather than misapplied. A batch from an older state that
-touches only unchanged blocks still applies. [How stetdoc works](docs/concepts.md) explains refs, bases and receipts,
-and the [CLI reference](docs/reference/cli.md) lists every command and flag, with examples that run as tests.
+Inserting paragraphs, formatting, and accepting or rejecting revisions go to `stetdoc edit` as a batch of
+[operations](docs/reference/operations.md). [How stetdoc works](docs/concepts.md) explains working copies, refs, base
+tokens and receipts. The [CLI reference](docs/reference/cli.md) lists every command and flag, such as `--clause`,
+`--range`, `--all` and `--manual`, with examples that run as tests.
 
 ## Build on stetdoc
 
@@ -241,24 +223,11 @@ let saved = doc.save()?;
 ```
 
 Node and Bun use it through the npm package `@clauseo/stetdoc`, with TypeScript types generated from the same
-definitions:
+definitions. Its `textEditor` is the backend of Claude's text editor tool, as the crate `stetdoc-editor` is in Rust.
+Errors carry a stable code, a message and a `next` hint, and the npm package throws them as `StetdocError`.
 
-```ts
-import { Document } from "@clauseo/stetdoc";
-
-const doc = Document.open(bytes);
-// Offsets count UTF-16 units.
-const receipt = doc.edit({ base: doc.base(), ops, author: "Jane Doe", date });
-// Keep it between turns.
-const copy = doc.export();
-// The backend of Claude's text editor tool.
-const result = doc.textEditor(toolUse.input, { author: "Jane Doe", date });
-```
-
-The Rust crate `stetdoc-editor` is the same backend for Claude's text editor tool. Errors carry a stable code, a message
-and a `next` hint, and the npm package throws them as `StetdocError`. [Build on stetdoc](docs/build-on-stetdoc.md)
-compares the crate, the npm package, the CLI and MCP for products; the npm package's own guide is
-[`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-napi/npm/README.md), and the
+[Build on stetdoc](docs/build-on-stetdoc.md) compares the crate, the npm package, the CLI and MCP for products. The npm
+package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-napi/npm/README.md), and the
 [error reference](docs/reference/errors.md) lists every code.
 
 ## Repository

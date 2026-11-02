@@ -335,8 +335,8 @@ def bench(c: dict, narrow: bool) -> str:
     W = 700 if narrow else 1600
     P = 36 if narrow else 72  # the plate's inner padding
     body = []
-    cap_size = 30 if narrow else 34
-    lab = 23 if narrow else 26
+    cap_size = 34
+    lab = 27 if narrow else 26
     y = (48 if narrow else 68) + A.cap * cap_size
     body.append(text("Median time per task", P, y, cap_size, TITLE, c["on_bar"]))
     if narrow:
@@ -345,9 +345,9 @@ def bench(c: dict, narrow: bool) -> str:
     else:
         body.append(key(c, P, y, lab, stacked=False, right=W - P))
         y += 44
-    fig = 76 if narrow else 84
-    rng = 40 if narrow else 46
-    model = 28 if narrow else 30
+    fig = 80 if narrow else 84
+    rng = 42 if narrow else 46
+    model = 32 if narrow else 30
     for i, (name, stet, (fast, slow)) in enumerate(BENCH):
         body.append(f'<rect fill="{c["divide"]}" fill-opacity="{c["divide_a"]:g}" x="{P}" y="{num(y)}" width="{W - 2 * P}" height="2"/>')
         if narrow:

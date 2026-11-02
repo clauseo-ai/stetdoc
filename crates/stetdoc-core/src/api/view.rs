@@ -322,11 +322,18 @@ pub enum WarningCode {
     /// The edit repaired a defect of the input that stops Word opening the file: a prefix that `mc:Ignorable`,
     /// `mc:ProcessContent` or `mc:MustUnderstand` names and nothing declares (decision 0014).
     Repaired,
+    /// A typed cross-reference, such as `Clause 16.2(b)`, reads the same after the edit and names another block now: the
+    /// edit renumbered the clauses, and the reference did not follow.
+    RefRetargeted,
+    /// A typed cross-reference that resolved to one block before the edit resolves to none, or to several, now.
+    RefUnresolved,
+    /// The edit removed the definition of a term that the document still uses.
+    DefinitionRemoved,
 }
 
 impl WarningCode {
     /// Every code, in the order of the design's table.
-    pub const ALL: [WarningCode; 35] = [
+    pub const ALL: [WarningCode; 38] = [
         WarningCode::LooksHidden,
         WarningCode::HiddenText,
         WarningCode::NumberingApproximate,
@@ -362,6 +369,9 @@ impl WarningCode {
         WarningCode::CompareListsDropped,
         WarningCode::OutlineShown,
         WarningCode::Repaired,
+        WarningCode::RefRetargeted,
+        WarningCode::RefUnresolved,
+        WarningCode::DefinitionRemoved,
     ];
 
     /// The snake_case name used on the wire.
@@ -402,6 +412,9 @@ impl WarningCode {
             WarningCode::CompareListsDropped => "compare_lists_dropped",
             WarningCode::OutlineShown => "outline_shown",
             WarningCode::Repaired => "repaired",
+            WarningCode::RefRetargeted => "ref_retargeted",
+            WarningCode::RefUnresolved => "ref_unresolved",
+            WarningCode::DefinitionRemoved => "definition_removed",
         }
     }
 

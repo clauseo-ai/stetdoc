@@ -71,6 +71,9 @@ impl Document {
         } else {
             Vec::new()
         };
+        // What the check of cross-references reads of the document as it is, read before the stage holds a copy of any part,
+        // so that the index it builds is dropped before the edit's own memory is in use.
+        let before = super::drift::Before::read(&self.state)?;
         // 4. Stage.
         let mut tx = self.state.begin();
         let scope = if edit.scope.is_empty() {
@@ -148,13 +151,16 @@ impl Document {
         // every failure the real edit would meet at the commit is met here too.
         if edit.dry_run {
             let mut receipt = receipt::build(&inputs(tx.parts(), self.state.base_token(), true))?;
-            let (_dropped, committed) = tx.commit()?;
-            receipt::complete(&mut receipt, &committed);
+            let (dropped, committed) = tx.commit()?;
+            // The state the real edit would install, read and then dropped, so that the check reads what the real edit reads.
+            let drift = super::drift::find(&before, &self.state, &dropped, &applied)?;
+            receipt::complete(&mut receipt, &committed, drift);
             return Ok((receipt, None));
         }
         let (next, committed) = tx.commit()?;
         let mut receipt = receipt::build(&inputs(next.parts(), next.base_token(), false))?;
-        receipt::complete(&mut receipt, &committed);
+        let drift = super::drift::find(&before, &self.state, &next, &applied)?;
+        receipt::complete(&mut receipt, &committed, drift);
         Ok((receipt, Some(next)))
     }
 }

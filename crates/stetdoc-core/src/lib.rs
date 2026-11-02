@@ -101,7 +101,8 @@ pub use api::op_spec::{FieldKind, FieldSpec, OPS, OpSpec};
 pub use api::options::{CompareOptions, Markup, OffsetUnit, OpenOptions, Quotes};
 pub use api::receipt::{
     AuthorRevisions, ChangeEntry, CheckResult, CommentEffect, FoldedEntry, ManualMark, MoveEntry,
-    OpResult, Receipt, RemovedOwnEntry, Resolution, ResolvedCount, Retired, Validation,
+    OpResult, Receipt, RefDrift, RefTarget, RemovedOwnEntry, Resolution, ResolvedCount, Retired,
+    Validation,
 };
 pub use api::revision::{ChangeKind, RevisionInfo};
 pub use api::stamp::Stamp;

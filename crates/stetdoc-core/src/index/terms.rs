@@ -29,6 +29,9 @@ pub(crate) struct Definition {
     pub story: StoryKind,
     /// How it was defined.
     pub kind: DefKind,
+    /// A definition paragraph that gives the meaning by pointing elsewhere, `"Cure Period" has the meaning given in Clause
+    /// 16.2(b)`: the meaning is where it points, so it does not stand in for a definition that an edit removes.
+    pub pointer: bool,
     /// The start of the paragraph.
     pub snippet: String,
 }
@@ -191,6 +194,26 @@ fn parenthetical_terms(text: &str) -> Vec<String> {
         }
     }
     out
+}
+
+/// The verbs of a definition paragraph that gives the meaning by pointing elsewhere.
+const POINTERS: [&str; 5] = [
+    "has the meaning",
+    "have the meaning",
+    "shall have the meaning",
+    "is defined in",
+    "are defined in",
+];
+
+/// True if the text is a definition paragraph whose verb points elsewhere for the meaning: `"Cure Period" has the meaning
+/// given in Clause 16.2(b)`.
+pub(crate) fn points_elsewhere(text: &str) -> bool {
+    let Some((_, rest)) = quoted_list(after_label(text)) else {
+        return false;
+    };
+    let lower = rest.to_lowercase();
+    let head: String = lower.chars().take(48).collect();
+    POINTERS.iter().any(|v| head.contains(v))
 }
 
 /// Every term the text defines, with how.

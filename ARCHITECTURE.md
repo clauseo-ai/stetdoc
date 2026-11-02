@@ -151,7 +151,9 @@ or newer **state version**) return `stale_files`.
 
 **Receipts show the result.** A `Receipt` carries the post-edit text of every block it
 touched, the refs of the blocks it added (a dry run lists a new block without a ref), the
-new base token, and warnings.
+new base token, and warnings. Among them are the cross-references the edit moved and the
+definitions it removed from terms still in use, compared by block over Final text, with each
+moved reference's old and new target in `Receipt.ref_drift`.
 
 **Determinism.** The same inputs (bytes, edits, stamps, options) always give
 byte-identical `save`, `export` and `compare` output. New identifiers come from
@@ -318,7 +320,7 @@ reading" file to exist.
 | `revisions` | Every revision shape Word writes; accept and reject | `Compiler::{replace_text, set_props, insert_block, delete_block, split_block, merge_blocks, insert_row, place_markers, …}`, `resolve(tx, &mut ChangeIndex, &[Step])`, `changes` | `revisions/mod.rs` |
 | `comments` | Writing comments and deleting notes | `add`, `reply`, `set_resolved`, `edit`, `delete`, `reconcile`, `delete_note` | `comments/add.rs` |
 | `threads` | Comments, threads, anchors and the consistency of the comment parts | `Threads::{of, comments, threads, comment, thread_of, covered_text, counts}`, `audit` | `threads/read.rs` |
-| `index` | Clauses, defined terms and cross-references | `PartsView::{doc_index, edges, bookmarks}`, `Index::{clauses, clause_of, resolve_clause, definitions}`, `Edges::{outbound, inbound}`, `lookup` | `index/mod.rs` |
+| `index` | Clauses, defined terms and cross-references | `PartsView::{doc_index, edges, bookmarks}` and their `_in` forms for a mode, `Index::{clauses, clause_of, resolve_clause, definitions, terms}`, `Edges::{outbound, inbound, all}`, `lookup`, `blocks_using` | `index/mod.rs` |
 | `check` | Validity under the no-new-violations rule, and the findings of a check | `edit(&Tx, &Declared) -> Result<Verified, StetError>`, `document(&PartsView) -> CheckReport`, `scan_unit(&SpanTree, NodeId)`, `scan_part(&SpanTree)`, `unit_keys(&PartsView, &BlockKey)`, `undeclared(&PartsView, PartId)` | `check/mod.rs` |
 | `ops` | Operations into compiler calls, and the two syntaxes of a batch | `apply(&Batch, &mut Tx) -> Result<Applied, StetError>`, `Batch::{parse, to_json, to_block}`, `validate::batch`, the quote policy | `ops/mod.rs`, then any `ops/<name>.rs` |
 | `projection` | Rendering, selection, paging, parsing edited files | `view(&State, &ViewSpec) -> View`, `render_files`, `render_blocks`, `lookup`, `render_lookup`, `files::to_batch(&State, &ReadableFiles, &Limits) -> Planned` | `projection/model.rs` |
@@ -462,7 +464,11 @@ that need them are skipped where the tool is absent.
    caches (text model, cascade, numbering, index) that were built from parts that did not
    change. Caches are not invalidated: each records the generation of every part it was
    built from, and is rebuilt on the next read if one has changed. Discard drops the
-   `Tx`, which never wrote to the committed state.
+   `Tx`, which never wrote to the committed state. The receipt is built from the committed
+   state, or for a dry run from the staged one. `document/drift.rs` compares the resolved prose
+   mentions of the starting state, read before staging, with those of the state the commit
+   makes (a dry run's too, before it is dropped), to warn about the ones the edit moved. It
+   builds each index in a scratch `Tx`, so no cache keeps one.
 
 **Compare (`compare`).** Open both packages, accept any existing revisions in memory
 (with a warning), then align blocks:

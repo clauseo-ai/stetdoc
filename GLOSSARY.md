@@ -387,6 +387,17 @@ comes out **resolved**, **ambiguous**, **relative** (read from the clauses aroun
 paragraph), **outside** (a citation of a law) or **unresolved**, and the first answer is never
 given for the second or the third.
 
+**Reference drift.** A mention that reads the same after an edit and names another block, or
+none, because the edit renumbered the clauses it cites. Targets are compared by block, never by
+label. A receipt warns about each one (`ref_retargeted`, `ref_unresolved`, listed in
+`Receipt.ref_drift`), and about a defined term whose definition the edit removed while the text
+still uses it (`definition_removed`). The codes say "ref" for a cross-reference, which this
+glossary otherwise keeps for block references.
+
+**Pointer definition.** A definition paragraph that gives the meaning by pointing elsewhere:
+"Cure Period" has the meaning given in Clause 16.2(b). It does not stand in for the definition
+it points at.
+
 **Reference graph.** All cross-references and defined-term uses, queryable in both
 directions.
 

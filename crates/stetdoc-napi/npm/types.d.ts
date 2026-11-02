@@ -841,6 +841,11 @@ export type Receipt = {
   moves: MoveEntry[];
   /** One result for each operation, in order. */
   operations: OpResult[];
+  /**
+   * The typed cross-references whose target the edit changed, one for each `ref_retargeted` and `ref_unresolved`
+   * warning, in the same order.
+   */
+  ref_drift?: RefDrift[];
   /** The refs that are stale now, with the reason. */
   retired: Retired[];
   /** The revisions the batch wrote, by author. */
@@ -855,6 +860,32 @@ export type Receipt = {
   validation: Validation;
   /** Every warning, deduplicated by code, block and message. */
   warnings: Warning[];
+};
+
+/**
+ * A typed cross-reference whose target block an edit changed: the mention reads the same, and the clause it names is
+ * another block now, or none. Each one has a `ref_retargeted` or `ref_unresolved` warning, in the same order.
+ */
+export type RefDrift = {
+  /** The block it resolves to after the edit, or none when it resolves to nothing or to several blocks. */
+  after?: RefTarget | null;
+  /** The block it resolved to before the edit. */
+  before: RefTarget;
+  /** The ref of the citing block. */
+  source: string;
+  /** The mention as written, such as `Clause 16.2(b)`. */
+  text: string;
+};
+
+/** The block a cross-reference resolved to. */
+export type RefTarget = {
+  /**
+   * The clause as a view prints it after the arrow of a mention: its label and the start of its text, such as
+   * `16.2(b) Step 2 — Cure Period. Upon receipt of a B…`.
+   */
+  label: string;
+  /** The ref of the block, or none for a block that the batch adds, in a dry run and in the real edit alike. */
+  ref?: string | null;
 };
 
 /** One cross-reference: a block that cites something and what it resolved to. */
@@ -1144,4 +1175,4 @@ export type Warning = {
   story?: string | null;
 };
 
-export type WarningCode = "looks_hidden" | "hidden_text" | "numbering_approximate" | "read_anomaly" | "opaque_content" | "unreferenced_note" | "duplicate_number" | "looks_like_rewrite" | "split_at_wrap" | "no_change" | "own_text_removed" | "property_change_folded" | "revision_removed_with_text" | "quotes_curled" | "quotes_straightened" | "find_matched_loosely" | "already_resolved" | "reply_to_resolved" | "anchor_emptied" | "comment_removed" | "compare_revisions_accepted" | "compare_paragraph_replaced" | "compare_not_redlined" | "compare_not_restored" | "compare_keys_merged" | "compare_table_replaced" | "compare_story_unmatched" | "compare_comments_dropped" | "compare_bookmarks_dropped" | "compare_hyperlinks_unlinked" | "compare_objects_dropped" | "compare_notes_dropped" | "compare_lists_dropped" | "outline_shown" | "repaired";
+export type WarningCode = "looks_hidden" | "hidden_text" | "numbering_approximate" | "read_anomaly" | "opaque_content" | "unreferenced_note" | "duplicate_number" | "looks_like_rewrite" | "split_at_wrap" | "no_change" | "own_text_removed" | "property_change_folded" | "revision_removed_with_text" | "quotes_curled" | "quotes_straightened" | "find_matched_loosely" | "already_resolved" | "reply_to_resolved" | "anchor_emptied" | "comment_removed" | "compare_revisions_accepted" | "compare_paragraph_replaced" | "compare_not_redlined" | "compare_not_restored" | "compare_keys_merged" | "compare_table_replaced" | "compare_story_unmatched" | "compare_comments_dropped" | "compare_bookmarks_dropped" | "compare_hyperlinks_unlinked" | "compare_objects_dropped" | "compare_notes_dropped" | "compare_lists_dropped" | "outline_shown" | "repaired" | "ref_retargeted" | "ref_unresolved" | "definition_removed";

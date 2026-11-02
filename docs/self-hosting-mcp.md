@@ -120,7 +120,7 @@ install script. `STETDOC_VERSION` pins the release.
 
 ```dockerfile
 FROM debian:bookworm-slim AS download
-ARG STETDOC_VERSION=0.9.1
+ARG STETDOC_VERSION=0.9.2
 ARG TARGETARCH
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl \
  && arch="${TARGETARCH:-$(dpkg --print-architecture)}" \

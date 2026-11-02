@@ -371,15 +371,20 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
         blocks: shown.blocks,
         blocks_omitted: shown.omitted,
         warnings,
+        ref_drift: Vec::new(),
         validation: i.validation.clone(),
         text: String::new(),
     })
 }
 
-/// Adds what only the commit knows, and writes the receipt's text. `retired` holds every ref that went stale: those whose
+/// Adds what only the commit knows, and the cross-references and definitions that the edit moved (`drift.rs`, read from the
+/// committed state), and writes the receipt's text. `retired` holds every ref that went stale: those whose
 /// element left the document, and those a merge absorbed, as `merged into p5` (or the survivor's reason, when the batch removed
 /// the survivor too).
-pub(super) fn complete(receipt: &mut Receipt, committed: &Committed) {
+pub(super) fn complete(receipt: &mut Receipt, committed: &Committed, drift: super::drift::Drift) {
+    // They come last: each is about one citing block and one mention, or one term, so none repeats another warning.
+    receipt.warnings.extend(drift.warnings);
+    receipt.ref_drift = drift.refs;
     receipt.retired = committed
         .retired
         .iter()

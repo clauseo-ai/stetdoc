@@ -1,7 +1,7 @@
 {
   "name": "stetdoc",
   "displayName": "stetdoc",
-  "version": "0.9.1",
+  "version": "0.9.2",
   "description": "Read, redline and compare Word .docx files with real tracked changes. Agents edit a .docx as a working copy, and every edit becomes a Word revision with an author.",
   "author": { "name": "Clauseo" },
   "homepage": "https://stetdoc.clauseo.chat",

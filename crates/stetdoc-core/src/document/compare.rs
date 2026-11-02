@@ -282,6 +282,7 @@ fn receipt_of(
         blocks: Vec::new(),
         blocks_omitted: 0,
         warnings,
+        ref_drift: Vec::new(),
         validation,
         text: String::new(),
     };

@@ -27,13 +27,13 @@ $ stetdoc replace msa.docx 'due within thirty (30) days' 'due within forty-five 
 replace "due within thirty (30) days" with "due within forty-five (45) days": once, at p145 (clause 11.1)
 applied 1 operation, tracked as Claude 2026-11-02T07:44:07Z. base 96c462d4a556723b:0:96c462d4a556723b
 0 replace p145: deletion #54, insertion #55
-p145 {style "First Paragraph"} 11.1 Payment … shall be due within {--thirty (30--}{#54 C}{++forty-five (45++}{#55 C}) days …
+p145 {style "First Paragraph"} 11.1 Payment … shall be due within {--thirty (30)--}{#54 C}{++forty-five (45)++}{#55 C} days …
 validated 1 unit: no problems, and this file needs no separate check.
 wrote msa.edited.docx
 msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one, …
 ```
 
-<sub>stetdoc 0.9.0 on a synthetic supply agreement from Harvey LAB, with the long lines cut short. `{--…--}` is the
+<sub>stetdoc 0.9.1 on a synthetic supply agreement from Harvey LAB, with the long lines cut short. `{--…--}` is the
 deletion and `{++…++}` the insertion, each a Word revision by Claude.</sub>
 
 ## Word found unreadable content.

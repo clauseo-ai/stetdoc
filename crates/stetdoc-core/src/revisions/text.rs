@@ -7,7 +7,7 @@
 //! keeps the original node as the left part, and an insertion goes after what was just deleted.
 
 use super::compiler::{Compiler, ParaView};
-use super::diff::{self, Cleanup};
+use super::diff;
 use super::errors::{invalid, readonly, unsupported};
 use super::insert_run::check_new_text;
 use super::names::is_w;
@@ -134,7 +134,9 @@ impl Compiler<'_, '_> {
         } else {
             with.to_string()
         };
-        let pieces: Vec<Piece> = diff::edits(&old, &with, Cleanup::Readable)
+        let start = range.start;
+        let keep = |r: Range<usize>| self.stays_out(&p, start + r.start..start + r.end);
+        let pieces: Vec<Piece> = diff::edits_keeping(&old, &with, &keep)
             .into_iter()
             .map(|e| Piece {
                 start: range.start + e.range.start,
@@ -195,6 +197,22 @@ impl Compiler<'_, '_> {
             cur = n.parent();
         }
         Ok(())
+    }
+
+    /// True if the characters `range` of `Final` must stay out of an edit that the bracket rule of the difference would
+    /// widen (design `revisions.md`, 2.5 rule 5): they are in another author's pending change, or deleting them would be
+    /// refused. The rule then leaves the bracket standing, as the edit was before it.
+    fn stays_out(&self, p: &ParaView, range: Range<usize>) -> bool {
+        let Some(loc) = p.map.locate(Mode::Final, range.clone()) else {
+            return true;
+        };
+        let deletion = Piece {
+            start: range.start,
+            end: range.end,
+            with: String::new(),
+        };
+        self.preflight(p, &deletion).is_err()
+            || !matches!(self.foreign_item(p, loc.items), Ok(None))
     }
 
     /// Every check that can refuse an edit, run before anything changes.

@@ -144,9 +144,20 @@ describe('headings', () => {
 
 describe('code', () => {
 	test("console blocks copy only commands; heredoc bodies go with their command", () => {
-		const src = readFileSync(join(REPO_ROOT, 'README.md'), 'utf8');
-		const block = src.slice(src.indexOf("stetdoc edit contract.stet <<'EOF'"));
-		const heredoc = block.slice(0, block.indexOf('\nEOF\n') + 4);
+		// Written here, not read from a page: the README held this example until its launch rewrite dropped it, and the
+		// test then fed the copy code an empty block. A heredoc with a heredoc inside it is the hard case.
+		const heredoc = [
+			"stetdoc edit contract.stet <<'EOF'",
+			'base: 5737b772923cf8d3:0:5737b772923cf8d3',
+			'---',
+			'@insert',
+			'ref: p4',
+			'place: after',
+			'paragraphs: <<END',
+			'A new paragraph after p4.',
+			'END',
+			'EOF',
+		].join('\n');
 		const { lines, copy } = consoleBlock(`$ ${heredoc}\nreceipt line\nerror[stale_target]: no\nnext: run it again`);
 		expect(copy).toBe(heredoc);
 		expect(copy).toContain('paragraphs: <<END');
@@ -364,7 +375,7 @@ describe('reading on phones', () => {
 describe('twins', () => {
 	test('{{version}} and the skill tables are filled; a leftover placeholder fails', () => {
 		const skill = readSource('crates/stetdoc-cli/skill/core.md');
-		expect(skill).toContain('stetdoc 0.9.0 turns a .docx');
+		expect(skill).toContain('stetdoc 0.9.1 turns a .docx');
 		expect(skill).not.toMatch(/\{\{/);
 		expect(skill).toContain('| `stetdoc unpack` |');
 		expect(skill).toMatch(/\| `replace` \| yes \| /);

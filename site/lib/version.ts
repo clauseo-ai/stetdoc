@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 /** the version this site last shipped with, if ../Cargo.toml can't be read */
-const PINNED = '0.9.0';
+const PINNED = '0.9.1';
 
 /**
  * stetdoc's version, from the workspace Cargo.toml one folder up. Vercel

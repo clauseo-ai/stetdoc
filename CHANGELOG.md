@@ -5,6 +5,17 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
+## [0.9.1] - 2026-11-02
+
+### Fixed
+
+- A replacement no longer cuts a bracket pair in half. `thirty (30)` to `forty-five (45)` used to strike `thirty (30` and
+  leave the `)` standing after the insertion; now the whole `thirty (30)` is struck and the whole `forty-five (45)`
+  inserted, however wide the search text. An edit that leaves `(`, `[`, `{` or `“` open takes the unchanged closer right
+  after it, and the mirror for a closer, unless the bracket is in another author's pending change. `ops` and `compare`
+  both get it, and glued `%` or `'s` still stay outside the edit, as in Word. The compare noise baseline is re-taken
+  for it: over the LAB pairs the redline has 0.05% more characters.
+
 ## [0.9.0] - 2026-11-02
 
 The first release: the `stetdoc` CLI with its MCP server and the agent plugins, built for seven targets, from GitHub
@@ -652,4 +663,5 @@ Releases, npm, PyPI, Homebrew and crates.io (`cargo install stetdoc --locked`, w
   paragraph the delete takes whole, or at a marker between paragraphs, as an empty-range comment if all its text goes.
   The edit used to be refused with `validation_failed`, and accepting such a tracked delete failed the same way.
 
+[0.9.1]: https://github.com/clauseo-ai/stetdoc/releases/tag/v0.9.1
 [0.9.0]: https://github.com/clauseo-ai/stetdoc/releases/tag/v0.9.0

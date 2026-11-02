@@ -153,22 +153,25 @@ and TLS.
 Pick any channel. Every one installs the same binary.
 
 ```sh
-# Homebrew, on macOS and Linux
+# Homebrew, macOS and Linux
 brew install clauseo-ai/tap/stetdoc
 
-# uv or pipx, on macOS, Linux and Windows. The wheel holds the native binary, so no Python runs after the install.
+# uv or pipx, Windows too
 uv tool install stetdoc
 pipx install stetdoc
 
-# npm swaps its Node launcher for the binary when install scripts run
+# npm
 npm install -g stetdoc
 
-# The install script, on macOS and Linux. It checks the SHA-256 and installs to ~/.local/bin.
+# Install script, macOS and Linux
 curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh
 
-# Cargo builds it from source
+# Cargo, from source
 cargo install stetdoc --locked
 ```
+
+The uv and pipx wheel holds the native binary, so no Python runs after the install. The script checks the SHA-256 and
+installs to `~/.local/bin`, and npm swaps its Node launcher for the binary when install scripts run.
 
 An agent can run stetdoc dozens of times in one task. Homebrew, uv, pipx and the install script put the binary itself
 on your PATH, so each call starts in about 5 ms. Through npx, every call starts Node and npm first, which costs a tenth

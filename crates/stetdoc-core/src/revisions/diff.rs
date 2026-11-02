@@ -18,12 +18,15 @@
 //!
 //! **Cleaning.** With [`Cleanup::Readable`] the edits are cleaned by the rules of 2.5: an unchanged
 //! island of no word, or of at most two words that is no longer than the larger of the two edits
-//! around it, is dissolved into them, until nothing changes, and then, if more than half of the
-//! words between the first and the last edit are inside edits, the whole span is one edit.
-//! [`Cleanup::Minimal`] keeps the matching as it is, which is what the noise measure of `compare`
-//! and the tests use as the denominator. Cleaning only merges edits and never moves an outer end,
-//! and it never leaves two edits without an unchanged island between them.
+//! around it, is dissolved into them, and an edit that cuts a bracket pair in half takes the other
+//! half when it stands unchanged right beside it (`diff_brackets.rs`), until nothing changes. Then,
+//! if more than half of the words between the first and the last edit are inside edits, the whole
+//! span is one edit. [`Cleanup::Minimal`] keeps the matching as it is, which is what the noise
+//! measure of `compare` and the tests use as the denominator. Cleaning only grows and merges edits:
+//! an outer end moves only over a bracket, never over a word. It never leaves two edits without an
+//! unchanged island between them.
 
+use super::diff_brackets::{Side, balance};
 use std::collections::HashMap;
 use std::ops::Range;
 
@@ -90,8 +93,28 @@ pub(crate) fn edits(old: &str, new: &str, cleanup: Cleanup) -> Vec<Edit> {
     edits_with(old, new, cleanup, Cleaning::DEFAULT)
 }
 
+/// [`edits`] with [`Cleanup::Readable`], where `keep` is true for a range of characters of `old` that the
+/// bracket rule must not pull into an edit: `replace_text` keeps another author's pending change out.
+pub(crate) fn edits_keeping(
+    old: &str,
+    new: &str,
+    keep: &dyn Fn(Range<usize>) -> bool,
+) -> Vec<Edit> {
+    run(old, new, Cleanup::Readable, Cleaning::DEFAULT, keep)
+}
+
 /// [`edits`] with other constants for the cleaning, which the calibration tries.
 pub(crate) fn edits_with(old: &str, new: &str, cleanup: Cleanup, cleaning: Cleaning) -> Vec<Edit> {
+    run(old, new, cleanup, cleaning, &|_| false)
+}
+
+fn run(
+    old: &str,
+    new: &str,
+    cleanup: Cleanup,
+    cleaning: Cleaning,
+    keep: &dyn Fn(Range<usize>) -> bool,
+) -> Vec<Edit> {
     let old_chars: Vec<char> = old.chars().collect();
     let new_chars: Vec<char> = new.chars().collect();
     let old_toks = tokenize(&old_chars);
@@ -104,7 +127,17 @@ pub(crate) fn edits_with(old: &str, new: &str, cleanup: Cleanup, cleaning: Clean
     let old_pre = Prefix::new(&old_toks);
     let new_pre = Prefix::new(&new_toks);
     if cleanup == Cleanup::Readable {
-        clean(&mut list, &old_pre, &new_pre, cleaning);
+        let sides = (
+            Side {
+                chars: &old_chars,
+                toks: &old_toks,
+            },
+            Side {
+                chars: &new_chars,
+                toks: &new_toks,
+            },
+        );
+        clean(&mut list, (&old_pre, &new_pre), &sides, cleaning, keep);
     }
 
     list.iter()
@@ -428,11 +461,11 @@ fn lcs(a: &[u32], b: &[u32]) -> Vec<(usize, usize)> {
 
 /// An edit in token numbers: old tokens `a0..a1` become new tokens `b0..b1`.
 #[derive(Clone, Copy, Debug)]
-struct TokEdit {
-    a0: usize,
-    a1: usize,
-    b0: usize,
-    b1: usize,
+pub(super) struct TokEdit {
+    pub(super) a0: usize,
+    pub(super) a1: usize,
+    pub(super) b0: usize,
+    pub(super) b1: usize,
 }
 
 /// The edits between the matched pairs: every stretch of tokens that no pair covers.
@@ -467,8 +500,29 @@ fn size(e: &TokEdit, old: &Prefix, new: &Prefix) -> usize {
     old.chars_between(e.a0, e.a1) + new.chars_between(e.b0, e.b1)
 }
 
-/// The cleaning rules of 2.5.
-fn clean(list: &mut Vec<TokEdit>, old: &Prefix, new: &Prefix, cleaning: Cleaning) {
+/// The cleaning rules of 2.5: rules 1 to 3 and the bracket rule until nothing changes, then rule 4, and the
+/// bracket rule once more over the one edit that rule 4 may have made.
+fn clean(
+    list: &mut Vec<TokEdit>,
+    (old, new): (&Prefix, &Prefix),
+    sides: &(Side<'_>, Side<'_>),
+    cleaning: Cleaning,
+    keep: &dyn Fn(Range<usize>) -> bool,
+) {
+    loop {
+        dissolve(list, old, new, cleaning);
+        if !balance(list, &sides.0, &sides.1, keep) {
+            break;
+        }
+    }
+    if whole_span(list, old, new, cleaning) {
+        balance(list, &sides.0, &sides.1, keep);
+    }
+}
+
+/// Rules 1 to 3: the islands that are dissolved, until nothing changes. Edits that touch are one, since an
+/// island of no token has no word.
+fn dissolve(list: &mut Vec<TokEdit>, old: &Prefix, new: &Prefix, cleaning: Cleaning) {
     loop {
         let mut changed = false;
         let mut out: Vec<TokEdit> = Vec::with_capacity(list.len());
@@ -491,6 +545,11 @@ fn clean(list: &mut Vec<TokEdit>, old: &Prefix, new: &Prefix, cleaning: Cleaning
             break;
         }
     }
+}
+
+/// Rule 4: if more than half of the words between the first edit and the last are inside edits, the span is one
+/// edit. Returns true if it is.
+fn whole_span(list: &mut Vec<TokEdit>, old: &Prefix, new: &Prefix, cleaning: Cleaning) -> bool {
     if let (Some(first), Some(last)) = (list.first().copied(), list.last().copied())
         && list.len() > 1
     {
@@ -506,6 +565,8 @@ fn clean(list: &mut Vec<TokEdit>, old: &Prefix, new: &Prefix, cleaning: Cleaning
                 b0: first.b0,
                 b1: last.b1,
             }];
+            return true;
         }
     }
+    false
 }

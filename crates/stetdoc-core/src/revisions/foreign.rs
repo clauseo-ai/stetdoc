@@ -100,11 +100,23 @@ impl Compiler<'_, '_> {
         if self.tracked() {
             return Ok(());
         }
+        match self.foreign_item(p, items)? {
+            Some(rev) => Err(refusal("this text is in", &rev)),
+            None => Ok(()),
+        }
+    }
+
+    /// The first of another author's pending changes that an item of `items` lies in, through a wrapper around it or a
+    /// formatting change of its run, tracked or not.
+    pub(super) fn foreign_item(
+        &self,
+        p: &ParaView,
+        items: Range<usize>,
+    ) -> Result<Option<Revision>, StetError> {
         let tree = self.tree_ro(&p.part)?;
         let Some(para) = Paragraph::new(tree, p.node) else {
-            return Ok(());
+            return Ok(None);
         };
-        let lead = "this text is in";
         for i in items {
             let Some(item) = p.map.items().get(i) else {
                 continue;
@@ -113,17 +125,17 @@ impl Compiler<'_, '_> {
                 if let Some(rev) = para.revision_of(ctx)
                     && !self.is_own_author(rev.author.as_deref())
                 {
-                    return Err(refusal(lead, &rev));
+                    return Ok(Some(rev));
                 }
             }
             if let Some(run) = item.run
                 && let Some(rev) = run_change(tree, run)
                 && !self.is_own_author(rev.author.as_deref())
             {
-                return Err(refusal(lead, &rev));
+                return Ok(Some(rev));
             }
         }
-        Ok(())
+        Ok(None)
     }
 
     /// Untracked: refuses new text at a gap inside another author's wrapper, where it would be theirs. At the edge of their

@@ -1,6 +1,6 @@
 //! Tests of `replace_text` at the edges of what it may touch: a comment reference at the edge of a range, a
-//! violation that an element carries through a rename, a run that holds a text box, and an equation that holds
-//! a deletion.
+//! violation that an element carries through a rename, a run that holds a text box, an equation that holds
+//! a deletion, and a bracket that the difference would take into an edit.
 
 use super::tests_support::*;
 use crate::wordml::Mode;
@@ -240,4 +240,51 @@ fn an_insert_at_the_start_of_a_paragraph_whose_ppr_follows_a_comment_goes_after_
             }
         }
     }
+}
+
+// --- a bracket beside an edit (design 2.5 rule 5)
+
+#[test]
+fn a_replacement_strikes_and_inserts_a_number_with_its_brackets_whole() {
+    let s = tracked_edits(
+        &p(&r("due within thirty (30) days")),
+        &[(0, 0..27, "due within forty-five (45) days")],
+    );
+    s.assert_clean();
+    assert_eq!(s.fin, ["due within forty-five (45) days"]);
+    assert_eq!(s.red, ["due within thirty (30)forty-five (45) days"]);
+    assert!(s.xml.contains(">thirty (30)</w:delText>"), "{}", s.xml);
+}
+
+#[test]
+fn a_closing_bracket_in_another_authors_insertion_is_left_to_them() {
+    // Eric inserted the `)`. The bracket rule would take it into the edit, which would delete his text and type it
+    // again, so it stays out, tracked or untracked (where taking it would be refused).
+    let body = p(&format!(
+        "{}<w:ins {}>{}</w:ins>{}",
+        r("due within thirty (30"),
+        eric(900),
+        r(")"),
+        r(" days")
+    ));
+    let s = tracked_edits(&body, &[(0, 0..27, "due within forty-five (45) days")]);
+    s.assert_clean();
+    assert_eq!(s.fin, ["due within forty-five (45) days"]);
+    assert_eq!(s.red, ["due within thirty (30forty-five (45) days"]);
+    assert_eq!(s.xml.matches("<w:del ").count(), 1, "{}", s.xml);
+    assert!(
+        s.xml
+            .contains(&format!("<w:ins {}>{}</w:ins>", eric(900), r(")"))),
+        "{}",
+        s.xml
+    );
+
+    let u = untracked_edits(&body, &[(0, 0..27, "due within forty-five (45) days")]);
+    assert!(u.effects.iter().all(Result::is_ok), "{:?}", u.effects);
+    assert_eq!(u.fin, ["due within forty-five (45) days"]);
+    assert!(
+        u.xml.contains(&format!("<w:ins {}>", eric(900))),
+        "{}",
+        u.xml
+    );
 }

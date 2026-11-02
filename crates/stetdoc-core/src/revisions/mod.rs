@@ -65,6 +65,7 @@ mod changes_text;
 mod cleanup;
 pub(crate) mod compiler;
 pub(crate) mod diff;
+mod diff_brackets;
 mod errors;
 mod foreign;
 mod gap;

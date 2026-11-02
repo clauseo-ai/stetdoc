@@ -157,7 +157,7 @@ Lines the design needs that the sections above don't give. Written to the same r
 
 **Copy buttons:** visible label "Copy"; after a copy it says "Copied" for 1.5 s, and a polite live region announces "Copied". Accessible name "Copy the install command". If the browser blocks both ways of copying, the command gets selected and the live region says "Selected. Copy it with your keyboard."
 
-**Hero Word sheet:** title strip "msa.edited.docx"; heading above the clause "Clause 11. Payment"; under the clause, the real start of clause 11.2 from the supply agreement, cut at two lines. Balloon "Claude", "Deleted: thirty (30", "31 Oct 2026, 08:24". Screen readers hear "deleted:" before the struck words and "inserted:" before the new ones.
+**Hero Word sheet:** title strip "msa.edited.docx"; heading above the clause "Clause 11. Payment"; under the clause, the real start of clause 11.2 from the supply agreement, cut at two lines. Balloon "Claude", "Deleted: thirty (30)", "31 Oct 2026, 08:24". Screen readers hear "deleted:" before the struck words and "inserted:" before the new ones.
 
 **Dialog artifact:** group label for screen readers "Word's dialog".
 

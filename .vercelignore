@@ -1,0 +1,24 @@
+# What `vercel deploy` from the repository root leaves out. The site (Root Directory `site` in the Vercel project)
+# reads docs/, the changelog, Cargo.toml and files under crates/ from the root, and checks that every repo path a doc
+# links to exists, so the rest of the tracked tree goes up. This mirrors .gitignore and site/.gitignore, since the
+# Vercel CLI does not read them.
+.git
+.vercel
+.cmx2
+.DS_Store
+/target
+**/node_modules
+**/*.snap.new
+*.pending-snap
+/crates/stetdoc-cli/tests/cmd/*.in/*.docx
+/crates/stetdoc-cli/tests/cmd/*.out
+/crates/stetdoc-cli/doc/*.in/*.docx
+/crates/stetdoc-cli/doc/*.out
+/site/.vercel
+/site/.next
+/site/out
+/site/next-env.d.ts
+/site/*.tsbuildinfo
+/site/.impeccable/review
+/site/public/docs
+/site/public/docs.md

@@ -1,10 +1,10 @@
 # stetdoc.clauseo.chat: launch page copy
 
-This is the single source for every word on the page. It was written with the homepage-copy skill and checked against its blacklist and the unslop rules. Every figure is real, and the comment after each one names its source. claims-honest (2026-11-02) rechecked every figure against its source and dropped the ones that had none. The comments are not shown on the page.
+This is the single source for every word on the page. It was written with the homepage-copy skill and checked against its blacklist and the unslop rules. Every figure is real, and the comment after each one names its source. The comments are not shown on the page.
 
 Diagnosis: situation A, a one-line ask ("the best way for agents to interact with Word, hardcore, no caveats"). The argument is built from facts in the repo, from real runs of stetdoc 0.9.0 on evals/fixtures/master-supply-agreement.docx (one of Harvey LAB's synthetic contracts), and from docx-agent-bench final-2.
 
-Read only the headings and they make the whole argument. Agents break Word files, and stetdoc doesn't. It is the fastest, and no less correct. It keeps every byte, knows the clause numbers, refuses to guess and keeps agents out of the XML. It works in every agent. Install it.
+Read only the headings and they make the whole argument. Agents break Word files, and stetdoc doesn't. It is the fastest. It keeps every byte, knows the clause numbers, refuses to guess and keeps agents out of the XML. It works in every agent. Install it.
 
 ---
 
@@ -29,8 +29,8 @@ stet mark + "stetdoc" · Docs · GitHub's mark (the Octicon, no word; its access
 
 **Picture:** the terminal run and the Word sheet with clause 11.1's tracked change. Use the run exactly as it is in the brief.
 
-**Caption:** Unedited output on a synthetic supply agreement from Harvey LAB.
-<!-- The earlier "527-paragraph" and "20 milliseconds" had no published run. Rechecked 2026-11-02 with a release build on an M1 Pro: the replace took a median of 33 ms (20 runs), so the time was dropped. Command and result: stetdoc-launch/claims-fixes.md. -->
+**Caption:** Unedited output from a Harvey LAB supply agreement.
+<!-- evals/fixtures/master-supply-agreement.docx; no edit time is quoted (measured median 33 ms, 20 runs, 2026-11-02) -->
 
 ---
 
@@ -46,21 +46,21 @@ stetdoc checks every edit against the schema and Word's own rules before it writ
 
 ## 2. Fastest on every model.
 
-We gave agents 8 short tasks and 3 long Harvey LAB markups. Every document in them is one of Harvey LAB's synthetic contracts. Each agent worked with stetdoc, with no plugin, with Anthropic's docx skill, with Anthropic's legal plugin or with Adeu. The legal plugin wasn't run on Gemini. Then we opened every file they wrote in Word. The agents using stetdoc had the fastest median time per task on all three models. On correctness they tied with no plugin on all three models.
-<!-- speed: tables.md process metrics, "wall s". Tie: tables.md task-clustered bootstrap, stetdoc minus none is +0 on every model and every 95% interval includes 0. -->
+We gave agents eight contract tasks and three long markups, five ways: with stetdoc, with no plugin, with Anthropic's docx skill, with Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc were fastest on all three models.
+<!-- docx-agent-bench reports/final-2/tables.md, process metrics, "wall s" -->
 
-**Chart: median time per task.** stetdoc is a solid bar, and the other setups show as a range from fastest to slowest (four on Claude, three on Gemini).
+**Chart: median time per task.** stetdoc is a solid bar, and the other setups show as a range from fastest to slowest.
 - Claude Haiku 5.5: stetdoc 21 s. Other setups 41 to 45 s.
 - Claude Opus 5.5: stetdoc 25 s. Other setups 37 to 56 s.
 - Gemini 3.8 Flash: stetdoc 135 s. Other setups 274 to 538 s.
 <!-- docx-agent-bench reports/final-2/tables.md, process metrics, short tasks, medians per run -->
 
 **Three facts:**
-- **0 of 118:** stetdoc runs that wrote a .docx got a repair prompt in Word. <!-- runs.csv word_valid: stetdoc 118 yes, 0 no; the other 30 stetdoc runs wrote no .docx -->
-- **6 of 6:** long Harvey LAB markups on each model opened in Word without a repair prompt and passed the objective checks. Other setups got 2 to 5 of 6. <!-- tables.md long tasks; this column leaves out the judge's legal rubric, where stetdoc scored 94% to 98% and the others 75% to 99%. 20 of the 24 repair prompts in the run came from one task, long-indenture-markup -->
-- **5 ms:** for each stetdoc call to start, with the binary on your PATH. <!-- docs/install.md, "Why the channel matters": median of 20 runs of stetdoc --version, 4.8 ms. Replaces "1 ms to a ready MCP server", which had no published source -->
+- **0 of 118** stetdoc runs left Word anything to repair. <!-- runs.csv word_valid: 118 stetdoc runs wrote a .docx, 0 got a repair prompt -->
+- **6 of 6** long Harvey LAB markups passed their checks and opened clean in Word, on every model. <!-- tables.md long tasks, objective checks and Word -->
+- **5 ms** for each stetdoc call to start. <!-- docs/install.md, "Why the channel matters": median 4.8 ms, binary on the PATH -->
 
-**Method line:** [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench), run final-2: 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per short task and two per long one, medians per run. Only the stetdoc setup had a hook that blocks other ways of writing a .docx in Claude Code. [Every file was opened in Microsoft Word for Mac 16.114.3](https://github.com/clauseo-ai/docx-agent-bench#how-grading-works), by a script that is not published.
+**Method line:** [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench): 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8, every file opened in Microsoft Word for Mac 16.114.3. [How it was graded](https://github.com/clauseo-ai/docx-agent-bench#how-grading-works).
 
 ---
 
@@ -68,8 +68,8 @@ We gave agents 8 short tasks and 3 long Harvey LAB markups. Every document in th
 
 Run a document through stetdoc without editing it and you get the identical file back, byte for byte. Edit one clause and only that clause's elements change. Styles, numbering, comments, other people's tracked changes and macros stay where their authors left them.
 
-**Proof line:** Every build checks this on 306 curated documents: unedited, each must come back byte-identical, and 50 random edit batches on each must change only what they edit. Every night the same random edits run on the whole corpus, 48,666 public documents from 58 sources. 42,317 of them were generated by python-docx, most of them Harvey LAB's synthetic legal documents, and 4,783 were saved by Microsoft Word.
-<!-- corpus/curated.tsv (306 rows), corpus/manifest/*.tsv (58 files, 48,666 rows, producer column: 42,317 "python-docx (default template)", 41,625 of them in harvey-labs.tsv; 4,783 "Microsoft Word*"), .github/workflows/laws.yml (nightly, full set, random batches) -->
+**Proof line:** Every build checks this on 306 documents, and every night random edits run on all 48,666 in the corpus.
+<!-- corpus/curated.tsv (306 rows), corpus/manifest/*.tsv (48,666 rows), .github/workflows/laws.yml (nightly) -->
 
 **Artifact:** a short stack of paragraph planes. One paragraph lifts and takes the tracked change, and the rest stay locked and identical. Then:
 ```

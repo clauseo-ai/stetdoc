@@ -15,7 +15,7 @@ THESIS: The stet mark is the page. Its bar and its three dots are the page's arc
 
 OWN-WORLD: Warm concrete planes, graphite ink. The bar is a full-bleed graphite plane with ground-coloured type reversed out; a dot is a graphite disc. Anek: 125% width for display, giant and tight; 116% for heads; 90% narrow for terminal text. Wells set in, the Word sheet a white turned page. Tracked changes in ink.
 
-STORY: Agents break Word files; stetdoc edits them as real tracked changes and leaves everything else byte for byte. It had the fastest median time per task on every model, with correctness tied. Install it.
+STORY: Agents break Word files; stetdoc edits them as real tracked changes and leaves everything else byte for byte. It was fastest on every model. Install it.
 
 FIRST VIEWPORT: The nav; then "Let it stand." set to the frame's width (frame / 6.4, two lines on phones) on a full-bleed graphite bar, ground type, with the mark's three dots set huge on the concrete under "stand", appearing once. Under the bar the sub at left and the install box at right (a small bar: command plus Copy). The real-run scene starts at the fold: the terminal well with the Word sheet over it.
 

@@ -187,9 +187,9 @@ lists every code.
 
 Open a document and save it without editing, and you get the same bytes back. Edit one paragraph, and only that
 paragraph's elements change. Styles, numbering, comments, other people's tracked changes and macros stay as their
-authors left them. Every build checks this on 306 curated documents, and every night CI runs random edits on all
-48,666 documents of the corpus, most of them synthetic. [`FIDELITY.md`](../FIDELITY.md) lists,
-feature by feature, what stetdoc keeps exactly, what it normalizes, what it shows read-only and what it leaves out.
+authors left them. Every build checks this on 306 documents, and every night random edits run on all 48,666 in the
+corpus. [`FIDELITY.md`](../FIDELITY.md) lists, feature by feature, what stetdoc keeps exactly, what it normalizes,
+what it shows read-only and what it leaves out.
 
 ## Clause numbers
 

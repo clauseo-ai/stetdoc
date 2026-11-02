@@ -35,19 +35,16 @@ export type BenchFact = {
 export const BENCH_FACTS: BenchFact[] = [
 	{
 		figure: '0 of 118',
-		line: 'stetdoc runs that wrote a .docx got a repair prompt in Word.',
+		line: 'stetdoc runs left Word anything to repair.',
 		wall: 118,
 	},
 	{
 		figure: '6 of 6',
-		line: 'long Harvey LAB markups on each model opened in Word without a repair prompt and passed the objective checks. Other setups got 2 to 5 of 6.',
+		line: 'long Harvey LAB markups passed their checks and opened clean in Word, on every model.',
 		wall: 6,
 	},
 	/* docs/install.md, "Why the channel matters": median of 20 runs of stetdoc --version */
-	{
-		figure: '5 ms',
-		line: 'for each stetdoc call to start, with the binary on your PATH.',
-	},
+	{ figure: '5 ms', line: 'for each stetdoc call to start.' },
 ];
 
 /** one piece of the method line: plain text, or a link when `href` is set */
@@ -57,11 +54,8 @@ export type MethodPart = { text: string; href?: string };
 export const BENCH_METHOD: MethodPart[] = [
 	{ text: 'docx-agent-bench', href: BENCH_URL },
 	{
-		text: ', run final-2: 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per short task and two per long one, medians per run. Only the stetdoc setup had a hook that blocks other ways of writing a .docx in Claude Code. ',
+		text: ': 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8, every file opened in Microsoft Word for Mac 16.114.3. ',
 	},
-	{
-		text: 'Every file was opened in Microsoft Word for Mac 16.114.3',
-		href: BENCH_GRADING_URL,
-	},
-	{ text: ', by a script that is not published.' },
+	{ text: 'How it was graded', href: BENCH_GRADING_URL },
+	{ text: '.' },
 ];

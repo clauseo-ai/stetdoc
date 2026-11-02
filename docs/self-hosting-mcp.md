@@ -106,8 +106,8 @@ So:
 - Run the server as an unprivileged user that owns the root and nothing else, or in a container with only the root
   mounted.
 - Put authentication in front of every server, and TLS on every connection that leaves the machine.
-- Treat document content as untrusted input. stetdoc makes no network connections and fails on hostile input with an
-  error code, but the text it shows the agent can contain instructions written by whoever wrote the document.
+- Treat document content as untrusted input. stetdoc never touches the network and fails on hostile input with an error
+  code, but the text it shows the agent can contain instructions written by whoever wrote the document.
 
 See [`SECURITY.md`](../SECURITY.md) for how hostile input is tested and how to report a vulnerability.
 

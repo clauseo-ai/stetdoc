@@ -51,9 +51,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 The receipt shows the redline: `p1 Payment is due within {--thirty--}{#0 C}{++sixty++}{#1 C} days.` Every failure is a
 `StetError` with a stable `ErrorCode`. Keep the `Document` between turns, or `export` it to a `WorkingCopy` and `resume`
-it later, so the agent's refs stay valid. The crate `stetdoc-editor` carries out the `view`, `str_replace` and
-`insert` commands of Anthropic's text editor tool on the document's readable files, for an app that gives Claude that
-tool. The public interface is listed in [`ARCHITECTURE.md`](../ARCHITECTURE.md), and why it has this shape is in
+it later, so the agent's refs stay valid. The crate `stetdoc-editor` is a backend for Claude's text editor tool. The
+public interface is listed in [`ARCHITECTURE.md`](../ARCHITECTURE.md), and why it has this shape is in
 [decision 0001](decisions/0001-core-interface.md).
 
 ## The Node and Bun package
@@ -88,8 +87,8 @@ try {
 ```
 
 Calls are synchronous, so a busy server makes them from a worker thread. Offsets count UTF-16 code units, as JavaScript
-strings do. `doc.textEditor(input, { author, date })` carries out a call of Anthropic's text editor tool on the
-document's readable files. The full surface is in [the package's README](../crates/stetdoc-napi/npm/README.md).
+strings do. `doc.textEditor(input, { author, date })` is a backend for Claude's text editor tool. The full surface is in
+[the package's README](../crates/stetdoc-napi/npm/README.md).
 
 ## The CLI as a subprocess
 

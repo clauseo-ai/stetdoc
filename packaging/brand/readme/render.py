@@ -9,8 +9,8 @@ result in the benchmark and red is the other setups. Brick is Clauseo's alone, s
 
 GitHub shows an SVG through <img>, which loads no web font, so this script draws every word as outlines from the Anek
 Latin the site hosts in site/app/fonts/, under the OFL. HarfBuzz shapes each line at the site's weight and width. The README
-picks a file with <picture>: night when the reader's system is dark, narrow on a phone. The day wide file is the
-fallback, and crates.io, which ignores <source>, shows only that one.
+picks a file with <picture>, night when the reader's system is dark and narrow on a phone. A renderer without
+<picture> shows the day wide file.
 
 The figures are site/content/bench.ts, the same ones the launch page draws.
 """
@@ -77,9 +77,15 @@ DISPLAY = (620, 125, -0.032, {})
 WORDMARK = (600, 125, -0.015, {})
 FIGURE = (620, 125, -0.035, {"tnum": True})
 RANGE = (560, 125, -0.02, {"tnum": True})
-TITLE = (560, 116, -0.01, {})
-BODY = (450, 104, 0.0, {})
-LABEL = (450, 104, 0.0, {"tnum": True})
+TITLE = (620, 116, -0.015, {})
+BODY = (400, 104, 0.0, {})
+LABEL = (400, 104, 0.0, {"tnum": True})
+
+
+# Each file is drawn on a grid wider than GitHub shows it: the wide files at about 850 px, the narrow ones at about
+# 324 px on a 390 px phone. U is how many units make one shown pixel, so the corners keep DESIGN.md's scale.
+U_WIDE = 1600 / 850
+U_NARROW = 700 / 324
 
 
 def num(n: float) -> str:
@@ -230,6 +236,7 @@ def banner(c: dict, narrow: bool) -> str:
     three dots hanging under "stand". Wide, the claim fills the frame on one line (frame / 6.32, the claim's width in
     its own em); narrow, it takes two lines, "Let it" over "stand.", as the site sets it under 1024px."""
     W = 700 if narrow else 1600
+    u = U_NARROW if narrow else U_WIDE
     G = 40 if narrow else 72  # the gutter
     body = []
 
@@ -271,19 +278,19 @@ def banner(c: dict, narrow: bool) -> str:
     body.append(dots((l2 + r2) / 2, dot_top, dw, c["ink"]))
 
     H = dot_top + dw / 4 + (44 if narrow else 64)
-    plate = f'<rect fill="{c["ground"]}" width="{W}" height="{num(H)}" rx="{12 if narrow else 16}"/>'
-    clip = f'<clipPath id="p"><rect width="{W}" height="{num(H)}" rx="{12 if narrow else 16}"/></clipPath>'
+    plate = f'<rect fill="{c["ground"]}" width="{W}" height="{num(H)}" rx="{num(10 * u)}"/>'
+    clip = f'<clipPath id="p"><rect width="{W}" height="{num(H)}" rx="{num(10 * u)}"/></clipPath>'
     return svg(W, H, "stetdoc. Let it stand.", f'<g clip-path="url(#p)">{plate}{"".join(body)}</g>', clip)
 
 
 # ---------- the benchmark: a table drawn on the stet bar, at true scale ----------
 
 
-def track(c: dict, x: float, y: float, w: float, h: float, stet: int, fast: int, slow: int, label_size: float) -> str:
+def track(c: dict, x: float, y: float, w: float, h: float, stet: int, fast: int, slow: int, label_size: float, u: float) -> str:
     """A groove cut into the bar from 0 to the row's slowest setup: stetdoc's bar lit court green at its true length,
     the other setups a red-tinted band with solid red ends, and the scale written at both ends under it."""
     out = [
-        f'<rect fill="{c["groove"]}" fill-opacity="{c["groove_a"]:g}" x="{num(x)}" y="{num(y)}" width="{num(w)}" height="{num(h)}" rx="8"/>'
+        f'<rect fill="{c["groove"]}" fill-opacity="{c["groove_a"]:g}" x="{num(x)}" y="{num(y)}" width="{num(w)}" height="{num(h)}" rx="{num(4 * u)}"/>'
     ]
     # the groove's top shade, as a cut into the plane
     out.append(f'<rect fill="#000000" fill-opacity="0.18" x="{num(x + 8)}" y="{num(y)}" width="{num(w - 16)}" height="2"/>')
@@ -291,11 +298,12 @@ def track(c: dict, x: float, y: float, w: float, h: float, stet: int, fast: int,
     ih = h - 2 * inset
     bx0 = x + inset + (w - 2 * inset) * fast / slow
     bx1 = x + w - inset
-    out.append(f'<rect fill="{c["red"]}" fill-opacity="{c["red_band_a"]:g}" x="{num(bx0)}" y="{num(y + inset)}" width="{num(bx1 - bx0)}" height="{num(ih)}" rx="4"/>')
-    for ex in (bx0, bx1 - 6):
-        out.append(f'<rect fill="{c["red"]}" x="{num(ex)}" y="{num(y + inset)}" width="6" height="{num(ih)}" rx="2"/>')
+    out.append(f'<rect fill="{c["red"]}" fill-opacity="{c["red_band_a"]:g}" x="{num(bx0)}" y="{num(y + inset)}" width="{num(bx1 - bx0)}" height="{num(ih)}" rx="{num(2 * u)}"/>')
+    end = 3 * u
+    for ex in (bx0, bx1 - end):
+        out.append(f'<rect fill="{c["red"]}" x="{num(ex)}" y="{num(y + inset)}" width="{num(end)}" height="{num(ih)}" rx="{num(end / 2)}"/>')
     gw = (w - 2 * inset) * stet / slow
-    out.append(f'<rect fill="{c["green"]}" x="{num(x + inset)}" y="{num(y + inset)}" width="{num(gw)}" height="{num(ih)}" rx="4"/>')
+    out.append(f'<rect fill="{c["green"]}" x="{num(x + inset)}" y="{num(y + inset)}" width="{num(gw)}" height="{num(ih)}" rx="{num(2 * u)}"/>')
     # Clauseo's lit tile: a top highlight, and the shadow stays neutral
     out.append(f'<rect fill="#FFFFFF" fill-opacity="0.22" x="{num(x + inset + 4)}" y="{num(y + inset)}" width="{num(gw - 8)}" height="2"/>')
     ls = label_size * 0.92
@@ -306,7 +314,7 @@ def track(c: dict, x: float, y: float, w: float, h: float, stet: int, fast: int,
     return "".join(out)
 
 
-def key(c: dict, x: float, y: float, size: float, stacked: bool, right: float | None = None) -> str:
+def key(c: dict, x: float, y: float, size: float, u: float, stacked: bool, right: float | None = None) -> str:
     """The key: both swatches and what they stand for. y is the first label's baseline."""
     sw, sh = size * 1.5, size * 0.8
     items = [("stetdoc", "green"), ("The other four setups, fastest to slowest", "red")]
@@ -318,11 +326,12 @@ def key(c: dict, x: float, y: float, size: float, stacked: bool, right: float | 
     for i, (t, kind) in enumerate(items):
         top = y - A.cap * size / 2 - sh / 2
         if kind == "green":
-            out.append(f'<rect fill="{c["green"]}" x="{num(x)}" y="{num(top)}" width="{num(sw)}" height="{num(sh)}" rx="3"/>')
+            out.append(f'<rect fill="{c["green"]}" x="{num(x)}" y="{num(top)}" width="{num(sw)}" height="{num(sh)}" rx="{num(2 * u)}"/>')
         else:
-            out.append(f'<rect fill="{c["red"]}" fill-opacity="{c["red_band_a"]:g}" x="{num(x)}" y="{num(top)}" width="{num(sw)}" height="{num(sh)}" rx="3"/>')
-            out.append(f'<rect fill="{c["red"]}" x="{num(x)}" y="{num(top)}" width="4" height="{num(sh)}" rx="1.5"/>')
-            out.append(f'<rect fill="{c["red"]}" x="{num(x + sw - 4)}" y="{num(top)}" width="4" height="{num(sh)}" rx="1.5"/>')
+            out.append(f'<rect fill="{c["red"]}" fill-opacity="{c["red_band_a"]:g}" x="{num(x)}" y="{num(top)}" width="{num(sw)}" height="{num(sh)}" rx="{num(2 * u)}"/>')
+            end = 3 * u
+            out.append(f'<rect fill="{c["red"]}" x="{num(x)}" y="{num(top)}" width="{num(end)}" height="{num(sh)}" rx="{num(end / 2)}"/>')
+            out.append(f'<rect fill="{c["red"]}" x="{num(x + sw - end)}" y="{num(top)}" width="{num(end)}" height="{num(sh)}" rx="{num(end / 2)}"/>')
         out.append(text(t, x + sw + size * 0.5, y, size, BODY, c["on_bar_quiet"], alpha=c["on_bar_quiet_a"]))
         if stacked:
             y += size * 1.6
@@ -333,6 +342,7 @@ def key(c: dict, x: float, y: float, size: float, stacked: bool, right: float | 
 
 def bench(c: dict, narrow: bool) -> str:
     W = 700 if narrow else 1600
+    u = U_NARROW if narrow else U_WIDE
     P = 36 if narrow else 72  # the plate's inner padding
     body = []
     cap_size = 34
@@ -340,10 +350,10 @@ def bench(c: dict, narrow: bool) -> str:
     y = (48 if narrow else 68) + A.cap * cap_size
     body.append(text("Median time per task", P, y, cap_size, TITLE, c["on_bar"]))
     if narrow:
-        body.append(key(c, P, y + 44 + A.cap * lab, lab, stacked=True))
+        body.append(key(c, P, y + 44 + A.cap * lab, lab, u, stacked=True))
         y += 44 + lab * 1.6 * 2 + 24
     else:
-        body.append(key(c, P, y, lab, stacked=False, right=W - P))
+        body.append(key(c, P, y, lab, u, stacked=False, right=W - P))
         y += 44
     fig = 80 if narrow else 84
     rng = 42 if narrow else 46
@@ -362,7 +372,7 @@ def bench(c: dict, narrow: bool) -> str:
             body.append(text(f"{stet} s", P - 2, fb, fig, FIGURE, c["on_bar_green"]))
             body.append(text(f"{fast} to {slow} s", ox, fb, rng, RANGE, c["on_bar_red"]))
             ty = fb + 30
-            body.append(track(c, P, ty, W - 2 * P, 48, stet, fast, slow, lab))
+            body.append(track(c, P, ty, W - 2 * P, 48, stet, fast, slow, lab, u))
             y = ty + 48 + 12 + A.cap * lab + 40
         else:
             # one line: model, stetdoc's time, the track level with the figures' middle, the other setups' range
@@ -378,13 +388,14 @@ def bench(c: dict, narrow: bool) -> str:
             tw = W - P - rw - 48 - tx
             body.append(text("stetdoc", fx, lb, lab, BODY, c["on_bar_quiet"], alpha=c["on_bar_quiet_a"]))
             body.append(text(f"{stet} s", fx - 3, fb, fig, FIGURE, c["on_bar_green"]))
-            body.append(track(c, tx, mid - 26, tw, 52, stet, fast, slow, lab))
+            body.append(track(c, tx, mid - 26, tw, 52, stet, fast, slow, lab, u))
             rx = W - P - rw
             body.append(text("Other setups", rx, lb, lab, BODY, c["on_bar_quiet"], alpha=c["on_bar_quiet_a"]))
             body.append(text(f"{fast} to {slow} s", rx - 3, fb, rng, RANGE, c["on_bar_red"]))
             y = max(fb, mid + 26 + 12 + A.cap * lab) + 44
     H = y + (8 if narrow else 16)
-    plate = f'<rect fill="{c["bar"]}" width="{W}" height="{num(H)}" rx="{12 if narrow else 16}"/>'
+    # a bar that carries words takes 6 px corners
+    plate = f'<rect fill="{c["bar"]}" width="{W}" height="{num(H)}" rx="{num(6 * u)}"/>'
     title = "Median time per task. " + " ".join(
         f"On {m}, stetdoc took {s} s and {'the other four setups' if i == 0 else 'the others'} {a} to {b} s."
         for i, (m, s, (a, b)) in enumerate(BENCH)

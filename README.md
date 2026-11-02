@@ -11,11 +11,12 @@ stetdoc is how AI agents work in Word. Every change your agent makes lands in Wo
 it, and everything it didn't touch comes back exactly as it was.
 
 ```sh
-brew install clauseo-ai/tap/stetdoc
+brew install \
+  clauseo-ai/tap/stetdoc
 stetdoc init
 ```
 
-`stetdoc init` puts the skill in every agent it finds. Without Homebrew, run `uv tool install stetdoc`, or pick another
+`stetdoc init` installs the skill for the agents you pick, or for every agent it finds when there's no terminal. Without Homebrew, run `uv tool install stetdoc`, or pick another
 of the [channels below](#install-stetdoc).
 
 **[Read the docs](https://stetdoc.clauseo.chat/docs)** · [Quickstart](docs/quickstart.md) · [Changelog](CHANGELOG.md) ·
@@ -79,8 +80,8 @@ $ cmp msa.docx roundtrip.docx && echo identical
 identical
 ```
 
-We test this every night on about 48,600 documents from 58 public sources. Every build also puts 306 more through 50
-random edit batches each. [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it
+We test this every night on about 48,600 documents from 58 public sources. Every build also puts 306 of them through
+50 random edit batches each. [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it
 normalizes, what it shows read-only and what it leaves out.
 
 ## It knows where 11.1 is.
@@ -90,15 +91,14 @@ file. stetdoc computes them, and a search hands your agent the clause, a stable 
 
 ```
 $ stetdoc view msa.docx --find 'thirty' --find 'governing law'
-…
 p81 {§3.3} …be submitted to the Seller not less than thirty (30) days prior to the first day of the… {~ "thirty" 2}
-…
 p145 {§11.1} …each Shipment of Products shall be due within thirty (30) days from the date… {~ "thirty" 1}
-…
 p268 22.7 Governing Law of the Arbitration Agreement. This arbitration agreement contained in this… {~ "governing law" 1}
-…
 {position: p81..p466 of find "thirty" (13), "governing law" (3): 16 matches in 15 blocks (15 of 15 blocks)}
 ```
+
+<sub>Three of the 16 hits, with the long lines cut short. This block leaves out the other 13 and the clause headings
+stetdoc prints above them.</sub>
 
 ## Twelve matches is not one.
 
@@ -110,11 +110,11 @@ an edit aimed at a paragraph that changed after the agent read it, so a change n
 $ stetdoc replace msa.docx 'thirty (30) days' 'forty-five (45) days'
 error[ambiguous_match]: "thirty (30) days" is in the document 12 times, and it must be there once:
   p81 (clause 3.3) …d to the Seller not less than [thirty (30) days] prior to the first day of the…
-  …
   p145 (clause 11.1) … Products shall be due within [thirty (30) days] from the date of the Bill of …
-  …
 next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, …
 ```
+
+<sub>Two of the 12 places, with the long last line cut short. stetdoc lists all 12.</sub>
 
 ## Hands off the XML.
 
@@ -143,12 +143,12 @@ stetdoc skills get core  # the full skill, embedded in the binary
 ```
 
 Agents that take tools instead of a shell get the same commands over the Model Context Protocol from `stetdoc mcp`.
-`stetdoc init --mcp` prints how to register it with each agent. Install the skill with the server. Then an agent whose
-server fails to start stops, rather than editing the XML. [Use stetdoc with your agent](docs/agents.md) has the setup
+`stetdoc init --mcp` prints how to register it with each agent. Install the skill with the server. Without the skill, an
+agent whose server fails to start falls back to unzipping the .docx and editing its XML. [Use stetdoc with your agent](docs/agents.md) has the setup
 for each one. To serve `stetdoc mcp` to cloud apps, with auth and TLS, see
 [Self-hosting the MCP server](docs/self-hosting-mcp.md).
 
-## Install stetdoc.
+## Install stetdoc
 
 Pick any channel. Every one installs the same binary.
 
@@ -186,7 +186,7 @@ version.
 export STETDOC_AUTHOR="Jane Doe"
 # Each hit shows its ref, its clause and the exact text.
 stetdoc view contract.docx --find 'net 30' --find 'governing law'
-# Writes contract.edited.docx. Each OLD must match once, and all pairs apply or none do.
+# Writes contract.edited.docx. The old text must appear once, or nothing changes.
 stetdoc replace contract.docx 'net 30' 'net 45'
 stetdoc comment contract.edited.docx 'Liability Cap' 'Is this mutual?' --in-place
 # A redline of any two versions.
@@ -225,7 +225,7 @@ let receipt = doc.edit(Edit::ops(batch, stamp))?;
 let saved = doc.save()?;
 ```
 
-Node and Bun use it through the npm package `@clauseo/stetdoc`, with TypeScript types generated from the same
+Node and Bun use it through the npm package `@clauseo/stetdoc`, with TypeScript types generated from the engine's
 definitions. Its `textEditor` is the backend of Claude's text editor tool, as the crate `stetdoc-editor` is in Rust.
 Errors carry a stable code, a message and a `next` hint, and the npm package throws them as `StetdocError`.
 
@@ -236,17 +236,18 @@ package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-
 ## Repository
 
 - [`ARCHITECTURE.md`](ARCHITECTURE.md): the map for anyone new to the code
-- [`GLOSSARY.md`](GLOSSARY.md): the exact domain terms
+- [`GLOSSARY.md`](GLOSSARY.md): what each domain term means
 - [`docs/decisions/`](docs/decisions/0001-core-interface.md) and [`docs/design/`](docs/design/revisions.md): the
   decision records and the design notes behind each module
-- [`AGENTS.md`](AGENTS.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md): how to work here
+- [`AGENTS.md`](AGENTS.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md): the commands, the rules the checks enforce, and
+  how to make a change and get it reviewed
 - [`SECURITY.md`](SECURITY.md): how to report a vulnerability, and how we test hostile input
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): how we expect people to treat each other here
 
 Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the laws on the curated
 corpus of 306 documents. Every unedited round trip must come back byte-identical. On each document, 50 seeded random
-edit batches must change only what they edit, stick, restore the expected text when someone accepts or rejects them,
-and leave the file valid. The full corpora run nightly in CI. Each fuzz target runs for at least 24 hours before a
+edit batches must keep the [laws](GLOSSARY.md#quality): they change only what they edit, the edits stick, accepting or
+rejecting them restores the expected text, and the file stays valid. The full corpora run nightly in CI. Each fuzz target runs for at least 24 hours before a
 release.
 
 ## Licence

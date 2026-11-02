@@ -5,7 +5,7 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
-## Unreleased
+## [0.9.1] - 2026-11-02
 
 ### Fixed
 
@@ -663,4 +663,5 @@ Releases, npm, PyPI, Homebrew and crates.io (`cargo install stetdoc --locked`, w
   paragraph the delete takes whole, or at a marker between paragraphs, as an empty-range comment if all its text goes.
   The edit used to be refused with `validation_failed`, and accepting such a tracked delete failed the same way.
 
+[0.9.1]: https://github.com/clauseo-ai/stetdoc/releases/tag/v0.9.1
 [0.9.0]: https://github.com/clauseo-ai/stetdoc/releases/tag/v0.9.0

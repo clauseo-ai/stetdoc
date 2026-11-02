@@ -237,6 +237,30 @@ pub struct ManualMark {
     pub underlined: String,
 }
 
+/// A typed cross-reference whose target block an edit changed: the mention reads the same, and the clause it names is
+/// another block now, or none. Each one has a `ref_retargeted` or `ref_unresolved` warning, in the same order.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct RefDrift {
+    /// The ref of the citing block.
+    pub source: String,
+    /// The mention as written, such as `Clause 16.2(b)`.
+    pub text: String,
+    /// The block it resolved to before the edit.
+    pub before: RefTarget,
+    /// The block it resolves to after the edit, or none when it resolves to nothing or to several blocks.
+    pub after: Option<RefTarget>,
+}
+
+/// The block a cross-reference resolved to.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+pub struct RefTarget {
+    /// The ref of the block, or none for a block that the batch adds, in a dry run and in the real edit alike.
+    pub r#ref: Option<String>,
+    /// The clause as a view prints it after the arrow of a mention: its label and the start of its text, such as
+    /// `16.2(b) Step 2 — Cure Period. Upon receipt of a B…`.
+    pub label: String,
+}
+
 /// The receipt of an edit.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 pub struct Receipt {
@@ -271,6 +295,10 @@ pub struct Receipt {
     pub blocks_omitted: u32,
     /// Every warning, deduplicated by code, block and message.
     pub warnings: Vec<Warning>,
+    /// The typed cross-references whose target the edit changed, one for each `ref_retargeted` and `ref_unresolved`
+    /// warning, in the same order.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub ref_drift: Vec<RefDrift>,
     /// What `check` verified.
     pub validation: Validation,
     /// What a surface shows an agent.

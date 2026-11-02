@@ -117,6 +117,46 @@ fn block_hit(parts: &PartsView<'_>, index: &Index, key: &BlockKey) -> Result<Hit
     })
 }
 
+/// The blocks whose `Final` text uses each term, in document order, each block once for each term: one walk of the
+/// document for all of them. Comments are not read, as `uses_of` reads none.
+pub(crate) fn blocks_using(
+    parts: &PartsView<'_>,
+    terms: &[&str],
+) -> Result<Vec<Vec<BlockKey>>, StetError> {
+    let mut out: Vec<Vec<BlockKey>> = vec![Vec::new(); terms.len()];
+    if terms.is_empty() {
+        return Ok(out);
+    }
+    let list = parts.story_specs()?;
+    for spec in list.0.iter().filter(|s| s.kind != StoryKind::Comments) {
+        let Some(part) = parts.id(&spec.part) else {
+            continue;
+        };
+        let story = parts.story(part)?;
+        let tree = parts.tree(part)?;
+        for (i, entry) in story.blocks().iter().enumerate() {
+            if entry.kind != BlockKind::Paragraph {
+                continue;
+            }
+            let Some(p) = story.paragraph(tree, i) else {
+                continue;
+            };
+            let map = p.map();
+            let raw = map.text(Mode::Final);
+            if !terms.iter().any(|t| raw.contains(t)) {
+                continue;
+            }
+            let text = clean(&raw);
+            for (term, found) in terms.iter().zip(out.iter_mut()) {
+                if !uses(&text, term).is_empty() {
+                    found.push(story.key(entry));
+                }
+            }
+        }
+    }
+    Ok(out)
+}
+
 /// Every place a term is used, in document order, with the exact count.
 fn uses_of(parts: &PartsView<'_>, term: &str) -> Result<(Vec<Site>, u32), StetError> {
     let list = parts.story_specs()?;

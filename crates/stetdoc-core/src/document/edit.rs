@@ -131,6 +131,7 @@ impl Document {
         };
         let inputs = |parts, base, dry_run| Inputs {
             parts,
+            before: self.state.parts(),
             base,
             dry_run,
             tracked: edit.tracked && !edit.markup.is_manual(),

@@ -5,8 +5,8 @@
 //! clause. It is derived data, read-only, and never decides for the caller: when a reference or a term is
 //! not unique, every candidate is returned.
 //!
-//! **Interface.** `PartsView::{doc_index, edges, bookmarks}`, `Index::{clauses, clause_of, resolve_clause,
-//! definitions, terms}`, `Edges::{outbound, inbound}`, and `lookup`.
+//! **Interface.** `PartsView::{doc_index, edges, bookmarks}` and their `_in` forms for a mode, `Index::{clauses,
+//! clause_of, resolve_clause, definitions, terms}`, `Edges::{outbound, inbound, all}`, `lookup` and `blocks_using`.
 //!
 //! **Invariants.**
 //! - Derived from the parts of a state through `PartsView::derived`, keyed by `BlockKey` and never by ref, so
@@ -15,7 +15,9 @@
 //! - A typed label is flagged as typed and a composed full label as composed. A prose mention ends in one of
 //!   five states, and `relative` and `outside` are never presented as `resolved`.
 //! - The clauses are those of `Final` text and numbers: a clause number in a contract names the document as it
-//!   will be.
+//!   will be. The receipt's check of cross-references (`document/drift.rs`) also reads the index and the edges of
+//!   the `Original` view, every tracked change rejected, through the `_in` forms, which are cached apart from the
+//!   `Final` ones.
 //!
 //! **Depends on.** `api`, `wordml`, `styles`, `numbering`, `state`.
 //!
@@ -51,8 +53,8 @@ mod tests_terms;
 
 pub(crate) use clauses::{Clause, Match as ClauseMatch, Reason, Source};
 pub(crate) use edges::{Edge, EdgeKind, Edges, State, target_name};
-pub(crate) use lookup::lookup;
 pub(crate) use lookup::near;
+pub(crate) use lookup::{blocks_using, lookup};
 pub(crate) use terms::Definition;
 
 use crate::api::error::StetError;
@@ -205,12 +207,23 @@ impl PartsView<'_> {
     /// mentions and the internal links, cached until the story or its numbering change. The edges are
     /// resolved from the mentions and the links, so the text is read once.
     pub(crate) fn story_facts(&self, part: PartId) -> Result<Arc<StoryFacts>, StetError> {
+        self.story_facts_in(part, Mode::Final)
+    }
+
+    /// `story_facts` in a mode: `Final`, or `Original` for the check of cross-references, which asks where a mention
+    /// pointed before any pending change. Another mode is read as `Final`.
+    pub(crate) fn story_facts_in(
+        &self,
+        part: PartId,
+        mode: Mode,
+    ) -> Result<Arc<StoryFacts>, StetError> {
+        let mode = indexed(mode);
         let mut deps = self.numbers_deps(part)?;
         deps.push(Dep::Part(part));
         let build = |_: Option<&StoryFacts>| -> Result<StoryFacts, StetError> {
             let story = self.story(part)?;
             let tree = self.tree(part)?;
-            let numbers = self.numbers(part, Mode::Final)?;
+            let numbers = self.numbers(part, mode)?;
             let mut builder = clauses::Builder::default();
             let mut defs = Vec::new();
             let mut found_mentions = Vec::new();
@@ -233,7 +246,7 @@ impl PartsView<'_> {
                     continue;
                 }
                 links_of(&p, &map, i, &mut links);
-                let raw = map.text(Mode::Final);
+                let raw = map.text(mode);
                 let text = clean(&raw);
                 if text.is_empty() {
                     continue;
@@ -255,6 +268,8 @@ impl PartsView<'_> {
                         block: story.key(entry),
                         story: story.kind(),
                         kind,
+                        pointer: kind == terms::DefKind::Paragraph
+                            && terms::points_elsewhere(&text),
                         snippet: text.chars().take(80).collect(),
                     });
                 }
@@ -273,11 +288,17 @@ impl PartsView<'_> {
                 lens,
             })
         };
-        self.derived(u64::from(part.number()), &deps, &build)
+        self.derived(variant(u64::from(part.number()), mode), &deps, &build)
     }
 
     /// The index of the document, cached until a story or its numbering changes. Comments are not indexed.
     pub(crate) fn doc_index(&self) -> Result<Arc<Index>, StetError> {
+        self.doc_index_in(Mode::Final)
+    }
+
+    /// `doc_index` in a mode, as `story_facts_in` reads it.
+    pub(crate) fn doc_index_in(&self, mode: Mode) -> Result<Arc<Index>, StetError> {
+        let mode = indexed(mode);
         let list = self.story_specs()?;
         let mut deps: Vec<Dep> = vec![Dep::Package];
         let mut parts = Vec::new();
@@ -291,7 +312,7 @@ impl PartsView<'_> {
         let build = |_: Option<&Index>| -> Result<Index, StetError> {
             let mut index = Index::default();
             for part in &parts {
-                let facts = self.story_facts(*part)?;
+                let facts = self.story_facts_in(*part, mode)?;
                 let start = index.clauses.len();
                 for clause in &facts.clauses {
                     let at = index.clauses.len();
@@ -318,7 +339,26 @@ impl PartsView<'_> {
             }
             Ok(index)
         };
-        self.derived(3, &deps, &build)
+        self.derived(variant(3, mode), &deps, &build)
+    }
+}
+
+/// The mode an index is built in: `Original`, or `Final` for any other.
+fn indexed(mode: Mode) -> Mode {
+    if mode == Mode::Original {
+        Mode::Original
+    } else {
+        Mode::Final
+    }
+}
+
+/// The cache variant of a value of the index in a mode: the `Final` one as it always was, and the `Original` one
+/// with a bit above every part number set, so that the two never share an entry.
+pub(super) fn variant(base: u64, mode: Mode) -> u64 {
+    if mode == Mode::Original {
+        base | (1 << 40)
+    } else {
+        base
     }
 }
 

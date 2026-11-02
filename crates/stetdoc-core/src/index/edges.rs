@@ -8,6 +8,7 @@
 use super::Index;
 use super::mentions::Raw;
 use crate::api::error::StetError;
+use crate::api::view::Mode;
 use crate::state::{Dep, PartsView};
 use crate::wordml::{BlockKey, StoryKind};
 use std::collections::HashMap;
@@ -210,6 +211,12 @@ impl Edges {
         out
     }
 
+    /// Every edge, in the order of the document: story by story, and in each story the fields, the links and then the
+    /// mentions, paragraph by paragraph.
+    pub(crate) fn all(&self) -> &[Edge] {
+        &self.all
+    }
+
     /// How many edges there are.
     pub(crate) fn len(&self) -> usize {
         self.all.len()
@@ -326,6 +333,12 @@ pub(crate) struct Here<'a> {
 impl PartsView<'_> {
     /// The edges of the document: fields and links that name a bookmark, and the mentions in the text.
     pub(crate) fn edges(&self) -> Result<Arc<Edges>, StetError> {
+        self.edges_in(Mode::Final)
+    }
+
+    /// `edges` in a mode: the mentions are resolved against the clauses of that mode's text and numbers, as
+    /// `doc_index_in` reads them.
+    pub(crate) fn edges_in(&self, mode: Mode) -> Result<Arc<Edges>, StetError> {
         let list = self.story_specs()?;
         let mut deps: Vec<Dep> = vec![Dep::Package];
         for spec in &list.0 {
@@ -334,12 +347,12 @@ impl PartsView<'_> {
                 deps.extend(self.numbers_deps(part)?);
             }
         }
-        let build = |_: Option<&Edges>| -> Result<Edges, StetError> { self.build_edges() };
-        self.derived(2, &deps, &build)
+        let build = |_: Option<&Edges>| -> Result<Edges, StetError> { self.build_edges(mode) };
+        self.derived(super::variant(2, mode), &deps, &build)
     }
 
-    fn build_edges(&self) -> Result<Edges, StetError> {
-        let index = self.doc_index()?;
+    fn build_edges(&self, mode: Mode) -> Result<Edges, StetError> {
+        let index = self.doc_index_in(mode)?;
         let list = self.story_specs()?;
         // The facts of every story come from one pass over its text, so the edges read none. The bookmarks
         // cost a walk of the whole story, and are asked for only when a field or a link names one.
@@ -356,7 +369,7 @@ impl PartsView<'_> {
             };
             let story = self.story(part)?;
             let tree = self.tree(part)?;
-            let facts = self.story_facts(part)?;
+            let facts = self.story_facts_in(part, mode)?;
             needs_marks |= !facts.links.is_empty()
                 || story
                     .fields(tree)

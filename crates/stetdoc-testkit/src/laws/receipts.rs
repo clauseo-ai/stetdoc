@@ -109,6 +109,10 @@ pub fn same_but_for_a_dry_run(what: &str, dry: &Receipt, real: &Receipt) -> Resu
     if dry.warnings != as_a_dry_run_lists(&real.warnings, &minted) {
         return fail("the warnings");
     }
+    // A cross-reference that moved names the blocks of the starting state, and a block the batch adds as none, in both.
+    if dry.ref_drift != real.ref_drift {
+        return fail("the cross-references that moved (ref_drift)");
+    }
     if dry.retired != real.retired || dry.comments != real.comments || dry.moves != real.moves {
         return fail("the retired refs, the comments or the moves");
     }

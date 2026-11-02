@@ -31,6 +31,7 @@ mod checking;
 mod compare;
 mod complement;
 mod declared;
+mod drift;
 mod edit;
 mod edit_files;
 mod export;
@@ -188,6 +189,8 @@ mod tests;
 mod tests_check;
 #[cfg(test)]
 mod tests_compare;
+#[cfg(test)]
+mod tests_drift;
 #[cfg(test)]
 mod tests_edit;
 #[cfg(test)]

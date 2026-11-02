@@ -28,6 +28,8 @@ use std::collections::{HashMap, HashSet};
 pub(super) struct Inputs<'a> {
     /// The state the receipt describes: the next one for an edit, the staged one for a dry run.
     pub parts: PartsView<'a>,
+    /// The state the edit started from, whose cross-references the receipt compares with those of `parts`.
+    pub before: PartsView<'a>,
     /// The token the receipt shows: the next state's for an edit, the current one for a dry run.
     pub base: BaseToken,
     /// True for a dry run.
@@ -351,6 +353,9 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
             warnings.push(w.clone());
         }
     }
+    // The cross-references the batch moved come last: each is about one citing block and one mention, so none repeats.
+    let drift = super::drift::find(i.before, parts, applied)?;
+    warnings.extend(drift.warnings);
     Ok(Receipt {
         base: i.base.to_string(),
         dry_run: i.dry_run,
@@ -371,6 +376,7 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
         blocks: shown.blocks,
         blocks_omitted: shown.omitted,
         warnings,
+        ref_drift: drift.refs,
         validation: i.validation.clone(),
         text: String::new(),
     })

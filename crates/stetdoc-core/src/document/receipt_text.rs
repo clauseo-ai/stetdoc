@@ -1,12 +1,14 @@
 //! `Receipt.text`: the form an agent reads (design `document-and-ops.md` 4.3).
 //!
 //! A head line, one line for each operation, the blocks as the readable file will hold them, then the warnings and what `check`
-//! carried. A text that would be longer than `TEXT_CAP` lists only the first operations and blocks and says where the rest are.
+//! carried. The warnings about cross-references that an edit moved are counted in the head line and shown up to `XREF_SHOWN`.
+//! A text that would be longer than `TEXT_CAP` lists only the first operations and blocks and says where the rest are.
 //! It is deterministic and token-lean, and it lives in this one file so that the format experiments can change its wording
 //! without touching the data.
 
 use crate::api::receipt::{ManualMark, OpResult, Receipt};
 use crate::api::revision::ChangeKind;
+use crate::api::view::{Warning, WarningCode};
 
 /// What a change is called in a line of a receipt.
 fn kind_word(kind: ChangeKind) -> &'static str {
@@ -158,7 +160,43 @@ fn fitting(items: &[String], budget: usize) -> usize {
     n
 }
 
-/// The head line of a receipt: what was applied, how it was marked, and the base.
+/// The codes of the warnings about cross-references and definitions that an edit moved, in the order the head counts them.
+const XREF_CODES: [WarningCode; 3] = [
+    WarningCode::RefRetargeted,
+    WarningCode::RefUnresolved,
+    WarningCode::DefinitionRemoved,
+];
+
+/// The most warnings about cross-references that the text shows. The JSON has every one.
+const XREF_SHOWN: usize = 8;
+
+fn is_xref(w: &Warning) -> bool {
+    XREF_CODES.contains(&w.code)
+}
+
+/// The sentence of the head line that counts the warnings about cross-references, with a space after it, or nothing when
+/// there are none: `3 cross-reference warnings below (2 ref_retargeted, 1 definition_removed). `
+fn xref_count(r: &Receipt) -> String {
+    let total = r.warnings.iter().filter(|w| is_xref(w)).count();
+    if total == 0 {
+        return String::new();
+    }
+    let kinds: Vec<String> = XREF_CODES
+        .iter()
+        .filter_map(|code| {
+            let n = r.warnings.iter().filter(|w| w.code == *code).count();
+            (n > 0).then(|| format!("{n} {}", code.as_str()))
+        })
+        .collect();
+    format!(
+        "{} below ({}). ",
+        plural(total, "cross-reference warning", "cross-reference warnings"),
+        kinds.join(", ")
+    )
+}
+
+/// The head line of a receipt: what was applied, how it was marked, how many warnings about cross-references there are, and
+/// the base.
 fn head(r: &Receipt) -> String {
     let ops = plural(r.operations.len(), "operation", "operations");
     let who = if r.markup.is_manual() {
@@ -168,13 +206,14 @@ fn head(r: &Receipt) -> String {
     } else {
         "untracked".to_string()
     };
+    let xref = xref_count(r);
     if r.dry_run {
         format!(
-            "dry run: nothing was applied. A new block has no ref until the edit is applied. {ops}, {who}. base {}\n",
+            "dry run: nothing was applied. A new block has no ref until the edit is applied. {ops}, {who}. {xref}base {}\n",
             r.base
         )
     } else if r.operations.iter().any(|o| o.changed) {
-        format!("applied {ops}, {who}. base {}\n", r.base)
+        format!("applied {ops}, {who}. {xref}base {}\n", r.base)
     } else {
         format!(
             "applied {ops}, and none changed the document. base {}\n",
@@ -329,7 +368,14 @@ fn compose_within(r: &Receipt, cap: usize) -> String {
 
 /// The warnings of a receipt, what was retired and what `check` said: the end of every receipt's text.
 fn tail(r: &Receipt, out: &mut String) {
+    let mut xrefs = 0usize;
     for w in &r.warnings {
+        if is_xref(w) {
+            xrefs += 1;
+            if xrefs > XREF_SHOWN {
+                continue;
+            }
+        }
         let at = w
             .block
             .as_deref()
@@ -339,6 +385,16 @@ fn tail(r: &Receipt, out: &mut String) {
         if let Some(next) = &w.next {
             out.push_str(&format!("  next: {next}\n"));
         }
+    }
+    if xrefs > XREF_SHOWN {
+        out.push_str(&format!(
+            "and {}: the JSON receipt (--json) lists every one, with each reference's old and new target in ref_drift.\n",
+            plural(
+                xrefs - XREF_SHOWN,
+                "more cross-reference warning",
+                "more cross-reference warnings"
+            )
+        ));
     }
     if !r.retired.is_empty() {
         let gone: Vec<String> = r

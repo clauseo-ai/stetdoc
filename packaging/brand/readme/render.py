@@ -3,12 +3,12 @@
 Run from the repository root:
     uv run --no-project --with fonttools --with brotli --with uharfbuzz python packaging/brand/readme/render.py
 
-The art follows the launch page's design (site/DESIGN.md): the stet bar in graphite with its words in concrete, the
-mark's three dots hanging under "stand", and the court's colours only where they mean something. Green is stetdoc's
+The art follows the launch page's design in site/DESIGN.md. The stet bar is graphite with its words in concrete, the
+mark's three dots hang under "stand", and the court's colours appear only where they mean something. Green is stetdoc's
 result in the benchmark and red is the other setups. Brick is Clauseo's alone, so it never appears here.
 
-GitHub shows an SVG through <img>, which loads no web font, so every word is drawn as outlines from the Anek Latin
-the site hosts (site/app/fonts/, under the OFL). HarfBuzz shapes each line at the site's weight and width. The README
+GitHub shows an SVG through <img>, which loads no web font, so this script draws every word as outlines from the Anek
+Latin the site hosts in site/app/fonts/, under the OFL. HarfBuzz shapes each line at the site's weight and width. The README
 picks a file with <picture>: night when the reader's system is dark, narrow on a phone. The day wide file is the
 fallback, and crates.io, which ignores <source>, shows only that one.
 
@@ -385,7 +385,10 @@ def bench(c: dict, narrow: bool) -> str:
             y = max(fb, mid + 26 + 12 + A.cap * lab) + 44
     H = y + (8 if narrow else 16)
     plate = f'<rect fill="{c["bar"]}" width="{W}" height="{num(H)}" rx="{12 if narrow else 16}"/>'
-    title = "Median time per task. " + " ".join(f"{m}: stetdoc {s} s, the other four setups {a} to {b} s." for m, s, (a, b) in BENCH)
+    title = "Median time per task. " + " ".join(
+        f"On {m}, stetdoc took {s} s and {'the other four setups' if i == 0 else 'the others'} {a} to {b} s."
+        for i, (m, s, (a, b)) in enumerate(BENCH)
+    )
     return svg(W, H, title, plate + "".join(body))
 
 

@@ -28,7 +28,7 @@ It is drawn in Clauseo's design language, as a sibling of Clauseo's comma (`desi
 uv run --no-project --with resvg-py --with pillow python packaging/brand/render.py
 ```
 
-`readme/` holds the art in the root README: the banner (the lockup, then "Let it stand." on the bar with the dots under "stand") and the benchmark chart, each by day and by night, wide and narrow for phones. Every word in them is outlined from the site's Anek Latin, because GitHub loads no web font in an SVG. The README's `<picture>` picks night when the system is dark and narrow under 600 px (the banner) or 768 px (the chart); the day wide file is the fallback, and the only one crates.io shows. `readme/render.py` writes them all. To change them, edit it and run it from the repository root:
+`readme/` holds the art in the root README, each piece by day and by night, wide and narrow for phones. The banner sets the lockup, then "Let it stand." on the bar with the dots under "stand". The chart draws the benchmark. `readme/render.py` writes them all and outlines every word in them from the site's Anek Latin, because GitHub loads no web font in an SVG. The README's `<picture>` picks night when the system is dark. It picks the narrow banner under 600 px and the narrow chart under 768 px. The day wide file is the fallback, and the only one crates.io shows. To change the art, edit `readme/render.py` and run it from the repository root:
 
 ```sh
 uv run --no-project --with fonttools --with brotli --with uharfbuzz python packaging/brand/readme/render.py

@@ -37,12 +37,12 @@ msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one
 
 ## Word found unreadable content.
 
-Every agent that edits a .docx's XML meets this dialog sooner or later. Word splits a sentence across many runs and
+Every agent that edits a .docx's XML gets this message from Word sooner or later. Word splits a sentence across many runs and
 stores tracked changes as XML structure. It refuses a file whose elements fall out of schema order. One slip in the XML
 and the document won't open.
 
 stetdoc checks every edit against the schema and Word's own rules before it writes a byte. A batch of edits applies
-completely or not at all. Bad input, a hostile file included, fails with a stable error code. stetdoc never panics,
+in full or not at all. Bad input, a hostile file included, fails with a stable error code. stetdoc never panics,
 hangs or touches the network.
 
 ## Done first, on every model.
@@ -56,12 +56,12 @@ first on all three models.
   <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night-narrow.svg">
   <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day-narrow.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-night.svg">
-  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day.svg" alt="Median time per task. Claude Haiku 5.5: stetdoc 21 s, the other four setups 41 to 45 s. Claude Opus 5.5: stetdoc 25 s, the other four setups 37 to 56 s. Gemini 3.8 Flash: stetdoc 135 s, the other four setups 274 to 538 s.">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/readme-design/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other four setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
 </picture>
 </p>
 
 - **0 of 118** stetdoc runs wrote a file Word offered to repair.
-- **6 of 6** long Harvey LAB markups came out fully correct, on every model.
+- **6 of 6** long Harvey LAB markups came out correct in full, on every model.
 - **1 ms** from launch to a ready MCP server.
 
 <sub>docx-agent-bench, 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run,
@@ -91,12 +91,12 @@ file. stetdoc computes them, and a search hands your agent the clause, a stable 
 ```
 $ stetdoc view msa.docx --find 'thirty' --find 'governing law'
 …
-{in p144 "Clause 11 — PAYMENT"}
-p145 {§11.1} …each Shipment of Products shall be due within thirty (30) days from the date… {~ "thirty" 1}
-{in p167 "Clause 14 — FORCE MAJEURE"}
-p182 {§14.3} …Party may terminate this Agreement by giving thirty (30) days’ written notice… {~ "thirty" 1}
+p81 {§3.3} …be submitted to the Seller not less than thirty (30) days prior to the first day of the… {~ "thirty" 2}
 …
-p272 CLAUSE 23 — GOVERNING LAW {~ "governing law" 1}
+p145 {§11.1} …each Shipment of Products shall be due within thirty (30) days from the date… {~ "thirty" 1}
+…
+p268 22.7 Governing Law of the Arbitration Agreement. This arbitration agreement contained in this… {~ "governing law" 1}
+…
 {position: p81..p466 of find "thirty" (13), "governing law" (3): 16 matches in 15 blocks (15 of 15 blocks)}
 ```
 
@@ -110,8 +110,8 @@ an edit aimed at a paragraph that changed after the agent read it, so a change n
 $ stetdoc replace msa.docx 'thirty (30) days' 'forty-five (45) days'
 error[ambiguous_match]: "thirty (30) days" is in the document 12 times, and it must be there once:
   p81 (clause 3.3) …d to the Seller not less than [thirty (30) days] prior to the first day of the…
-  p81 (clause 3.3) …ders submitted with less than [thirty (30) days]’ notice may be accepted by th…
-  p126 (clause 7.5(a)) …cement to be completed within [thirty (30) days] of the date on which the non-…
+  …
+  p145 (clause 11.1) … Products shall be due within [thirty (30) days] from the date of the Bill of …
   …
 next: Nothing was applied, so retry at once, with no dry run: to change every one, pass --all; to pick one place, …
 ```
@@ -142,11 +142,11 @@ stetdoc init --remove    # take it out again
 stetdoc skills get core  # the full skill, embedded in the binary
 ```
 
-Agents that take tools instead of a shell get the same commands over the Model Context Protocol from `stetdoc mcp`, and
-`stetdoc init --mcp` prints how to register it with each agent. Install the skill with the server, so an agent whose
-server fails to start stops rather than editing the XML. [Use stetdoc with your agent](docs/agents.md) has the setup
-for each one, and [Self-hosting the MCP server](docs/self-hosting-mcp.md) serves `stetdoc mcp` to cloud apps, with auth
-and TLS.
+Agents that take tools instead of a shell get the same commands over the Model Context Protocol from `stetdoc mcp`.
+`stetdoc init --mcp` prints how to register it with each agent. Install the skill with the server. Then an agent whose
+server fails to start stops, rather than editing the XML. [Use stetdoc with your agent](docs/agents.md) has the setup
+for each one. To serve `stetdoc mcp` to cloud apps, with auth and TLS, see
+[Self-hosting the MCP server](docs/self-hosting-mcp.md).
 
 ## Install stetdoc.
 
@@ -170,12 +170,12 @@ curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/i
 cargo install stetdoc --locked
 ```
 
-The uv and pipx wheel holds the native binary, so no Python runs after the install. The script checks the SHA-256 and
-installs to `~/.local/bin`, and npm swaps its Node launcher for the binary when install scripts run.
+The uv and pipx wheel holds the native binary, so no Python runs after the install. The install script checks the SHA-256
+and installs to `~/.local/bin`. npm swaps its Node launcher for the binary when install scripts run.
 
 An agent can run stetdoc dozens of times in one task. Homebrew, uv, pipx and the install script put the binary itself
 on your PATH, so each call starts in about 5 ms. Through npx, every call starts Node and npm first, which costs a tenth
-of a second or more, so keep `npx stetdoc mcp` for the MCP server, which starts once per session. `uvx stetdoc` runs
+of a second or more. Keep `npx stetdoc mcp` for the MCP server, which starts once per session. `uvx stetdoc` runs
 stetdoc once without installing it. [Install](docs/install.md) covers Windows, updating, uninstalling and pinning a
 version.
 
@@ -240,18 +240,19 @@ package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-
 - [`docs/decisions/`](docs/decisions/0001-core-interface.md) and [`docs/design/`](docs/design/revisions.md): the
   decision records and the design notes behind each module
 - [`AGENTS.md`](AGENTS.md) and [`CONTRIBUTING.md`](CONTRIBUTING.md): how to work here
-- [`SECURITY.md`](SECURITY.md): how to report a vulnerability, and how hostile input is tested
+- [`SECURITY.md`](SECURITY.md): how to report a vulnerability, and how we test hostile input
 - [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md): how we expect people to treat each other here
 
 Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the laws on the curated
-corpus of 306 documents. Every unedited round trip must be byte-identical, and on each document 50 seeded random edit
-batches must change only what they edit, stick, restore the expected text when accepted or rejected, and leave the file
-valid. The full corpora run nightly in CI, and each fuzz target runs for at least 24 hours before a release.
+corpus of 306 documents. Every unedited round trip must come back byte-identical. On each document, 50 seeded random
+edit batches must change only what they edit, stick, restore the expected text when someone accepts or rejects them,
+and leave the file valid. The full corpora run nightly in CI. Each fuzz target runs for at least 24 hours before a
+release.
 
 ## Licence
 
-Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT licence](LICENSE-MIT), at your option.
-See [`NOTICE`](NOTICE).
+You can use stetdoc under either the [Apache License, Version 2.0](LICENSE-APACHE) or the [MIT licence](LICENSE-MIT), at
+your option. See [`NOTICE`](NOTICE).
 
 <sub>Stet is the proofreader's mark for "let it stand". It goes under a word that was struck out by mistake, and the
 word stays. stetdoc is open source, from [Clauseo](https://www.clauseo.chat).</sub>

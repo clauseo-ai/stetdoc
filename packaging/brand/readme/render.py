@@ -65,7 +65,7 @@ NIGHT = {
     "on_colour": "#FFFFFF",
 }
 
-# site/content/bench.ts: median seconds per task, stetdoc and the other four setups' fastest and slowest
+# site/content/bench.ts: median seconds per task, stetdoc and the other setups' fastest and slowest
 BENCH = [
     ("Claude Haiku 5.5", 21, (41, 45)),
     ("Claude Opus 5.5", 25, (37, 56)),
@@ -317,7 +317,7 @@ def track(c: dict, x: float, y: float, w: float, h: float, stet: int, fast: int,
 def key(c: dict, x: float, y: float, size: float, u: float, stacked: bool, right: float | None = None) -> str:
     """The key: both swatches and what they stand for. y is the first label's baseline."""
     sw, sh = size * 1.5, size * 0.8
-    items = [("stetdoc", "green"), ("The other four setups, fastest to slowest", "red")]
+    items = [("stetdoc", "green"), ("The other setups, fastest to slowest", "red")]
     widths = [sw + size * 0.5 + A.width(t, size, BODY) for t, _ in items]
     gap = size * 1.4
     if right is not None and not stacked:
@@ -397,7 +397,7 @@ def bench(c: dict, narrow: bool) -> str:
     # a bar that carries words takes 6 px corners
     plate = f'<rect fill="{c["bar"]}" width="{W}" height="{num(H)}" rx="{num(6 * u)}"/>'
     title = "Median time per task. " + " ".join(
-        f"On {m}, stetdoc took {s} s and {'the other four setups' if i == 0 else 'the others'} {a} to {b} s."
+        f"On {m}, stetdoc took {s} s and {'the other setups' if i == 0 else 'the others'} {a} to {b} s."
         for i, (m, s, (a, b)) in enumerate(BENCH)
     )
     return svg(W, H, title, plate + "".join(body))

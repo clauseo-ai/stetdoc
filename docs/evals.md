@@ -8,8 +8,9 @@ accuracy as well as correctness.
 
 The figures on the website come from a separate benchmark,
 [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench), which compares stetdoc with other setups on
-contract-editing tasks. It checks the files the agents write with
-[ooxml-validate](https://github.com/clauseo-ai/ooxml-validate), a CLI around Microsoft's Open XML SDK validator.
+8 short tasks and 3 long Harvey LAB markups. It opens the files the agents write in Microsoft Word, through a script
+that is not published, and uses [ooxml-validate](https://github.com/clauseo-ai/ooxml-validate), a CLI around
+Microsoft's Open XML SDK validator, to pick which files Word must open. In run final-2, Word opened all of them.
 
 Every run is a real model call on your account. The suite never runs in CI or in `cargo xtask check`.
 

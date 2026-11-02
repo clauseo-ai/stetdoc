@@ -62,7 +62,7 @@ export function homeMarkdown(): string {
 	out.push(`${c.caption}:`, '', `| ${c.columns.join(' | ')} |`, '| --- | --- | --- |');
 	for (const row of c.rows)
 		out.push(`| ${row.model} | ${row.stetdoc} s | ${row.others[0]} to ${row.others[1]} s |`);
-	out.push('', ...p.bench.facts.map((f) => `- **${f.figure}**: ${f.line}`), '', `[${p.bench.method.name}](${p.bench.method.href})${p.bench.method.rest}`, '');
+	out.push('', ...p.bench.facts.map((f) => `- **${f.figure}**: ${f.line}`), '', p.bench.method.map((part) => (part.href ? `[${part.text}](${part.href})` : part.text)).join(''), '');
 
 	out.push(`## ${p.bytes.title}`, '', ...p.bytes.body.flatMap((b) => [b, '']), p.bytes.proof, '');
 	out.push(fence('console', `${terminal(p.bytes.run)}\n${p.bytes.verdict}`), '');

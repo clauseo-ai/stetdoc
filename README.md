@@ -33,8 +33,8 @@ wrote msa.edited.docx
 msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one, …
 ```
 
-<sub>stetdoc 0.9.0 on a supply agreement from Harvey LAB, with the long lines cut short. `{--…--}` is the deletion and
-`{++…++}` the insertion, each a Word revision by Claude.</sub>
+<sub>stetdoc 0.9.0 on a synthetic supply agreement from Harvey LAB, with the long lines cut short. `{--…--}` is the
+deletion and `{++…++}` the insertion, each a Word revision by Claude.</sub>
 
 ## Word found unreadable content.
 
@@ -43,30 +43,36 @@ stores tracked changes as XML structure. It refuses a file whose elements fall o
 and the document won't open.
 
 stetdoc checks every edit against the schema and Word's own rules before it writes a byte. A batch of edits applies
-in full or not at all. Bad input, a hostile file included, fails with a stable error code. stetdoc never panics,
-hangs or touches the network.
+in full or not at all. Bad input, a hostile file included, fails with a stable error code. stetdoc never panics
+or hangs on it, and it makes no network connections: the binary has no networking code.
 
-## Done first, on every model.
+## Fastest on every model.
 
-We gave agents eight contract-editing tasks five ways: with stetdoc, with no plugin, with Anthropic's docx skill, with
-Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc finished
-first on all three models.
+We gave agents 8 short tasks and 3 long Harvey LAB markups. Every document in them is one of Harvey LAB's synthetic
+contracts. Each agent worked with stetdoc, with no plugin, with Anthropic's docx skill, with Anthropic's legal plugin or
+with Adeu. The legal plugin wasn't run on Gemini. Then we opened every file they wrote in Word. The agents using stetdoc
+had the fastest median time per task on all three models. On correctness they tied with no plugin on all three models.
 
 <p>
 <picture>
   <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-night-narrow.svg">
   <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day-narrow.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-night.svg">
-  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other four setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
 </picture>
 </p>
 
-- **0 of 118** stetdoc runs wrote a file Word offered to repair.
-- **6 of 6** long Harvey LAB markups came out correct in full, on every model.
-- **1 ms** from launch to a ready MCP server.
+- **0 of 118** stetdoc runs that wrote a .docx got a repair prompt in Word.
+- **6 of 6** long Harvey LAB markups on each model opened in Word without a repair prompt and passed the objective
+  checks. The other setups got 2 to 5 of 6, mostly because of repair prompts on one task. The legal rubric, scored by a
+  model, didn't separate them: stetdoc 94% to 98%, the others 75% to 99%.
+- **5 ms** for each stetdoc call to start, with the binary on your PATH
+  ([measured](docs/install.md#why-the-channel-matters)).
 
-<sub>docx-agent-bench, 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run,
-and every file opened in Microsoft Word for Mac 16.114.3.</sub>
+<sub>[docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench), run final-2: 639 runs in Claude Code 2.1.311
+and Antigravity CLI 1.4.8. Five runs per short task and two per long one, medians per run. Only the stetdoc setup had a
+hook that blocks other ways of writing a .docx in Claude Code. Every file was opened in Microsoft Word for Mac 16.114.3
+([how](https://github.com/clauseo-ai/docx-agent-bench#how-grading-works)), by a script that isn't published.</sub>
 
 ## Open, save, same bytes.
 
@@ -80,9 +86,11 @@ $ cmp msa.docx roundtrip.docx && echo identical
 identical
 ```
 
-We test this every night on about 48,600 documents from 58 public sources. Every build also puts 306 of them through
-50 random edit batches each. [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it
-normalizes, what it shows read-only and what it leaves out.
+Every build checks this on 306 curated documents: unedited, each must come back byte-identical, and 50 random edit
+batches on each must change only what they edit. Every night CI runs the same random edits on the whole corpus, 48,666
+public documents from 58 sources. 42,317 of them were generated by python-docx, 41,625 of those Harvey LAB's synthetic
+legal documents, and 4,783 were saved by Microsoft Word. [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what
+stetdoc keeps exactly, what it normalizes, what it shows read-only and what it leaves out.
 
 ## It knows where 11.1 is.
 
@@ -226,8 +234,10 @@ let saved = doc.save()?;
 ```
 
 Node and Bun use it through the npm package `@clauseo/stetdoc`, with TypeScript types generated from the engine's
-definitions. Its `textEditor` is the backend of Claude's text editor tool, as the crate `stetdoc-editor` is in Rust.
-Errors carry a stable code, a message and a `next` hint, and the npm package throws them as `StetdocError`.
+definitions. Its `textEditor` carries out the `view`, `str_replace` and `insert` commands of Anthropic's text editor
+tool on the document's readable files, so an app that gives Claude that tool can apply its calls to a .docx. The crate
+`stetdoc-editor` does the same in Rust. Errors carry a stable code, a message and a `next` hint, and the npm package
+throws them as `StetdocError`.
 
 [Build on stetdoc](docs/build-on-stetdoc.md) compares the crate, the npm package, the CLI and MCP for products. The npm
 package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-napi/npm/README.md), and the
@@ -247,8 +257,9 @@ package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-
 Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the laws on the curated
 corpus of 306 documents. Every unedited round trip must come back byte-identical. On each document, 50 seeded random
 edit batches must keep the [laws](GLOSSARY.md#quality): they change only what they edit, the edits stick, accepting or
-rejecting them restores the expected text, and the file stays valid. The full corpora run nightly in CI. Each fuzz target runs for at least 24 hours before a
-release.
+rejecting them restores the expected text, and the file stays valid. Every night CI runs the random edit batches on all
+48,666 documents of the corpus. CI also runs each of the four fuzz targets for 60 seconds on every pull request. Longer
+fuzz runs are made by hand with `cargo xtask fuzz --time`, and no log of them is published.
 
 ## Licence
 

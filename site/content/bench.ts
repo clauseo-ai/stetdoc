@@ -1,18 +1,20 @@
 /**
- * docx-agent-bench, the figures behind "Done first, on every model."
+ * docx-agent-bench, the figures behind "Fastest on every model."
  * Every number here is real and supplied by Rohan; change none of them
  * without new runs. Times are median seconds per task. `others` is the
- * range across the four other setups (no plugin, Anthropic's docx skill,
- * Anthropic's legal plugin, Adeu): fastest to slowest.
+ * range across the other setups (no plugin, Anthropic's docx skill,
+ * Anthropic's legal plugin, Adeu; the legal plugin was not run on Gemini):
+ * fastest to slowest. Source: reports/final-2/tables.md, process metrics,
+ * in the docx-agent-bench repository.
  */
 
-import { BENCH_URL } from '../app/links';
+import { BENCH_URL, BENCH_GRADING_URL } from '../app/links';
 
 export type BenchRow = {
 	model: string;
 	/** stetdoc's median time per task, in seconds */
 	stetdoc: number;
-	/** the other four setups: [fastest, slowest], in seconds */
+	/** the other setups: [fastest, slowest], in seconds */
 	others: [number, number];
 };
 
@@ -33,20 +35,33 @@ export type BenchFact = {
 export const BENCH_FACTS: BenchFact[] = [
 	{
 		figure: '0 of 118',
-		line: 'stetdoc runs that wrote a file Word offered to repair.',
+		line: 'stetdoc runs that wrote a .docx got a repair prompt in Word.',
 		wall: 118,
 	},
 	{
 		figure: '6 of 6',
-		line: 'long Harvey LAB markups, fully correct on every model.',
+		line: 'long Harvey LAB markups on each model opened in Word without a repair prompt and passed the objective checks. Other setups got 2 to 5 of 6.',
 		wall: 6,
 	},
-	{ figure: '1 ms', line: 'from launch to a ready MCP server.' },
+	/* docs/install.md, "Why the channel matters": median of 20 runs of stetdoc --version */
+	{
+		figure: '5 ms',
+		line: 'for each stetdoc call to start, with the binary on your PATH.',
+	},
 ];
 
-/** the method line: `name` links to `href`, and `rest` follows it */
-export const BENCH_METHOD = {
-	name: 'docx-agent-bench',
-	href: BENCH_URL,
-	rest: ', 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run, and every file opened in Microsoft Word for Mac 16.114.3.',
-};
+/** one piece of the method line: plain text, or a link when `href` is set */
+export type MethodPart = { text: string; href?: string };
+
+/** the method line, in order; every figure above links its method from here */
+export const BENCH_METHOD: MethodPart[] = [
+	{ text: 'docx-agent-bench', href: BENCH_URL },
+	{
+		text: ', run final-2: 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per short task and two per long one, medians per run. Only the stetdoc setup had a hook that blocks other ways of writing a .docx in Claude Code. ',
+	},
+	{
+		text: 'Every file was opened in Microsoft Word for Mac 16.114.3',
+		href: BENCH_GRADING_URL,
+	},
+	{ text: ', by a script that is not published.' },
+];

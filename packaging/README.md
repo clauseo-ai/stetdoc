@@ -26,7 +26,7 @@ and uploads to PyPI when a maintainer publishes the GitHub release. A maintainer
 
 Related repositories: [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench) is the benchmark behind the
 figures on the website, and [ooxml-validate](https://github.com/clauseo-ai/ooxml-validate)
-(`brew install clauseo-ai/tap/ooxml-validate`) is the validity check it uses.
+(`brew install clauseo-ai/tap/ooxml-validate`) is the Open XML SDK validator it uses to pick the files Word must open.
 
 ## Release checklist
 

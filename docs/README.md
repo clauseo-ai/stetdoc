@@ -25,8 +25,8 @@ package, the CLI and the MCP server.
   unless you ask for manual markup.
 - **Validated before commit.** An edit may not add schema or Word-rule violations, and a batch applies completely or not
   at all.
-- **Safe on hostile input.** Bad input fails with a stable error code. stetdoc never panics, hangs or touches the
-  network.
+- **Safe on hostile input.** Bad input fails with a stable error code. stetdoc never panics or hangs on it, and it
+  makes no network connections.
 
 ## Every page
 

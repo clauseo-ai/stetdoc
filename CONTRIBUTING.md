@@ -171,9 +171,11 @@ an output, since each is made from a corpus document. `STETDOC_LO_ONLY=3,17` rea
 
 ### Fuzzing
 
-The container (`package`) and the span tree (`xml`) have fuzz targets. A release needs
-at least 24 CPU-hours of fuzzing per target without a crash, and CI runs each target for 60
-seconds on every pull request.
+Four fuzz targets cover the container (`package`), the span tree (`xml`), operation batches
+(`batch`) and edits of the readable files (`files`). CI runs each target for 60 seconds on every
+pull request. The aim, from [decision 0002](docs/decisions/0002-fuzz-entry-points.md), is 24
+CPU-hours per target without a crash before a release. No release workflow runs that yet, and
+no log of a long run is published, so 0.9.0 and 0.9.1 shipped without a recorded one.
 
 ```
 cargo xtask fuzz xml                                    60 seconds

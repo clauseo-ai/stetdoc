@@ -7,6 +7,8 @@ export const CLAUSEO_URL = 'https://www.clauseo.chat';
 export const SITE_URL = 'https://stetdoc.clauseo.chat';
 /** the benchmark behind the figures (COPY.md, Bench) */
 export const BENCH_URL = 'https://github.com/clauseo-ai/docx-agent-bench';
+/** how the benchmark grades a run, the Word check included (COPY.md, Bench) */
+export const BENCH_GRADING_URL = `${BENCH_URL}#how-grading-works`;
 
 /** the suggested install (COPY.md, Hero) */
 export const INSTALL_COMMAND = 'brew install clauseo-ai/tap/stetdoc';

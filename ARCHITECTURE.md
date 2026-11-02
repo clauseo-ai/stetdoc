@@ -465,8 +465,10 @@ that need them are skipped where the tool is absent.
    change. Caches are not invalidated: each records the generation of every part it was
    built from, and is rebuilt on the next read if one has changed. Discard drops the
    `Tx`, which never wrote to the committed state. The receipt is built from the committed
-   state, or for a dry run from the staged one, and `document/drift.rs` compares its resolved
-   prose mentions with those of the starting state to warn about the ones the edit moved.
+   state, or for a dry run from the staged one. `document/drift.rs` compares the resolved prose
+   mentions of the starting state, read before staging, with those of the state the commit
+   makes (a dry run's too, before it is dropped), to warn about the ones the edit moved. It
+   builds each index in a scratch `Tx`, so no cache keeps one.
 
 **Compare (`compare`).** Open both packages, accept any existing revisions in memory
 (with a warning), then align blocks:

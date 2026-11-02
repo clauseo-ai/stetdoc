@@ -67,10 +67,14 @@ Option 4.
 - An edit that renumbers a list warns about each typed reference that now names another limb, and about a definition it
   took out from under a term still in use. The bug report's two repros give exactly the warnings it asked for.
 - A receipt without such a warning is byte for byte as it was, and the JSON gains no field.
-- The cost, for a batch that changed something: an index and edge pass over the starting state and one over the result.
-  The index and the edges of the Original view are built only when a candidate exists, and the walk for the uses of a
-  term only when a definition went. The check stops after the first pass when the starting state has no resolved
-  mention and no defined term.
+- The cost: an index and edge pass over the starting state before the edit stages anything, and, for a batch that
+  changed something, one over the state the commit makes. The index and the edges of the Original view are built only
+  when a candidate exists and the starting state has tracked changes, and the walk for the uses of a term only when a
+  definition went. The check stops after the first pass when the starting state has no resolved mention and no defined
+  term. Each pass builds its index in a scratch transaction and keeps only a small snapshot of the mentions and the
+  definitions, so no cache holds an index and two are never held at once. The peak memory of an edit is what it was
+  before this change. The price is time: a later edit or view builds its index again. The second of two edits on the
+  300-page contract went from 91 ms to 106 ms, against a budget of 1 s.
 - Out of scope: field `REF` cross-references, which follow their bookmark and whose cached result stetdoc does not
   update, and mentions that were relative or ambiguous before the edit. `compare` receipts leave `ref_drift` empty.
 - A caller that matches `WarningCode` exhaustively needs a wildcard arm, as it is `non_exhaustive`.

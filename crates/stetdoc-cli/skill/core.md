@@ -153,6 +153,9 @@ One kind is repaired for you, because Word refuses to open a file that has it: a
 nothing declares. The receipt says so in a `repaired` warning, such as `declared w14, wp14 in word/document.xml so Word
 can open the file`. Tell the user that the input did not open in Word and the output does.
 
+After you insert, delete or re-level a list item, read any `ref_retargeted`, `ref_unresolved` or `definition_removed`
+warning and fix the typed references (such as `Clause 16.2(b)`) in the same batch, or confirm the move with the user.
+
 When the document holds tracked changes you did not make, receipts and views say so in a line such as
 `4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #0 insert p1 "shall pay ", ...`, followed by
 `Tell the user about them.` Do it: name who made them and what they change. `stetdoc view FILE --revisions --context 1`

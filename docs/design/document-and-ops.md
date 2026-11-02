@@ -161,7 +161,7 @@ napi, because a JSON byte array would be wrong for both. `projection`'s and `che
 | `stamp.rs`, `options.rs` | `Stamp { author, date }`, `OpenOptions`, `CompareOptions`, `Quotes`, `OffsetUnit` | `document` |
 | `op.rs`, `op_spec.rs`, `batch.rs` | `Op` and its payloads; the `OPS` table, `OpSpec`, `FieldSpec`; `Batch { base, ops }` | `document` |
 | `edit.rs` | `Edit` and its builder | `document` |
-| `receipt.rs` | `Receipt`, `OpResult`, `AuthorRevisions`, `ChangeEntry`, `ChangeKind`, `Resolution`, `CommentEffect`, `Retired`, `MoveEntry`, `Validation`, `CheckResult` | `document`, from check 5, revisions 2.1, comments 7 |
+| `receipt.rs` | `Receipt`, `OpResult`, `AuthorRevisions`, `ChangeEntry`, `ChangeKind`, `Resolution`, `CommentEffect`, `Retired`, `MoveEntry`, `RefDrift`, `RefTarget`, `Validation`, `CheckResult` | `document`, from check 5, revisions 2.1, comments 7 |
 | `revision.rs` | `RevisionInfo` | `document` |
 | `inspect.rs` | `Inspection`, `InspectItem` | `document` |
 | `working_copy.rs` | `WorkingCopy`, `Complement`, `WriteOptions`, `WritePlan`, `WriteStep`, `Recovery`, `Saved`, `SaveReceipt` | `document` |
@@ -655,6 +655,7 @@ pub struct Receipt {
     pub blocks: Vec<RenderedBlock>,         // the post-edit text of every block touched or added, at most 200
     pub blocks_omitted: u32,
     pub warnings: Vec<Warning>,             // every warning, deduplicated by code, block and message
+    pub ref_drift: Vec<RefDrift>,           // one for each ref_retargeted and ref_unresolved warning, in the same order. Left out of the JSON when empty
     pub validation: Validation,             // what `check` verified
     pub text: String,                       // what the CLI and the editor show an agent
 }
@@ -667,6 +668,8 @@ pub struct OpResult { pub index: usize, pub op: String, pub changed: bool, pub o
 pub struct RemovedOwnEntry { pub kind: String, pub id: Option<i64> }          // text, mark, paragraph or row, and the id of the revision it was
 pub struct FoldedEntry { pub id: i64, pub cancelled: bool }                  // revisions' Folded: the id of the change, and whether the edit undid it
 pub struct MoveEntry { pub from: String, pub to: String, pub text: String }   // compare only
+pub struct RefDrift { pub source: String, pub text: String, pub before: RefTarget, pub after: Option<RefTarget> }   // after: None when it resolves to nothing or to several
+pub struct RefTarget { pub r#ref: Option<String>, pub label: String }        // ref: None for a block the batch adds
 pub struct AuthorRevisions { pub author: String, pub counts: Vec<(ChangeKind, u32)>, pub changes: Vec<ChangeEntry> }
 pub struct ChangeEntry { pub kind: ChangeKind, pub ids: Vec<i64>, pub date: String, pub block: Option<String> }
 pub struct Resolution { pub action: String, pub resolved: Vec<ResolvedCount>, pub swallowed: Vec<i64>, pub removed: Vec<Retired>,
@@ -697,6 +700,7 @@ that `reconcile` removed are listed with the comment they belonged to.
 | `retired`, `added`, `added_count` | `Committed::retired` and `minted` | `retired` holds refs of blocks that existed, so a dry run has the same list. `added` holds the refs minted and is empty for a dry run, which has only `added_count` |
 | `blocks`, block `warnings` | `projection::render_blocks(next.parts(), base, keys, BlockSpec { format, context: 0 })` | the keys are the touched and new blocks and the survivors of merges. A row or table key is expanded to the paragraphs of a **new** row. At most 200 blocks, in document order, with the rest counted in `blocks_omitted`. A dry run renders `tx.parts()`, so a new block has `ref: None` and an `anchor`, and the line in its text is the one the agent would write |
 | `warnings` | the warnings of the blocks, `Planned.notes` (`looks_like_rewrite`, `split_at_wrap`), `Outcome::warnings`, the comment warnings, the quote and `find` notes, and the notes of `check` | one list, deduplicated, in the order above |
+| `ref_drift`, and the warnings `ref_retargeted`, `ref_unresolved` and `definition_removed` | `document/drift.rs`, which compares the resolved prose mentions of the starting state with those of the state the receipt describes, over Final text and numbers, by the ref of the citing block and the mention as written | appended after the other warnings. A target is compared by block, never by label. A mention whose citing block or text the batch changed is skipped, and one that now names what it named in the Original view of the starting state is not reported. Field `REF` cross-references are not checked ([decision 0015](../decisions/0015-cross-reference-drift.md)) |
 | `validation` | `Verified` from `check::edit` | `carried` lists up to ten problems that were already in the blocks the edit touched, so an agent knows a later `check` will still show them |
 | `numbering`'s tier-3 number format `Note` | `render_blocks` | a block whose clause number may not match Word carries the `numbering_approximate` warning of `projection-and-index` 3.6, and so does the head of every view. `check` does not read numbering (`styles-and-numbering` 2.4), so this is where the note reaches an agent, in the receipt of a block it edited and in the view |
 
@@ -724,7 +728,9 @@ would be longer lists the operations that fit in 2,000 bytes, then `and N more o
 numbers, the JSON receipt and `stetdoc view FILE --revisions` as the places to find them. It shows the blocks that fit in what is left, then
 `and N more blocks not shown here, from pK on`, which counts the 200-block cap's overflow too, with `stetdoc view FILE --range pK` and
 `stetdoc view FILE --revisions --context 1`. The head line, the warnings and what `check` said are always whole, and a block is never cut,
-so a receipt whose first block is longer than the cap is longer too. The cap reads the lengths of the strings the text is built from and
+so a receipt whose first block is longer than the cap is longer too. The head line counts the warnings about cross-references
+(`3 cross-reference warnings below (2 ref_retargeted, 1 definition_removed).`), and the text shows at most 8 of them, then says how many more
+there are and that the JSON lists every one. The cap reads the lengths of the strings the text is built from and
 adds no pass over the document. A compare receipt caps its moves the same way. The JSON is unchanged.
 
 ## 5. The working copy
@@ -1177,8 +1183,8 @@ testkit through `Document`.
 - `projection::authors(parts: PartsView) -> Vec<(String, String)>`: code and name, as the view's author line shows them. `document` hands it to `ops` for
   `accept` and `reject` by author, because the document facts are `projection`'s and `ops` may not read them.
 - `Warning.story` is an `Option<String>`, and `WarningCode` holds the codes of 4.2: `no_change`, `own_text_removed`,
-  `property_change_folded`, `revision_removed_with_text`, `quotes_curled`, `quotes_straightened`, `find_matched_loosely`, `already_resolved`, `reply_to_resolved`, `anchor_emptied` and
-  `comment_removed`. A warning about an operation and not a block has no story.
+  `property_change_folded`, `revision_removed_with_text`, `quotes_curled`, `quotes_straightened`, `find_matched_loosely`, `already_resolved`, `reply_to_resolved`, `anchor_emptied`,
+  `comment_removed`, `ref_retargeted`, `ref_unresolved` and `definition_removed`. A warning about an operation and not a block has no story.
 - `ReadableFiles` has `rendered: Vec<(String, String)>` (file name and hex SHA-256), empty from `render_files` and filled by `pending_files`. `Lookup` has
   `text: String`.
 - On the files path `max_batch_ops` counts the **changed blocks**, and the refusal says how many there are and that the edit should be applied in parts.

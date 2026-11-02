@@ -5,6 +5,18 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
+## Unreleased
+
+### Added
+
+- A receipt warns when an edit moves a typed cross-reference or removes a definition still in use. After an edit that
+  renumbers a list, a mention such as `Clause 16.2(b)` that now names another limb gets a `ref_retargeted` warning, one
+  that now names nothing or several limbs gets `ref_unresolved`, and a term whose last definition went while the text
+  still uses it gets `definition_removed`. The head line counts them, the text shows up to 8, and the JSON receipt lists
+  every one, with each reference's old and new target in `ref_drift`. Edits, dry runs, `pack` and `check` of a working
+  copy with pending edits all warn. An edit that only undoes a pending change says nothing, and neither does a reference
+  the batch itself rewrote.
+
 ## [0.9.1] - 2026-11-02
 
 ### Fixed

@@ -123,6 +123,13 @@ the server finds the author you saved with `stetdoc init`, so the snippets need 
 agent, add `--author "Name"` after `mcp` in its snippet. Before the binary is on the PATH, `npx stetdoc mcp` works in
 place of `stetdoc mcp`.
 
+### Receipts after a list edit
+
+Whichever surface the agent uses, an edit that inserts, deletes or re-levels a list item can leave a typed reference such
+as `Clause 16.2(b)` naming another clause. The receipt says so in a `ref_retargeted`, `ref_unresolved` or
+`definition_removed` warning, and the skill tells the agent to fix the typed references in the same batch or confirm the
+move with the user.
+
 ## Claude Code
 
 - **Skill:** `~/.claude/skills/stetdoc/SKILL.md`, or `.claude/skills/stetdoc/SKILL.md` in a project. `stetdoc init

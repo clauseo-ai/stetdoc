@@ -570,8 +570,8 @@ A minimal word diff is correct and often unreadable: two paragraphs that share a
 confetti of one-word deletions and insertions, and a reader, a lawyer in particular, wants to see one clause
 replaced by another. The cleaning rules turn dense edits into one replacement, as a careful human would write
 them. They follow the semantic cleanup of diff-match-patch, which is the standard answer to the same problem, and
-run over the edit script, the unchanged islands between edits and the token kinds of step 2. Repeat 1 to 3 until
-nothing changes:
+run over the edit script, the unchanged islands between edits and the token kinds of step 2. Repeat 1 to 3 and 5 until
+nothing changes, then apply 4, and 5 once more:
 
 1. An island with **no word token** (only spaces and punctuation) between two edits is dissolved into them. An island is
    the unchanged tokens between two edits, and there is always one, because two edits that touch are one.
@@ -581,6 +581,17 @@ nothing changes:
 4. At the end, if **more than half** of the word tokens between the first and the last edit are inside edits, the
    span from the first edit's start to the last edit's end becomes one replacement. The words are counted on both sides:
    those of the old span and those of the new span.
+5. **A bracket pair is never cut in half.** If an edit's deleted or inserted text leaves an opener open (`(`, `[`, `{` or
+   `“`) and the unchanged token right after the edit is its closer, the edit takes the closer; if it leaves a closer
+   unopened and the unchanged token right before the edit is its opener, the edit takes the opener. One token at a time,
+   as long as one qualifies. This is the only rule that moves an outer end, and only over a bracket. It reaches into the
+   trimmed prefix and suffix, where rules 1 to 4 do not: `thirty (30)` to `forty-five (45)` has the common suffix `)`,
+   which 0.9.0 left standing after the insertion (~~thirty (30~~forty-five (45**)**), and a reviewer strikes and inserts
+   the number with its brackets whole. It never takes a token another edit holds, and `replace_text` keeps out a bracket
+   in another author's pending change, or one whose deletion would be refused (`diff::edits_keeping`), so the edit is then
+   what it was before the rule. A straight quote has no direction and a curly single quote is also an apostrophe, so
+   neither is a pair, and glued punctuation that is not a bracket stays outside the edit, as in Word's own replacements:
+   `{--2--}{++3++}%`, `the {--Seller--}{++Vendor++}'s`.
 
 `diff::edits(old, new, Cleanup)` takes `Cleanup::Readable`, which `ops` and `compare` use, or `Cleanup::Minimal`,
 which compare's noise measure and the tests use. `Minimal` is the matching with no cleaning rule applied. It keeps as many
@@ -590,7 +601,10 @@ the first baseline, so the baseline is taken with `Readable`, and the minimal di
 constants (two tokens, one half) are starting values, checked with a table of before and
 after pairs written by hand (the cases a reviewer would call choppy), with the 139 Word-written pairs of `del`
 then `ins` (1.3) as the check that Word's own replacements are not coarser than ours, and with the noise figure
-over the Harvey LAB pairs.
+over the Harvey LAB pairs. **As built, rule 5.** It changes none of the Word-written pairs of the full set (133 in 75
+paragraphs on 2026-11-02, the same edits with and without it). Over the 354 LAB pairs it adds 0.05% to the redline's
+characters, and the formatting changes it counts fall from 17,795 to 16,707. The noise baseline was re-taken for it on
+purpose.
 
 ## 3. Revision shapes: reading, writing, accepting, rejecting
 
@@ -1708,7 +1722,7 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `carve.rs` | splitting a run at a character, carving a range into whole runs (the original node stays the left part), the copy rule | 430 |
 | `gap.rs` | the gap rule (4.2): where new text goes, splitting a wrapper or a container | 520 |
 | `insert_run.rs`, `wrap.rs` | building the run for new text and placing it; deleting what a carve covered, by whose text it is | 560 |
-| `text.rs`, `text_apply.rs`, `diff.rs` | `replace_text`: locate on one map, classify, delete, insert; the word-level difference and its cleaning (pure, shared with `compare`) | 940 |
+| `text.rs`, `text_apply.rs`, `diff.rs`, `diff_brackets.rs` | `replace_text`: locate on one map, classify, delete, insert; the word-level difference and its cleaning (pure, shared with `compare`) | 940 |
 | `props.rs`, `props_edit.rs`, `lists.rs` | `set_props`: containers, snapshots, edit, the change element, fold and refuse; `new_list_instance` | 840 |
 | `markers.rs` | `place_markers`, `place_markers_beside`, `remove_markers`, `remove_markers_in_part` | 400 |
 | `blocks.rs`, `blocks_insert.rs`, `blocks_delete.rs`, `join.rs` | what the block primitives share; `insert_block` and `split_block` (shapes X and Y); `delete_block`, `delete_block_with_mark` and `merge_blocks`; the join of two paragraphs | 1,440 |

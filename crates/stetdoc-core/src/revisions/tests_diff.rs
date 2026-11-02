@@ -367,6 +367,125 @@ fn most_words_changed_makes_the_whole_span_one_edit() {
     assert_eq!(edits(old, new, Cleanup::Readable), [e(0..14, new)]);
 }
 
+/// The one edit of a readable difference, as the deleted and the inserted text.
+fn one_edit(old: &str, new: &str) -> (String, String) {
+    let list = edits(old, new, Cleanup::Readable);
+    check_script(old, new, &list);
+    assert_eq!(list.len(), 1, "{old:?} {new:?} {list:?}");
+    let deleted = chars(old)[list[0].range.clone()].iter().collect();
+    (deleted, list[0].with.clone())
+}
+
+#[test]
+fn an_edit_never_cuts_a_bracket_pair_in_half() {
+    // old, new, the deletion, the insertion: the cases of the report on 0.9.0, and the ones that must not change.
+    let table = [
+        (
+            "due within thirty (30) days",
+            "due within forty-five (45) days",
+            "thirty (30)",
+            "forty-five (45)",
+        ),
+        (
+            "thirty (30)",
+            "forty-five (45)",
+            "thirty (30)",
+            "forty-five (45)",
+        ),
+        ("within (30) days", "within [30] days", "(30)", "[30]"),
+        (
+            "interest at 2% per month",
+            "interest at 3% per month",
+            "2",
+            "3",
+        ),
+        (
+            "the Seller's obligations",
+            "the Vendor's obligations",
+            "Seller",
+            "Vendor",
+        ),
+        ("(see clause 3.3)", "(see clause 7.5(a))", "3.3", "7.5(a)"),
+        (
+            "Payment is due within thirty days.",
+            "Payment is due within sixty days.",
+            "thirty",
+            "sixty",
+        ),
+        ("thirty days", "sixty (60) days", "thirty", "sixty (60)"),
+        // The mirror: a closer the edit leaves unopened takes the opener before it.
+        (
+            "under (a) Seller shall",
+            "under (b) Buyer shall",
+            "(a) Seller",
+            "(b) Buyer",
+        ),
+        // Brackets nested two deep are both taken.
+        (
+            "see [clause (3",
+            "see [section (4",
+            "clause (3",
+            "section (4",
+        ),
+        (
+            "as in f(g(x)) here",
+            "as in h(k(y)) here",
+            "f(g(x))",
+            "h(k(y))",
+        ),
+        // Curly double quotes pair; a straight quote has no direction and stays out.
+        (
+            "the \u{201C}Price list\u{201D} means",
+            "the \u{201C}Cost sheet\u{201D} means",
+            "Price list",
+            "Cost sheet",
+        ),
+        (
+            "the \u{201C}Price (net\u{201D} means",
+            "the \u{201C}Cost (gross\u{201D} means",
+            "Price (net",
+            "Cost (gross",
+        ),
+        (
+            "says \"thirty (30)\" here",
+            "says \"sixty (60)\" here",
+            "thirty (30)",
+            "sixty (60)",
+        ),
+    ];
+    for (old, new, deleted, inserted) in table {
+        assert_eq!(
+            one_edit(old, new),
+            (deleted.to_owned(), inserted.to_owned()),
+            "{old:?} -> {new:?}"
+        );
+    }
+}
+
+#[test]
+fn a_bracket_that_another_edit_holds_or_that_the_caller_keeps_out_is_not_taken() {
+    // The caller keeps the closer out: the edit is what it was before the bracket rule.
+    let old = "due within thirty (30) days";
+    let new = "due within forty-five (45) days";
+    let closer = old.find(')').unwrap();
+    let list = edits_keeping(old, new, &|r| r.contains(&closer));
+    check_script(old, new, &list);
+    assert_eq!(list, [e(11..21, "forty-five (45")]);
+    // Kept out elsewhere, it is taken.
+    assert_eq!(
+        edits_keeping(old, new, &|r| r.start == 0),
+        [e(11..22, "forty-five (45)")]
+    );
+}
+
+#[test]
+fn a_minimal_difference_keeps_the_bracket_where_the_matching_put_it() {
+    assert_eq!(
+        edits("thirty (30) days", "forty-five (45) days", Cleanup::Minimal),
+        [e(0..6, "forty-five"), e(8..10, "45")]
+    );
+}
+
 #[test]
 fn a_combining_mark_stays_with_its_letter() {
     let (min, read) = both("a cafe\u{301} b", "a cafe b");

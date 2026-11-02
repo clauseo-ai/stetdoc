@@ -1,8 +1,48 @@
 # Packaging and listings
 
-This folder holds everything that gets stetdoc onto other people's machines and into agent catalogues. Nothing here has
-been published. Each channel below says what the release fills in, and the command or page that publishes it once the
-repository has a GitHub remote. A maintainer runs those steps. The release workflow only builds files.
+This folder holds everything that gets stetdoc onto other people's machines and into agent catalogues. Each channel
+below says what the release fills in, and the command or page that publishes it. The release workflow builds the files
+and uploads to PyPI when a maintainer publishes the GitHub release. A maintainer runs every other publish step.
+
+## Where stetdoc is published
+
+0.9.0 shipped on 2026-11-02 to every channel below except the hand-reviewed and paid directories.
+
+| Channel | Name | Install | Status |
+| --- | --- | --- | --- |
+| Website and docs | stetdoc.clauseo.chat | https://stetdoc.clauseo.chat | `site/`, deployed on Vercel |
+| GitHub Releases | `clauseo-ai/stetdoc` | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | live |
+| Homebrew | `clauseo-ai/tap/stetdoc` | `brew install clauseo-ai/tap/stetdoc` | live |
+| npm, CLI | `stetdoc`, `@clauseo/stetdoc-cli-<target>` | `npx stetdoc mcp`, `npm i -g stetdoc` | live |
+| npm, library | `@clauseo/stetdoc`, `@clauseo/stetdoc-<target>` | `npm i @clauseo/stetdoc` | live |
+| PyPI | `stetdoc` | `uvx stetdoc`, `uv tool install stetdoc` | live |
+| crates.io | `stetdoc`, `stetdoc-core` | `cargo install stetdoc --locked` | live |
+| MCP Registry | `io.github.clauseo-ai/stetdoc` | through npm | live |
+| Claude Code | marketplace `stetdoc` in this repository | `claude plugin marketplace add clauseo-ai/stetdoc` | live from `main` |
+| Codex, ChatGPT desktop | marketplace in this repository | `codex plugin marketplace add clauseo-ai/stetdoc` | live from `main` |
+| Cursor | plugin in this repository | Cursor's marketplace | submitted by hand, reviewed by Cursor |
+| Hermes | skill in this repository | `hermes skills install clauseo-ai/stetdoc/skills/stetdoc` | works from `main`; no hub listing |
+| ClawHub | none | none | not listed: its sign-in failed on its side on 2026-11-02 |
+
+## Release checklist
+
+The order 0.9.0 was released in. Each step's detail is in its channel's section below.
+
+1. Every section of `CHANGELOG.md` names the release and its date. `node packaging/scripts/stamp.mjs --write`,
+   `cargo xtask release check` and `cargo publish --dry-run -p stetdoc-core -p stetdoc` pass. Commit and push.
+2. Optionally, tag a candidate `v<version>-rc.N` to run the whole build first, then delete its draft release.
+3. Tag `v<version>` and push the tag. `release.yml` builds a draft release with 46 files. All organisations share
+   GitHub's macOS runners, so another repository's CI can hold the macOS jobs in the queue.
+4. Check the draft, then publish it. That makes the install script work and starts `publish-pypi`.
+5. npm: the seven CLI target packages, then `stetdoc`, then the seven library target packages, then `@clauseo/stetdoc`.
+   With 2FA on writes, each `npm publish` asks for a browser approval, which can waive 2FA for five minutes. npm holds a
+   brand-new package for review before it serves it. In 0.9.0 the 16 packages came out one by one within about ten
+   minutes, and until then `npx stetdoc` failed with `ETARGET`.
+6. crates.io: `cargo publish -p stetdoc-core -p stetdoc` from a clean checkout of the tag.
+7. Homebrew: copy the release's `stetdoc.rb` to `Formula/stetdoc.rb` in `clauseo-ai/homebrew-tap` and push.
+8. MCP Registry, after npm serves the new version: `mcp-publisher publish` (see channel 9 for the login).
+9. Check each channel: `npx stetdoc@<version> --version`, `uvx stetdoc@<version> --version`, `brew install`, and the
+   registry's search for the MCP listing.
 
 ## Placeholders and the version
 
@@ -58,15 +98,15 @@ repository-based channels work from the repository at its default branch, so a m
   checks its SHA-256 against the `.sha256` file the `cli` job writes, and installs to `$STETDOC_INSTALL_DIR` or
   `~/.local/bin`. Linux gets the static musl build. Windows is not covered.
 - Release fills: nothing. The archives and their checksums come from the `cli` jobs of `release.yml`.
-- Publish: push the repository to GitHub, tag `v<version>`, and publish the draft release. Then:
+- Publish: tag `v<version>`, push the tag, and publish the draft release. Then:
   `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh`
 
 ### 2. Homebrew
 
 - File: `packaging/homebrew/stetdoc.rb`, a template with `@VERSION@` and four `@SHA256_*@` placeholders. The `homebrew`
   job of `release.yml` runs `packaging/scripts/fill-formula.mjs` and attaches the filled file to the draft as `stetdoc.rb`.
-- Publish: create a tap repository named `homebrew-tap`, copy the released `stetdoc.rb` to `Formula/stetdoc.rb`, and
-  push it. Users then run `brew install clauseo-ai/tap/stetdoc`. Nothing in this repository pushes to a tap.
+- Publish: copy the released `stetdoc.rb` to `Formula/stetdoc.rb` in the tap repository `clauseo-ai/homebrew-tap` and
+  push it. Users then run `brew install clauseo-ai/tap/stetdoc`. Nothing in this repository pushes to the tap.
 
 ### 3. npm: the CLI
 
@@ -81,7 +121,9 @@ repository-based channels work from the repository at its default branch, so a m
   one `clauseo-stetdoc-cli-<target>-<version>.tgz` per target. The napi addon's tarballs are `clauseo-stetdoc-*.tgz`
   without `cli`, so none of them collide in the release.
 - Publish: publish the seven target packages first, then the main one, from the draft's tarballs, with
-  `npm publish <tarball> --access public`. Then `npx stetdoc mcp` works anywhere.
+  `npm publish <tarball> --access public`. Then `npx stetdoc mcp` works anywhere. The packages belong to the npm
+  organisation `clauseo`; a publisher must be a member with 2FA. npm holds a package it has never seen for review
+  before it serves the version (see the release checklist above).
 - Bun: Bun blocks the install step of any package not in `trustedDependencies`, so a plain `bun add stetdoc` or
   `bun add -g stetdoc` keeps the Node launcher (`Blocked 1 postinstall`). Bun users should install with `--trust`:
   `bun add -g --trust stetdoc` (or `bun add --trust stetdoc` in a project, which adds `stetdoc` to the project's
@@ -103,7 +145,7 @@ repository-based channels work from the repository at its default branch, so a m
   | `bun add -g`, then `stetdoc` | no (blocked) | Node | 65 ms |
   | `bun add -g --trust` or `bun pm -g trust stetdoc`, then `stetdoc` | yes | none | 1.8 ms |
 
-  Not checked: `bunx stetdoc` straight from the registry (nothing is published), and Windows. Getting `stetdoc` onto Bun's
+  Not checked: `bunx stetdoc` straight from the registry, and Windows. Getting `stetdoc` onto Bun's
   built-in list of trusted packages would make the plain install fast too; that is a request to the Bun project.
 
 ### 4. PyPI: the CLI
@@ -121,8 +163,8 @@ repository-based channels work from the repository at its default branch, so a m
   `stetdoc-<pep440 version>.tar.gz`. The version comes from the workspace, as above.
 - Publish: publishing the draft release on GitHub starts the `publish-pypi` job, which downloads that release's seven
   wheels and the sdist and uploads them with `pypa/gh-action-pypi-publish` by trusted publishing (no token in the
-  repository). Before the first release, a PyPI account with 2FA adds a pending publisher at
-  https://pypi.org/manage/account/publishing/ with these fields:
+  repository). The trusted publisher has these fields (set up for 0.9.0, as a pending publisher at
+  https://pypi.org/manage/account/publishing/ that the first upload turned into a normal one):
 
   | Field | Value |
   | --- | --- |
@@ -132,11 +174,10 @@ repository-based channels work from the repository at its default branch, so a m
   | Workflow name | `release.yml` |
   | Environment name | `pypi` |
 
-  and the repository gets a GitHub environment named `pypi` (Settings, Environments), ideally with a required reviewer
-  and limited to `v*` tags. The first upload creates the project and turns the pending publisher into a normal one.
-  Without trusted publishing, the token route: download the wheels and the sdist from the release into an empty folder
-  and run `uv publish <folder>/*` (or `twine upload <folder>/*`) with an API token. The first upload needs a token scoped
-  to the whole account, because a project token exists only once the project does; replace it with a project token after.
+  The repository's GitHub environment `pypi` (Settings, Environments) admits only `v*` tags. It has no required
+  reviewer, so publishing the GitHub release uploads at once; add one there to approve each upload by hand.
+  If trusted publishing ever fails, the token route: download the wheels and the sdist from the release into an empty
+  folder and run `uv publish <folder>/*` (or `twine upload <folder>/*`) with a project-scoped API token.
 - Install: `uv tool install stetdoc`, `pipx install stetdoc` or `pip install stetdoc`. `uvx stetdoc mcp` runs the
   server without installing.
 - Local build: `cd packaging/pypi && maturin build --release --locked` writes a wheel for this machine to `target/wheels`
@@ -153,17 +194,16 @@ repository-based channels work from the repository at its default branch, so a m
 - Publish: from a clean checkout of the `v<version>` tag, after the GitHub release, run
   `cargo publish -p stetdoc-core -p stetdoc`. Cargo 1.90 or newer publishes both in dependency order and waits for
   `stetdoc-core` to reach the index before `stetdoc`. `cargo publish --dry-run -p stetdoc-core -p stetdoc` checks the
-  same without uploading; it passed on 2026-10-30 at 0.9.0. A published version can be yanked but never replaced or
+  same without uploading. A published version can be yanked but never replaced or
   deleted, and its README is frozen with it.
 - Account, once: sign in at https://crates.io with GitHub, verify the email address under Account Settings, create an
   API token there with the `publish-new` and `publish-update` scopes (it is shown once), and run `cargo login`, which
   reads the token from stdin and keeps it in `~/.cargo/credentials.toml`. crates.io has no organisations: the crates
   belong to the account that publishes first. Add co-owners after with `cargo owner --add <github-login>`, or a GitHub
   team with `cargo owner --add github:clauseo-ai:<team>`.
-- Later releases: once the crates exist, trusted publishing (crate Settings, Trusted Publishing, repository
-  `clauseo-ai/stetdoc`, workflow `release.yml`) lets a release job publish with `rust-lang/crates-io-auth-action` and no
-  stored token. No such job exists yet; the first publish has to be by hand, because a trusted publisher can only be
-  added to a crate that exists.
+- The crates belong to the account that published 0.9.0 by hand. Now that they exist, trusted publishing (crate
+  Settings, Trusted Publishing, repository `clauseo-ai/stetdoc`, workflow `release.yml`) would let a release job publish
+  with `rust-lang/crates-io-auth-action` and no stored token. No such job exists yet, so releases publish by hand.
 - Install: `cargo install stetdoc --locked`, or `cargo binstall stetdoc` (not checked), which looks for a prebuilt binary.
 
 ### 6. Claude Code: plugin and marketplace
@@ -184,8 +224,8 @@ repository-based channels work from the repository at its default branch, so a m
 
 - Files: `plugins/cursor/` with `.cursor-plugin/plugin.json` (no `$schema`, because Cursor's schema rejects unknown top-level
   keys), `mcp.json` and the skill copy.
-- Publish: push the public repository, then submit it at https://cursor.com/marketplace/publish. Cursor reviews each plugin
-  by hand. Local test: copy `plugins/cursor/` to `~/.cursor/plugins/local/stetdoc/` and reload the window.
+- Publish: submit the repository at https://cursor.com/marketplace/publish. Cursor reviews each plugin by hand. A later
+  release needs no new submission: Cursor reads the plugin from the repository. Local test: copy `plugins/cursor/` to `~/.cursor/plugins/local/stetdoc/` and reload the window.
 - Sources: https://cursor.com/docs/reference/plugins, https://raw.githubusercontent.com/cursor/plugins/main/schemas/plugin.schema.json
 
 ### 8. OpenAI: Codex and ChatGPT
@@ -217,18 +257,24 @@ repository-based channels work from the repository at its default branch, so a m
 ### 10. OpenClaw ClawHub: skill
 
 - No manifest. ClawHub takes the skill folder as it is: `skills/stetdoc/SKILL.md` is the whole skill.
-- Publish: `clawhub login`, then from the repository root:
+- Status: not listed. For 0.9.0 on 2026-11-02, `clawhub login` (CLI 0.25.0) failed on ClawHub's side: the device-code
+  request answered 500 three times, and the one code it did issue gave a server error when approved. The listing was
+  dropped for that release.
+- Publish, when its sign-in works: `npm i -g clawhub`, `clawhub login`, then from the repository root:
   `clawhub skill publish skills/stetdoc --slug stetdoc --name "stetdoc" --owner <owner> --categories productivity,development --topics "docx,word,tracked-changes"`.
-  Omit `--owner` to publish as yourself. The `--dry-run` form for skills is unverified.
+  Omit `--owner` to publish as yourself. The `--dry-run` form for skills is unverified. A ClawHub listing would also
+  reach Hermes users, whose public Skills Hub installs `clawhub/...` skills.
 - Sources: https://docs.openclaw.ai/clawhub/publishing, https://docs.openclaw.ai/clawhub/skill-format
 
 ### 11. Hermes Skills Hub: skill
 
 - No manifest. Hermes takes a folder with `SKILL.md`, and the frontmatter of `skills/stetdoc/SKILL.md` already fits.
-- Publish to a GitHub repository, from the repository root:
-  `hermes skills publish skills/stetdoc --to github --repo clauseo-ai/stetdoc`. Users then run
-  `hermes skills tap add clauseo-ai/stetdoc` and `hermes skills install clauseo-ai/stetdoc/skills/stetdoc`.
-- Unverified: whether the public Skills Hub takes a listing request, beyond a GitHub repository or tap.
+- Publish: none. The skill already sits in this public repository, so `hermes skills install
+  clauseo-ai/stetdoc/skills/stetdoc` works from `main`. `hermes skills publish --to github` would only copy it to a
+  repository, so it was not run for 0.9.0.
+- Hermes's public Skills Hub lists its own skills and ClawHub's (`clawhub/...`), so stetdoc appears there only through a
+  ClawHub listing (channel 10).
+- Unverified: whether the Skills Hub takes a listing request of its own.
 - Sources: https://hermes-agent.nousresearch.com/docs/user-guide/features/skills,
   https://hermes-agent.nousresearch.com/docs/developer-guide/creating-skills
 
@@ -236,6 +282,17 @@ repository-based channels work from the repository at its default branch, so a m
 
 `skills/stetdoc/SKILL.md` follows https://agentskills.io/specification: `name` is `stetdoc`, the same as its directory,
 and `description` is under 1024 characters. The `skills-ref validate` tool named in that spec was not run.
+
+### 13. The website: stetdoc.clauseo.chat
+
+- Files: `site/`, a static Next.js export with the launch page, the docs (rendered from `docs/`), markdown twins of every
+  page, `llms.txt` and pagefind search. `site/README.md` covers running, building and deploying it.
+- Hosting: Vercel, with the project's root directory set to `site`; `site/vercel.json` sets the install and build
+  commands, the output folder and the redirects. `stetdoc.clauseo.chat` points at the project.
+- Publish: a push to `main` deploys. A release needs no step of its own, but the site quotes the version and the install
+  commands, so check the page after each release.
+- Every manifest's `homepage` (Cargo, npm, PyPI, the plugins and the MCP listing) points at https://stetdoc.clauseo.chat,
+  and the repository stays the `repository` link.
 
 ## Launch cost and which channel to recommend
 
@@ -269,12 +326,9 @@ the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch 
 
 1. **npm names (decided).** Everything but the CLI lives under the Clauseo organisation's scope. The CLI is the unscoped
    `stetdoc`, so `npx stetdoc` works, with platform packages `@clauseo/stetdoc-cli-<target>`. The napi library is
-   `@clauseo/stetdoc`, with platform packages `@clauseo/stetdoc-<target>`. It ships with this release, so its
-   package.json is no longer marked private. On 2026-10-27 the registry returned 404 for `stetdoc`, `@clauseo/stetdoc`,
-   `@clauseo/stetdoc-cli-darwin-arm64` and `@clauseo/stetdoc-darwin-arm64`, and "Scope not found" for
-   `https://registry.npmjs.org/-/org/clauseo/package`, so a maintainer must create the npm organisation `clauseo` before
-   any `@clauseo/*` package can be published. Check again before publishing, because a 404 is not a reservation. The
-   Homebrew tap is `clauseo-ai/homebrew-tap` (404 on GitHub the same day), so it can hold other Clauseo formulae later.
+   `@clauseo/stetdoc`, with platform packages `@clauseo/stetdoc-<target>`. All of them were first published with 0.9.0,
+   under the npm organisation `clauseo`. The Homebrew tap is `clauseo-ai/homebrew-tap`, so it can hold other Clauseo
+   formulae later.
 2. **The Claude plugin** is `plugins/claude/` and holds only the skill, the manifest, the icon and the guard hook, not the repository.
 3. **The author** is `Clauseo` in every manifest, as in the napi package and the Cargo manifests.
 
@@ -307,8 +361,26 @@ the default. Unwinding stays on, because `stetdoc mcp` and the napi addon catch 
   `clauseo-stetdoc-darwin-arm64-1.0.0-dev.tgz` installed with npm, and `require("@clauseo/stetdoc")` under Node 26 and
   `import { Document } from "@clauseo/stetdoc"` under Bun 1.4.3 loaded the addon from the platform package. The Bun runs are
   in the npm section. `publish-pypi` passes `actionlint` and has not run.
-- The filled Homebrew formula passed `ruby -c`. `brew audit` takes only a tapped formula, and no tap was made.
+- The filled Homebrew formula passed `ruby -c`.
 
-Not verified: a real release run, the `pypi` job and maturin-action's containers, a real tap or npm install from the registry, the Homebrew `on_*` blocks on macOS, the
-MCP registry schema check (no validator was available), whether `mcp-publisher` reads `server.json` from the current
-directory, and the Hermes and OpenClaw listing rules beyond their docs.
+The 0.9.0 release, on 2026-11-02:
+
+- `release.yml` ran green on `v0.9.0-rc.3` and then on `v0.9.0` (the same commit), every job included: the seven CLI
+  builds, the seven addons and their smoke tests, the seven wheels in maturin-action's containers, the sdist, the npm
+  tarballs and the formula. The draft held 46 files. The Apple Silicon archive matched its `.sha256` and printed
+  `stetdoc 0.9.0`.
+- Publishing the release ran `publish-pypi`, which uploaded the seven wheels and the sdist; PyPI lists 0.9.0 with 8 files,
+  and `uvx stetdoc@0.9.0 --version` printed `stetdoc 0.9.0`.
+- npm: after all 16 packages came out of review, `npx stetdoc@0.9.0 --version` printed the version, `npx stetdoc@0.9.0
+  mcp` answered `tools/list` with 11 tools (the count in `docs/reference/mcp-tools.md`), and `require("@clauseo/stetdoc")`
+  loaded in Node from a fresh install.
+- crates.io: `cargo publish -p stetdoc-core -p stetdoc` published both from a clean clone of the tag.
+- Homebrew: `brew install clauseo-ai/tap/stetdoc` installed from the tap and printed `stetdoc 0.9.0`.
+- MCP Registry: `mcp-publisher validate` passed before the publish, and the registry's search returns
+  `io.github.clauseo-ai/stetdoc` 0.9.0.
+
+- The install script, run against the live release into a fresh folder, installed a binary that printed
+  `stetdoc 0.9.0`.
+
+Not verified: `cargo install stetdoc` from crates.io, `cargo binstall`, the Homebrew formula on Intel macOS and Linux, `brew audit`, a Windows install from any channel, and the Hermes and
+OpenClaw listing rules beyond their docs.

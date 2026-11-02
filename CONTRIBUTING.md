@@ -51,7 +51,9 @@ cargo xtask release check     the packages and the release workflow agree with t
 ```
 
 CI's `napi` job runs the smoke test on Bun 1.3.13, Bun 1.3.14 and Node 24, and type-checks it. Releases are built by
-`.github/workflows/release.yml` on a `v*` tag, into a draft GitHub release; nothing is published from CI.
+`.github/workflows/release.yml` on a `v*` tag, into a draft GitHub release. The only upload from CI is to PyPI, when a
+maintainer publishes that release; npm, crates.io, Homebrew and the MCP Registry are published by hand
+([packaging/README.md](packaging/README.md#release-checklist)).
 
 ### Snapshots
 

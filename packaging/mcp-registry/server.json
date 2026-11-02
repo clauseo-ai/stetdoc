@@ -4,6 +4,7 @@
   "title": "stetdoc",
   "description": "Read, redline and compare Word .docx files with real tracked changes",
   "version": "0.9.0",
+  "websiteUrl": "https://stetdoc.clauseo.chat",
   "repository": {
     "url": "https://github.com/clauseo-ai/stetdoc",
     "source": "github"

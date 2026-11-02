@@ -9,7 +9,7 @@ rust-version = "1.92"
 license = "MIT OR Apache-2.0"
 authors = ["Clauseo"]
 repository = "https://github.com/clauseo-ai/stetdoc"
-homepage = "https://github.com/clauseo-ai/stetdoc"
+homepage = "https://stetdoc.clauseo.chat"
 publish = false
 
 [workspace.dependencies]

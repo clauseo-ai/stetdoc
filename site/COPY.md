@@ -150,7 +150,6 @@ stetdoc is open source, from [Clauseo lockup] · Docs · GitHub's mark ("stetdoc
 ## Gaps
 
 - [NEED: a named quote] One sentence from a real user or design partner, with their name and role, would be the strongest proof on the page. None exists in the repo.
-- [NEED: publish] Every install command only works once its channel is live. On 2026-10-31, crates.io, PyPI and npm all returned 404 for stetdoc. The Homebrew tap repository exists, but its formula wasn't checked.
 
 ## UI strings
 

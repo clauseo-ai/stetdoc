@@ -33,4 +33,4 @@ Import the repo and set **Root Directory** to `site`. [vercel.json](vercel.json)
 
 `public/samples/contract.docx` is the quickstart's downloadable sample, the only document the repo commits. It is the testkit fixture `contract::package()`, and `cargo test -p stetdoc` fails if its bytes drift (`site_sample_is_the_fixture` in `crates/stetdoc-cli/tests/cli.rs`; `STETDOC_UPDATE_SAMPLE=1` rewrites it). The styles are `app/globals.css` (tokens, base, hero, end) and `app/parts.css` (the parts between them).
 
-Docs links all read `DOCS_URL` in `app/links.ts`; flip it to `/docs` when the docs ship.
+Docs links all read `DOCS_URL` in `app/links.ts`, which is `/docs`.

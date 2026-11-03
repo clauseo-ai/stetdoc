@@ -5,11 +5,15 @@ Install stetdoc, then make a tracked change and a comment in a real Word file. I
 ## Install stetdoc
 
 ```sh
+# macOS
 brew install clauseo-ai/tap/stetdoc
+# Linux
+curl -fsSL https://stetdoc.clauseo.chat/install.sh | sh
+# Windows
+uv tool install stetdoc
 ```
 
-On a machine without Homebrew, run `uv tool install stetdoc`. [Install](install.md) lists every other channel, Windows
-included. Check that the binary is on your PATH:
+[Install](install.md) lists every other channel. Check that the binary is on your PATH:
 
 ```console
 $ stetdoc --version

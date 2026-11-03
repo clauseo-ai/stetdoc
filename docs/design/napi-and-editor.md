@@ -1,6 +1,6 @@
 # Design: `stetdoc-napi`, `stetdoc-editor`, packaging and release
 
-This covers the TypeScript library over Node-API, the backend of Claude's text editor tool over the readable
+This covers the TypeScript library over Node-API, a backend for Claude's text editor tool over the readable
 files, the npm package with its prebuilt addons, and the release workflow that builds the CLI for seven targets. It covers
 the library's two host-facing guarantees (a stale working copy never overwrites a newer head, and the clock honours `TZ`),
 the supported platforms, and the library's documentation. The core is the one in [`document-and-ops.md`](document-and-ops.md), used through its public

@@ -51,7 +51,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 The receipt shows the redline: `p1 Payment is due within {--thirty--}{#0 C}{++sixty++}{#1 C} days.` Every failure is a
 `StetError` with a stable `ErrorCode`. Keep the `Document` between turns, or `export` it to a `WorkingCopy` and `resume`
-it later, so the agent's refs stay valid. The backend of Claude's text editor tool is the crate `stetdoc-editor`. The
+it later, so the agent's refs stay valid. The crate `stetdoc-editor` is a backend for Claude's text editor tool. The
 public interface is listed in [`ARCHITECTURE.md`](../ARCHITECTURE.md), and why it has this shape is in
 [decision 0001](decisions/0001-core-interface.md).
 
@@ -87,7 +87,7 @@ try {
 ```
 
 Calls are synchronous, so a busy server makes them from a worker thread. Offsets count UTF-16 code units, as JavaScript
-strings do. `doc.textEditor(input, { author, date })` is the backend of Claude's text editor tool. The full surface is in
+strings do. `doc.textEditor(input, { author, date })` is a backend for Claude's text editor tool. The full surface is in
 [the package's README](../crates/stetdoc-napi/npm/README.md).
 
 ## The CLI as a subprocess

@@ -1,10 +1,16 @@
 # Evals of the Claude Code plugin
 
-`evals/` is a suite that runs Claude Code with the stetdoc plugin on real legal documents and scores what it does. It
-runs on Claude Code's own `claude plugin eval` (Claude Code 2.1.311 or later), so a case is a prompt a user would
-type, and graders check the result. It is also the benchmark for the plugin: each case records turns, tool calls,
-tokens, cost and wall time per run, so a change to the CLI, the skill or the MCP server can be measured for speed and
-accuracy as well as correctness.
+`evals/` is a suite that runs Claude Code with the stetdoc plugin on Harvey LAB's synthetic legal documents and scores
+what it does. It runs on Claude Code's own `claude plugin eval` (Claude Code 2.1.311 or later), so a case is a prompt a
+user would type, and graders check the result. It is also the benchmark for the plugin: each case records turns, tool
+calls, tokens, cost and wall time per run, so a change to the CLI, the skill or the MCP server can be measured for speed
+and accuracy as well as correctness.
+
+The figures on the website come from a separate benchmark,
+[docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench), which compares stetdoc with other setups on
+8 short tasks and 3 long Harvey LAB markups. It opens the files the agents write in Microsoft Word, through a script
+that is not published, and uses [ooxml-validate](https://github.com/clauseo-ai/ooxml-validate), a CLI around
+Microsoft's Open XML SDK validator, to pick which files Word must open. In run final-2, Word opened all of them.
 
 Every run is a real model call on your account. The suite never runs in CI or in `cargo xtask check`.
 

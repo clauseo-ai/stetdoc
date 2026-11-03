@@ -74,7 +74,18 @@ export function Hero() {
 						{NAV.otherWays}
 					</a>
 				</p>
-				<InstallBar command={SITE.install} />
+				{/* every system's install is in the HTML, labelled; with data-os
+				    set (lib/os-script.ts), CSS shows the visitor's own alone */}
+				<div className='installs'>
+					{SITE.installs.map((i) => (
+						<div
+							key={i.os}
+							className={`os os-${i.os}`}>
+							<p className='os-label'>{i.label}</p>
+							<InstallBar command={i.command} />
+						</div>
+					))}
+				</div>
 				<DocLinks />
 				<p className='licence'>{SITE.licence}</p>
 			</div>

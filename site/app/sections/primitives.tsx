@@ -127,7 +127,9 @@ export function Body({ paras }: { paras: readonly string[] }) {
 
 /* ---------- the install bar: the mark's bar, carrying the command ---------- */
 
-/** a command that breaks only at its spaces and after a slash, never at a hyphen */
+/** a command that breaks only at its spaces and inside a URL, after its
+    :// and after each dot of the host (https://|stetdoc.|clauseo.|chat/),
+    never at a hyphen; a package path such as clauseo-ai/tap/stetdoc stays whole */
 export function Breakable({ text }: { text: string }) {
 	return (
 		<>
@@ -135,16 +137,17 @@ export function Breakable({ text }: { text: string }) {
 				/^\s+$/.test(word) ? (
 					word
 				) : (
-					<span
-						key={i}
-						className='word'>
-						{word.split(/(?<=\/)/).map((piece, j) => (
+					/* each piece is its own unbreakable span, so the <wbr> between
+					   them is the only place the word can break; a <wbr> inside a
+					   nowrap span is ignored by WebKit */
+					<Fragment key={i}>
+						{word.split(/(?<=:\/\/|\.(?=[a-z]+[./]))/).map((piece, j) => (
 							<Fragment key={j}>
 								{j > 0 ? <wbr /> : null}
-								{piece}
+								<span className='word'>{piece}</span>
 							</Fragment>
 						))}
-					</span>
+					</Fragment>
 				),
 			)}
 		</>

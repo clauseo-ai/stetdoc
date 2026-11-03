@@ -3,7 +3,9 @@ import { END, NAV } from '../../content/copy';
 import { DocLinks, Inline, InstallBar } from './primitives';
 
 /* the end's picker: radio inputs and :checked, no script. Every command is
-   in the HTML; CSS shows the chosen one's panel. */
+   in the HTML; CSS shows the chosen one's panel. Homebrew is checked in the
+   HTML; lib/os-script.ts checks the visitor's system's channel instead and
+   moves its tab first, and CSS shows "Suggested" on that tab alone. */
 export function Picker() {
 	return (
 		<fieldset className='picker'>
@@ -16,14 +18,14 @@ export function Picker() {
 							name='channel'
 							id={`ch-${ch.id}`}
 							className='picker-input'
-							defaultChecked={ch.suggested}
+							defaultChecked={ch.id === END.channels[0].id}
 						/>
 						<label
 							htmlFor={`ch-${ch.id}`}
 							className='picker-tab'>
 							{ch.name}
-							{ch.suggested ? (
-								<span className='picker-tag'> {NAV.suggested}</span>
+							{ch.os ? (
+								<span className={`picker-tag tag-${ch.os}`}> {NAV.suggested}</span>
 							) : null}
 						</label>
 					</Fragment>
@@ -32,7 +34,7 @@ export function Picker() {
 			{END.channels.map((ch) => (
 				<div
 					key={ch.id}
-					className={`picker-panel panel-${ch.id}`}>
+					className={`picker-panel panel-${ch.id}${ch.os ? ` pick-${ch.os}` : ''}`}>
 					<InstallBar command={ch.command} />
 					<p className='picker-note'>{ch.note}</p>
 				</div>

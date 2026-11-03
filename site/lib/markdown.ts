@@ -7,6 +7,8 @@ import {
 	ENTITY,
 	FOOTER,
 	HERO,
+	INSTALL_BLOCK,
+	INSTALLS,
 	type Line,
 	NAV,
 	PARTS,
@@ -38,7 +40,7 @@ export function homeMarkdown(): string {
 	const c = p.bench.chart;
 	const out: string[] = [];
 	out.push(`# ${SITE.title}`, '', `> ${ENTITY}`, '', `## ${HERO.h1}`, '', HERO.sub, '');
-	out.push(fence('sh', SITE.install), '', `${NAV.suggested}. Every other channel is under [Install stetdoc](#install-stetdoc). ${SITE.licence}`, '');
+	out.push(fence('sh', INSTALL_BLOCK), '', `Every other channel is under [Install stetdoc](#install-stetdoc). ${SITE.licence}`, '');
 	out.push(`Version ${stetdocVersion()}. [${NAV.readDocs}](${absolute(SITE.links.docs)}) · [${NAV.github}](${SITE.links.github})`, '');
 	out.push(`### A real run`, '', HERO.caption, '', fence('console', terminal(HERO.run)), '');
 	out.push(
@@ -62,7 +64,7 @@ export function homeMarkdown(): string {
 	out.push(`${c.caption}:`, '', `| ${c.columns.join(' | ')} |`, '| --- | --- | --- |');
 	for (const row of c.rows)
 		out.push(`| ${row.model} | ${row.stetdoc} s | ${row.others[0]} to ${row.others[1]} s |`);
-	out.push('', ...p.bench.facts.map((f) => `- **${f.figure}**: ${f.line}`), '', p.bench.method, '');
+	out.push('', ...p.bench.facts.map((f) => `- **${f.figure}**: ${f.line}`), '', p.bench.method.map((part) => (part.href ? `[${part.text}](${part.href})` : part.text)).join(''), '');
 
 	out.push(`## ${p.bytes.title}`, '', ...p.bytes.body.flatMap((b) => [b, '']), p.bytes.proof, '');
 	out.push(fence('console', `${terminal(p.bytes.run)}\n${p.bytes.verdict}`), '');
@@ -90,7 +92,7 @@ export function homeMarkdown(): string {
 
 	out.push(`## ${END.title}`, '', END.intro, '', `| Channel | Command | Note |`, '| --- | --- | --- |');
 	for (const ch of END.channels)
-		out.push(`| ${ch.name}${ch.suggested ? `, ${NAV.suggested.toLowerCase()}` : ''} | ${inlineCode(ch.command.replace(/\|/g, '\\|'))} | ${ch.note} |`);
+		out.push(`| ${ch.name}${ch.os ? `, ${NAV.suggestedOn} ${INSTALLS.find((i) => i.os === ch.os)?.label}` : ''} | ${inlineCode(ch.command.replace(/\|/g, '\\|'))} | ${ch.note} |`);
 	out.push('', END.why, '', `[${NAV.readDocs}](${absolute(SITE.links.docs)}) · [${NAV.github}](${SITE.links.github}) · [${FOOTER.changelog}](${SITE.links.changelog})`, '');
 	out.push(END.footnote, '', `${FOOTER.from} [Clauseo](${SITE.links.clauseo}).`, '', `Source: ${absolute('/')}`, '');
 	return out.join('\n');

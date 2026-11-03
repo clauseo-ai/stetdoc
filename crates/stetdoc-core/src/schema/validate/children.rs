@@ -53,6 +53,31 @@ fn visit_known<T: SchemaTree>(
     }
 }
 
+/// Whether two elements are the same: name, attributes (in any order) and element children, all the way down. Text is not
+/// compared; the children of a property container hold none.
+fn same_element<T: SchemaTree>(tree: &T, a: T::Node, b: T::Node) -> bool {
+    let attrs = |n: T::Node| {
+        let mut v: Vec<(String, String, String)> = tree
+            .attributes(n)
+            .into_iter()
+            .map(|at| {
+                (
+                    at.namespace.to_owned(),
+                    at.local.to_owned(),
+                    at.value.into_owned(),
+                )
+            })
+            .collect();
+        v.sort();
+        v
+    };
+    let (ka, kb) = (tree.children(a), tree.children(b));
+    tree.name(a) == tree.name(b)
+        && attrs(a) == attrs(b)
+        && ka.len() == kb.len()
+        && ka.iter().zip(&kb).all(|(x, y)| same_element(tree, *x, *y))
+}
+
 /// Runs the children of `node`, as Word reads them (`read`), through its content model.
 pub(super) fn check_children<T: SchemaTree>(
     tree: &T,
@@ -65,7 +90,8 @@ pub(super) fn check_children<T: SchemaTree>(
     let model = cc.model;
     let skipped = read.skipped;
     let mut state = 0usize;
-    let mut seen = vec![false; model.alpha_name.len()];
+    // The first child of each column, so that a second copy can be told from the first.
+    let mut seen: Vec<Option<T::Node>> = vec![None; model.alpha_name.len()];
     let mut consumed = Consumed::default();
     let mut to_visit: Vec<Frame<T::Node>> = Vec::new();
     for item in read.items {
@@ -104,9 +130,12 @@ pub(super) fn check_children<T: SchemaTree>(
         };
         // An earlier sibling with the same name, whether or not it was accepted: what makes a
         // second copy of an element that may occur once "too many", wherever it stands.
-        let earlier = col.is_some_and(|c| seen.get(c).copied().unwrap_or(false));
-        if let Some(s) = col.and_then(|c| seen.get_mut(c)) {
-            *s = true;
+        let first = col.and_then(|c| seen.get(c).copied().flatten());
+        let earlier = first.is_some();
+        if let Some(s) = col.and_then(|c| seen.get_mut(c))
+            && s.is_none()
+        {
+            *s = Some(child);
         }
         match model.next(state, use_col) {
             Some(next) => {
@@ -149,8 +178,18 @@ pub(super) fn check_children<T: SchemaTree>(
                 } else {
                     format!("after {blocking}")
                 };
+                let extra = match first {
+                    Some(first)
+                        if repeated
+                            && kind == ViolationKind::NonCanonicalOrder
+                            && !same_element(tree, first, child) =>
+                    {
+                        super::DIFFERING_REPEAT.to_string()
+                    }
+                    _ => String::new(),
+                };
                 sink.push(
-                    key(kind, cc.parent_label, subject, String::new()),
+                    key(kind, cc.parent_label, subject, extra),
                     child,
                     format!(
                         "not allowed here in {} ({why}); allowed here: {}",

@@ -80,8 +80,8 @@ pub enum ViolationKind {
     /// violation.
     TooMany,
     /// In a property container that the schema leaves unordered (`w:rPr`, `w:trPr`), a child
-    /// is not in the order Word writes, or repeats. Not a schema violation; Word reads any
-    /// order, but it only writes this one.
+    /// is not in the order Word writes, or repeats (with other values, its key's `extra` is
+    /// [`DIFFERING_REPEAT`]). Not a schema violation; Word reads any order, but it only writes this one.
     NonCanonicalOrder,
     /// The content ends before a required element.
     MissingChild,
@@ -137,9 +137,16 @@ pub struct ViolationKey {
     /// The offending element or attribute, `w:foo`, or `#text`. Empty for an order problem in
     /// content (a parent that is not a property container) and for a missing child.
     pub subject: String,
-    /// For an invalid value, the value (clipped). Empty otherwise.
+    /// For an invalid value, the value (clipped); [`DIFFERING_REPEAT`] for a child of a property container that
+    /// repeats an earlier one with other values. Empty otherwise.
     pub extra: String,
 }
+
+/// The `extra` of a [`ViolationKind::NonCanonicalOrder`] key whose child repeats an earlier one of its name with other
+/// attributes or children, such as `<w:sz w:val="24"/>` and then `<w:sz w:val="26"/>` in one `w:rPr`. An exact repeat can be
+/// dropped from a copy and an out-of-order child put in its place, but which of two differing repeats Word reads is not the
+/// compiler's to decide, so a copy of the container (a new run, the record of a tracked change) keeps both.
+pub const DIFFERING_REPEAT: &str = "differing repeat";
 
 #[derive(Clone, Debug)]
 /// One violation in a part, with the node it was found at.

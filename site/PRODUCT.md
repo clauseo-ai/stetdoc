@@ -22,7 +22,7 @@ Agents that hand-edit .docx XML break files ("Word found unreadable content"). s
 
 ## Operating Context
 
-Terminal and agent sessions; Word documents, mostly contracts (a 527-paragraph supply agreement is the reference run). Installed into agents with `stetdoc init`, served over MCP with `stetdoc mcp`, a Claude Code plugin with a hook.
+Terminal and agent sessions; Word documents, mostly contracts (a Harvey LAB supply agreement is the reference run). Installed into agents with `stetdoc init`, served over MCP with `stetdoc mcp`, a Claude Code plugin with a hook.
 
 ## Capabilities and Constraints
 
@@ -41,10 +41,10 @@ Terminal and agent sessions; Word documents, mostly contracts (a 527-paragraph s
 
 ## Evidence on Hand
 
-- Real CLI output from a run on a 527-paragraph supply agreement (replace, view --find, ambiguous_match refusal), quoted in the brief.
-- 20 ms tracked replace on a Mac mini; ~5 ms startup.
-- Round-trip law runs nightly on ~48,000 real documents and on 306 more with 50 random edit batches each, every build.
-- docx-agent-bench: 639 runs across three models against four other setups; median time per task, 0 of 118 stetdoc runs wrote a file Word offered to repair, 6 of 6 long Harvey LAB markups fully correct (content/bench.ts). Invent no others.
+- Real CLI output from a run on a Harvey LAB supply agreement (replace, view --find, ambiguous_match refusal), quoted in the brief.
+- 5 ms for each stetdoc call to start (docs/install.md). Quote no time for the replace itself.
+- Every build checks the round trip on 306 documents; every night random edits run on 48,595 public documents.
+- docx-agent-bench: 639 runs across three models; stetdoc fastest on every model; 0 of 118 stetdoc runs left Word anything to repair; 6 of 6 long Harvey LAB markups passed their checks and opened clean in Word, on every model (content/bench.ts). The detail lives in the bench README. Invent no others.
 
 ## Product Principles
 

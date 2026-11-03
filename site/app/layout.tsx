@@ -28,6 +28,8 @@ export default function RootLayout({
 	return (
 		<html
 			lang='en'
+			/* the launch page's OS script sets data-os before React would hydrate */
+			suppressHydrationWarning
 			className={`${anek.variable} ${anekExt.variable}`}>
 			<body>{children}</body>
 		</html>

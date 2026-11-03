@@ -72,7 +72,7 @@ The operations, their fields and the error codes are listed by `capabilities()`,
 
 ## Claude's text editor tool
 
-`textEditor` is the backend of Anthropic's `text_editor_20250728` tool (tool name `str_replace_based_edit_tool`) over the
+`textEditor` is a backend for Anthropic's `text_editor_20250728` tool (tool name `str_replace_based_edit_tool`) over the
 document's readable files. Pass the `tool_use` block's input exactly as the model sent it, as an object or its JSON:
 
 ```ts

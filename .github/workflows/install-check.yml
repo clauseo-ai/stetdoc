@@ -1,0 +1,94 @@
+name: install-check
+
+# Installs stetdoc the way the README tells each system to, from the published packages rather than this checkout, and
+# makes one real tracked change with it: uv on Windows, the install script on Linux. It runs by hand, when a release is
+# published, and on a pull request that changes this file, so ordinary pull requests never wait for it.
+# On a published release it installs that release: the Windows job waits for `publish-pypi` (release.yml) to put the
+# version on PyPI, and the Linux job asks the install script for the release's tag.
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+  pull_request:
+    paths: [".github/workflows/install-check.yml"]
+
+# Least privilege: the jobs only read the repository, for the sample contract.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  STETDOC_AUTHOR: Install Check
+  # The release's tag, such as v0.9.2, or empty outside a release.
+  TAG: ${{ github.event.release.tag_name }}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  windows:
+    name: uv tool install (windows-2025)
+    runs-on: windows-2025
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+
+      - name: uv tool install stetdoc
+        run: |
+          spec=stetdoc
+          [ -n "$TAG" ] && spec="stetdoc==${TAG#v}"
+          # PyPI gets a release's wheels from publish-pypi, which starts with this run: wait up to 15 minutes for them.
+          for attempt in $(seq 1 30); do
+            uv tool install --refresh "$spec" && break
+            [ "$attempt" = 30 ] && exit 1
+            echo "$spec is not on PyPI yet, retrying in 30 s"
+            sleep 30
+          done
+          uv tool dir --bin >> "$GITHUB_PATH"
+
+      - name: Edit the sample contract
+        run: |
+          stetdoc --version
+          mkdir work
+          cp site/public/samples/contract.docx work/
+          cd work
+          stetdoc view contract.docx --find thirty
+          stetdoc replace contract.docx 'thirty days' 'sixty days'
+          stetdoc check --strict contract.edited.docx
+          stetdoc view contract.edited.docx --find sixty
+
+  linux:
+    name: install script (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The raw URL, not stetdoc.clauseo.chat/install.sh: the site serves the copy from its last deploy, which may lag
+      # this commit.
+      - name: Install script
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | STETDOC_VERSION="${TAG:-latest}" sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Edit the sample contract
+        run: |
+          stetdoc --version
+          mkdir work
+          cp site/public/samples/contract.docx work/
+          cd work
+          stetdoc view contract.docx --find thirty
+          stetdoc replace contract.docx 'thirty days' 'sixty days'
+          stetdoc check --strict contract.edited.docx
+          stetdoc view contract.edited.docx --find sixty

@@ -5,15 +5,24 @@ the install.
 
 ## Pick a channel
 
-Every channel installs the same binary. Homebrew comes first, and `uv` is the pick on a machine without it.
+Every channel installs the same binary. Use the line for your system:
+
+```sh
+# macOS
+brew install clauseo-ai/tap/stetdoc
+# Linux
+curl -fsSL https://stetdoc.clauseo.chat/install.sh | sh
+# Windows
+uv tool install stetdoc
+```
 
 | Channel | Command | Platforms | Notes |
 | --- | --- | --- | --- |
 | Homebrew | `brew install clauseo-ai/tap/stetdoc` | macOS, Linux | From the tap `clauseo-ai/homebrew-tap`. Each call starts in about 5 ms |
+| Install script | `curl -fsSL https://stetdoc.clauseo.chat/install.sh \| sh` | macOS, Linux | Checks the SHA-256 and installs to `~/.local/bin`. Each call starts in about 5 ms |
 | uv | `uv tool install stetdoc` | macOS, Linux, Windows | The wheel holds the native binary, so no Python runs after the install. Each call starts in about 5 ms |
 | pipx | `pipx install stetdoc` | macOS, Linux, Windows | The same wheel as uv. Each call starts in about 5 ms |
 | npm | `npm install -g stetdoc` | macOS, Linux, Windows | npm swaps its Node launcher for the binary when install scripts run. Each call then starts in about 6 ms |
-| Install script | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | macOS, Linux | Checks the SHA-256 and installs to `~/.local/bin`. Each call starts in about 5 ms |
 | Cargo | `cargo install stetdoc --locked` | Any platform with a Rust toolchain | Builds from source on crates.io |
 
 `pip install stetdoc` into a virtual environment works too, and `uvx stetdoc` runs stetdoc once without installing it.
@@ -112,7 +121,7 @@ stetdoc init --list
 To pin a release, name it in the install:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | STETDOC_VERSION=v0.9.2 sh
+curl -fsSL https://stetdoc.clauseo.chat/install.sh | STETDOC_VERSION=v0.9.2 sh
 uv tool install stetdoc==0.9.2
 npm install -g stetdoc@0.9.2
 cargo install stetdoc --version 0.9.2 --locked

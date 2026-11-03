@@ -50,6 +50,13 @@
       "continue": true
     },
     {
+      "src": "^/install\\.sh$",
+      "headers": {
+        "Content-Type": "text/plain; charset=utf-8"
+      },
+      "continue": true
+    },
+    {
       "src": "^/$",
       "headers": {
         "Link": "</index.md>; rel=\"alternate\"; type=\"text/markdown\", </llms.txt>; rel=\"describedby\"",

@@ -119,9 +119,13 @@ impl Key {
     /// writes (`schema_non_canonical_order`). Word reads any order, but the Open XML SDK validator
     /// counts every such container as a schema error, so a copy of one is a new error to it. The
     /// compiler writes every container it creates in order (`revisions::canonical`), so a unit
-    /// never has more than its origin had.
+    /// never has more than its origin had. The exception is a repeat with other values
+    /// (`schema::DIFFERING_REPEAT`): the compiler keeps both in a copy, since which one Word reads
+    /// is not its to decide, so the copy in a new run or in the record of a tracked change is carried,
+    /// as a copy of any other problem is.
     pub(crate) fn is_counted(&self) -> bool {
-        matches!(self, Key::Schema(key) if key.kind == ViolationKind::NonCanonicalOrder)
+        matches!(self, Key::Schema(key) if key.kind == ViolationKind::NonCanonicalOrder
+            && key.extra != crate::schema::DIFFERING_REPEAT)
     }
 
     /// The key of a rule about `subject`.

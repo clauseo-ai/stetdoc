@@ -466,3 +466,17 @@ fn a_shard_reads_and_counts_only_its_own_documents() {
     // Its share of a minimum of 40 for the set is 8.
     assert_eq!(swept.verdict(40).is_ok(), mine >= 8);
 }
+
+#[test]
+fn a_sweep_asked_for_documents_fails_without_the_corpus_and_skips_otherwise() {
+    assert_eq!(no_corpus_for(None, None), None);
+    let only =
+        no_corpus_for(Some("fdo77129"), None).expect("STETDOC_ONLY without the corpus fails");
+    assert!(only.contains("STETDOC_ONLY=fdo77129"), "{only}");
+    assert!(only.contains("STETDOC_CORPUS_DIR is not set"), "{only}");
+    assert!(only.contains("cargo xtask corpus path"), "{only}");
+    let shard = no_corpus_for(None, Some("3/40")).expect("STETDOC_SHARD without the corpus fails");
+    assert!(shard.contains("STETDOC_SHARD=3/40"), "{shard}");
+    let both = no_corpus_for(Some("n760764"), Some("3/40")).expect("both fail");
+    assert!(both.contains("STETDOC_ONLY=n760764"), "{both}");
+}

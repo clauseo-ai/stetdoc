@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "bun scripts/docs-artifacts.ts && next dev",
     "build": "bun scripts/docs-artifacts.ts && next build && bun scripts/strip-runtime.ts && pagefind --site out --glob \"{docs.html,docs/**/*.html}\" && bun scripts/check-site.ts && bun scripts/check-docs.ts",
     "serve": "bun scripts/serve.ts",
     "typecheck": "tsc --noEmit",

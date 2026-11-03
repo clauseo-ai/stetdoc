@@ -19,6 +19,8 @@
 //!   names a runaway in the log before a timeout kills the job.
 //! - **Deadline.** After `STETDOC_DEADLINE` (Unix seconds) no worker takes a new document; the sweep reports what it found and
 //!   how many documents it did not reach, and fails when it left any.
+//! - **No corpus.** Without `STETDOC_CORPUS_DIR` a sweep skips, except when `STETDOC_ONLY` or `STETDOC_SHARD` asks for documents:
+//!   then it fails and says how to set it, so that a rerun of a nightly failure cannot pass having checked nothing.
 //!
 //! [`Settings`] holds these, and [`sweep`] is the part that runs over any list, which the tests drive with a fake law.
 
@@ -394,14 +396,40 @@ pub fn to_the_summary(text: &str) {
     }
 }
 
+/// The corpus a sweep reads: [`Corpus::from_env`], except that a sweep asked to check documents (`STETDOC_ONLY` or
+/// `STETDOC_SHARD` set) fails without `STETDOC_CORPUS_DIR`. Skipped, such a rerun of a nightly failure would pass having
+/// checked nothing.
+fn sweep_corpus() -> Option<Result<Corpus, String>> {
+    Corpus::from_env().or_else(|| {
+        let set = |name: &str| std::env::var(name).ok().filter(|v| !v.trim().is_empty());
+        no_corpus_for(set(ENV_ONLY).as_deref(), set(ENV_SHARD).as_deref()).map(Err)
+    })
+}
+
+/// Why a sweep without a corpus must fail rather than skip: `None` when neither `STETDOC_ONLY` (`only`) nor
+/// `STETDOC_SHARD` (`shard`) asks for documents.
+fn no_corpus_for(only: Option<&str>, shard: Option<&str>) -> Option<String> {
+    let asked = match (only, shard) {
+        (Some(only), _) => format!("{ENV_ONLY}={only}"),
+        (None, Some(shard)) => format!("{ENV_SHARD}={shard}"),
+        (None, None) => return None,
+    };
+    Some(format!(
+        "{asked} asks for documents of the corpus, but {} is not set, so the sweep would check none of them and pass; set it \
+         to the corpus cache, which `cargo xtask corpus path` prints (after `cargo xtask corpus fetch --full` for the full set)",
+        crate::corpus::ENV_DIR
+    ))
+}
+
 /// Runs `law` over the documents of the corpus set that must open, of this shard, or those of them that `STETDOC_ONLY` names,
 /// and says what it finds as it goes ([`to_the_log`]). `name` names the sweep in the log. `None` when `STETDOC_CORPUS_DIR` is not
-/// set.
+/// set, and an error when `STETDOC_ONLY` or `STETDOC_SHARD` asks for documents all the same, since a rerun that skips would
+/// pass having checked nothing.
 pub fn over_the_corpus(
     name: &str,
     law: impl Fn(&[u8]) -> Result<(), String> + Sync,
 ) -> Option<Result<Swept, String>> {
-    let corpus = match Corpus::from_env()? {
+    let corpus = match sweep_corpus()? {
         Ok(corpus) => corpus,
         Err(e) => return Some(Err(e)),
     };
@@ -418,7 +446,7 @@ pub fn survey_of_the_corpus(
     name: &str,
     law: impl Fn(&[u8]) -> Result<(), String> + Sync,
 ) -> Option<Result<Swept, String>> {
-    let corpus = match Corpus::from_env()? {
+    let corpus = match sweep_corpus()? {
         Ok(corpus) => corpus,
         Err(e) => return Some(Err(e)),
     };

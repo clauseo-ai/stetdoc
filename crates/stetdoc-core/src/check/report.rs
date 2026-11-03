@@ -33,6 +33,9 @@ pub(crate) fn schema_message(tree: &SpanTree, v: &Violation<NodeId>) -> String {
         ViolationKind::TooMany => {
             format!("{own} is a second copy of an element that may occur once in {parent}")
         }
+        ViolationKind::NonCanonicalOrder if v.key.extra == crate::schema::DIFFERING_REPEAT => {
+            format!("{own} repeats an earlier {own} with other values in {parent}")
+        }
         ViolationKind::NonCanonicalOrder => {
             format!("{own} is not in the order Word writes in {parent}")
         }

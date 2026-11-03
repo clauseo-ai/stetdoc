@@ -412,6 +412,15 @@
 	line-height: 21px;
 	color: var(--on-bar-quiet);
 }
+.method .text-link {
+	color: var(--on-bar);
+	text-decoration-color: var(--on-bar-line);
+}
+@media (hover: hover) {
+	.method .text-link:hover {
+		text-decoration-color: var(--on-bar);
+	}
+}
 
 /* the three facts hang under the bar on the mark's three dots */
 .facts {

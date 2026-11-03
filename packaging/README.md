@@ -11,7 +11,7 @@ and uploads to PyPI when a maintainer publishes the GitHub release. A maintainer
 | Channel | Name | Install | Status |
 | --- | --- | --- | --- |
 | Website and docs | stetdoc.clauseo.chat | https://stetdoc.clauseo.chat | `site/`, deployed on Vercel |
-| GitHub Releases | `clauseo-ai/stetdoc` | `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh \| sh` | live |
+| GitHub Releases | `clauseo-ai/stetdoc` | `curl -fsSL https://stetdoc.clauseo.chat/install.sh \| sh` | live |
 | Homebrew | `clauseo-ai/tap/stetdoc` | `brew install clauseo-ai/tap/stetdoc` | live |
 | npm, CLI | `stetdoc`, `@clauseo/stetdoc-cli-<target>` | `npx stetdoc mcp`, `npm i -g stetdoc` | live |
 | npm, library | `@clauseo/stetdoc`, `@clauseo/stetdoc-<target>` | `npm i @clauseo/stetdoc` | live |
@@ -23,6 +23,10 @@ and uploads to PyPI when a maintainer publishes the GitHub release. A maintainer
 | Cursor | plugin in this repository | Cursor's marketplace | submitted by hand, reviewed by Cursor |
 | Hermes | skill in this repository | `hermes skills install clauseo-ai/stetdoc/skills/stetdoc` | works from `main`; no hub listing |
 | ClawHub | none | none | not listed: its sign-in failed on its side on 2026-11-02 |
+
+Related repositories: [docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench) is the benchmark behind the
+figures on the website, and [ooxml-validate](https://github.com/clauseo-ai/ooxml-validate)
+(`brew install clauseo-ai/tap/ooxml-validate`) is the Open XML SDK validator it uses to pick the files Word must open.
 
 ## Release checklist
 
@@ -97,6 +101,9 @@ repository-based channels work from the repository at its default branch, so a m
 - File: `packaging/install.sh`. POSIX sh. It detects the OS and CPU, downloads `stetdoc-<triple>.tar.gz` from the release,
   checks its SHA-256 against the `.sha256` file the `cli` job writes, and installs to `$STETDOC_INSTALL_DIR` or
   `~/.local/bin`. Linux gets the static musl build. Windows is not covered.
+- Served at `https://stetdoc.clauseo.chat/install.sh`: the site's build copies it into `site/public/`
+  (`site/scripts/docs-artifacts.ts`), so the site serves the copy from the commit it was built from. The raw GitHub URL
+  keeps working.
 - Release fills: nothing. The archives and their checksums come from the `cli` jobs of `release.yml`.
 - Publish: tag `v<version>`, push the tag, and publish the draft release. Then:
   `curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh`

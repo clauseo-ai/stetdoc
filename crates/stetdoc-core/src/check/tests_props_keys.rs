@@ -57,6 +57,17 @@ fn a_verbatim_copy_of_the_marks_repeated_property_onto_a_run_is_new() {
 }
 
 #[test]
+fn a_verbatim_copy_of_a_mark_that_repeats_a_property_with_another_value_is_carried() {
+    // The compiler keeps both of two repeats that differ (`revisions::canonical`), since which one Word reads is not its to
+    // decide, so a copy of them is a problem the unit had (`schema::DIFFERING_REPEAT`), and not a new one.
+    let s = state(&MARK_TWICE.replace(
+        r#"<w:sz w:val="30"/></w:rPr>"#,
+        r#"<w:sz w:val="32"/></w:rPr>"#,
+    ));
+    accepted(&said(&s, copy_mark_onto_run));
+}
+
+#[test]
 fn a_snapshot_of_out_of_order_paragraph_properties_is_carried() {
     let s = state(PPR_OUT_OF_ORDER);
     accepted(&said(&s, snapshot_ppr));

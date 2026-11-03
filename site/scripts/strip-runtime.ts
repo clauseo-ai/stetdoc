@@ -120,6 +120,9 @@ const copy = readFileSync(join(out, 'index.html'), 'utf8').match(
 );
 if (!copy) fail('the copy script is missing from index.html');
 else if (copy[1].length > 1100) fail(`the copy script is ${copy[1].length} bytes`);
+const os = readFileSync(join(out, 'index.html'), 'utf8').match(/<script id="os-script"[^>]*>([\s\S]*?)<\/script>/);
+if (!os) fail('the os script is missing from index.html');
+else if (os[1].length > 500) fail(`the os script is ${os[1].length} bytes`);
 
 // the files only the client runtime fetched: JS chunks and RSC payloads
 let removedFiles = 0;

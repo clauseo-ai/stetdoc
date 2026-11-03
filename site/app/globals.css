@@ -615,16 +615,20 @@ p code {
    yellow, ink words, the yellow lit shadow, until it is used once; then
    the yellow goes and the key is plain again. The For agents key is the
    same install for an agent, and waits the same way. */
-.cta .copy:not([data-chosen]),
-.end .panel-brew .copy:not([data-chosen]),
+[data-os] .cta .copy:not([data-chosen]),
+[data-os='mac'] .end .pick-mac .copy:not([data-chosen]),
+[data-os='linux'] .end .pick-linux .copy:not([data-chosen]),
+[data-os='windows'] .end .pick-windows .copy:not([data-chosen]),
 .for-agents .copy:not([data-chosen]) {
 	background: var(--yellow);
 	color: var(--on-yellow);
 	box-shadow: var(--lit-y);
 }
 @media (hover: hover) {
-	.cta .copy:not([data-chosen]):hover,
-	.end .panel-brew .copy:not([data-chosen]):hover,
+	[data-os] .cta .copy:not([data-chosen]):hover,
+	[data-os='mac'] .end .pick-mac .copy:not([data-chosen]):hover,
+	[data-os='linux'] .end .pick-linux .copy:not([data-chosen]):hover,
+	[data-os='windows'] .end .pick-windows .copy:not([data-chosen]):hover,
 	.for-agents .copy:not([data-chosen]):hover {
 		background: var(--chip-yellow);
 	}
@@ -669,8 +673,38 @@ p code {
 }
 .cta-head .text-link {
 	padding: 11px 0;
-	margin: -11px 0;
+	margin: -11px 0 -11px auto;
 	font-weight: 480;
+}
+/* the install for each system (lib/os-script.ts). Without data-os (a phone,
+   an unknown system, script off) all three stand labelled and nothing is
+   suggested; with it, the visitor's own stands alone under "Suggested", and
+   its channel's picker tag reads "Suggested" too. */
+html:not([data-os]) .os + .os {
+	margin-top: 12px;
+}
+.os-label {
+	margin: 0 0 6px;
+	font-size: 15px;
+	line-height: 22px;
+	font-weight: 520;
+	color: var(--muted);
+}
+[data-os] .os,
+[data-os] .os-label,
+html:not([data-os]) .suggested,
+.picker-tag {
+	display: none;
+}
+[data-os='mac'] .os-mac,
+[data-os='linux'] .os-linux,
+[data-os='windows'] .os-windows {
+	display: block;
+}
+[data-os='mac'] .tag-mac,
+[data-os='linux'] .tag-linux,
+[data-os='windows'] .tag-windows {
+	display: inline-flex;
 }
 /* a command breaks at its spaces and after a slash, never inside a word */
 .word {

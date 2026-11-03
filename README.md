@@ -11,13 +11,18 @@ stetdoc is how AI agents work in Word. Every change your agent makes lands in Wo
 it, and everything it didn't touch comes back exactly as it was.
 
 ```sh
-brew install \
-  clauseo-ai/tap/stetdoc
+# macOS
+brew install clauseo-ai/tap/stetdoc
+# Linux
+curl -fsSL https://stetdoc.clauseo.chat/install.sh | sh
+# Windows
+uv tool install stetdoc
+
 stetdoc init
 ```
 
-`stetdoc init` installs the skill for the agents you pick, or for every agent it finds when there's no terminal. Without Homebrew, run `uv tool install stetdoc`, or pick another
-of the [channels below](#install-stetdoc).
+`stetdoc init` installs the skill for the agents you pick, or for every agent it finds when there's no terminal. Every
+other way to install is in the [channels below](#install-stetdoc).
 
 **[Read the docs](https://stetdoc.clauseo.chat/docs)** · [Quickstart](docs/quickstart.md) · [Changelog](CHANGELOG.md) ·
 Free and open source, MIT or Apache-2.0
@@ -33,7 +38,7 @@ wrote msa.edited.docx
 msa.docx is unchanged. Run the next edit on msa.edited.docx to build on this one, …
 ```
 
-<sub>stetdoc 0.9.1 on a supply agreement from Harvey LAB, with the long lines cut short. `{--…--}` is the deletion and
+<sub>stetdoc 0.9.1 on a Harvey LAB supply agreement, with the long lines cut short. `{--…--}` is the deletion and
 `{++…++}` the insertion, each a Word revision by Claude.</sub>
 
 ## Word found unreadable content.
@@ -46,27 +51,28 @@ stetdoc checks every edit against the schema and Word's own rules before it writ
 in full or not at all. Bad input, a hostile file included, fails with a stable error code. stetdoc never panics,
 hangs or touches the network.
 
-## Done first, on every model.
+## Fastest on every model.
 
-We gave agents eight contract-editing tasks five ways: with stetdoc, with no plugin, with Anthropic's docx skill, with
-Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc finished
-first on all three models.
+We gave agents eight contract tasks and three long markups, five ways: with stetdoc, with no plugin, with Anthropic's
+docx skill, with Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using
+stetdoc were fastest on all three models.
 
 <p>
 <picture>
   <source media="(prefers-color-scheme: dark) and (max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-night-narrow.svg">
   <source media="(max-width: 767px)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day-narrow.svg">
   <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-night.svg">
-  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other four setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
+  <img src="https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/brand/readme/bench-day.svg" alt="Median time per task. On Claude Haiku 5.5, stetdoc took 21 s and the other setups 41 to 45 s. On Claude Opus 5.5, stetdoc took 25 s and the others 37 to 56 s. On Gemini 3.8 Flash, stetdoc took 135 s and the others 274 to 538 s.">
 </picture>
 </p>
 
-- **0 of 118** stetdoc runs wrote a file Word offered to repair.
-- **6 of 6** long Harvey LAB markups came out correct in full, on every model.
-- **1 ms** from launch to a ready MCP server.
+- **0 of 118** stetdoc runs left Word anything to repair.
+- **6 of 6** long Harvey LAB markups passed their checks and opened clean in Word, on every model.
+- **[5 ms](docs/install.md#why-the-channel-matters)** for each stetdoc call to start.
 
-<sub>docx-agent-bench, 639 runs in Claude Code 2.1.311 and Antigravity CLI 1.4.8. Five runs per task, medians per run,
-and every file opened in Microsoft Word for Mac 16.114.3.</sub>
+<sub>[docx-agent-bench](https://github.com/clauseo-ai/docx-agent-bench): 639 runs in Claude Code 2.1.311 and Antigravity
+CLI 1.4.8, every file opened in Microsoft Word for Mac 16.114.3.
+[How it was graded](https://github.com/clauseo-ai/docx-agent-bench#how-grading-works).</sub>
 
 ## Open, save, same bytes.
 
@@ -80,9 +86,9 @@ $ cmp msa.docx roundtrip.docx && echo identical
 identical
 ```
 
-We test this every night on about 48,600 documents from 58 public sources. Every build also puts 306 of them through
-50 random edit batches each. [`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it
-normalizes, what it shows read-only and what it leaves out.
+Every build checks this on 306 documents, and every night random edits run on 48,595 public documents.
+[`FIDELITY.md`](FIDELITY.md) says, feature by feature, what stetdoc keeps exactly, what it normalizes, what it shows
+read-only and what it leaves out.
 
 ## It knows where 11.1 is.
 
@@ -156,15 +162,15 @@ Pick any channel. Every one installs the same binary.
 # Homebrew, macOS and Linux
 brew install clauseo-ai/tap/stetdoc
 
-# uv or pipx, Windows too
+# Install script, macOS and Linux
+curl -fsSL https://stetdoc.clauseo.chat/install.sh | sh
+
+# uv or pipx, macOS, Linux and Windows
 uv tool install stetdoc
 pipx install stetdoc
 
 # npm
 npm install -g stetdoc
-
-# Install script, macOS and Linux
-curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh
 
 # Cargo, from source
 cargo install stetdoc --locked
@@ -226,7 +232,7 @@ let saved = doc.save()?;
 ```
 
 Node and Bun use it through the npm package `@clauseo/stetdoc`, with TypeScript types generated from the engine's
-definitions. Its `textEditor` is the backend of Claude's text editor tool, as the crate `stetdoc-editor` is in Rust.
+definitions. Its `textEditor` is a backend for Claude's text editor tool, as the crate `stetdoc-editor` is in Rust.
 Errors carry a stable code, a message and a `next` hint, and the npm package throws them as `StetdocError`.
 
 [Build on stetdoc](docs/build-on-stetdoc.md) compares the crate, the npm package, the CLI and MCP for products. The npm
@@ -247,8 +253,8 @@ package has its own guide, [`crates/stetdoc-napi/npm/README.md`](crates/stetdoc-
 Build and verify with `cargo xtask check`. Besides formatting, lints and unit tests, it runs the laws on the curated
 corpus of 306 documents. Every unedited round trip must come back byte-identical. On each document, 50 seeded random
 edit batches must keep the [laws](GLOSSARY.md#quality): they change only what they edit, the edits stick, accepting or
-rejecting them restores the expected text, and the file stays valid. The full corpora run nightly in CI. Each fuzz target runs for at least 24 hours before a
-release.
+rejecting them restores the expected text, and the file stays valid. Every night they run on 48,595 public documents in
+CI, and CI fuzzes all four targets on every pull request.
 
 ## Licence
 

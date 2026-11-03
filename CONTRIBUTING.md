@@ -121,7 +121,7 @@ of `laws::edits` stay as a smoke set.
 ### The nightly laws run
 
 `.github/workflows/laws.yml` runs the three corpus tests of `laws_random` (random batches, random edits of files, L2 by
-block) every night on the full corpora, about 48,600 documents, in 40 shards. A document's shard is the first 16
+block) every night on the full corpora, the 48,595 of its 48,666 documents that must open, in 40 shards. A document's shard is the first 16
 hexadecimal digits of its SHA-256 in `INDEX.tsv`, modulo 40, so a shard reads and opens only its own documents and holds
 the same ones every night. `laws::sweep` prints, with `laws:` in front, each failure the moment it is found (`FAILED
 <document id>: seed <seed>, batch <k>: ...`), progress every 3 minutes, a line for a document still running after 120 s,
@@ -131,16 +131,18 @@ document that runs over 600 s is a failure: a performance bug. After `STETDOC_DE
 failures and each sweep's summary are also on the run page. `STETDOC_WATCH_SECS`, `STETDOC_LIMIT_SECS` and
 `STETDOC_PROGRESS_SECS` change the watchdog, the limit and the progress interval.
 
-To run a failure again, take the seed from the top of the shard's log (`random edit batches: seed ...`) and a piece of the
-document's id:
+To run a failure again, fetch the full set once (`cargo xtask corpus fetch --full`), then take the seed from the top of the
+shard's log (`random edit batches: seed ...`) and a piece of the document's id:
 
 ```
-STETDOC_CORPUS_SET=full STETDOC_ONLY=RP052-Deleted-Para-Mark STETDOC_SEED=10390364666906268427 \
+STETDOC_CORPUS_DIR="$(cargo xtask corpus path)" STETDOC_CORPUS_SET=full \
+  STETDOC_ONLY=RP052-Deleted-Para-Mark STETDOC_SEED=10390364666906268427 \
   cargo test --release -p stetdoc-testkit --test laws_random -- random_batches_on_the_curated --nocapture
 ```
 
 Use `random_edits_of_files_on_the_curated` for a failure of the random edits of files, and `STETDOC_SHARD=<i>/40` instead of
-`STETDOC_ONLY` to run the whole shard (about an hour on a laptop).
+`STETDOC_ONLY` to run the whole shard (about an hour on a laptop). Without `STETDOC_CORPUS_DIR` a corpus sweep skips and
+passes, so a sweep that `STETDOC_ONLY` or `STETDOC_SHARD` asks for fails instead and says how to set it.
 
 The size was measured in October 2026 with `/usr/bin/time` on a Mac. Per document, the three tests cost 4.8 seconds of an
 Apple M-series core on shard 0 of 64 (763 documents: 3.6 for the random batches, 1.3 for the random edits of files, 0.02
@@ -171,9 +173,11 @@ an output, since each is made from a corpus document. `STETDOC_LO_ONLY=3,17` rea
 
 ### Fuzzing
 
-The container (`package`) and the span tree (`xml`) have fuzz targets. A release needs
-at least 24 CPU-hours of fuzzing per target without a crash, and CI runs each target for 60
-seconds on every pull request.
+Four fuzz targets cover the container (`package`), the span tree (`xml`), operation batches
+(`batch`) and edits of the readable files (`files`). CI runs each target for 60 seconds on every
+pull request. The aim, from [decision 0002](docs/decisions/0002-fuzz-entry-points.md), is 24
+CPU-hours per target without a crash before a release. No release workflow runs that yet, and
+no log of a long run is published, so 0.9.0 and 0.9.1 shipped without a recorded one.
 
 ```
 cargo xtask fuzz xml                                    60 seconds
@@ -291,11 +295,11 @@ no clock, so the clock, the inputs, the budgets and the table are in `stetdoc_te
 
 ### Evals of the Claude Code plugin
 
-`evals/run.sh` runs Claude Code with the plugin on real contracts (read, redline, comment, accept and reject, compare,
-a rename throughout, chained edits, a colleague's edit between turns, and stetdoc missing) and grades the documents
-it writes with stetdoc itself. It records turns, tokens, cost and time per case, so it is also the benchmark for a
-change to the CLI, the skill or the MCP server. Every run costs money (about $10 for the full suite), so it is not part
-of the check. [docs/evals.md](docs/evals.md) says how to run it and read the results.
+`evals/run.sh` runs Claude Code with the plugin on synthetic contracts from Harvey LAB (read, redline, comment, accept
+and reject, compare, a rename throughout, chained edits, a colleague's edit between turns, and stetdoc missing) and
+grades the documents it writes with stetdoc itself. It records turns, tokens, cost and time per case, so it is also the
+benchmark for a change to the CLI, the skill or the MCP server. Every run costs money (about $10 for the full suite), so
+it is not part of the check. [docs/evals.md](docs/evals.md) says how to run it and read the results.
 
 ## Review
 

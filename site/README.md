@@ -34,7 +34,7 @@ The root `.vercelignore` keeps `target/` and other build output out of the uploa
 ## How it stays fast
 
 - `next.config.ts` sets `output: 'export'` and inlines the CSS.
-- `scripts/strip-runtime.ts` runs after `next build` and removes Next's client runtime and RSC payload from out/: the pages have no client components and navigate with full page loads. It fails the build if a page has a client component of ours, or streamed content that needs script, and it checks that no page lost a word. What ships per page: the HTML with its CSS, the Anek font, and a 1 KB inline script for the copy buttons. The install picker is CSS only.
+- `scripts/strip-runtime.ts` runs after `next build` and removes Next's client runtime and RSC payload from out/: the pages have no client components and navigate with full page loads. It fails the build if a page has a client component of ours, or streamed content that needs script, and it checks that no page lost a word. What ships per page: the HTML with its CSS, the Anek font, a 1 KB inline script for the copy buttons, and a 0.5 KB one on the launch page that reads the visitor's system and shows its install (`lib/os-script.ts`). The install picker is CSS only; that script only chooses its first tab.
 - Anek Latin is self-hosted in `app/fonts/` under the OFL (`app/fonts/OFL.txt`); the latin face is subset to the weights, widths and characters the page uses. Arial fallbacks with Anek's metrics (globals.css) keep the layout still when the font swaps in.
 - `og/` holds a static instance of Anek for the share card, which `app/og.png/route.tsx` draws at build.
 

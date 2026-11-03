@@ -5,9 +5,19 @@ export const CHANGELOG_URL =
 	'https://github.com/clauseo-ai/stetdoc/blob/main/CHANGELOG.md';
 export const CLAUSEO_URL = 'https://www.clauseo.chat';
 export const SITE_URL = 'https://stetdoc.clauseo.chat';
+/** the benchmark behind the figures (COPY.md, Bench) */
+export const BENCH_URL = 'https://github.com/clauseo-ai/docx-agent-bench';
+/** how the benchmark grades a run, the Word check included (COPY.md, Bench) */
+export const BENCH_GRADING_URL = `${BENCH_URL}#how-grading-works`;
 
-/** the suggested install (COPY.md, Hero) */
-export const INSTALL_COMMAND = 'brew install clauseo-ai/tap/stetdoc';
+/** packaging/install.sh, copied into public/ by scripts/docs-artifacts.ts */
+export const INSTALL_SCRIPT_URL = `${SITE_URL}/install.sh`;
+/** the suggested install on each desktop system (COPY.md, Hero) */
+export const INSTALL_COMMANDS = {
+	mac: 'brew install clauseo-ai/tap/stetdoc',
+	linux: `curl -fsSL ${INSTALL_SCRIPT_URL} | sh`,
+	windows: 'uv tool install stetdoc',
+} as const;
 
 
 /** the agent guide as markdown */

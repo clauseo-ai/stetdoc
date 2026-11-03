@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { FOOTER, NAV, SITE, UI } from '../content/copy';
 import { pageMetadata } from '../lib/meta';
+import { OS_SCRIPT } from '../lib/os-script';
 import { COPY_SCRIPT } from './copy-button';
 import { GitHubMark } from './github-mark';
 import { Lockup } from './lockup';
@@ -43,6 +44,12 @@ export const metadata: Metadata = pageMetadata({
 export default function Home() {
 	return (
 		<div className='launch'>
+			{/* before the hero, so the visitor's install shows from the first paint */}
+			<script
+				id='os-script'
+				data-keep
+				dangerouslySetInnerHTML={{ __html: OS_SCRIPT }}
+			/>
 			<JsonLd />
 			<header className='top'>
 				<a

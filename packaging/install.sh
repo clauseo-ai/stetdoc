@@ -2,7 +2,7 @@
 # Installs the stetdoc command-line tool from a GitHub release.
 #
 # Usage:
-#   curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh
+#   curl -fsSL https://stetdoc.clauseo.chat/install.sh | sh
 #   STETDOC_VERSION=v1.0.0 STETDOC_INSTALL_DIR=/usr/local/bin sh install.sh
 #
 # It detects the OS and the CPU, downloads the matching archive from the release, checks its SHA-256 against the

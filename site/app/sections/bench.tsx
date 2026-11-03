@@ -122,7 +122,20 @@ export function Bench() {
 							})}
 						</tbody>
 					</table>
-					<p className='method'>{p.method}</p>
+					<p className='method'>
+						{p.method.map((part) =>
+							part.href ? (
+								<a
+									key={part.text}
+									className='text-link'
+									href={part.href}>
+									{part.text}
+								</a>
+							) : (
+								part.text
+							),
+						)}
+					</p>
 				</div>
 			</div>
 			<ul className='facts'>

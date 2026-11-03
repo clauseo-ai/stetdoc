@@ -16,7 +16,7 @@ import {
 	CLAUSEO_URL,
 	DOCS_URL,
 	GITHUB_URL,
-	INSTALL_COMMAND,
+	INSTALL_COMMANDS,
 	SITE_URL,
 } from '../app/links';
 import { BENCH_FACTS, BENCH_METHOD, BENCH_ROWS } from './bench';
@@ -25,13 +25,31 @@ import { BENCH_FACTS, BENCH_METHOD, BENCH_ROWS } from './bench';
     words take court green */
 export type Line = { kind: 'cmd' | 'out' | 'raw'; text: string; passed?: boolean };
 
+/** a desktop system the page can suggest an install for */
+export type Os = keyof typeof INSTALL_COMMANDS;
+
+/**
+ * The suggested install on each desktop system, in the order the page lists
+ * them. The hero shows the visitor's own (lib/os-script.ts reads it), or all
+ * three, labelled, on a phone, an unknown system or with script off.
+ * `channel` is the picker tab the same install sits under.
+ */
+export const INSTALLS = [
+	{ os: 'mac', label: 'macOS', channel: 'brew', command: INSTALL_COMMANDS.mac },
+	{ os: 'linux', label: 'Linux', channel: 'script', command: INSTALL_COMMANDS.linux },
+	{ os: 'windows', label: 'Windows', channel: 'uv', command: INSTALL_COMMANDS.windows },
+] as const satisfies readonly { os: Os; label: string; channel: string; command: string }[];
+
+/** the three installs as one shell block, a comment naming each system */
+export const INSTALL_BLOCK = INSTALLS.map((i) => `# ${i.label}\n${i.command}`).join('\n');
+
 export const SITE = {
 	name: 'stetdoc',
 	url: SITE_URL,
 	title: 'stetdoc · Let it stand',
 	description:
 		"stetdoc is how AI agents work in Word. Every edit lands as a tracked change with the agent's name on it, and everything the agent didn't touch comes back exactly as it was.",
-	install: INSTALL_COMMAND,
+	installs: INSTALLS,
 	licence: 'Free and open source, MIT or Apache-2.0.',
 	links: {
 		docs: DOCS_URL,
@@ -55,8 +73,9 @@ export const AGENT_BLOCK = {
 	title: 'For agents',
 	text: [
 		'Install stetdoc and connect it to this agent. Run these yourself.',
-		'1. brew install clauseo-ai/tap/stetdoc',
-		`   Without Homebrew, pick another channel at ${SITE_URL}/#install`,
+		'1. Install it with the line for this system:',
+		...INSTALLS.map((i) => `   ${i.label}: ${i.command}`),
+		`   Every other channel is at ${SITE_URL}/#install`,
 		'2. stetdoc --version',
 		'3. stetdoc init',
 		'   This puts the stetdoc skill in every agent it finds.',
@@ -77,6 +96,8 @@ export const NAV = {
 	github: 'GitHub',
 	readDocs: 'Read the docs',
 	suggested: 'Suggested',
+	/** the picker's markdown table: "Homebrew, suggested on macOS" */
+	suggestedOn: 'suggested on',
 	otherWays: 'Other ways to install',
 };
 
@@ -86,7 +107,7 @@ export const HERO = {
 	stetWord: 'stand',
 	sub: "stetdoc is how AI agents work in Word. Every change your agent makes lands in Word as a tracked change with its name on it, and everything it didn't touch comes back exactly as it was.",
 	caption:
-		'Unedited output from a 527-paragraph supply agreement. The edit took 20 milliseconds.',
+		'Unedited output from a Harvey LAB supply agreement.',
 	run: [
 		{
 			kind: 'cmd',
@@ -144,15 +165,15 @@ export const PARTS = {
 	},
 	bench: {
 		id: 'bench',
-		title: 'Done first, on every model.',
+		title: 'Fastest on every model.',
 		body: [
-			"We gave agents eight contract-editing tasks five ways: with stetdoc, with no plugin, with Anthropic's docx skill, with Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc finished first on all three models.",
+			"We gave agents eight contract tasks and three long markups, five ways: with stetdoc, with no plugin, with Anthropic's docx skill, with Anthropic's legal plugin and with Adeu. Then we opened every file they wrote in Word. The agents using stetdoc were fastest on all three models.",
 		],
 		chart: {
 			caption: 'Median time per task',
 			columns: ['Model', 'stetdoc', 'Other setups, fastest to slowest'],
 			keyStet: 'stetdoc',
-			keyOthers: 'The other four setups, fastest to slowest',
+			keyOthers: 'The other setups, fastest to slowest',
 			/** the label over each row's quieter figure */
 			othersLabel: 'Other setups',
 			rows: BENCH_ROWS,
@@ -170,7 +191,7 @@ export const PARTS = {
 		body: [
 			"Run a document through stetdoc without editing it and you get the identical file back, byte for byte. Edit one clause and only that clause's elements change. Styles, numbering, comments, other people's tracked changes and macros stay where their authors left them.",
 		],
-		proof: 'We test this every night on **about 48,000 documents** from **77** public sources. Every build also puts **306** more through **50** random edit batches each.',
+		proof: 'Every build checks this on **306** documents, and every night random edits run on **48,595** public documents.',
 		/** the paragraphs around 11.1 in the supply agreement, as stetdoc reads them */
 		stack: [
 			{
@@ -289,7 +310,8 @@ export const PART_ORDER = [
 export type Channel = {
 	id: string;
 	name: string;
-	suggested?: boolean;
+	/** the system this channel is suggested on; that system's visitors see it chosen */
+	os?: Os;
 	command: string;
 	note: string;
 };
@@ -303,15 +325,23 @@ export const END = {
 		{
 			id: 'brew',
 			name: 'Homebrew',
-			suggested: true,
-			command: INSTALL_COMMAND,
+			os: 'mac',
+			command: INSTALL_COMMANDS.mac,
 			note: 'macOS and Linux. Each call starts in about 5 ms.',
+		},
+		{
+			id: 'script',
+			name: 'Install script',
+			os: 'linux',
+			command: INSTALL_COMMANDS.linux,
+			note: 'macOS and Linux. It checks the SHA-256 and installs to ~/.local/bin. Each call starts in about 5 ms.',
 		},
 		{
 			id: 'uv',
 			name: 'uv',
-			command: 'uv tool install stetdoc',
-			note: 'The wheel holds the native binary, so no Python runs after the install. Each call starts in about 5 ms.',
+			os: 'windows',
+			command: INSTALL_COMMANDS.windows,
+			note: 'macOS, Linux and Windows. The wheel holds the native binary, so no Python runs after the install. Each call starts in about 5 ms.',
 		},
 		{
 			id: 'pipx',
@@ -324,13 +354,6 @@ export const END = {
 			name: 'npm',
 			command: 'npm install -g stetdoc',
 			note: 'npm swaps its Node launcher for the binary when install scripts run. Each call then starts in about 6 ms.',
-		},
-		{
-			id: 'script',
-			name: 'Install script',
-			command:
-				'curl -fsSL https://raw.githubusercontent.com/clauseo-ai/stetdoc/main/packaging/install.sh | sh',
-			note: 'macOS and Linux. It checks the SHA-256 and installs to ~/.local/bin. Each call starts in about 5 ms.',
 		},
 		{
 			id: 'cargo',

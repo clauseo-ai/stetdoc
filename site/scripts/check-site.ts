@@ -7,6 +7,7 @@
  * - Every page has its own canonical and a markdown alternate.
  * - robots.txt, sitemap.xml, llms.txt, llms-full.txt and security.txt exist,
  *   with absolute URLs and within size.
+ * - install.sh is packaging/install.sh, byte for byte.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -48,7 +49,7 @@ for (const [where, text] of [
 	['index.md', md],
 	['llms.txt', llms],
 ] as const) {
-	need(where, text, SITE.install);
+	for (const i of SITE.installs) need(where, text, i.command);
 	for (const line of AGENT_BLOCK.text.split('\n')) need(where, text, line.trim());
 }
 need('index.html', html, `"softwareVersion":"${version}"`);
@@ -75,6 +76,10 @@ need('robots.txt', robots, 'Allow: /');
 const sitemap = read('sitemap.xml');
 for (const page of sitePages()) if (page.updated) need('sitemap.xml', sitemap, `<lastmod>${page.updated}`);
 if (/<loc>(?!https:\/\/)/.test(sitemap)) failures.push('sitemap.xml has a relative URL');
+// the install script the Linux install pipes to sh, the same bytes as packaging/install.sh
+const script = read('install.sh');
+if (script && script !== readFileSync(join(import.meta.dir, '..', '..', 'packaging', 'install.sh'), 'utf8'))
+	failures.push('out/install.sh differs from packaging/install.sh');
 const security = read('.well-known/security.txt');
 need('security.txt', security, 'Contact: ');
 need('security.txt', security, 'Expires: ');

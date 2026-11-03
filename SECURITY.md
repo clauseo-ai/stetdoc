@@ -44,6 +44,6 @@ hostile file.
   as the corpus manifest expects, and no document outside that tier may be refused.
 - Four fuzz targets cover the entry points: `package` (the ZIP container), `xml` (the parser and
   editor), `batch` (operation batches applied to a document) and `files` (edits of the readable
-  files). Each runs for 60 seconds in CI on every pull request and for at least 24 hours before a
-  release; a crash, a hang over 30 seconds or a broken law fails the run. See
-  [`fuzz/`](fuzz/) and `cargo xtask fuzz`.
+  files). Each runs for 60 seconds in CI on every pull request, and a crash, a hang over 30
+  seconds or a broken law fails the run. Longer runs are made by hand with `cargo xtask fuzz
+  --time`, and no log of them is published. See [`fuzz/`](fuzz/) and `cargo xtask fuzz`.

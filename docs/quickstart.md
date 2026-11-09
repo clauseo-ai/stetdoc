@@ -17,7 +17,7 @@ uv tool install stetdoc
 
 ```console
 $ stetdoc --version
-stetdoc 0.9.2
+stetdoc 0.9.3
 
 ```
 

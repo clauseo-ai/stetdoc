@@ -2,7 +2,7 @@
 name: stetdoc
 description: Read, redline, comment on and compare Word documents (.docx) with real tracked changes. Use whenever a task involves reading or editing a .docx file.
 metadata:
-  stetdoc-version: "0.9.2"
+  stetdoc-version: "0.9.3"
 ---
 
 # stetdoc

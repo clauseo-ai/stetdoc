@@ -1,9 +1,12 @@
 name: release
 
-# Builds a release on a `v*` tag, or by hand: the `stetdoc` CLI and the napi addon for the seven release targets, smoke
+# Builds a release on a `v*` tag, or by hand: the `stetdoc` CLI and the napi addon for the eight release targets, smoke
 # tests of both, and a draft GitHub release holding the archives, their SHA-256 files, the npm tarballs (the addon's and the
 # CLI's), the Python wheels and sdist, and the Homebrew formula filled for this version. Every shipped binary is built with
-# the `dist` profile of the root Cargo.toml (fat LTO, one codegen unit, stripped). `packaging-check` validates the packaging files first. Nothing
+# the `dist` profile of the root Cargo.toml (fat LTO, one codegen unit, stripped), and every Windows binary links the C runtime
+# statically (`+crt-static` in .cargo/config.toml, which no job here overrides with RUSTFLAGS), so it starts on a Windows
+# without the VC++ Redistributable; each Windows job fails if its binary still imports a VC++ runtime DLL
+# (.github/scripts/pe-crt-imports.mjs). `packaging-check` validates the packaging files first. Nothing
 # in the build publishes to npm, PyPI, a tap or any other registry: publishing is a maintainer's step, from the draft release's
 # assets. The one exception is `publish-pypi`, which runs only when a maintainer publishes the release on GitHub: it uploads
 # that release's wheels and sdist to PyPI by trusted publishing, and every build job is skipped in that run.
@@ -43,6 +46,7 @@ jobs:
           - { npm: darwin-x64, triple: x86_64-apple-darwin, runner: macos-15 }
           - { npm: darwin-arm64, triple: aarch64-apple-darwin, runner: macos-15 }
           - { npm: win32-x64-msvc, triple: x86_64-pc-windows-msvc, runner: windows-2025 }
+          - { npm: win32-arm64-msvc, triple: aarch64-pc-windows-msvc, runner: windows-11-arm }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -75,6 +79,13 @@ jobs:
           bin=target/${{ matrix.target.triple }}/dist/stetdoc
           "$bin" --version
           "$bin" capabilities --json > /dev/null
+
+      # The runner has the VC++ runtime installed, so the run above cannot show that a user's Windows lacks it. The C
+      # runtime is linked statically (.cargo/config.toml), and this fails if the binary still imports a VC++ runtime DLL.
+      - name: Check that it imports no VC++ runtime
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: node .github/scripts/pe-crt-imports.mjs "target/${{ matrix.target.triple }}/dist/stetdoc.exe"
 
       - name: Archive
         shell: bash
@@ -117,6 +128,7 @@ jobs:
           - { npm: darwin-x64, triple: x86_64-apple-darwin, runner: macos-15-intel, lib: libstetdoc_napi.dylib }
           - { npm: darwin-arm64, triple: aarch64-apple-darwin, runner: macos-15, lib: libstetdoc_napi.dylib }
           - { npm: win32-x64-msvc, triple: x86_64-pc-windows-msvc, runner: windows-2025, lib: stetdoc_napi.dll }
+          - { npm: win32-arm64-msvc, triple: aarch64-pc-windows-msvc, runner: windows-11-arm, lib: stetdoc_napi.dll }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -138,6 +150,12 @@ jobs:
         if: ${{ !matrix.target.musl }}
         shell: bash
         run: cargo build --profile dist --locked -p stetdoc-napi --target ${{ matrix.target.triple }}
+
+      # As for the CLI: the addon links the C runtime statically, and this fails if it still imports a VC++ runtime DLL.
+      - name: Check that it imports no VC++ runtime
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: node .github/scripts/pe-crt-imports.mjs "target/${{ matrix.target.triple }}/dist/${{ matrix.target.lib }}"
 
       # The musl addons are built inside Alpine, whose C library, C compiler and linker are musl's, so the addon links
       # against musl alone and never needs glibc. An addon is a shared library, which cannot carry a static C runtime, so
@@ -187,6 +205,7 @@ jobs:
           - { npm: darwin-arm64, runner: macos-15, runtime: bun, version: 1.3.14 }
           - { npm: darwin-x64, runner: macos-15-intel, runtime: node, version: 24 }
           - { npm: win32-x64-msvc, runner: windows-2025, runtime: node, version: 24 }
+          - { npm: win32-arm64-msvc, runner: windows-11-arm, runtime: node, version: 24 }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -286,6 +305,9 @@ jobs:
       - name: Check the versions against the workspace
         run: node packaging/scripts/stamp.mjs --check
 
+      - name: Test the check of the Windows binaries' imports
+        run: node --test .github/scripts/pe-crt-imports.test.mjs
+
   # The Homebrew formula for the tap, filled from the release's checksum files. It only writes the file: nothing is pushed.
   homebrew:
     name: homebrew formula
@@ -373,6 +395,7 @@ jobs:
           x86_64-apple-darwin darwin-x64
           aarch64-apple-darwin darwin-arm64
           x86_64-pc-windows-msvc win32-x64-msvc
+          aarch64-pc-windows-msvc win32-arm64-msvc
           EOF
 
       - name: Pack
@@ -405,6 +428,7 @@ jobs:
           - { npm: darwin-x64, triple: x86_64-apple-darwin, runner: macos-15 }
           - { npm: darwin-arm64, triple: aarch64-apple-darwin, runner: macos-15, smoke: true }
           - { npm: win32-x64-msvc, triple: x86_64-pc-windows-msvc, runner: windows-2025, smoke: true }
+          - { npm: win32-arm64-msvc, triple: aarch64-pc-windows-msvc, runner: windows-11-arm, smoke: true }
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -446,6 +470,16 @@ jobs:
           "$bin/python" -m pip install --no-index --find-links packaging/pypi/wheels stetdoc
           "$bin/stetdoc" --version
           "$bin/stetdoc" capabilities --json > /dev/null
+
+      # maturin reads .cargo/config.toml like cargo does, so the wheel's binary links the C runtime statically too. A wheel
+      # is a zip: this unpacks it and fails if the binary in it still imports a VC++ runtime DLL.
+      - name: Check that the wheel's binary imports no VC++ runtime
+        if: ${{ runner.os == 'Windows' }}
+        shell: bash
+        run: |
+          mkdir -p wheel-contents
+          for wheel in packaging/pypi/wheels/*.whl; do 7z x -y -owheel-contents "$wheel" > /dev/null; done
+          node .github/scripts/pe-crt-imports.mjs wheel-contents
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -535,7 +569,7 @@ jobs:
         run: |
           gh release download "$TAG" --dir dist --pattern 'stetdoc-*.whl' --pattern 'stetdoc-[0-9]*.tar.gz'
           ls -l dist
-          test "$(find dist -name '*.whl' | wc -l)" -eq 7 || { echo "expected 7 wheels in the release" >&2; exit 1; }
+          test "$(find dist -name '*.whl' | wc -l)" -eq 8 || { echo "expected 8 wheels in the release" >&2; exit 1; }
           test "$(find dist -name '*.tar.gz' | wc -l)" -eq 1 || { echo "expected 1 sdist in the release" >&2; exit 1; }
 
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

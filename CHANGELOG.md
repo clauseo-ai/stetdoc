@@ -7,8 +7,18 @@ All notable changes to stetdoc are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Windows on Arm64 builds: `stetdoc-aarch64-pc-windows-msvc.zip` on the release page, the npm packages
+  `@clauseo/stetdoc-cli-win32-arm64-msvc` (for `stetdoc`) and `@clauseo/stetdoc-win32-arm64-msvc` (for `@clauseo/stetdoc`),
+  and a `win_arm64` wheel on PyPI. Each is built and smoke-tested on a native Arm64 runner.
+
 ### Fixed
 
+- The Windows builds no longer need the VC++ Redistributable. `stetdoc.exe` imported `VCRUNTIME140.dll` and
+  `VCRUNTIME140_1.dll`, and the napi addon `VCRUNTIME140.dll`, so on a Windows without the Redistributable they failed to
+  start. Every Windows binary of a release, in the zip, the npm packages and the wheels, now links the C runtime
+  statically, and the release fails if one still imports a VC++ runtime DLL.
 - A tracked edit of properties whose `w:rPr` repeats a property with another value, such as the paragraph mark of
   LibreOffice's `table-ltr.docx` with `<w:sz w:val="24"/>` and then `<w:sz w:val="26"/>`, is applied. The record of the
   change keeps both sizes, since which one Word reads is not stetdoc's to decide, and `check` counted that copy as a

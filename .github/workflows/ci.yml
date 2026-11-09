@@ -239,3 +239,8 @@ jobs:
           "$RUNNER_TEMP/tsc/node_modules/.bin/tsc" --noEmit --strict --skipLibCheck --module nodenext \
             --moduleResolution nodenext --target es2022 --typeRoots "$RUNNER_TEMP/tsc/node_modules/@types" --types node \
             test/smoke.mts index.d.ts
+
+      # The release runs this script over every Windows binary it builds; its tests need only Node.
+      - name: Test the check of the Windows binaries' imports
+        if: ${{ matrix.case.typecheck }}
+        run: node --test .github/scripts/pe-crt-imports.test.mjs

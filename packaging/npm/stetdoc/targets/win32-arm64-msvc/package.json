@@ -1,0 +1,25 @@
+{
+  "name": "@clauseo/stetdoc-cli-win32-arm64-msvc",
+  "version": "0.9.2",
+  "description": "The stetdoc command-line tool for aarch64-pc-windows-msvc. Install `stetdoc`, which depends on it.",
+  "license": "MIT OR Apache-2.0",
+  "author": "Clauseo",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/clauseo-ai/stetdoc.git",
+    "directory": "packaging/npm/stetdoc/targets/win32-arm64-msvc"
+  },
+  "homepage": "https://stetdoc.clauseo.chat",
+  "bugs": {
+    "url": "https://github.com/clauseo-ai/stetdoc/issues"
+  },
+  "files": [
+    "bin/stetdoc.exe"
+  ],
+  "os": [
+    "win32"
+  ],
+  "cpu": [
+    "arm64"
+  ]
+}

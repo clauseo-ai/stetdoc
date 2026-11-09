@@ -1,2 +1,13 @@
 [alias]
 xtask = "run --quiet --locked --package xtask --"
+
+# Link the C runtime statically on Windows, so `stetdoc.exe`, the napi addon and the wheels' binary start on a Windows
+# without the VC++ Redistributable. Every build reads this: cargo build, maturin and a local build alike. A RUSTFLAGS or
+# CARGO_ENCODED_RUSTFLAGS in the environment replaces these flags, so no Windows build in .github/workflows/release.yml
+# sets either, and the workflow's import check (.github/scripts/pe-crt-imports.mjs) fails a binary that still imports
+# the VC++ runtime.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

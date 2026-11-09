@@ -50,24 +50,24 @@ Bun blocks install scripts by default, so `bun add -g stetdoc` keeps the Node la
 
 ## Platforms
 
-Each release builds stetdoc for seven targets, which cover macOS on Apple silicon and Intel, Linux on x64 and arm64 for both glibc
-and musl, and Windows on x64. Homebrew and the install script give Linux the static musl build, which runs on glibc and
+Each release builds stetdoc for eight targets, which cover macOS on Apple silicon and Intel, Linux on x64 and arm64 for both glibc
+and musl, and Windows on x64 and Arm64. Homebrew and the install script give Linux the static musl build, which runs on glibc and
 musl alike.
 
 ### Windows
 
-Four channels ship a Windows x64 binary:
+Four channels ship a Windows binary for x64 and for Arm64. It needs no VC++ Redistributable:
 
-- `uv tool install stetdoc` or `pipx install stetdoc`. PyPI has a Windows wheel that holds `stetdoc.exe`. This is the
+- `uv tool install stetdoc` or `pipx install stetdoc`. PyPI has a Windows wheel for each that holds `stetdoc.exe`. This is the
   one to pick.
 - `npm install -g stetdoc`. On Windows the install step leaves the Node launcher in place, so every call starts Node
   first.
 - The zip from the [release page](https://github.com/clauseo-ai/stetdoc/releases/latest),
-  `stetdoc-x86_64-pc-windows-msvc.zip`. Check it against `stetdoc-x86_64-pc-windows-msvc.zip.sha256` with
+  `stetdoc-x86_64-pc-windows-msvc.zip`, or `stetdoc-aarch64-pc-windows-msvc.zip` on Arm. Check it against the `.zip.sha256` beside it with
   `Get-FileHash -Algorithm SHA256`, then put `stetdoc.exe` in a folder on your PATH.
 - `cargo install stetdoc --locked`, which builds it from source.
 
-Homebrew and the install script don't run on Windows. There is no Windows build for Arm. On Windows, `stetdoc init`
+Homebrew and the install script don't run on Windows. On Windows, `stetdoc init`
 saves your name under `%APPDATA%` unless `XDG_CONFIG_HOME` is set.
 
 ## Check the install

@@ -35,10 +35,10 @@ The order 0.9.0 was released in. Each step's detail is in its channel's section 
 1. Every section of `CHANGELOG.md` names the release and its date. `node packaging/scripts/stamp.mjs --write`,
    `cargo xtask release check` and `cargo publish --dry-run -p stetdoc-core -p stetdoc` pass. Commit and push.
 2. Optionally, tag a candidate `v<version>-rc.N` to run the whole build first, then delete its draft release.
-3. Tag `v<version>` and push the tag. `release.yml` builds a draft release with 46 files. All organisations share
+3. Tag `v<version>` and push the tag. `release.yml` builds a draft release with 52 files. All organisations share
    GitHub's macOS runners, so another repository's CI can hold the macOS jobs in the queue.
 4. Check the draft, then publish it. That makes the install script work and starts `publish-pypi`.
-5. npm: the seven CLI target packages, then `stetdoc`, then the seven library target packages, then `@clauseo/stetdoc`.
+5. npm: the eight CLI target packages, then `stetdoc`, then the eight library target packages, then `@clauseo/stetdoc`.
    With 2FA on writes, each `npm publish` asks for a browser approval, which can waive 2FA for five minutes. npm holds a
    brand-new package for review before it serves it. In 0.9.0 the 16 packages came out one by one within about ten
    minutes, and until then `npx stetdoc` failed with `ETARGET`.
@@ -122,12 +122,12 @@ repository-based channels work from the repository at its default branch, so a m
   binary itself, as esbuild does. The step copies a file npm already installed, downloads nothing, writes only inside the
   package and never fails the install. With `--ignore-scripts`, a package manager that blocks install scripts (pnpm 10,
   Bun, and npm 11.20 already warns that `allowScripts` will gate them), on Windows, or when the binary does not print
-  `stetdoc <version>`, the launcher stays and works the same, more slowly (see "Launch cost" below). The seven packages `packaging/npm/stetdoc/targets/<target>/` are `@clauseo/stetdoc-cli-<target>`, one per target,
+  `stetdoc <version>`, the launcher stays and works the same, more slowly (see "Launch cost" below). The eight packages `packaging/npm/stetdoc/targets/<target>/` are `@clauseo/stetdoc-cli-<target>`, one per target,
   and the main package lists them as `optionalDependencies`. `scripts/pack.mjs` copies the binaries in.
-- Release fills: the `npm-cli` job unpacks the `cli` archives and writes eight tarballs, `stetdoc-<version>.tgz` and
+- Release fills: the `npm-cli` job unpacks the `cli` archives and writes nine tarballs, `stetdoc-<version>.tgz` and
   one `clauseo-stetdoc-cli-<target>-<version>.tgz` per target. The napi addon's tarballs are `clauseo-stetdoc-*.tgz`
   without `cli`, so none of them collide in the release.
-- Publish: publish the seven target packages first, then the main one, from the draft's tarballs, with
+- Publish: publish the eight target packages first, then the main one, from the draft's tarballs, with
   `npm publish <tarball> --access public`. Then `npx stetdoc mcp` works anywhere. The packages belong to the npm
   organisation `clauseo`; a publisher must be a member with 2FA. npm holds a package it has never seen for review
   before it serves the version (see the release checklist above).
@@ -168,7 +168,7 @@ repository-based channels work from the repository at its default branch, so a m
   manylinux and musllinux containers), installs the wheels a runner can run and runs `stetdoc --version`, and
   `pypi-sdist` builds the sdist. All of them go into the draft release, named `stetdoc-<pep440 version>-*.whl` and
   `stetdoc-<pep440 version>.tar.gz`. The version comes from the workspace, as above.
-- Publish: publishing the draft release on GitHub starts the `publish-pypi` job, which downloads that release's seven
+- Publish: publishing the draft release on GitHub starts the `publish-pypi` job, which downloads that release's eight
   wheels and the sdist and uploads them with `pypa/gh-action-pypi-publish` by trusted publishing (no token in the
   repository). The trusted publisher has these fields (set up for 0.9.0, as a pending publisher at
   https://pypi.org/manage/account/publishing/ that the first upload turned into a normal one):

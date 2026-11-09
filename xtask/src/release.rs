@@ -1,9 +1,9 @@
 //! `cargo xtask release check`: the npm packages and the release workflow agree with the workspace.
 //!
-//! The release itself is `.github/workflows/release.yml`, run on a `v*` tag: it builds the CLI and the addon for the seven
+//! The release itself is `.github/workflows/release.yml`, run on a `v*` tag: it builds the CLI and the addon for the eight
 //! targets, smoke-tests them and attaches the archives and the npm tarballs to a draft GitHub release. Nothing publishes to a
 //! registry. This check keeps the hand-written parts in step: every package carries the workspace version, the main package
-//! depends on exactly the seven target packages and has no install script, each target package declares the platform it
+//! depends on exactly the eight target packages and has no install script, each target package declares the platform it
 //! runs on, the workflow builds every target, and the Python distribution builds the CLI's binary into a wheel for each. A test runs it, so `cargo xtask check` fails on drift.
 
 use crate::repo::Repo;
@@ -23,8 +23,8 @@ pub struct Target {
     pub libc: Option<&'static str>,
 }
 
-/// The seven release targets.
-pub const TARGETS: [Target; 7] = [
+/// The eight release targets.
+pub const TARGETS: [Target; 8] = [
     Target {
         npm: "linux-x64-gnu",
         triple: "x86_64-unknown-linux-gnu",
@@ -72,6 +72,13 @@ pub const TARGETS: [Target; 7] = [
         triple: "x86_64-pc-windows-msvc",
         os: "win32",
         cpu: "x64",
+        libc: None,
+    },
+    Target {
+        npm: "win32-arm64-msvc",
+        triple: "aarch64-pc-windows-msvc",
+        os: "win32",
+        cpu: "arm64",
         libc: None,
     },
 ];
@@ -569,10 +576,10 @@ mod tests {
     }
 
     #[test]
-    fn the_targets_are_seven_and_distinct() {
+    fn the_targets_are_eight_and_distinct() {
         let mut names: Vec<&str> = TARGETS.iter().map(|t| t.npm).collect();
         names.sort_unstable();
         names.dedup();
-        assert_eq!(names.len(), 7);
+        assert_eq!(names.len(), 8);
     }
 }

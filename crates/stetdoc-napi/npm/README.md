@@ -30,8 +30,8 @@ const { document: redline, receipt: diff } = compare(original, revised, { stamp:
 
 Install it with `npm install @clauseo/stetdoc` or `bun add @clauseo/stetdoc`.
 
-Node 22.18 or later, or Bun 1.3.13 or later, on one of seven targets: `linux-x64-gnu`, `linux-arm64-gnu`,
-`linux-x64-musl`, `linux-arm64-musl`, `darwin-x64`, `darwin-arm64` and `win32-x64-msvc`. The addon for each target is its
+Node 22.18 or later, or Bun 1.3.13 or later, on one of eight targets: `linux-x64-gnu`, `linux-arm64-gnu`,
+`linux-x64-musl`, `linux-arm64-musl`, `darwin-x64`, `darwin-arm64`, `win32-x64-msvc` and `win32-arm64-msvc`. The addon for each target is its
 own package, `@clauseo/stetdoc-<target>`, which the package manager installs as an optional dependency. No package runs a script
 on install. A missing addon throws an error that names the target and the paths it tried.
 

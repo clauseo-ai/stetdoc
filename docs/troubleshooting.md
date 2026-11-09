@@ -70,7 +70,7 @@ Run the server by hand. It prints one line and waits for a client:
 
 ```console
 $ stetdoc mcp < /dev/null
-stetdoc mcp 0.9.2: 11 tools on stdin and stdout
+stetdoc mcp 0.9.3: 11 tools on stdin and stdout
 
 ```
 

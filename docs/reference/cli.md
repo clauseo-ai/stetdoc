@@ -711,7 +711,7 @@ stetdoc capabilities [OPTIONS]
 
 ```console
 $ stetdoc capabilities
-stetdoc 0.9.2
+stetdoc 0.9.3
 formats: stet/1 (.md)
 complement: 1.0
 

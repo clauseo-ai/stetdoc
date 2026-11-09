@@ -74,7 +74,7 @@ saves your name under `%APPDATA%` unless `XDG_CONFIG_HOME` is set.
 
 ```console
 $ stetdoc --version
-stetdoc 0.9.2
+stetdoc 0.9.3
 
 ```
 
@@ -121,10 +121,10 @@ stetdoc init --list
 To pin a release, name it in the install:
 
 ```sh
-curl -fsSL https://stetdoc.clauseo.chat/install.sh | STETDOC_VERSION=v0.9.2 sh
-uv tool install stetdoc==0.9.2
-npm install -g stetdoc@0.9.2
-cargo install stetdoc --version 0.9.2 --locked
+curl -fsSL https://stetdoc.clauseo.chat/install.sh | STETDOC_VERSION=v0.9.3 sh
+uv tool install stetdoc==0.9.3
+npm install -g stetdoc@0.9.3
+cargo install stetdoc --version 0.9.3 --locked
 ```
 
 The install script reads `STETDOC_VERSION`, which defaults to `latest`, and `STETDOC_INSTALL_DIR`, which defaults to

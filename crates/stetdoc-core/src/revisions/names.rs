@@ -15,6 +15,10 @@ pub(super) const XML_NS: &str = "http://www.w3.org/XML/1998/namespace";
 pub(super) const M_T: &str = "http://schemas.openxmlformats.org/officeDocument/2006/math";
 /// Office Math, Strict.
 pub(super) const M_S: &str = "http://purl.oclc.org/ooxml/officeDocument/math";
+/// The relationships namespace of attributes such as `r:id`, Transitional.
+pub(super) const R_T: &str = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
+/// The relationships namespace, Strict.
+pub(super) const R_S: &str = "http://purl.oclc.org/ooxml/officeDocument/relationships";
 
 /// True for a namespace URI of the `w` vocabulary in either dialect.
 pub(super) fn is_word_ns(uri: &str) -> bool {

@@ -307,6 +307,15 @@ pub(crate) fn apply(
     }
     applied.touched_by_ops = tx.touched().len();
     reconcile(tx, &track, &mut applied)?;
+    // A hyperlink relationship whose last use the batch removed goes with it. The edit that removed the use was itself checked
+    // against the scope, so the relationships part is declared here.
+    for part in crate::revisions::links::drop_unused_link_rels(tx)? {
+        applied.side_effects.push(context::SideEffect {
+            part,
+            why: "a hyperlink relationship that nothing uses any more was removed".to_string(),
+            styles: None,
+        });
+    }
     Ok(applied)
 }
 

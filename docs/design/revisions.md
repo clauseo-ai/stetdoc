@@ -1017,7 +1017,12 @@ reference even when that run holds more (a `w:lastRenderedPageBreak`).
 **3.6.6 Hyperlinks, controls, smart tags.** The wrapper stays and the revision goes inside it:
 `w:hyperlink > w:del > w:r`. `w:ins > w:hyperlink` is invalid (the schema tables say `w:ins` takes no
 `w:hyperlink`), and an insertion at the end of a hyperlink goes outside it. An insertion in the middle of
-one goes inside, where both neighbours are in it.
+one goes inside, where both neighbours are in it, and so does the new text of a replacement that selected text of the
+hyperlink up to its end (4.2). A removal that leaves a hyperlink with no text removes the hyperlink too, because Word fills an
+empty one with its address when fields are updated: at once untracked, and tracked when the deletion inside it is accepted.
+Its range markers stay where it was. When nothing in the part uses the hyperlink's relationship any more, the relationship
+goes in the same transaction (`revisions/links.rs`). A bookmark, permission range or content control that a deletion
+empties stays, empty.
 
 **3.6.7 Text boxes.** A text box is written twice, in `mc:Choice` and `mc:Fallback`, with different ids on the
 revisions in each (`Comment042`: 6 and 6). Edits inside a text box are `unsupported` (they have no refs). Accept
@@ -1086,7 +1091,13 @@ the place from that.
    same date, and no adjacent `del` pair has the same date).
 
 A replace is a deletion followed by an insertion at the position **after the last deleted piece**, so
-the result reads `del` then `ins`, and the insertion is found by the same rule.
+the result reads `del` then `ins`, and the insertion is found by the same rule, with one exception that follows Word
+typing over a selection. When what the replacement selected starts inside a hyperlink, a content control, a smart tag, a
+custom XML element, a bookmark, a permission range or a comment's range, or at its start, and ends at its end, the new text
+stays inside it: before `</w:hyperlink>` or `</w:sdtContent>`, and before the `bookmarkEnd`, `permEnd` or
+`commentRangeEnd`. What it selected is each piece of the difference, and for an insertion inside the range the text of the
+range before it (`revisions/keep.rs`). A pure insertion, at an empty range, keeps the rule above: at an element's end it
+goes after the element. A selection that starts before the element does not keep the new text in it.
 
 ### 4.3 Formatting
 
@@ -1740,7 +1751,7 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `verify.rs` | deriving `created` from the minted ids; the post-conditions, `check::scan_unit` on each unit that holds a created revision | 200 |
 | `tree_ops.rs` | the small edits of a span tree that everything is built from | 200 |
 | `carve.rs` | splitting a run at a character, carving a range into whole runs (the original node stays the left part), the copy rule | 430 |
-| `gap.rs` | the gap rule (4.2): where new text goes, splitting a wrapper or a container | 520 |
+| `gap.rs`, `keep.rs` | the gap rule (4.2): where new text goes, splitting a wrapper or a container; the elements a replacement's new text stays inside | 620 |
 | `insert_run.rs`, `wrap.rs` | building the run for new text and placing it; deleting what a carve covered, by whose text it is | 560 |
 | `text.rs`, `text_apply.rs`, `diff.rs`, `diff_brackets.rs` | `replace_text`: locate on one map, classify, delete, insert; the word-level difference and its cleaning (pure, shared with `compare`) | 940 |
 | `props.rs`, `props_edit.rs`, `lists.rs` | `set_props`: containers, snapshots, edit, the change element, fold and refuse; `new_list_instance` | 840 |
@@ -1751,7 +1762,7 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `changes.rs`, `changes_text.rs`, `changes_rows.rs`, `changes_marks.rs`, `moves.rs` | `changes()` and `Change`: the grouping of 6.1, over a window of entries; the atoms and text groups; rows; paragraphs and moves | 1,350 |
 | `resolve.rs`, `resolve_select.rs` | `resolve`: steps, selection (by id through the index, by window), closure, the driver, the report | 420 |
 | `resolve_run.rs`, `resolve_props.rs`, `resolve_mark.rs`, `resolve_table.rs`, `resolve_control.rs` | accepting and rejecting run-level revisions, math, fields, moves; snapshots and numbering; the join at a paragraph mark; rows and cells; custom XML ranges | 920 |
-| `cleanup.rs`, `notes.rs` | pruning and hoisting range markers; removing a note that no reference names | 380 |
+| `cleanup.rs`, `notes.rs`, `links.rs` | pruning and hoisting range markers, and removing an emptied hyperlink; removing a note that no reference names; removing a hyperlink relationship that nothing uses any more | 460 |
 | `laws*.rs`, `tests_*.rs` | the laws and their generator, normalizer, reference checks and selection checks; the direct tests, the scenario rows, the corpus tests | not counted |
 
 Dependencies are as the Allowed dependencies table says: `api`, `xml`, `schema`, `wordml`, `state`. `revisions` reads

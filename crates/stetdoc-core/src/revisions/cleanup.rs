@@ -7,7 +7,7 @@ use super::names::{is_w, is_word_ns};
 use super::tree_ops::{child_ids, detach, insert, move_to, next_sibling_of, parent_of, rename};
 use crate::api::error::StetError;
 use crate::wordml::{NodeId, revision_at};
-use crate::xml::{NodeRef, SpanTree};
+use crate::xml::{NodeKind, NodeRef, SpanTree};
 
 /// True if the node is in the document: its ancestors reach the root element.
 pub(super) fn is_attached(tree: &SpanTree, node: NodeId) -> bool {
@@ -346,14 +346,38 @@ pub(super) fn rename_text_back(tree: &mut SpanTree, el: NodeId) -> Result<(), St
     Ok(())
 }
 
+/// True for a `w:hyperlink` that holds nothing but range markers and white space. Word fills an empty link with its address
+/// when fields are updated, so a removal that empties a link removes the link too, and its markers stay where it was.
+pub(super) fn is_empty_link(n: &NodeRef<'_>) -> bool {
+    is_w(n, "hyperlink")
+        && n.children().all(|c| {
+            super::carve::is_transparent(&c) || (!c.is_element() && c.kind() != NodeKind::Text)
+        })
+}
+
+/// Unwraps each hyperlink of `links` that is still in the tree and is empty (`is_empty_link`): an edit that removed all of a
+/// link's text removes the link. Its markers take its place.
+pub(super) fn unwrap_emptied_links(tree: &mut SpanTree, links: &[NodeId]) -> Result<(), StetError> {
+    for &link in links {
+        if is_attached(tree, link) && is_empty_link(&tree.node_ref(link)) {
+            unwrap_element(tree, link)?;
+        }
+    }
+    Ok(())
+}
+
 /// Removes the containers that a removal emptied, from `start` up: an empty `w:rPr`, `w:pPr`, `w:trPr`,
-/// `w:tcPr` or `w:numPr`, and an insertion or deletion with nothing in it. The old properties inside a
-/// `*PrChange` may be empty, and are left. Returns the node that is left in the tree where the pruning
+/// `w:tcPr` or `w:numPr`, an insertion or deletion with nothing in it, and a hyperlink with no text left
+/// (`is_empty_link`), whose markers stay. The old properties inside a `*PrChange` may be empty, and are left. Returns the node that is left in the tree where the pruning
 /// stopped: `start` itself if it stays, and what holds it if it went, which is what a caller that marks
 /// `start` as changed marks, because a node that left the tree has no block to touch.
 pub(super) fn prune_from(tree: &mut SpanTree, start: NodeId) -> Result<NodeId, StetError> {
     let mut cur = start;
     loop {
+        if is_empty_link(&tree.node_ref(cur)) {
+            cur = unwrap_element(tree, cur)?;
+            continue;
+        }
         let (empty, prunable, parent) = {
             let n = tree.node_ref(cur);
             let empty = !n.children().any(|c| c.is_element());

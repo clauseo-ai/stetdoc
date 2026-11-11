@@ -87,17 +87,37 @@ impl Compiler<'_, '_> {
         range: Range<usize>,
         with: &str,
     ) -> Result<(), StetError> {
-        let (p, pieces) = self.plan_text(block, range, with, true)?;
+        let (p, pieces) = self.plan_text(block, range.clone(), with, true)?;
         if pieces.is_empty() {
             return Ok(());
         }
         // From the last edit to the first, on the one map.
         let starts = final_starts(&p.map);
         for piece in pieces.iter().rev() {
-            self.apply_piece(&p, &starts, piece)?;
+            self.apply_piece(&p, &starts, piece, &range)?;
         }
+        self.unwrap_emptied_links(&p)?;
         self.touch(block);
         Ok(())
+    }
+
+    /// Removes the hyperlinks of the paragraph that held text before the call and hold none now. Untracked, a deletion of all
+    /// of a link's text removes its runs, and the link would be left empty. Tracked, the link holds the `w:del` until the
+    /// deletion is accepted, and accepting it removes the link (`cleanup::prune_from`).
+    pub(super) fn unwrap_emptied_links(&mut self, p: &ParaView) -> Result<(), StetError> {
+        let mut links: Vec<crate::wordml::NodeId> = Vec::new();
+        for item in p.map.items().iter().filter(|i| i.len > 0) {
+            for ctx in p.map.context(item.ctx) {
+                if ctx.kind == WrapperKind::Hyperlink && !links.contains(&ctx.node) {
+                    links.push(ctx.node);
+                }
+            }
+        }
+        if links.is_empty() {
+            return Ok(());
+        }
+        let tree = self.tx.part_mut(&p.part)?;
+        super::cleanup::unwrap_emptied_links(tree, &links)
     }
 
     /// Every check that can refuse the call, run before anything changes, and the difference as a list of

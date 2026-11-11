@@ -222,6 +222,8 @@ mod tests_edit_plain;
 #[cfg(test)]
 mod tests_edit_props;
 #[cfg(test)]
+mod tests_edit_range_ends;
+#[cfg(test)]
 mod tests_edit_reject;
 #[cfg(test)]
 mod tests_edit_review;

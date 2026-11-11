@@ -6,25 +6,43 @@ use super::carve::groups;
 use super::compiler::{Compiler, ParaView};
 use super::errors::{internal, readonly};
 use super::gap::SettleMode;
+use super::keep::{Keep, keep_for};
 use super::names::is_w;
 use super::text::Piece;
 use super::tree_ops::{detach, parent_of, rpr_of};
 use crate::api::error::StetError;
 use crate::wordml::{ItemKind, Mode, NO_FIELD, NodeId};
 use crate::xml::NodeKind;
+use std::ops::Range;
 
 impl Compiler<'_, '_> {
-    /// Applies one piece. `starts` are the `Final` offsets at which the map's items start.
+    /// Applies one piece. `starts` are the `Final` offsets at which the map's items start, and `range` is the range the
+    /// caller replaces, of which the piece is a part.
     pub(super) fn apply_piece(
         &mut self,
         p: &ParaView,
         starts: &[usize],
         piece: &Piece,
+        range: &Range<usize>,
     ) -> Result<(), StetError> {
         if !self.tracked() && self.untracked_in_place(p, starts, piece)? {
             return Ok(());
         }
         let map = &p.map;
+        // What the new text replaces: the piece's own characters, or for an insertion inside the range the characters of the
+        // range before it. A pure insertion, at an empty range, replaces nothing.
+        let selection = if piece.start < piece.end {
+            piece.start..piece.end
+        } else if range.start < piece.start {
+            range.start..piece.start
+        } else {
+            piece.start..piece.start
+        };
+        let keep = if piece.with.is_empty() {
+            Keep::default()
+        } else {
+            keep_for(self.tree_ro(&p.part)?, p, selection)
+        };
         let (format, mut boundary, depth_item) = if piece.start < piece.end {
             let loc = map
                 .locate(Mode::Final, piece.start..piece.end)
@@ -82,7 +100,7 @@ impl Compiler<'_, '_> {
             };
             (format, boundary, gap.left)
         };
-        let (settled, ends) = self.settle(&p.part, boundary, SettleMode::Insert)?;
+        let (settled, ends) = self.settle_keeping(&p.part, boundary, SettleMode::Insert, &keep)?;
         boundary = settled;
         if self.field_depth_after(p, depth_item) - ends > 0 {
             return Err(readonly(

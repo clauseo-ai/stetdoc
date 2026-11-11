@@ -145,7 +145,7 @@ impl Compiler<'_, '_> {
             let (planned, pieces) = self.plan_text(block, 0..len, "", keep_marks)?;
             let starts = final_starts(&planned.map);
             for piece in pieces.iter().rev() {
-                self.apply_piece(&planned, &starts, piece)?;
+                self.apply_piece(&planned, &starts, piece, &(0..len))?;
             }
         } else {
             self.check_editable(&p)?;

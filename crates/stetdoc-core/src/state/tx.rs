@@ -302,7 +302,31 @@ impl<'s> Tx<'s> {
         Ok(id)
     }
 
-    /// Makes the transaction's package the one that `add_part` or `add_relationship` built, and
+    /// Removes the relationships of `source` whose ids are `ids`, for the hyperlinks whose last use an edit removed
+    /// (`revisions::links`). Only the source's relationships part is rewritten, and it gets a fresh cell and epoch as in
+    /// `add_part`, so what was derived from the relationships goes stale. Returns the name of the relationships part if it
+    /// changed.
+    pub(crate) fn remove_relationships(
+        &mut self,
+        source: &str,
+        ids: &[String],
+    ) -> Result<Option<String>, StetError> {
+        failpoint::here("tx:remove_relationships")?;
+        let mut package = self
+            .added
+            .as_ref()
+            .map_or_else(|| self.base.package.clone(), |a| a.package.clone());
+        if !package.remove_relationships(source, ids)? {
+            return Ok(None);
+        }
+        let rels_name = opc::rels_part_name(source);
+        let index = (*self.index).clone();
+        let ids: Vec<PartId> = index.id(&rels_name).into_iter().collect();
+        self.adopt(package, index, &ids);
+        Ok(Some(rels_name))
+    }
+
+    /// Makes the transaction's package the one that `add_part`, `add_relationship` or `remove_relationships` built, and
     /// gives the parts it wrote a fresh cell and a new epoch.
     fn adopt(&mut self, package: Package, index: PartIndex, ids: &[PartId]) {
         self.index = Arc::new(index);

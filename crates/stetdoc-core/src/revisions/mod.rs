@@ -3,7 +3,8 @@
 //! **Owns.** The compiler that turns edits into tracked changes, or applies them directly: the revision
 //! shapes it writes (insertions, deletions, paragraph marks, the `*PrChange` family, rows), stamping, the
 //! word-level difference of a text edit, list instances, and the placing of range markers. Also the grouping
-//! of revision elements into changes, and the engine that accepts and rejects them.
+//! of revision elements into changes, the engine that accepts and rejects them, and the removal of the hyperlink
+//! relationships whose last use a transaction removed (`links.rs`).
 //!
 //! **Interface.** `Compiler::{new, replace_text, set_props, insert_block, insert_block_in, delete_block,
 //! delete_block_with_mark, split_block, merge_blocks, insert_row, new_list_instance, place_markers,
@@ -12,7 +13,7 @@
 //! `set_snapshot`, `add_deleted_note`, `split_block_untracked` and `import_writer`, and `canonical::order_created` (design `compare.md`, 6.1 and 20)
 //! over a `Tx`, with `Track`,
 //! `RevStamp`, `Effect` and `Outcome`; `resolve(tx, &mut ChangeIndex, &[Step])`;
-//! `changes(story, tree, range)`; `notes::remove_unreferenced_notes`; and `diff::edits`.
+//! `changes(story, tree, range)`; `notes::remove_unreferenced_notes`; `links::drop_unused_link_rels`; and `diff::edits`.
 //!
 //! **Invariants.**
 //! - Operations, `Edit::files`, comment anchors, the editor and compare all end up as `Compiler` calls on a
@@ -37,7 +38,10 @@
 //! - Text with white space at an end says `xml:space="preserve"` unless an ancestor does (XML inherits it), and a text edit
 //!   never deletes a note's own number.
 //! - A replace is the word-level difference, cleaned, deletion before insertion, applied right to left over
-//!   one text map. A tracked edit never deletes a paragraph's runs to write the same text again.
+//!   one text map. A tracked edit never deletes a paragraph's runs to write the same text again. Its new text stays
+//!   inside the hyperlink, control, bookmark, permission range or comment range that holds all it replaced (`keep.rs`).
+//! - A hyperlink that an edit or a resolution leaves with no text is removed, its markers kept, and a hyperlink
+//!   relationship goes only when the transaction removed its last use.
 //! - Accept and reject are selective and structural. A change is the unit, a move and a field are resolved
 //!   whole, a range marker is hoisted and never deleted, and a join keeps the first paragraph's element and
 //!   ref with the later paragraph's properties.
@@ -76,6 +80,8 @@ pub(crate) mod import_writer;
 pub(crate) mod index;
 mod insert_run;
 mod join;
+mod keep;
+pub(crate) mod links;
 mod lists;
 mod markers;
 mod moves;

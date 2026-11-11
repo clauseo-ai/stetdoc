@@ -5,6 +5,53 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
+## [Unreleased]
+
+### Fixed
+
+- An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
+  over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in
+  its part, referenced by nothing, while the receipt and `check` said nothing. The note now goes with its reference, as
+  it does when a tracked deletion of it is accepted, and the receipt names it in the operation's new `notes_removed`.
+  `check` reports a note that nothing references as the new note `unreferenced_note`, which blocks no edit (#15).
+- `--no-track` could rewrite a complex field's cached result, which Word replaces at its next field update, and deleting
+  the whole result left an empty field behind. An untracked edit now follows the same read-only rules as a tracked one:
+  a replace, insert or delete inside a field's result is refused as `readonly_region`, and so is an untracked edit of
+  only part of a field's displayed text, such as a HYPERLINK field's display text, as a tracked edit already was.
+  Deleting the whole result deletes the field (#16).
+- A complex field written with no stored result (begin, instruction and end, with no separator), such as `PAGE`, `EQ` or
+  `MACROBUTTON`, counted as one character that `view` showed as an empty field. Every offset after it in the paragraph
+  was one character off, so an edit landed on the wrong character and an offset past the visible end was accepted. Such a
+  field, and an empty `w:fldSimple`, now has no width, so offsets match the text `view` shows (#17).
+- `insert` with `place: after` could put the new paragraph in the wrong place. A tracked insert after a paragraph that
+  ends a section moved the section break onto the new paragraph, and an insert after a paragraph followed by a bookmark, a
+  permission range or an empty content control landed past that markup, inside ranges the anchor stood outside of. A
+  tracked insert also rebuilt the anchor's properties and dropped their empty elements. The new paragraph now goes
+  directly after its ref, before any markup that follows, and the ref keeps its section break and its properties as they
+  were. A tracked insert after the body's last paragraph, when that paragraph ends a section, is refused with
+  `readonly_region`, since the only tracked shape that rejects cleanly there would move the break; insert it untracked
+  (`--no-track`) instead. An untracked `split` likewise keeps an empty `w:pPr`, or an empty `w:rPr` inside it, on the
+  first half instead of dropping it (#18).
+- Accepting the deletion of a paragraph that held an empty run (`<w:t/>` or `<w:t></w:t>`) between runs of text merged
+  the next paragraph into it: the deleted paragraph kept its paraId and the next one was retired as merged. The deleted
+  paragraph is now removed (`retired: p1 (deleted)`) and the next one keeps its element and paraId, as when the empty run
+  is not there. A tracked deletion of the text on both sides of an empty run also takes the run into the same `w:del` (#19).
+- A replacement whose range ended at the end of a hyperlink, bookmark, permission range or inline content control wrote
+  the new text after it, so link text lost its link, a REF field to the bookmark lost the new words, and a permission
+  range no longer covered the text it guarded. When the text a replacement replaces starts inside, or at the start of, a
+  hyperlink, content control, smart tag, custom XML element, `dir` or `bdo` element, bookmark, permission range or
+  comment range and ends at its end, the new text now goes inside it, as typing over a selection in Word does. An
+  insertion that replaces nothing still goes after an element that ends where it is inserted. A deletion that empties a
+  hyperlink now removes the link, and the link's relationship when nothing else uses it, at once untracked and when the
+  deletion is accepted tracked (#20).
+- Inserting and deleting rows broke vertically merged cells. A row inserted with the `row` operation copied its anchor
+  row's merges and wrote the given text into every cell, even one that continued a merge, so the text was in the file but
+  Word never showed it. An insert below a merge's last row extended the merge, and deleting the row that held a merge's
+  start left the cells below it with no start. A new cell now continues a vertical merge only when the cell below it in
+  the same grid column does, as Word's Insert Rows leaves it. Text for a cell that continues a merge is refused with
+  `invalid_payload`, which says to pass `""` for that column. Removing the row that holds a merge's start, untracked or
+  by accepting or rejecting a tracked change, makes the next row's cell in that column the start (#21).
+
 ## [0.9.3] - 2026-11-09
 
 ### Added

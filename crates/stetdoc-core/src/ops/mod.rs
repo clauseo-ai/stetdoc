@@ -264,7 +264,12 @@ pub(crate) fn apply(
             let mut compiler = Compiler::new(&mut *tx, track.clone()).map_err(|e| at(e, i))?;
             for (k, op) in run.iter().enumerate() {
                 let n = i + k;
-                let done = dispatch(&mut compiler, cx, &base, op).map_err(|e| at(e, n))?;
+                let mut done = dispatch(&mut compiler, cx, &base, op).map_err(|e| at(e, n))?;
+                // A note goes with its last reference, as an accepted deletion takes it (`revisions/notes.rs`).
+                let gone = compiler
+                    .remove_notes_of_dropped_references()
+                    .map_err(|e| at(e, n))?;
+                done.notes_removed.extend(gone);
                 // The index of revisions is built at the first `resolve`, and kept current by what the calls did before it.
                 if ops.iter().skip(n + 1).any(is_review) {
                     for effect in &done.effects {
@@ -286,6 +291,7 @@ pub(crate) fn apply(
                     warnings: done.warnings,
                     resolution: None,
                     marked: done.marked,
+                    notes_removed: done.notes_removed,
                 });
             }
             let outcome = compiler

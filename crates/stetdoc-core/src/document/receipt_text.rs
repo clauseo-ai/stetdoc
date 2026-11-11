@@ -116,7 +116,7 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
     for r in &op.removed_own {
         parts.push(format!("removed your own pending {}", r.kind));
     }
-    if parts.is_empty() {
+    let said = if parts.is_empty() {
         match (op.changed, tracked) {
             (false, _) => "no change".to_string(),
             (true, false) => "applied directly".to_string(),
@@ -124,6 +124,14 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
         }
     } else {
         parts.join(", ")
+    };
+    if op.notes_removed.is_empty() {
+        said
+    } else {
+        format!(
+            "{said}, and removed {}, whose last reference went",
+            op.notes_removed.join(", ")
+        )
     }
 }
 

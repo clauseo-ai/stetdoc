@@ -30,6 +30,13 @@ impl Compiler<'_, '_> {
                 .locate(Mode::Final, piece.start..piece.end)
                 .ok_or_else(|| internal("a range that was checked is outside the paragraph"))?;
             let loc = super::text::cover(p, loc)?;
+            if map
+                .items()
+                .get(loc.items.clone())
+                .is_some_and(|items| items.iter().any(|i| i.kind == ItemKind::NoteRef))
+            {
+                self.dropped_reference = true;
+            }
             let before = map.gap(Mode::Final, piece.start);
             let after = map.gap(Mode::Final, piece.end);
             // The formatting of the first text that is deleted, read before the carve moves anything.

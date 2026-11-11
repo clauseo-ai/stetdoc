@@ -437,6 +437,7 @@ impl Compiler<'_, '_> {
             };
             // Its range markers and comment references are hoisted, as an accepted deletion of the row
             // hoists them (design 3.6.5), so that no start loses its end and a comment keeps its anchor.
+            self.dropped_reference |= super::notes::holds_note_reference(self.tree_ro(part)?, row);
             let tree = self.tx.part_mut(part)?;
             let wrapper = table_of(tree, row)
                 .and_then(|t| super::resolve_table::child_toward(tree, t, row))

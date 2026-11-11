@@ -96,6 +96,10 @@ Each of these was decided in a design, with the evidence there.
   a note whose reference is a pending deletion, and the `Original` view one whose reference is a pending insertion. A note's
   id (`fn3`), which refs and `delete-note` use, counts every reference and is the same in every view; the two views add the
   number Word shows as its mark once their changes are resolved, when that is another (`{footnote 3 mark=2}`, `"mark"`).
+  An untracked edit (`--no-track`) that takes out a note's last reference, by a replace, a delete or the removal of a row,
+  takes the note out with it, as accepting the deletion would, and the operation's `notes_removed` in the receipt names it.
+  `check` reports a note that no reference in any story names as `unreferenced_note`, a note and not a violation, so a
+  document that already has one can still be edited.
 - **Quotes typed into a paragraph follow its convention**, curly or straight, and the receipt says so. `--quotes as-typed`
   keeps them as typed. See [document and ops 2.8](docs/design/document-and-ops.md#28-quotes).
 

@@ -201,7 +201,7 @@ export type Finding = {
   part: string;
 };
 
-export type FindingCode = "schema_wrong_root" | "schema_unexpected_child" | "schema_unknown_element" | "schema_out_of_order" | "schema_non_canonical_order" | "schema_missing_child" | "schema_must_understand" | "mc_prefix_undeclared" | "schema_unexpected_text" | "schema_unknown_attribute" | "schema_missing_attribute" | "schema_invalid_attribute_value" | "text_in_deletion" | "deltext_outside_deletion" | "edge_space_without_preserve" | "revision_id_duplicate" | "bookmark_id_duplicate" | "revision_nested_in_itself" | "bookmark_unpaired" | "move_range_unpaired" | "move_name_unpaired" | "field_split_by_deletion" | "cell_without_final_paragraph" | "table_without_row" | "row_without_cell" | "container_without_block" | "empty_revision" | "empty_properties" | "part_without_content_type" | "relationship_target_missing" | "relationship_id_duplicate" | "comment_id_duplicate" | "marker_unpaired" | "marker_without_comment" | "reference_missing" | "reference_duplicate" | "unanchored" | "row_without_comment" | "row_missing" | "para_id_missing" | "para_id_duplicate" | "para_id_range" | "parent_missing" | "thread_cycle" | "durable_mismatch" | "part_unrelated" | "part_unreadable";
+export type FindingCode = "schema_wrong_root" | "schema_unexpected_child" | "schema_unknown_element" | "schema_out_of_order" | "schema_non_canonical_order" | "schema_missing_child" | "schema_must_understand" | "mc_prefix_undeclared" | "schema_unexpected_text" | "schema_unknown_attribute" | "schema_missing_attribute" | "schema_invalid_attribute_value" | "text_in_deletion" | "deltext_outside_deletion" | "edge_space_without_preserve" | "revision_id_duplicate" | "bookmark_id_duplicate" | "revision_nested_in_itself" | "bookmark_unpaired" | "move_range_unpaired" | "move_name_unpaired" | "field_split_by_deletion" | "cell_without_final_paragraph" | "table_without_row" | "row_without_cell" | "container_without_block" | "empty_revision" | "empty_properties" | "part_without_content_type" | "relationship_target_missing" | "relationship_id_duplicate" | "comment_id_duplicate" | "marker_unpaired" | "marker_without_comment" | "reference_missing" | "reference_duplicate" | "unanchored" | "row_without_comment" | "row_missing" | "para_id_missing" | "para_id_duplicate" | "para_id_range" | "parent_missing" | "thread_cycle" | "durable_mismatch" | "part_unrelated" | "part_unreadable" | "unreferenced_note";
 
 /** A finding code with its class. */
 export type FindingInfo = {
@@ -730,6 +730,12 @@ export type OpResult = {
   index: number;
   /** With manual markup, what it struck through and underlined, in the order of the text. */
   marked?: ManualMark[];
+  /**
+   * The notes that went because the operation took out their last reference, as `Resolution::notes_removed` names them:
+   * `footnote (id 1)`. A reference leaves the document at once when the edit is untracked, and a note goes only when its
+   * reference goes.
+   */
+  notes_removed?: string[];
   /** Its name. */
   op: string;
   /** For an edit of files, the file and line it came from. */

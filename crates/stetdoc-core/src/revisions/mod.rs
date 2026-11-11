@@ -8,7 +8,7 @@
 //! **Interface.** `Compiler::{new, replace_text, set_props, insert_block, insert_block_in, delete_block,
 //! delete_block_with_mark, split_block, merge_blocks, insert_row, new_list_instance, place_markers,
 //! place_markers_beside, remove_markers, remove_markers_in_part, parts_mut, tracked,
-//! remove_unreferenced_notes, finish}`, and for compare `redline_paragraph`, `mark_inserted`, `place_deleted`,
+//! remove_unreferenced_notes, remove_notes_of_dropped_references, finish}`, and for compare `redline_paragraph`, `mark_inserted`, `place_deleted`,
 //! `set_snapshot`, `add_deleted_note`, `split_block_untracked` and `import_writer`, and `canonical::order_created` (design `compare.md`, 6.1 and 20)
 //! over a `Tx`, with `Track`,
 //! `RevStamp`, `Effect` and `Outcome`; `resolve(tx, &mut ChangeIndex, &[Step])`;

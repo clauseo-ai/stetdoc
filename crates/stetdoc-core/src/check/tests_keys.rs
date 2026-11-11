@@ -101,7 +101,8 @@ fn only_the_notes_the_design_names_are_notes() {
             "para_id_missing",
             "para_id_range",
             "parent_missing",
-            "part_unreadable"
+            "part_unreadable",
+            "unreferenced_note"
         ]
     );
 }

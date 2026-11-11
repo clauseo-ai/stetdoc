@@ -249,11 +249,11 @@ a numbered list renumbers everything after it and produces no revision, and a he
 (`4.2` to `4.3` in the text) does. Three further rules, none of which changes what an edit's offsets mean, because they replace
 characters one for one:
 
-1. **Atoms compare by identity.** `ItemKind::Object` (a drawing, picture or object), `Math` and `FieldValue` are one
+1. **Atoms compare by identity.** `ItemKind::Object` (a drawing, picture or object) and `Math` are one
    character each in the text. Compare gives each a character of the private use area (U+E000 and up) from a dictionary of
    the pair, keyed by the atom's identity: for an object, the hash of its extent, its alt text and the bytes of the media it
    names (not its `r:embed`, which differs between packages); for a text box, a hash of its text and its drawing's shape;
-   for math, a hash of its canonical XML; for a field value, its cached result. Two different pictures are two different
+   for math, a hash of its canonical XML. Two different pictures are two different
    characters, so replacing a picture is a deletion and an insertion. `NoteRef` stays one character, because the note is compared
    in its own story (4.7), and `Tab`, `LineBreak`, `PageBreak`, `ColumnBreak`, `Hyphen`, `SoftHyphen` and `Symbol` are
    their own characters already. The substitution is only in the strings the aligner and the diff see.

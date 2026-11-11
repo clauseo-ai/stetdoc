@@ -12,7 +12,7 @@
 //! the content of an untaken branch, of a text box, of an unknown element) are the upper-case
 //! tokens in `HIDDEN`.
 
-use super::tests_gen_data::{CDATA_PIECES, INSTRS, PIECES, Rng, SHOWN};
+use super::tests_gen_data::{CDATA_PIECES, INSTRS, PIECES, Rng};
 use super::*;
 
 #[derive(Clone, Copy)]
@@ -20,7 +20,6 @@ struct GField {
     code: bool,
     sep: bool,
     simple: bool,
-    shown: bool,
 }
 
 /// The state of a generation: what is open, and the three texts written so far.
@@ -259,15 +258,12 @@ impl Gen {
 
     fn simple_field(&mut self, depth: u32) -> String {
         let instr = *self.rng.pick(&INSTRS);
-        let shown = shown(instr);
         self.fields.push(GField {
             code: false,
             sep: true,
             simple: true,
-            shown,
         });
         let depth_here = self.fields.len();
-        let before = self.width;
         let mut inner = if self.rng.chance(70) {
             self.content(depth + 1)
         } else {
@@ -278,9 +274,6 @@ impl Gen {
             while self.fields.len() > depth_here && !self.fields.last().is_some_and(|f| f.simple) {
                 inner.push_str(&self.end_field());
             }
-        }
-        if self.width == before && shown {
-            self.out("\u{6}");
         }
         self.fields.pop();
         let attr = instr.replace('"', "&quot;");
@@ -307,7 +300,6 @@ impl Gen {
                     code: true,
                     sep: false,
                     simple: false,
-                    shown: shown(instr),
                 });
                 let dirty = if self.rng.chance(10) {
                     " w:dirty=\"true\""
@@ -344,15 +336,7 @@ impl Gen {
                 "<w:r><w:fldChar w:fldCharType=\"separate\"/></w:r>".to_string()
             }
             _ => {
-                if let Some(top) = self.fields.last().copied() {
-                    if !top.sep && !top.simple && top.shown {
-                        if let Some(f) = self.fields.last_mut() {
-                            f.code = false;
-                        }
-                        self.out("\u{6}");
-                    }
-                    self.fields.pop();
-                }
+                self.fields.pop();
                 "<w:r><w:fldChar w:fldCharType=\"end\"/></w:r>".to_string()
             }
         }
@@ -541,14 +525,4 @@ impl Gen {
         }
         GenBody { xml, expect }
     }
-}
-
-/// True if the instruction names a field Word shows with no stored result.
-fn shown(instr: &str) -> bool {
-    let word = instr
-        .split_whitespace()
-        .next()
-        .unwrap_or("")
-        .trim_matches('"');
-    SHOWN.contains(&word.to_ascii_uppercase().as_str())
 }

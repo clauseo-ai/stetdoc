@@ -18,20 +18,6 @@ use std::collections::{HashMap, HashSet};
 /// Nesting deeper than this is ignored with an anomaly.
 pub(super) const MAX_DEPTH: usize = 32;
 
-/// The field types Word still shows when they have no stored result (4.4). `MACROBUTTON` and
-/// `GOTOBUTTON` show text that is in their code. The rest of the fields with no result (`IF`,
-/// `REF`, `XE`, `TA` and others) show nothing.
-const DISPLAYED_WITHOUT_RESULT: [&str; 8] = [
-    "EQ",
-    "MACROBUTTON",
-    "LISTNUM",
-    "SYMBOL",
-    "PAGE",
-    "GOTOBUTTON",
-    "QUOTE",
-    "BARCODE",
-];
-
 /// The field type of an instruction: its first word in upper case.
 pub(super) fn keyword(instr: &str) -> String {
     instr
@@ -39,11 +25,6 @@ pub(super) fn keyword(instr: &str) -> String {
         .next()
         .map(|w| w.trim_matches('"').to_ascii_uppercase())
         .unwrap_or_default()
-}
-
-/// True if Word shows something for a field of this type that has no stored result.
-pub(super) fn shows_without_result(keyword: &str) -> bool {
-    DISPLAYED_WITHOUT_RESULT.contains(&keyword)
 }
 
 /// Where a field is.
@@ -182,17 +163,6 @@ impl FieldState {
                 Sep::Done(f.id)
             }
             _ => Sep::Stray,
-        }
-    }
-
-    /// Lets the innermost field show a value of its own, as if it had a result.
-    pub fn show_value(&mut self) {
-        if let Some(f) = self.stack.last_mut()
-            && f.phase == Phase::Code
-        {
-            f.phase = Phase::Result;
-            f.instr = String::new();
-            self.code = self.code.saturating_sub(1);
         }
     }
 

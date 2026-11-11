@@ -1,4 +1,4 @@
-//! Content types and relationships: reading them, and adding one element to each.
+//! Content types and relationships: reading them, adding one element to each, and removing relationships.
 //!
 //! Both parts are XML, so they go through the span tree. Reading looks at the root's child
 //! elements. Adding appends one `Override` or `Relationship` element as a new last child of the
@@ -330,6 +330,33 @@ pub(super) fn with_override(
         ],
         limits,
     )
+}
+
+/// A relationships part without the relationships whose ids are `ids`, and `None` if it has none of them. Only the removed
+/// elements leave: everything else keeps its bytes.
+pub(super) fn without_relationships(
+    name: &str,
+    part: &Bytes,
+    ids: &[String],
+    limits: &Limits,
+) -> Result<Option<Vec<u8>>, StetError> {
+    let mut tree = parse_root(name, part, "Relationships", limits)?;
+    let gone: Vec<_> = tree
+        .root()
+        .child_elements()
+        .filter(|el| {
+            el.local_name() == "Relationship" && attr(*el, "Id").is_some_and(|id| ids.contains(&id))
+        })
+        .map(|el| el.id())
+        .collect();
+    if gone.is_empty() {
+        return Ok(None);
+    }
+    let mut ed = tree.edit();
+    for el in gone {
+        ed.detach(el)?;
+    }
+    Ok(Some(tree.serialize()))
 }
 
 /// A relationships part with one relationship added.

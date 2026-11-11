@@ -664,7 +664,9 @@ pub struct OpResult { pub index: usize, pub op: String, pub changed: bool, pub o
                       pub removed_own: Vec<RemovedOwnEntry>,   // the author's own pending text, marks or rows that the operation removed outright
                       pub folded: Vec<FoldedEntry>,            // the author's own pending property changes that the operation edited in place
                       pub swallowed: Vec<i64>,                 // ids of other revisions that went with removed text
-                      pub resolution: Option<Resolution>, pub comment: Option<String>, pub warnings: Vec<Warning> }
+                      pub resolution: Option<Resolution>, pub comment: Option<String>,
+                      pub notes_removed: Vec<String>,          // notes that went with their last reference, such as "footnote (id 1)"
+                      pub warnings: Vec<Warning> }
 pub struct RemovedOwnEntry { pub kind: String, pub id: Option<i64> }          // text, mark, paragraph or row, and the id of the revision it was
 pub struct FoldedEntry { pub id: i64, pub cancelled: bool }                  // revisions' Folded: the id of the change, and whether the edit undid it
 pub struct MoveEntry { pub from: String, pub to: String, pub text: String }   // compare only
@@ -695,6 +697,7 @@ that `reconcile` removed are listed with the comment they belonged to.
 | `revisions`, `operations[i].revisions` | `revisions::changes(story, tree, Some(range))` over the touched and new blocks of the next state, one call for each cluster of neighbouring entries, kept to changes with an id that `Outcome::created` lists | `revisions` 6.1: a window is extended to whole changes. An id is attributed to the first operation whose `Effect::minted` holds it. An insertion that coalesced into the revision of an earlier operation is listed there, and its own operation lists none |
 | `Receipt.revisions` | the same, grouped by author | by construction one author, the stamp's. `AuthorRevisions::group` also groups the list of `Document::revisions`, for `check` of a file with nothing pending |
 | removals the agent must know | `Effect::removed_own`, `folded`, `swallowed` | the structured `OpResult.removed_own`, `folded` and `swallowed`, and the warnings `own_text_removed`, `property_change_folded`, `revision_removed_with_text`, so an operation that took an earlier change of the agent's away says so (`revisions` H2) |
+| `operations[i].notes_removed` | the notes that `Compiler::remove_notes_of_dropped_references` took out after the operation's calls, and those of an untracked `delete-note` | a note goes with its last reference: an untracked edit, or the removal of the author's own pending reference, takes the reference out at once and the note with it, as an accepted deletion does. The text says so after what the operation did. Left out of the JSON when empty |
 | `operations[i].resolution` | `Resolution` of the run, shown on its first operation | counts by author and kind, the refs retired (`Removed`, with the reason), the joins, the notes removed, the `revisions` warnings |
 | `comments` | `comments`'s `CommentEffect`, with the ids as `c3`, and `reconcile`'s removals | an added comment is listed with its id so the next operation can name it, which a ref cannot do within a batch (`comments-and-notes` 7). A removal by `reconcile` carries the `comment_removed` warning, which names the blocks whose markers went |
 | `retired`, `added`, `added_count` | `Committed::retired` and `minted` | `retired` holds refs of blocks that existed, so a dry run has the same list. `added` holds the refs minted and is empty for a dry run, which has only `added_count` |

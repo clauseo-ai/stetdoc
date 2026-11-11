@@ -2,7 +2,7 @@
 
 # Findings reference
 
-`stetdoc check` and the receipt of an edit report findings. There are 47 codes. A **violation** is a departure from the schema or from a Word rule, which an edit may not add: an edit that would add one is refused as `validation_failed`, and a violation that the document already had is reported and not blamed on the edit. A **note** is legal and worth saying. A code is stable once released: new codes may be added, and existing ones are never repurposed or removed outside a major version.
+`stetdoc check` and the receipt of an edit report findings. There are 48 codes. A **violation** is a departure from the schema or from a Word rule, which an edit may not add: an edit that would add one is refused as `validation_failed`, and a violation that the document already had is reported and not blamed on the edit. A **note** is legal and worth saying. A code is stable once released: new codes may be added, and existing ones are never repurposed or removed outside a major version.
 
 ## Violations
 
@@ -60,3 +60,4 @@
 | `para_id_range` | A w14:paraId at or above 0x80000000, which the schema forbids. |
 | `parent_missing` | A comment whose parent paragraph id names no comment. |
 | `part_unreadable` | A part that could not be read (encrypted, or stored with an unsupported method), so it was not checked. |
+| `unreferenced_note` | A footnote or an endnote that no reference in any story names, so Word keeps its text and shows it nowhere. A reference inside a tracked deletion counts, and the separators are never reported. An edit takes a note out with its last reference, so it makes no new one. |

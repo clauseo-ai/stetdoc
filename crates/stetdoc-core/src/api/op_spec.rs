@@ -149,7 +149,7 @@ op_specs! {
         example: "{\"op\":\"replace\",\"ref\":\"p42\",\"find\":\"shall\",\"with\":\"must\"}",
         fields: [
             ("ref", Ref, true, "The paragraph.", &[]),
-            ("with", Text, true, "The new text. A newline is a line break inside the paragraph, and a tab is written as a tab.", &[]),
+            ("with", Text, true, "The new text. A newline is a line break inside the paragraph, and a tab is written as a tab. The new text is placed piece by piece of the word-level difference, and a piece's new text goes inside a hyperlink, content control, smart tag, custom XML element, `dir` or `bdo` element, bookmark, permission range or comment range when the text it replaces (for an insertion inside the range, the range's text before it) starts inside that element or at its start and ends at its end, as typing over a selection in Word does. An insertion that replaces nothing, such as one at an empty range, goes after an element that ends there.", &[]),
             ("find", Text, false, "The text to find in the paragraph's Final text. It must match once, or `occurrence` says which match. A newline matches a line break of the paragraph.", &[]),
             ("occurrence", Number, false, "Which match of `find` to use, counted from 1.", &[]),
             ("start", Number, false, "The first character of the range, as an offset in the Final text. Not with `find`.", &[]),
@@ -165,7 +165,7 @@ op_specs! {
         example: "{\"op\":\"insert\",\"ref\":\"p42\",\"place\":\"after\",\"paragraphs\":[\"A new paragraph.\"]}",
         fields: [
             ("ref", Ref, true, "The paragraph or table the new paragraphs go next to.", &[]),
-            ("place", Choice, true, "Whether they go before or after it.", &["before", "after"]),
+            ("place", Choice, true, "Whether they go before or after it. After puts them directly after it, before any bookmark or other markup that follows, and a section break it ends stays on it. A tracked insert after the last paragraph of the body when that paragraph ends a section is refused, since the break would move: insert it untracked.", &["before", "after"]),
             ("paragraphs", List, true, "The paragraphs, in order. Each is one paragraph of text, and a newline inside one is a line break of that paragraph. In JSON an entry may be an object with a text and a style, and in block text one style applies to all.", &[]),
         ],
     }
@@ -177,7 +177,7 @@ op_specs! {
         one_of: [],
         example: "{\"op\":\"delete\",\"ref\":\"p42\"}",
         fields: [
-            ("ref", Ref, true, "The paragraph, table or first paragraph of the range.", &[]),
+            ("ref", Ref, true, "The paragraph, table or first paragraph of the range. A deletion of all of a hyperlink's text removes the hyperlink too, at once untracked and when the deletion is accepted tracked. A bookmark, permission range or content control that a deletion empties stays.", &[]),
             ("to", Ref, false, "The last paragraph of a range that spans paragraphs. Then `start` is an offset in `ref` and `end` an offset in `to`.", &[]),
             ("find", Text, false, "The text to find in the paragraph's Final text. It must match once, or `occurrence` says which match. A newline matches a line break of the paragraph.", &[]),
             ("occurrence", Number, false, "Which match of `find` to use, counted from 1.", &[]),
@@ -316,7 +316,7 @@ op_specs! {
             ("ref", Ref, true, "The row.", &[]),
             ("action", Choice, true, "Whether to insert a row next to this one or delete it.", &["insert", "delete"]),
             ("place", Choice, false, "For an insert, whether the new row goes before or after. After by default.", &["before", "after"]),
-            ("cells", List, false, "For an insert, the text of each cell, in order. A newline inside one is a line break of the cell.", &[]),
+            ("cells", List, false, "For an insert, the text of each cell, in order. A newline inside one is a line break of the cell. A cell that continues a merged cell takes \"\", since Word shows only a merge's first cell.", &[]),
         ],
     }
     Comment {

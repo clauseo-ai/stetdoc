@@ -9,6 +9,7 @@ use crate::api::files::Origin as FileOrigin;
 use crate::api::options::{Markup, OffsetUnit, Quotes};
 use crate::api::view::Warning;
 use crate::comments::CommentEffect;
+use crate::revisions::notes::RemovedNote;
 use crate::revisions::outcome::{Effect, Origin, Outcome};
 use crate::revisions::resolve::Resolution;
 use crate::revisions::stamp::RevStamp;
@@ -35,6 +36,8 @@ pub(super) struct Done {
     /// True when the operation changed the document through calls whose effects it does not hold: a comment written, a note
     /// deleted.
     pub changed: bool,
+    /// The footnotes and endnotes that went because their last reference went.
+    pub notes_removed: Vec<RemovedNote>,
 }
 
 impl Done {
@@ -118,6 +121,8 @@ pub(crate) struct OpApplied {
     pub resolution: Option<usize>,
     /// With manual markup, what it struck through and underlined.
     pub marked: Vec<Marked>,
+    /// The footnotes and endnotes that went because the operation took out their last reference.
+    pub notes_removed: Vec<RemovedNote>,
 }
 
 /// What a whole batch did.

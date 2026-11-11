@@ -200,19 +200,31 @@ mod tests_edit_comment_tables;
 #[cfg(test)]
 mod tests_edit_comments;
 #[cfg(test)]
+mod tests_edit_empty_run;
+#[cfg(test)]
+mod tests_edit_field_width;
+#[cfg(test)]
 mod tests_edit_fields;
 #[cfg(test)]
 mod tests_edit_files;
 #[cfg(test)]
 mod tests_edit_foreign;
 #[cfg(test)]
+mod tests_edit_insert_after;
+#[cfg(test)]
 mod tests_edit_manual;
+#[cfg(test)]
+mod tests_edit_merged_rows;
 #[cfg(test)]
 mod tests_edit_ops;
 #[cfg(test)]
 mod tests_edit_order;
 #[cfg(test)]
+mod tests_edit_plain;
+#[cfg(test)]
 mod tests_edit_props;
+#[cfg(test)]
+mod tests_edit_range_ends;
 #[cfg(test)]
 mod tests_edit_reject;
 #[cfg(test)]

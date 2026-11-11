@@ -1,20 +1,20 @@
-//! `insert_block` and `split_block`: new paragraphs in the two shapes Word writes (design
-//! `revisions.md`, 3.2.1).
+//! `insert_block` and `split_block`: new paragraphs in the two shapes Word writes (design `revisions.md`, 3.2.1).
 //!
-//! **Y** (Enter in a paragraph that has a successor or ends its container, and every split but one before the text): the paragraph that was there keeps
-//! its element, its text before the cut and a copy of its properties with an inserted mark. A new
-//! paragraph after it holds the rest and the **original** mark and properties. Rejecting the mark joins the
-//! two halves again, and the later paragraph's properties are the original's.
+//! **Y** (Enter in a paragraph that a paragraph follows, or that ends its container, and every split but one before the
+//! text): the paragraph that was there keeps its element, its text before the cut and a faithful copy of its properties
+//! with an inserted mark. A new paragraph after it holds the rest and the **original** mark and properties. Rejecting the
+//! mark joins the two halves again, and the later paragraph's properties are the original's. An insertion after a
+//! paragraph that ends a section is never a Y, which would move the break; at a container's end, tracked, it is refused.
 //!
-//! **X** (a paragraph that stands alone: inserted before another, cut off before a paragraph's text, or where Y cannot go): a new
-//! paragraph with an inserted mark and all its content inserted. It has a **twin**, the paragraph after it,
-//! which rejecting its mark joins it into. Its properties are a copy of the twin's, and when an edit makes
-//! them differ, a `pPrChange` aligns it to the twin, so that Word gets the same answer under either rule
-//! for which paragraph's properties survive a join (3.2.4).
+//! **X** (a paragraph that stands alone: inserted before a block, after a paragraph that ends a section, after a block
+//! that a table, a content control or the like follows, or cut off before a paragraph's text): a new paragraph with an
+//! inserted mark and all its content inserted, directly next to its anchor and before any markup that follows it. It has
+//! a **twin**, the paragraph after it, which rejecting its mark joins it into, and its properties are a copy of the
+//! twin's, so it needs no change of properties. With no paragraph after it, they are a copy of its anchor's.
 //!
 //! Untracked, a new paragraph has no marks of ours.
 
-use super::blocks::{copy_ppr, mark_of};
+use super::blocks::{copy_ppr, copy_ppr_faithful, foreign_ppr_change, mark_of, style_edit};
 use super::compiler::Compiler;
 use super::errors::{internal, invalid, readonly};
 use super::gap::{Boundary, SettleMode};
@@ -25,10 +25,10 @@ use super::props::Direct;
 use super::props_edit::find_chain;
 use super::text::{check_carriable, final_starts};
 use super::tree_ops::{create_w, insert, move_to, next_sibling_of, parent_of};
-use super::types::{InsertRun, NewParagraph, Place, PropEdit, PropElement, RunStep};
+use super::types::{InsertRun, NewParagraph, Place, PropEdit, RunStep};
 use crate::api::error::StetError;
 use crate::wordml::BlockKey;
-use crate::wordml::{BlockKind, Mode, NodeId, revision_at};
+use crate::wordml::{BlockKind, Mode, NodeId};
 use crate::xml::SpanTree;
 use std::sync::Arc;
 
@@ -106,43 +106,6 @@ fn wrapper_exit(tree: &SpanTree, block: NodeId, place: Place) -> Result<Option<N
         cur = parent;
     }
     Ok(out)
-}
-
-/// The edit that makes a paragraph's base properties exactly `w:pStyle` with this id: it sets the style
-/// and clears every other base property that the paragraph has.
-fn style_edit(tree: &SpanTree, para: NodeId, style: &str, extra: &PropEdit) -> PropEdit {
-    let ns = tree.node_ref(para).namespace().to_owned();
-    let mut clear: Vec<(String, String)> = Vec::new();
-    if let Some(ppr) = find_chain(tree, para, &["pPr"]) {
-        for c in tree.node_ref(ppr).child_elements() {
-            let name = c.local_name();
-            if matches!(name, "rPr" | "sectPr" | "pPrChange" | "pStyle") {
-                continue;
-            }
-            clear.push((c.namespace().to_owned(), name.to_owned()));
-        }
-    }
-    clear.extend(extra.clear.iter().cloned());
-    let mut set: Vec<PropElement> = vec![PropElement {
-        ns: ns.clone(),
-        local: "pStyle".to_owned(),
-        attrs: vec![(ns, "val".to_owned(), style.to_owned())],
-        children: Vec::new(),
-    }];
-    set.extend(extra.set.iter().cloned());
-    PropEdit { set, clear }
-}
-
-/// True if the paragraph's `w:pPr` holds a pending `w:pPrChange` that is not the author's.
-fn foreign_ppr_change(tree: &SpanTree, para: NodeId, author: &str) -> bool {
-    find_chain(tree, para, &["pPr"])
-        .and_then(|ppr| {
-            tree.node_ref(ppr)
-                .child_elements()
-                .find(|c| is_w(c, "pPrChange"))
-        })
-        .and_then(|c| revision_at(&c))
-        .is_some_and(|r| r.author.as_deref() != Some(author))
 }
 
 impl Compiler<'_, '_> {
@@ -267,10 +230,13 @@ impl Compiler<'_, '_> {
         };
         let anchor_mark = mark_of(self.tree_ro(&part)?, entry.node);
         let anchor_mark_clean = is_para && anchor_mark.is_clean();
+        // Y takes the original properties to the new paragraph, a section break with them, so after a paragraph that ends a
+        // section the new one is an X and the break stays put.
+        let owns_break =
+            is_para && find_chain(self.tree_ro(&part)?, entry.node, &["pPr", "sectPr"]).is_some();
         // After the last paragraph of its container (a cell, a note, a comment, the body) the Enter shape too, as Word
-        // has it: the anchor's mark is the container's end, which no rejection can remove, so a paragraph with an
-        // inserted mark of its own after it would be left empty by Word's Reject All. An inserted mark may move with
-        // the original properties to the new paragraph, which is then the one that ends the container.
+        // has it: the anchor's mark is the container's end, which no rejection can remove, so Word's Reject All would leave a
+        // paragraph with a mark of its own after it empty. An inserted mark may move with the original properties.
         let at_end = is_para
             && exit.is_none()
             && crate::wordml::ends_container(self.tree_ro(&part)?, entry.node);
@@ -278,21 +244,32 @@ impl Compiler<'_, '_> {
             && anchor_mark.move_from.is_none()
             && anchor_mark.move_to.is_none();
         let shape = match (self.tracked(), place) {
+            // At the end Y would move a section break (refused, as a merge is), and any other shape is one Reject All leaves empty.
+            (true, Place::After) if at_end => {
+                if owns_break {
+                    return Err(readonly(
+                        "this paragraph ends a section and its container, and a tracked paragraph after it would move the break onto the new paragraph. Insert it in an untracked edit (`--no-track`), or insert it before this paragraph.",
+                    ));
+                }
+                if !movable || (edit_wanted && foreign) {
+                    return Err(readonly(if movable {
+                        "the last paragraph of this container holds another author's pending change of paragraph properties, which a new paragraph after it would have to take over. Insert it without properties, or resolve that change first."
+                    } else {
+                        "the mark of the last paragraph of this container is a pending deletion or move, so nothing can follow it. Resolve that change first."
+                    }));
+                }
+                Shape::Y { anchor: entry.node }
+            }
+            // Enter in a paragraph that a paragraph follows, as Word writes it.
             (true, Place::After)
                 if is_para
                     && exit.is_none()
-                    && ((next_para.is_some() && anchor_mark_clean) || (at_end && movable))
+                    && next_para.is_some()
+                    && anchor_mark_clean
+                    && !owns_break
                     && !(edit_wanted && foreign) =>
             {
                 Shape::Y { anchor: entry.node }
-            }
-            // Where Y cannot go at the end, a paragraph of its own would be the one Reject All leaves empty.
-            (true, Place::After) if at_end => {
-                return Err(readonly(if movable {
-                    "the last paragraph of this container holds another author's pending change of paragraph properties, which a new paragraph after it would have to take over. Insert it without properties, or resolve that change first."
-                } else {
-                    "the mark of the last paragraph of this container is a pending deletion or move, so nothing can follow it. Resolve that change first."
-                }));
             }
             (_, Place::Before) => Shape::X {
                 twin: if is_para { Some(entry.node) } else { None },
@@ -304,6 +281,9 @@ impl Compiler<'_, '_> {
                 before: Some(exit.unwrap_or(entry.node)),
                 after: None,
             },
+            // Directly after the anchor, before any markup that follows it, so the anchor keeps its properties, section
+            // break included. Tracked, a paragraph that follows is the twin and the model, so the new paragraph needs no
+            // change of properties and starts the next section as it does; with none, the anchor is the model.
             (tracked, Place::After) => Shape::X {
                 twin: if tracked { next_para } else { None },
                 // Untracked there is no twin to join into, and the new paragraph follows the anchor.
@@ -314,7 +294,7 @@ impl Compiler<'_, '_> {
                 } else {
                     prev_para.or(next_para)
                 },
-                before: next.map(|e| e.0),
+                before: None,
                 after: Some(exit.unwrap_or(entry.node)),
             },
         };
@@ -332,7 +312,7 @@ impl Compiler<'_, '_> {
         };
         // A paragraph made with no model was built from nothing, and says so with an empty list.
         let key = BlockKey::new(part.clone(), new);
-        // The new paragraph sits right before the block that followed its anchor, or right before the anchor.
+        // The new paragraph sits right after its anchor, so the block that followed the anchor follows it, or right before the anchor.
         // Before a wrapper, the anchor inside it is in another parent, so nothing follows in the same one.
         let follows = match place {
             Place::After => next,
@@ -366,11 +346,13 @@ impl Compiler<'_, '_> {
         spec: &NewParagraph,
     ) -> Result<NodeId, StetError> {
         let p2 = self.new_paragraph_element(part, anchor)?;
+        let tracked = self.tracked();
         let tree = self.tx.part_mut(part)?;
         // The properties: the original goes to the second paragraph, a copy stays.
+        // The copy is faithful: the children it keeps are the original's, empty ones too (canonical order aside).
         let ppr = find_chain(tree, anchor, &["pPr"]);
         if let Some(ppr) = ppr {
-            let copy = copy_ppr(tree, ppr)?;
+            let copy = copy_ppr_faithful(tree, ppr, tracked)?;
             super::tree_ops::detach(tree, ppr)?;
             insert(tree, p2, None, ppr)?;
             if let Some(copy) = copy {
@@ -439,8 +421,8 @@ impl Compiler<'_, '_> {
         })
     }
 
-    /// A self-contained paragraph with a copy of the model's properties, placed before `before`, or after
-    /// `after` when `before` is `None`.
+    /// A self-contained paragraph with a copy of the model's properties, placed before `before`, or directly
+    /// after `after` when `before` is `None`.
     fn make_x(
         &mut self,
         part: &Arc<str>,

@@ -3,12 +3,14 @@ adeu:shared/cross_platform_tests/03_libreoffice_review_comments/input.docx	para_
 adeu:shared/cross_platform_tests/08_agent_nested_revisions/input.docx	para_id_missing	2
 adeu:shared/cross_platform_tests/08_agent_nested_revisions/input.docx	schema_non_canonical_order	1
 adeu:shared/cross_platform_tests/08_agent_nested_revisions/input.docx	schema_out_of_order	1
+aspose-words-net:Examples/Data/Corrupted footnotes.docx	unreferenced_note	1
 betteroffice:crates/betteroffice-docx/tests/corpus/fixtures/wordprocessingml-comprehensive.docx	para_id_missing	2
 betteroffice:crates/docx-edit/tests/fixtures/structured-export/principal.docx	deltext_outside_deletion	1
 betteroffice:crates/docx-edit/tests/fixtures/structured-export/principal.docx	schema_missing_child	1
 betteroffice:crates/docx-edit/tests/fixtures/structured-export/principal.docx	schema_out_of_order	2
 betteroffice:crates/docx-edit/tests/fixtures/structured-export/principal.docx	schema_unknown_element	1
 betteroffice:crates/docx-edit/tests/fixtures/structured-export/principal.docx	unanchored	1
+betteroffice:crates/docx-edit/tests/fixtures/structured-export/principal.docx	unreferenced_note	1
 casualoffice-docs:docx-editor/e2e/fixtures/docx-editor-numbering.docx	empty_properties	4
 casualoffice-docs:docx-editor/e2e/fixtures/docx-editor-numbering.docx	schema_invalid_attribute_value	9
 casualoffice-docs:docx-editor/e2e/fixtures/titlePg-header-footer.docx	empty_properties	13

@@ -1,7 +1,8 @@
 //! Resolving rows and cells (design `revisions.md`, 3B and 3.4). Accepting a deleted row or rejecting an
 //! inserted one removes the row, and the refs of what was in it go with the reason of the change. A cell
 //! that is removed because it was deleted widens the nearest live cell before it, so that the row still
-//! covers the grid. A table left with no row is removed.
+//! covers the grid. A table left with no row is removed. A row removed with the start of a vertical merge, on accept
+//! or reject, makes the continuation below it the new start (`merge_rows.rs`).
 
 use super::cleanup::{is_attached, prune_from, remove_hoisting};
 use super::names::{is_w, w_attr};
@@ -81,6 +82,12 @@ impl Engine<'_, '_> {
         let wrapper = table
             .and_then(|t| child_toward(tree, t, row))
             .filter(|w| *w != row);
+        // A row that goes with the start of a vertical merge, by an accepted deletion or a rejected insertion, moves
+        // the start to the row below. A row that stetdoc inserted never holds a start from the source (a new row
+        // continues a merge or is plain), so a rejection that gives back the source never moves one.
+        if let Some(t) = table {
+            super::merge_rows::promote_below(tree, t, row)?;
+        }
         let blocks = blocks_within(tree, row);
         let (to, swallowed) = remove_hoisting(tree, row)?;
         self.swallowed.extend(swallowed);

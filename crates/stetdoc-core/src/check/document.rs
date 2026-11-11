@@ -8,7 +8,7 @@ use super::keys::schema_code;
 use super::report::{Builder, schema_message};
 use super::rules::scan_part;
 use super::units::{Layout, layout_of};
-use super::{audit, fields, prefixes};
+use super::{audit, fields, notes, prefixes};
 use crate::api::check::{CheckReport, Class, Finding};
 use crate::api::error::StetError;
 use crate::schema::{PartKind, Report, is_unit_boundary, unit_root, validate_part};
@@ -240,6 +240,23 @@ pub(crate) fn document(parts: &PartsView<'_>) -> CheckReport {
             block: None,
             message: found.message,
         });
+    }
+    match notes::unreferenced(parts) {
+        Ok(found) => {
+            for (part, found) in found {
+                builder.count(found.code, 1);
+                if builder.has_room_for(found.code) {
+                    builder.list(Finding {
+                        code: found.code,
+                        class: found.code.class(),
+                        part: part.to_string(),
+                        block: None,
+                        message: found.message,
+                    });
+                }
+            }
+        }
+        Err(why) => builder.unreadable("the notes parts", &why),
     }
     match audit::audit_of(parts, &list.parts) {
         Ok(audited) => {

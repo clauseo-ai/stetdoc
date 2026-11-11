@@ -57,6 +57,12 @@ Each of these was decided in a design, with the evidence there.
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
+- **An insertion after a paragraph goes directly after it**, before any bookmark, permission range or other markup that
+  follows, and **a section break stays on that paragraph**. Word's Enter shape moves the break onto the new paragraph, so
+  after a paragraph that ends a section stetdoc writes a self-contained new paragraph instead, with the next paragraph's
+  properties, at the start of the next section. After the last paragraph of a container Word's shape is needed for Reject
+  All, so **a tracked insertion after a body's last paragraph that ends a section is refused** (`readonly_region`). An
+  untracked one keeps the break where it was. See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
 - **A section break added with `set` is untracked only**, because a `w:pPrChange` cannot hold it. A tracked attempt is
   `invalid_payload`. See [document and ops 2.1](docs/design/document-and-ops.md#21-the-set).
 - **A tracked deletion of an equation that already holds a tracked deletion is refused**, because Word writes a form for it
@@ -96,6 +102,10 @@ Each of these was decided in a design, with the evidence there.
   a note whose reference is a pending deletion, and the `Original` view one whose reference is a pending insertion. A note's
   id (`fn3`), which refs and `delete-note` use, counts every reference and is the same in every view; the two views add the
   number Word shows as its mark once their changes are resolved, when that is another (`{footnote 3 mark=2}`, `"mark"`).
+  An untracked edit (`--no-track`) that takes out a note's last reference, by a replace, a delete or the removal of a row,
+  takes the note out with it, as accepting the deletion would, and the operation's `notes_removed` in the receipt names it.
+  `check` reports a note that no reference in any story names as `unreferenced_note`, a note and not a violation, so a
+  document that already has one can still be edited.
 - **Quotes typed into a paragraph follow its convention**, curly or straight, and the receipt says so. `--quotes as-typed`
   keeps them as typed. See [document and ops 2.8](docs/design/document-and-ops.md#28-quotes).
 

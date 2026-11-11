@@ -316,7 +316,7 @@ op_specs! {
             ("ref", Ref, true, "The row.", &[]),
             ("action", Choice, true, "Whether to insert a row next to this one or delete it.", &["insert", "delete"]),
             ("place", Choice, false, "For an insert, whether the new row goes before or after. After by default.", &["before", "after"]),
-            ("cells", List, false, "For an insert, the text of each cell, in order. A newline inside one is a line break of the cell.", &[]),
+            ("cells", List, false, "For an insert, the text of each cell, in order. A newline inside one is a line break of the cell. A cell that continues a merged cell takes \"\", since Word shows only a merge's first cell.", &[]),
         ],
     }
     Comment {

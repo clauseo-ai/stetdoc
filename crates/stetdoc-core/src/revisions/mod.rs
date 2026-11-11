@@ -84,6 +84,7 @@ mod keep;
 pub(crate) mod links;
 mod lists;
 mod markers;
+mod merge_rows;
 mod moves;
 mod names;
 pub(crate) mod notes;

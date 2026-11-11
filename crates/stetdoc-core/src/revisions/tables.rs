@@ -5,6 +5,7 @@
 //! an insertion; there is no `w:cellIns`, as in Word's own output. A deleted row has `w:trPr/w:del` and
 //! every paragraph of every cell deleted with its mark, the last of a cell included, because the row goes
 //! as a whole. A row that is the author's own insertion with content that is all hers is removed outright.
+//! What a new or removed row does to merged cells around it is in `merge_rows.rs`.
 
 use super::blocks::{TEXT_ID, copy_ppr};
 use super::compiler::Compiler;
@@ -14,13 +15,13 @@ use super::insert_run::check_new_text;
 use super::names::{is_w, is_word_ns, w_attr, w_child};
 use super::outcome::{Effect, Origin, RemovedKind, RemovedOwn};
 use super::props::Direct;
-use super::props_edit::{apply_edit, ensure_chain, find_chain, place};
+use super::props_edit::{ensure_chain, find_chain, place};
 use super::text::check_carriable;
 use super::tree_ops::{create_w, detach, insert, next_sibling_of, parent_of};
-use super::types::{Place, PropEdit, PropElement};
+use super::types::Place;
 use crate::api::error::StetError;
 use crate::wordml::BlockKey;
-use crate::wordml::{Block, Cell, IdKind, NodeId, Row, Table, VMerge, revision_at};
+use crate::wordml::{Block, Cell, IdKind, NodeId, Row, Table, revision_at};
 use crate::xml::SpanTree;
 use std::sync::Arc;
 
@@ -121,13 +122,12 @@ impl Compiler<'_, '_> {
         cells: &[String],
     ) -> Result<(), StetError> {
         let part = anchor.part().clone();
-        let (table, n_cells, vmerge, models) = {
+        let (table, n_cells, plan, models) = {
             let tree = self.tree_ro(&part)?;
             let row = Row::new(tree, anchor.node())
                 .ok_or_else(|| cross_block("the anchor of a new row must be a row"))?;
             let table =
                 table_of(tree, anchor.node()).ok_or_else(|| internal("a row has no table"))?;
-            let vm: Vec<VMerge> = row.cells().map(|c| c.v_merge()).collect();
             let models: Vec<Option<NodeId>> = row
                 .cells()
                 .map(|c| {
@@ -137,7 +137,8 @@ impl Compiler<'_, '_> {
                     })
                 })
                 .collect();
-            (table, vm.len(), vm, models)
+            let plan = super::merge_rows::plan_new_cells(tree, table, anchor.node(), side);
+            (table, models.len(), plan, models)
         };
         if cells.len() > n_cells {
             return Err(invalid(format!(
@@ -149,6 +150,7 @@ impl Compiler<'_, '_> {
             check_carriable(t)?;
             check_new_text(t)?;
         }
+        super::merge_rows::refuse_hidden_text(&plan, cells)?;
         // The copy, with every cell emptied but its properties.
         let tr_ids = match super::blocks::para_id_ns(self.tree_ro(&part)?, anchor.node()) {
             Some(ns) => Some((ns, self.tx.mint_id(IdKind::ParaId, &part)?)),
@@ -216,27 +218,9 @@ impl Compiler<'_, '_> {
             }
             if let Some(tcpr) = find_chain(tree, tc, &["tcPr"]) {
                 strip_all(tree, tcpr)?;
-                let state = vmerge.get(i).copied().unwrap_or(VMerge::None);
-                let ns = tree.node_ref(tc).namespace().to_owned();
-                let vm = PropElement {
-                    ns: ns.clone(),
-                    local: "vMerge".to_owned(),
-                    attrs: Vec::new(),
-                    children: Vec::new(),
-                };
-                let edit = match (side, state) {
-                    (Place::After, VMerge::Restart | VMerge::Continue) => Some(PropEdit {
-                        set: vec![vm],
-                        clear: Vec::new(),
-                    }),
-                    (Place::Before, VMerge::Restart) => Some(PropEdit {
-                        set: Vec::new(),
-                        clear: vec![(ns, "vMerge".to_owned())],
-                    }),
-                    _ => None,
-                };
-                if let Some(edit) = edit {
-                    apply_edit(tree, tcpr, &edit)?;
+                if let Some(cell) = plan.get(i) {
+                    let ns = tree.node_ref(tc).namespace().to_owned();
+                    super::merge_rows::apply_new_merge(tree, tcpr, &ns, cell.merge)?;
                 }
             }
         }
@@ -439,6 +423,9 @@ impl Compiler<'_, '_> {
             // hoists them (design 3.6.5), so that no start loses its end and a comment keeps its anchor.
             self.dropped_reference |= super::notes::holds_note_reference(self.tree_ro(part)?, row);
             let tree = self.tx.part_mut(part)?;
+            if let Some(t) = table_of(tree, row) {
+                super::merge_rows::promote_below(tree, t, row)?;
+            }
             let wrapper = table_of(tree, row)
                 .and_then(|t| super::resolve_table::child_toward(tree, t, row))
                 .filter(|w| *w != row);

@@ -214,6 +214,8 @@ mod tests_edit_insert_after;
 #[cfg(test)]
 mod tests_edit_manual;
 #[cfg(test)]
+mod tests_edit_merged_rows;
+#[cfg(test)]
 mod tests_edit_ops;
 #[cfg(test)]
 mod tests_edit_order;

@@ -263,7 +263,7 @@ Tracked as revisions: yes. Reversible by rejecting what it wrote: yes.
 | `ref` | ref | yes | The row. |
 | `action` | choice | yes | Whether to insert a row next to this one or delete it. One of `insert`, `delete`. |
 | `place` | choice | no | For an insert, whether the new row goes before or after. After by default. One of `before`, `after`. |
-| `cells` | list | no | For an insert, the text of each cell, in order. A newline inside one is a line break of the cell. |
+| `cells` | list | no | For an insert, the text of each cell, in order. A newline inside one is a line break of the cell. A cell that continues a merged cell takes "", since Word shows only a merge's first cell. |
 
 ```json
 {"op":"row","ref":"r17","action":"delete"}

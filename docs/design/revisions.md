@@ -911,16 +911,25 @@ The comparison is of **base properties**: the paragraph's `w:pPr` children witho
   inserted, deleted or formatted does not borrow their revisions. Each cell holds one paragraph with the text from
   `cells` (empty when there is none). The row gets `trPr/ins`. Each paragraph gets the mark `ins` and its content in a
   `w:ins`. There is no `cellIns` (`FA/007`, `RP010`). `gridSpan` is kept. A **vertical merge** needs care, because a copied
-  `restart` would begin a second merge in the middle of the first. After the anchor, the new cell is `w:vMerge` with no
-  value (continue), whether the anchor's cell is `restart` or `continue`. Before the anchor, a new cell above a `restart`
-  has no `vMerge` and the anchor keeps its `restart`, and above a `continue` it is `continue`. A nested table in the
+  `restart` would begin a second merge in the middle of the first, and it is found by grid column (`gridBefore` plus the
+  spans before the cell), never by cell index (`merge_rows.rs`). The new cell continues the merge only inside it, as
+  Word's Insert Rows does: after the anchor it is `w:vMerge` with no value (continue) when the next row's cell in the same
+  grid column continues the merge, and has no `vMerge` when the anchor's row is the merge's last or the table's last.
+  Before the anchor, a new cell above a `restart` has no `vMerge` and the anchor keeps its `restart`, and above a
+  `continue` it is `continue`. A new cell that continues a merge, vertical or a legacy `w:hMerge` copied from the anchor,
+  takes no text, because Word shows only a merge's first cell: a non-empty `cells` entry for it is `invalid_payload`,
+  naming the column and saying to pass `""`. A nested table in the
   anchor is not copied. `w14:paraId` on the row and its paragraphs is new if the anchor has one. The table is touched,
   because its list of rows changed.
 - **Delete a row** is `delete_block(row)`. It gives `trPr/del` to the row, deletes each cell's paragraphs as in 3.2.2
   but **with the mark deleted for the last paragraph of each cell too** (`FA/006`, `RP009`: the row goes away as a whole,
   so there is nothing to keep a cell valid), and recurses into nested tables. A row that is our own pending
   insertion and whose content is ours is removed outright. A row that another author inserted gets our `del` on
-  `trPr` after their `ins`. `delete_block(table)` does this for every row.
+  `trPr` after their `ins`. `delete_block(table)` does this for every row. When a row that holds a vertical merge's
+  `restart` goes, the next row's continuation cell in the same grid column becomes `w:vMerge w:val="restart"`, as Word's
+  Delete Rows does, and the old start's content goes with its row: at once when the row is removed outright, and when the
+  row goes on accept or reject when it is tracked, so the tracked state keeps the merge as it was. A row stetdoc inserts
+  never holds a `restart` from the source, so rejecting every change still gives the source back.
 - **Cells.** `cellIns`, `cellDel` and `cellMerge` are read, accepted and rejected. They are not written, since
   no operation inserts or deletes a cell. `set_props(Cell)` writes `tcPrChange`.
 - **Accept and reject of rows** remove the row, so the audit retires its refs. A table left with no row is removed.
@@ -1354,8 +1363,9 @@ For each part with selected elements, over its `SpanTree` from `Tx::part_mut` (t
    paragraph reads and is written as it was before the split. Walking from the end makes a run of consecutive marks collapse
    into the first paragraph of the run, which ends with the properties of the last, as OpenXmlPowerTools' grouping does.
 3. **Rows and cells.** Rows and cells that are removed go, and an accepted `cellDel` widens the cell before it (3B).
-   A cell left with no block gets `<w:p/>`, a table with no row is removed, and a `w:vMerge` is converted for an accepted
-   `cellMerge`. **As built.** A cell gets the paragraph only when what it held was removed: a paragraph, row or table
+   A cell left with no block gets `<w:p/>`, a table with no row is removed, a `w:vMerge` is converted for an accepted
+   `cellMerge`, and a row removed with a vertical merge's `restart`, by an accepted deletion or a rejected insertion,
+   makes the continuation below it the new `restart` (3.4). **As built.** A cell gets the paragraph only when what it held was removed: a paragraph, row or table
    that changed inside it leaves its last block as it was, so a cell that already ended with a table (LibreOffice writes
    them, `tdf153891`) gets none on accept, while a reject of a paragraph inserted after such a table gives the cell the
    paragraph W9 asks for. A story (the body, a note, a comment, a header or a footer) that an accept leaves with no block
@@ -1758,6 +1768,7 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `markers.rs` | `place_markers`, `place_markers_beside`, `remove_markers`, `remove_markers_in_part` | 400 |
 | `blocks.rs`, `blocks_insert.rs`, `blocks_delete.rs`, `join.rs` | what the block primitives share; `insert_block` and `split_block` (shapes X and Y); `delete_block`, `delete_block_with_mark` and `merge_blocks`; the join of two paragraphs | 1,440 |
 | `tables.rs` | `insert_row` (the copy and the vertical merge), the row side of `delete_block`, nested tables | 460 |
+| `merge_rows.rs` | merged cells around a row that is inserted or removed: the plan of a new row's merges, the refusal of hidden text, the moved start | 200 |
 | `index.rs` | `ChangeIndex`: id to nodes, built at the first `resolve` of a batch and extended after each compiler call | 120 |
 | `changes.rs`, `changes_text.rs`, `changes_rows.rs`, `changes_marks.rs`, `moves.rs` | `changes()` and `Change`: the grouping of 6.1, over a window of entries; the atoms and text groups; rows; paragraphs and moves | 1,350 |
 | `resolve.rs`, `resolve_select.rs` | `resolve`: steps, selection (by id through the index, by window), closure, the driver, the report | 420 |

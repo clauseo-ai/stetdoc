@@ -1,5 +1,5 @@
-//! Untracked edits through `Document::edit` take a note out with its reference, as accepting a tracked deletion of it does
-//! (issue 15).
+//! Untracked edits through `Document::edit` follow the same read-only rules as tracked ones, and take a note out with its
+//! reference (issues 15 and 16). Untracked changes only whether the change is tracked, never what an edit may touch.
 
 use super::tests_edit::*;
 use super::*;
@@ -7,6 +7,22 @@ use crate::api::edit::Edit;
 use crate::api::receipt::Receipt;
 use stetdoc_testkit::fixtures::parts::{self, DECL, NS_W};
 use stetdoc_testkit::fixtures::zip::{Entry, Zip};
+
+/// `Before {DATE "2026"} after`, a complex field between two runs of text, then a plain paragraph.
+fn with_field() -> Document {
+    let body = concat!(
+        r#"<w:p><w:r><w:t xml:space="preserve">Before </w:t></w:r><w:r><w:fldChar w:fldCharType="begin"/></w:r>"#,
+        r#"<w:r><w:instrText xml:space="preserve"> DATE </w:instrText></w:r><w:r><w:fldChar w:fldCharType="separate"/></w:r>"#,
+        r#"<w:r><w:t>2026</w:t></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r><w:r><w:t xml:space="preserve"> after</w:t></w:r></w:p>"#,
+        r#"<w:p><w:r><w:t>Plain paragraph.</w:t></w:r></w:p>"#,
+    );
+    let xml = parts::Doc::new().body(body).bytes();
+    Document::open(
+        Zip::new(parts::entries_doc(&xml)).build(),
+        &OpenOptions::default(),
+    )
+    .unwrap()
+}
 
 /// Runs `ops` on `doc`, tracked or not.
 fn edit(doc: &mut Document, ops: &str, tracked: bool) -> Result<Receipt, StetError> {
@@ -19,10 +35,80 @@ fn edit(doc: &mut Document, ops: &str, tracked: bool) -> Result<Receipt, StetErr
     doc.edit(e)
 }
 
+/// The batch is refused as `readonly_region` in both modes, and the document is as it was.
+fn refused_both_ways(fresh: fn() -> Document, ops: &str) {
+    let before = fresh().save().unwrap().bytes;
+    for tracked in [true, false] {
+        let mut doc = fresh();
+        let e = edit(&mut doc, ops, tracked)
+            .err()
+            .unwrap_or_else(|| panic!("{ops} (tracked: {tracked}) was applied"));
+        assert_eq!(
+            e.code(),
+            ErrorCode::ReadonlyRegion,
+            "{ops} (tracked: {tracked}): {e}"
+        );
+        assert_eq!(
+            doc.save().unwrap().bytes,
+            before,
+            "{ops} (tracked: {tracked})"
+        );
+    }
+}
+
 fn part_xml(doc: &Document, name: &str) -> String {
     let view = doc.state.parts();
     let id = view.id(name).unwrap();
     String::from_utf8(view.tree(id).unwrap().serialize()).unwrap()
+}
+
+#[test]
+fn an_untracked_replace_of_a_field_result_is_refused_as_tracked_is() {
+    refused_both_ways(
+        with_field,
+        r#"{"op":"replace","ref":"p1","find":"2026","with":"2027"}"#,
+    );
+    // Text typed inside the result, and part of the result deleted, are refused in both modes too.
+    refused_both_ways(
+        with_field,
+        r#"{"op":"replace","ref":"p1","start":9,"end":9,"with":"X"}"#,
+    );
+    refused_both_ways(
+        with_field,
+        r#"{"op":"delete","ref":"p1","start":8,"end":10}"#,
+    );
+}
+
+#[test]
+fn an_untracked_edit_beside_a_field_or_of_the_whole_field_does_what_tracked_does() {
+    // The text around the field is edited in place.
+    let mut doc = with_field();
+    edit(
+        &mut doc,
+        r#"{"op":"replace","ref":"p1","find":"Before","with":"Then"}"#,
+        false,
+    )
+    .unwrap();
+    assert_eq!(final_text(&doc, "p1"), "Then 2026 after");
+    // Deleting all of the result deletes the field whole, in both modes, and leaves no empty field behind.
+    for tracked in [true, false] {
+        let mut doc = with_field();
+        edit(
+            &mut doc,
+            r#"{"op":"delete","ref":"p1","find":"2026"}"#,
+            tracked,
+        )
+        .unwrap();
+        assert_eq!(
+            final_text(&doc, "p1"),
+            "Before  after",
+            "tracked: {tracked}"
+        );
+        assert!(doc.check().ok, "{:?}", doc.check());
+        if !tracked {
+            assert!(!part_xml(&doc, "word/document.xml").contains("fldChar"));
+        }
+    }
 }
 
 const NS_R: &str = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";

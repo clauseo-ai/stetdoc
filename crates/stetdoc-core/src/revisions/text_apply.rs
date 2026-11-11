@@ -10,7 +10,7 @@ use super::names::is_w;
 use super::text::Piece;
 use super::tree_ops::{detach, parent_of, rpr_of};
 use crate::api::error::StetError;
-use crate::wordml::{ItemKind, Mode, NodeId};
+use crate::wordml::{ItemKind, Mode, NO_FIELD, NodeId};
 use crate::xml::NodeKind;
 
 impl Compiler<'_, '_> {
@@ -107,7 +107,10 @@ impl Compiler<'_, '_> {
     }
 
     /// Untracked, an edit that lies inside one text node is done in the node, so that the runs of the
-    /// paragraph stay as they were. Returns false when the edit is not that simple.
+    /// paragraph stay as they were. Returns false when the edit is not that simple. Text in a field is never
+    /// that simple: the edit takes the path a tracked edit takes, which widens a deletion to the whole field
+    /// and refuses new text inside a field's result, so that untracked changes only whether the change is
+    /// tracked and never what is read-only.
     fn untracked_in_place(
         &mut self,
         p: &ParaView,
@@ -128,7 +131,7 @@ impl Compiler<'_, '_> {
             let Some(item) = map.items().get(span.item) else {
                 return Ok(false);
             };
-            if item.kind != ItemKind::Text {
+            if item.kind != ItemKind::Text || item.field != NO_FIELD {
                 return Ok(false);
             }
             (span.node, span.start as usize, span.end as usize)
@@ -142,7 +145,7 @@ impl Compiler<'_, '_> {
             let Some(item) = map.items().get(l) else {
                 return Ok(false);
             };
-            if l != r || item.kind != ItemKind::Text {
+            if l != r || item.kind != ItemKind::Text || item.field != NO_FIELD {
                 return Ok(false);
             }
             let at = item.from as usize + (piece.start - starts.get(l).copied().unwrap_or(0));

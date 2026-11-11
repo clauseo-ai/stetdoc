@@ -1952,7 +1952,8 @@ not, or where it settled something the design left open. Each was found by a tes
    exactly `{pStyle}`. The Y shape writes a `pPrChange` with the original snapshot when the style differs from the
    paragraph it splits. The X shape writes none when it has no twin, and aligns to the twin when it has one.
 5. **`new_list_instance(num_id, ilvl, restart_at)`** takes the level, which a restart override names.
-6. **Untracked edits** that stay inside one run are made in place and write no wrapper (`untracked_in_place`).
+6. **Untracked edits** that stay inside one run, outside any field, are made in place and write no wrapper (`untracked_in_place`).
+   Text in a field takes the path of a tracked edit, so a field's result is read-only untracked too (issue 16).
 7. **Carve** leaves a run in fragments when it removes the author's own text. `normalize` merges them, and so does
    the next edit that touches them.
 8. **Merging.** A tracked `merge_blocks` declares nothing, so `ops` resolves refs per call: untracked, the second merge

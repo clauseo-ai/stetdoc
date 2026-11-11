@@ -22,6 +22,8 @@
 //! - Another author's pending change is never rewritten or hidden: a tracked edit records what it does to it or
 //!   is refused, and an untracked edit that would reach into it is `readonly_region` (`foreign.rs`). Untracked
 //!   means the author's own changes go untracked (`Track::UntrackedBy`).
+//! - Untracked changes only whether a change is tracked, never what is read-only: an untracked edit is refused
+//!   wherever a tracked one is (a field's result, a locked control, a deleted paragraph), by the same checks.
 //! - New revision ids come from `Tx::next_annotation_id`. A date is `YYYY-MM-DDTHH:MM:SSZ`, the wall-clock
 //!   time of the date the caller gave, validated and never converted. No `w:rsid*` attribute is added,
 //!   removed or rewritten.

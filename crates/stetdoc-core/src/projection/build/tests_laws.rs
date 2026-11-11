@@ -9,7 +9,7 @@ use crate::projection::formats::registry;
 use crate::projection::model::*;
 use crate::refs::BlockRef;
 use crate::state::State;
-use crate::wordml::{BlockKind, ItemKind, Paragraph as WPara, StoryKind};
+use crate::wordml::{BlockKind, Paragraph as WPara, StoryKind};
 use std::collections::HashMap;
 
 /// The characters that stand for atoms in the text map, which a model shows in its own way.
@@ -109,6 +109,20 @@ fn entries_of(state: &State) -> Entries {
     Entries { by_ref, total }
 }
 
+/// True if the paragraph holds a `MACROBUTTON` or `GOTOBUTTON` that begins here with no `separate` and no result,
+/// the one field whose view text is not its result: the label the view shows comes from the field code and has no
+/// characters in the map, so M1's text comparison cannot hold for it. These are the paragraphs that the skip of the former
+/// `FieldValue` atom covered for these two instructions, and no more. The width check still runs on them.
+fn shows_its_code(map: &crate::wordml::TextMap) -> bool {
+    map.fields().iter().any(|f| {
+        let word = f.instr.split_whitespace().next().unwrap_or_default();
+        f.begins_here
+            && f.separate.is_none()
+            && (word.eq_ignore_ascii_case("MACROBUTTON") || word.eq_ignore_ascii_case("GOTOBUTTON"))
+            && !map.items().iter().any(|i| i.field == f.id && i.len > 0)
+    })
+}
+
 /// M1: the text of every paragraph of the model is the text of its map, in each mode, and the width of
 /// what the model shows is the number of characters in `Final`.
 fn m1(state: &State, mode: Mode, m: &Projection, e: &Entries) -> usize {
@@ -121,14 +135,13 @@ fn m1(state: &State, mode: Mode, m: &Projection, e: &Entries) -> usize {
         let tree = parts.tree(part).unwrap();
         let wp: WPara<'_> = story.paragraph(tree, i).unwrap();
         let map = wp.map();
-        if map.items().iter().any(|it| it.kind == ItemKind::FieldValue) {
-            continue;
+        if !shows_its_code(&map) {
+            assert_eq!(
+                strip(&flatten(&par.inlines)),
+                strip(&map.text(mode)),
+                "M1 text of {r} in {mode:?}"
+            );
         }
-        assert_eq!(
-            strip(&flatten(&par.inlines)),
-            strip(&map.text(mode)),
-            "M1 text of {r} in {mode:?}"
-        );
         if mode != Mode::Original && par.flags.readonly != Some(ReadOnly::DeletedBlock) {
             assert_eq!(
                 width_of(&par.inlines) as usize,
@@ -162,9 +175,6 @@ fn m1_slots(state: &State, m: &Projection, e: &Entries) -> usize {
             let tree = parts.tree(part).unwrap();
             let wp: WPara<'_> = story.paragraph(tree, i).unwrap();
             let map = wp.map();
-            if map.items().iter().any(|it| it.kind == ItemKind::FieldValue) {
-                continue;
-            }
             let text: Vec<char> = map.text(Mode::Final).chars().collect();
             let mut start = 0usize;
             for (j, slot) in block.texts.iter().enumerate() {

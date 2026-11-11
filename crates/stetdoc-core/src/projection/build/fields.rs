@@ -38,7 +38,6 @@ impl<'a> StoryCx<'a> {
         let mut width = 0u32;
         let (mut opens, mut closes, mut shown) = (false, false, false);
         let mut first: Option<usize> = None;
-        let mut value = false;
         let mut comment_marks: Vec<usize> = Vec::new();
         for (k, it) in at.items.iter().enumerate() {
             let in_mode = it.vis.in_mode(self.mode);
@@ -48,13 +47,6 @@ impl<'a> StoryCx<'a> {
                 ItemKind::FieldBegin if it.field == at.outer => opens = true,
                 ItemKind::FieldEnd if it.field == at.outer => closes = true,
                 ItemKind::CommentStart | ItemKind::CommentEnd => comment_marks.push(k),
-                ItemKind::FieldValue => {
-                    value = true;
-                    first.get_or_insert(k);
-                    if in_final {
-                        width += 1;
-                    }
-                }
                 kind if kind.is_mark() => {}
                 kind => {
                     first.get_or_insert(k);
@@ -70,8 +62,12 @@ impl<'a> StoryCx<'a> {
         if !shown {
             return;
         }
-        if value {
-            text = info.display_text().unwrap_or_default();
+        if info.separate.is_none()
+            && text.is_empty()
+            && let Some(shown) = info.display_text()
+        {
+            // a `MACROBUTTON` or `GOTOBUTTON` with no stored result shows the text in its code
+            text = shown;
         }
         let ctx = at
             .items

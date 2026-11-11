@@ -60,7 +60,7 @@ fn names_of(kind: ItemKind) -> &'static [&'static str] {
             "yearShort",
             "yearLong",
         ],
-        FieldValue | FieldBegin | FieldEnd => &["fldChar", "fldSimple"],
+        FieldBegin | FieldEnd => &["fldChar", "fldSimple"],
         FieldSeparate => &["fldChar"],
         BookmarkStart => &["bookmarkStart"],
         BookmarkEnd => &["bookmarkEnd"],
@@ -86,7 +86,7 @@ pub(super) fn check_items(tree: &SpanTree, p: NodeId, m: &TextMap) {
         let (first, end) = *pos
             .get(&item.node)
             .unwrap_or_else(|| panic!("{item:?} is outside the paragraph"));
-        // a field value that field code demoted to a mark keeps the element, so it exits with it
+        // every item of a `w:fldSimple` but its begin is keyed to the element's end, so it exits with it
         let exits =
             node.is_element() && is_w(&node, "fldSimple") && item.kind != ItemKind::FieldBegin;
         let key = if exits { end } else { first };
@@ -425,7 +425,6 @@ fn the_generator_reaches_every_shape_it_is_meant_to() {
         ItemKind::NoteRef,
         ItemKind::Math,
         ItemKind::Auto,
-        ItemKind::FieldValue,
         ItemKind::BookmarkStart,
         ItemKind::BookmarkEnd,
         ItemKind::CommentStart,

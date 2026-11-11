@@ -350,7 +350,7 @@ pub struct RevTag { pub id: i64, pub author: u32 /* index into Head.authors */, 
   characters of `Text`, as wordml's text model makes them (4.1 of that design), because `replace` text may
   contain a tab or a line break (revisions 2.2). A page break and a column break are atoms, because `replace`
   text may not contain them. So is anything with no characters of its own: a drawing, a note reference, an
-  equation, a page number, a field with no stored result that Word still shows.
+  equation, a page number.
 - **Revisions nest as the XML does.** `Rev` wraps inlines, and a deletion inside another author's insertion is a
   `Rev` inside a `Rev`. In `Final` no `Del` or `MoveFrom` is present, in `Original` no `Ins` or `MoveTo`, and in
   `Redline` everything is. `RevTag.id` is the `w:id` of the revision element, which `accept` and `reject` select
@@ -533,7 +533,7 @@ staged state of a dry run. The steps:
    its result and the fields nested in either. The result is one string (an atom inside it takes one character of
    `width` and none of `text`), `width` counts the characters that are in `Final`, and `opens` and `closes` say
    which ends are in this paragraph. A zero-width comment mark inside an extent is kept after the field. A field
-   with no stored result that Word still shows (`MACROBUTTON`) shows the text its code holds.
+   with no stored result has no width, and a `MACROBUTTON` or `GOTOBUTTON` with none shows the text its code holds.
 7. **Tables.** Through `wordml`'s block views, so the rows and cells are found as the scan found them: `cols` is the
    grid, or the widest row if that is more, a cell's column honours `gridBefore`, and a nested table is a block of
    its cell.

@@ -178,7 +178,7 @@ fn numbering_and_the_cascade_are_total_over_the_corpus() {
 const FLOOR_DOCUMENTS: usize = 286;
 const FLOOR_STORIES: usize = 810;
 const FLOOR_NUMBERED: usize = 7_900;
-const FLOOR_RUNS: usize = 85_900;
+const FLOOR_RUNS: usize = 85_850;
 const FLOOR_VANISH: usize = 18;
 const FLOOR_WHITE: usize = 34;
 

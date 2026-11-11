@@ -336,10 +336,6 @@ fn deleting_the_spans_of_a_range_removes_exactly_that_text_and_an_insert_lands_a
         let tree = document(&format!("<w:p>{content}</w:p>"));
         let story = Story::scan(&Arc::from("word/document.xml"), StoryKind::Body, &tree).unwrap();
         let m = story.paragraph(&tree, 0).unwrap().map();
-        if m.items().iter().any(|i| i.kind == ItemKind::FieldValue) {
-            // deleting the value of a field is deleting the field, which is the caller's policy
-            continue;
-        }
         let editable = |span: &Span| m.items()[span.item].flags & CDATA == 0;
         let old: Vec<char> = m.text(FINAL).chars().collect();
         let len = old.len();

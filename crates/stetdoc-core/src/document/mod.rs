@@ -200,6 +200,8 @@ mod tests_edit_comment_tables;
 #[cfg(test)]
 mod tests_edit_comments;
 #[cfg(test)]
+mod tests_edit_field_width;
+#[cfg(test)]
 mod tests_edit_fields;
 #[cfg(test)]
 mod tests_edit_files;

@@ -42,7 +42,7 @@ This document covers:
    release. Agreed with `state`, word for word.
 3. **Fields are carried across paragraphs, lazily and incrementally** (4.4, 8): 19 curated fields span
    paragraphs, up to 61. Field code is not text: it is a zero-width mark and in no mode. A field
-   with no result that Word still shows (`MACROBUTTON`, `EQ`, `PAGE`) is one read-only atom.
+   with no stored result has no width, whatever its instruction.
 4. **Atoms are one character each, using characters XML cannot carry** (4.1), so a tab, a page break,
    a footnote reference or a drawing has a position and can never be confused with text.
 5. **Reading is total** (9): one error, at the scan of the body, anomalies for everything else, no
@@ -683,12 +683,12 @@ Unicode scalar values (`char`), in every offset the model takes or returns.
 | `w:footnoteRef`, `w:endnoteRef` (the automatic number inside a note) | `NoteMark` | U+0003 |
 | `m:oMath`, `m:oMathPara` | `Math` | U+0004 |
 | `w:pgNum` and the six legacy date elements | `Auto` | U+0005 |
-| a complex field with no `separate` that Word still shows (4.4) | `FieldValue` | U+0006 |
 | bookmarks, comment ranges and references, field control, permission and move range markers | marks | nothing (zero width) |
 
 **Why these characters.** The control characters U+0001 to U+0006, U+000C and U+000E cannot be
 written in an XML part (`xml` refuses them), so an atom's character can never collide with real
-text. They are our own codes. They resemble the ones Word's object model uses for a few of the same
+text. U+0006 stands for no atom now (it was a field with no stored result, 4.4) and stays reserved, so
+a payload that holds it is still refused. They are our own codes. They resemble the ones Word's object model uses for a few of the same
 things, but they are not the same set, and nothing relies on the resemblance. U+2011 and U+00AD
 stand for `w:noBreakHyphen` and `w:softHyphen`. An
 atom is exactly one character wide and is never split. The characters are for matching, diffing and
@@ -804,16 +804,13 @@ it, so the model tracks fields precisely.
 - **A field with no `separate`.** 63 curated fields have no `separate`, so no stored result. Word
   still **displays** something for 33 of them: `EQ` (11), `MACROBUTTON` (9, the text shown is in the
   field code), `LISTNUM` (4), `SYMBOL` (4), `PAGE` (2, in headers and footers), `GOTOBUTTON` (1, same as
-  `MACROBUTTON`), `QUOTE` (1) and `BARCODE` (1). The model gives each of these **one read-only
-  `FieldValue` atom** (U+0006) at the field's `end`, with the field's id and the `FIELD_RESULT` flag, so
-  the field has a position and a presence, and `FieldInfo::display_text()` gives the shown text where it
-  is in the code (`MACROBUTTON` and `GOTOBUTTON`). The keywords that do this are one named table,
-  `DISPLAYED_WITHOUT_RESULT` in `text_fields.rs`, so it can grow without touching the machine. The
-  rest stay empty and contribute no item: `IF` (16), `REF` (4), `XE` (4), `TA` (1) and the others. A
-  `w:fldSimple` with no content and a keyword in the table gets the same atom.
-  The atom's node is the `end` element (or the `w:fldSimple`), so an edit must never detach it alone:
-  `ops` treats an item flagged `FIELD_RESULT` as read-only, or deletes the field whole. The edit
-  agreement test of 5.2 item 8 skips ranges that hold such an atom for this reason.
+  `MACROBUTTON`), `QUOTE` (1) and `BARCODE` (1). The model still gives every one of them **no width**,
+  whatever its instruction: only its marks are in the map, so it is as wide as a field whose result is
+  empty, and the text and the offsets an agent works from agree with what `view` shows. What Word draws
+  for it is a value Word works out when it lays the page out, not stored text, so it cannot be edited and
+  has no characters to count (issue #17). `FieldInfo::display_text()` gives the text a `MACROBUTTON` or
+  `GOTOBUTTON` shows, which is in its code, for the view. A `w:fldSimple` with no content has no width
+  either, for the same reason.
 - **Simple fields.** A `w:fldSimple` pushes a field already in the result phase for its content, with
   the instruction taken from `w:instr`.
 - **Independent of wrappers.** The stack is driven by document order only. A `begin` inside a `w:ins`

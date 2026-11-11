@@ -7,7 +7,7 @@
 use super::anomaly::AnomalyKind;
 use super::mc;
 use super::names::{M, XML, is_in, is_word_ns, w_attr, w_child};
-use super::text_build::{Builder, Frame, FrameKind, Info, displayed};
+use super::text_build::{Builder, Frame, FrameKind, Info};
 use super::text_fields::{Instr, Sep};
 use super::text_model::{CDATA, ItemKind, WrapperKind};
 use crate::xml::{NodeKind, NodeRef};
@@ -342,21 +342,17 @@ impl<'t> Builder<'t> {
         }
     }
 
-    /// The end of a complex field. One that has no result, and is a type Word still shows, gets an
-    /// atom for what it shows.
+    /// The end of a complex field. A field with no `separate` has no stored result, so it has no
+    /// width, whatever its instruction: only its marks are in the map.
     fn field_end(&mut self, c: &NodeRef<'t>, info: Info) {
         let id = c.id();
         if self.state.is_ignoring() {
             self.state.end();
             return;
         }
-        let Some(top) = self.state.stack.last() else {
+        if !self.state.in_field() {
             self.anomaly(AnomalyKind::StrayFieldChar, id);
             return;
-        };
-        if !top.separate && !top.simple && displayed(&top.instr) {
-            self.state.show_value();
-            self.atom(ItemKind::FieldValue, id, info);
         }
         self.mark(ItemKind::FieldEnd, id, info);
         self.pop_field(id);
@@ -367,7 +363,6 @@ impl<'t> Builder<'t> {
         let instr = w_attr(c, "instr")
             .map(|v| v.into_owned())
             .unwrap_or_default();
-        let displayed = displayed(&instr);
         if self.open_field(c, true, instr).is_none() {
             self.anomaly(AnomalyKind::FieldTooDeep, c.id());
             self.push_wrapper(
@@ -381,15 +376,10 @@ impl<'t> Builder<'t> {
         }
         let inner = self.wrap(info, WrapperKind::FieldSimple, c.id());
         self.mark(ItemKind::FieldBegin, c.id(), inner);
-        let items_before = self.items.len();
         self.stack.push(Frame {
             it: c.children(),
             info: inner,
-            kind: FrameKind::Simple {
-                node: c.id(),
-                items_before,
-                displayed,
-            },
+            kind: FrameKind::Simple { node: c.id() },
         });
     }
 

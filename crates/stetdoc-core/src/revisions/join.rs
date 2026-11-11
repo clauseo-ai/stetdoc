@@ -68,15 +68,26 @@ pub(super) fn is_leftover(n: &NodeRef<'_>) -> bool {
     }
 }
 
-/// True for something that is no content and goes with its paragraph: a `w:proofErr`, and a run that holds
-/// nothing but its properties and a `w:lastRenderedPageBreak` (Word leaves both behind when text goes).
+/// True for something that is no content and goes with its paragraph: a `w:proofErr`, and an empty run
+/// (Word leaves both behind when text goes).
 fn is_hollow(n: &NodeRef<'_>) -> bool {
-    is_w(n, "proofErr")
-        || is_w(n, "r")
-            && n.children().all(|c| {
-                is_blank(&c)
-                    || c.is_element() && (is_w(&c, "rPr") || is_w(&c, "lastRenderedPageBreak"))
-            })
+    is_w(n, "proofErr") || is_empty_run(n)
+}
+
+/// True for a run that holds no content: nothing but its properties, a `w:lastRenderedPageBreak`, and
+/// text elements with no characters (`<w:t/>`, which Word and other editors leave behind). None of these
+/// is in the paragraph's text, so a run of them is not content (issue #19). A text element that holds
+/// white space is content, since `xml:space` may keep it.
+pub(super) fn is_empty_run(n: &NodeRef<'_>) -> bool {
+    is_w(n, "r")
+        && n.children().all(|c| {
+            is_blank(&c)
+                || c.is_element()
+                    && (is_w(&c, "rPr")
+                        || is_w(&c, "lastRenderedPageBreak")
+                        || (is_w(&c, "t") || is_w(&c, "delText"))
+                            && c.children().all(|t| !t.is_element() && t.text().is_empty()))
+        })
 }
 
 /// Puts the leftovers of a paragraph that goes, `first`, where they keep their place without changing the

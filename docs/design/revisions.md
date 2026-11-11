@@ -455,7 +455,10 @@ three.
       `w:delText` and `w:instrText` to `w:delInstrText`; or remove outright; or nest our `w:del` among the runs
       of the other author's `w:ins`. Range markers between the first and last carved run go inside the
       `w:del`, as Word does (`w:del{commentRangeStart, r, commentRangeEnd}` occurs 7 times); markers
-      outside them stay.
+      outside them stay. An empty run between them goes inside too (only properties, a
+      `w:lastRenderedPageBreak` and `w:t` elements with no characters), since it has no text of its own to
+      carve. A run with an empty `w:delText` outside any deletion stays where it is, so a rejection gives it
+      back as it was.
    e. **Insert** `with` as one new `w:ins` placed after the last piece that was just deleted. For a pure
       insertion the place is chosen by the gap rule of 4.2. The run's `rPr` is a copy, by the copy rule, of the
       first deleted run's, or of the nearest text on the left (then on the right, then the paragraph mark's),
@@ -1362,9 +1365,10 @@ is the one being removed.
 
 - If `first` has no content left (a whole-paragraph deletion that is accepted, or an X paragraph whose content was
   rejected), its element is removed and `second` is untouched: it keeps its properties, its element and its ref.
-  **As built.** A `w:proofErr` and a run with nothing but its properties and a `w:lastRenderedPageBreak` are no content
-  here, and the range markers `first` leaves stand between blocks where it was, so `second` keeps its XML; only when a
-  comment reference run is among them do they go to the start of `second` (3.6.5).
+  **As built.** A `w:proofErr` and an empty run are no content here. An empty run holds nothing but its properties, a
+  `w:lastRenderedPageBreak` and text elements with no characters (`<w:t/>`). The range markers `first` leaves stand
+  between blocks where it was, so `second` keeps its XML; only when a comment reference run is among them do they go to
+  the start of `second` (3.6.5).
 - Otherwise `second`'s content moves to the end of `first`, `first`'s `w:pPr` is replaced by `second`'s (the later
   paragraph's properties, mark and section break win, and with no `w:pPr` there `first` ends with none), and `second`'s
   element is removed. **`first` keeps its element**, its attributes (`w14:paraId`, the rsids) and its ref. A split followed by

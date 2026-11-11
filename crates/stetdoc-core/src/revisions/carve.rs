@@ -423,8 +423,8 @@ pub(super) fn is_transparent(n: &crate::xml::NodeRef<'_>) -> bool {
         )
 }
 
-/// Groups units into runs of consecutive siblings of one parent, with the transparent siblings
-/// between them. Each group is the nodes to wrap or to remove together, in order, and the item index
+/// Groups units into runs of consecutive siblings of one parent, with the transparent siblings and the
+/// empty runs between them. Each group is the nodes to wrap or to remove together, in order, and the item index
 /// of its first unit.
 pub(super) fn groups(tree: &SpanTree, units: &[(NodeId, usize)]) -> Vec<(Vec<NodeId>, usize)> {
     let mut out: Vec<(Vec<NodeId>, usize)> = Vec::new();
@@ -444,7 +444,12 @@ pub(super) fn groups(tree: &SpanTree, units: &[(NodeId, usize)]) -> Vec<(Vec<Nod
                         ok = true;
                         break;
                     }
-                    if !is_transparent(&c) {
+                    // an empty run between two units goes with them, so a deletion holds it. Only one whose text
+                    // elements are `w:t`: a stray empty `w:delText` outside any deletion would come back from a
+                    // rejection as a `w:t`, so it stays where it is
+                    let empty = super::join::is_empty_run(&c)
+                        && !c.child_elements().any(|t| is_w(&t, "delText"));
+                    if !is_transparent(&c) && !empty {
                         break;
                     }
                     between.push(c.id());

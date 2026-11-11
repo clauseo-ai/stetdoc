@@ -57,6 +57,12 @@ Each of these was decided in a design, with the evidence there.
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
+- **An insertion after a paragraph goes directly after it**, before any bookmark, permission range or other markup that
+  follows, and **a section break stays on that paragraph**. Word's Enter shape moves the break onto the new paragraph, so
+  after a paragraph that ends a section stetdoc writes a self-contained new paragraph instead, with the next paragraph's
+  properties, at the start of the next section. After the last paragraph of a container Word's shape is needed for Reject
+  All, so **a tracked insertion after a body's last paragraph that ends a section is refused** (`readonly_region`). An
+  untracked one keeps the break where it was. See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
 - **A section break added with `set` is untracked only**, because a `w:pPrChange` cannot hold it. A tracked attempt is
   `invalid_payload`. See [document and ops 2.1](docs/design/document-and-ops.md#21-the-set).
 - **A tracked deletion of an equation that already holds a tracked deletion is refused**, because Word writes a form for it

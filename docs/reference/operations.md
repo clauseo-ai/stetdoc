@@ -85,7 +85,7 @@ Tracked as revisions: yes. Reversible by rejecting what it wrote: yes.
 | Field | Kind | Required | Meaning |
 |---|---|---|---|
 | `ref` | ref | yes | The paragraph or table the new paragraphs go next to. |
-| `place` | choice | yes | Whether they go before or after it. One of `before`, `after`. |
+| `place` | choice | yes | Whether they go before or after it. After puts them directly after it, before any bookmark or other markup that follows, and a section break it ends stays on it. A tracked insert after the last paragraph of the body when that paragraph ends a section is refused, since the break would move: insert it untracked. One of `before`, `after`. |
 | `paragraphs` | list | yes | The paragraphs, in order. Each is one paragraph of text, and a newline inside one is a line break of that paragraph. In JSON an entry may be an object with a text and a style, and in block text one style applies to all. |
 
 ```json

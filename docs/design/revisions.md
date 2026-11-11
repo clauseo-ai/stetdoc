@@ -552,7 +552,7 @@ Both touch the paragraph. The ids are minted by the caller from `Tx::next_annota
 
 | Code | When |
 |---|---|
-| `readonly_region` | text or property edit in a deleted block; a range that cuts into a field, or a gap strictly inside a field result, or a delete, merge or split at a paragraph that begins or ends a field that spans paragraphs; text in a locked, data-bound or placeholder content control; a property edit on a container that holds another author's pending `*PrChange`; `merge_blocks` where either paragraph carries a section break, or where either holds another author's pending `pPrChange`; `split_block` inside an inline content control or a `w:fldSimple`; `delete_block` on a row that another revision already deletes |
+| `readonly_region` | text or property edit in a deleted block; a range that cuts into a field, or a gap strictly inside a field result, or a delete, merge or split at a paragraph that begins or ends a field that spans paragraphs; text in a locked, data-bound or placeholder content control; a property edit on a container that holds another author's pending `*PrChange`; `merge_blocks` where either paragraph carries a section break, or where either holds another author's pending `pPrChange`; a tracked `insert_block(R, After)` where R ends both its container and a section; `split_block` inside an inline content control or a `w:fldSimple`; `delete_block` on a row that another revision already deletes |
 | `cross_block` | `merge_blocks` of two blocks that are not neighbouring paragraphs of one container (neighbouring in `Final`: only deleted blocks may lie between them); a table range for a paragraph primitive |
 | `invalid_payload` | an offset outside the text or inside an atom or surrogate pair, a character that cannot be written, an empty or over-long author, a date that is not a real ISO 8601 date and time, a `PropEdit` that cannot be placed |
 | `unsupported` | an edit whose target is inside a text box (the text boxes of `Story::text_boxes` have no refs, so `ops` refuses before the compiler), and a primitive that is not built in 1.0 |
@@ -704,15 +704,25 @@ stetdoc writes the same shapes and chooses by position:
   inserted mark, and rejecting the mark would remove that element (6.2) and keep the new one, losing P's attributes and
   its ref. The X keeps P's element, attributes, text and ref, so a reject gives back the very `w:p`.
 - `insert_block(R, Before, ..)` writes X before R.
-- `insert_block(R, After, ..)` writes Y when a paragraph follows R in the same container and R's mark holds no
-  revision of any kind, and **when nothing follows R in its container** (`wordml::ends_container`, which reads through
-  content controls and block wrappers as the join rule does) and R's mark is clean or only inserted: the inserted mark
-  moves with the original `w:pPr` to the new paragraph, which then ends the container, and rejecting joins R back into it.
-  Otherwise it writes X before the paragraph that follows R. Two `ins` cannot be on one mark, and a pending deleted mark is
-  left alone. **At the end of a container where Y cannot go** (R's mark is deleted or moved, or the edit needs a
-  `pPrChange` where another author's is pending) the insertion is `readonly_region`: a paragraph of its own there would be
-  the one that Reject All leaves empty. After a table that ends its container X stays, and rejecting removes it (above).
-  `insert_block(R, After)` is `split_block(R, len)` followed by putting the text in the second paragraph.
+- `insert_block(R, After, ..)` writes Y when a paragraph follows R in the same container, R's mark holds no revision of any
+  kind and R carries no section break, and **when nothing follows R in its container** (`wordml::ends_container`, which
+  reads through content controls and block wrappers as the join rule does) and R's mark is clean or only inserted: the
+  inserted mark moves with the original `w:pPr` to the new paragraph, which then ends the container, and rejecting joins R
+  back into it. `insert_block(R, After)` is then `split_block(R, len)` followed by putting the text in the second paragraph,
+  which goes directly after R. Otherwise it writes X **directly after R**, before whatever follows R (range markers such as a
+  bookmark or a permission range that ends there, a proofing mark, an empty content control or `w:customXml`, a
+  `w:altChunk`, then a table or a content control), so the new paragraph never lands inside a range that R
+  stood outside of, and R keeps its `w:pPr` byte for byte (issue 18). **After a paragraph that carries a section break** the
+  shape is that X even when a paragraph follows, because Y would move the break onto the new paragraph and the section would
+  end one paragraph later; the X is a copy of the next paragraph, its twin, so it needs no `pPrChange`. Where Y is refused because
+  R's mark holds a pending revision (inserted, deleted or moved) or because the edit needs a `pPrChange` where another
+  author's is pending, the X is the same copy of the next paragraph. Two `ins` cannot be on one mark, and a pending deleted mark is left alone. **At the end of a container where Y
+  cannot go** (R's mark is deleted or moved, or the edit needs a `pPrChange` where another author's is pending) the insertion
+  is `readonly_region`: a paragraph of its own there would be the one that Reject All leaves empty. **When R ends both its
+  container and a section** (the body's last paragraph holds a `w:sectPr`, which Word itself never writes) a tracked
+  insertion is `readonly_region` too, as a merge across a section break is (3.2.3): Y would move the break, and no other
+  tracked shape rejects to the original. An untracked insertion there is an X that leaves the break on R. After a table that
+  ends its container X stays, and rejecting removes it (above).
 
 **As built.** After the last block of a content control the next block of the story is in another container, so
 `insert_block(R, After)` writes X right after R in R's own container, with no twin. An insertion before a paragraph that
@@ -720,11 +730,15 @@ a field's result runs into, or after one that it runs out of, would be inside th
 split there is.
 
 **Y in detail.** The first paragraph is the **original element**, as the ref design wants, and it keeps its
-`w14:paraId`. Its `w:pPr` is replaced by a new one: a copy of the original's by the copy rule (2.2), so with no
-`pPrChange`, no revision on the mark and no `sectPr`, and with our `ins` first in the mark's `w:rPr`. The original
+`w14:paraId`. Its `w:pPr` is replaced by a new one: a faithful copy of the original's (`blocks::copy_ppr_faithful`), so with no
+`pPrChange`, no revision on the mark and no `sectPr`, with our `ins` first in the mark's `w:rPr`, and with every other child
+the original had, empty ones included. The copy is a container the transaction created, so `canonical::order_created` puts
+it in schema order: a copy of an order that is not the schema's would be one more `schema_non_canonical_order` finding, which
+the check counts as new. The original
 `w:pPr` moves whole to the second paragraph: its `sectPr`, its pending `pPrChange` and the revisions on its mark come
-with it, because the second paragraph holds the original mark. So a section break stays at the end of the section,
-now on the new paragraph. The second paragraph is new, with a new `w14:paraId` where the first has one (5.4). A
+with it, because the second paragraph holds the original mark. So in a split a section break stays at the end of the
+section, on the second half. An insertion after a paragraph that carries a section break is never a Y (above), so it never
+moves the break. The second paragraph is new, with a new `w14:paraId` where the first has one (5.4). A
 properties edit in `NewParagraph::props` is applied to the second paragraph by `set_props`, which writes a `pPrChange`
 whose snapshot is the original properties (3.3). That is what `FA/005` has: the second paragraph's `pPrChange`
 holds the original, empty `pPr`, and the first paragraph carries the same list formatting with **no** change,
@@ -735,11 +749,13 @@ author's revision written under a new id.
 
 **X in detail.** The new paragraph stands before its **twin**, the paragraph that rejecting its mark joins it
 into (the paragraph after it). Its `w:pPr` is a copy of the twin's by the copy rule, with our `ins` first in the
-mark's `w:rPr`, and its text is in one `w:ins`. When `NewParagraph::props` makes it differ from the twin, the edit is
-applied and the paragraph gets a `pPrChange` whose snapshot is the twin's base properties, so that rejecting gives the
-twin's properties whichever answer 3.2.4 turns out to have. With **no twin** (X after the last paragraph, `RP039`)
+mark's `w:rPr`, and its text is in one `w:ins`. After a paragraph that ends a section it is therefore a paragraph of the
+next section, as the twin is, and needs no change of properties. When `NewParagraph::props` makes it differ from the twin,
+the edit is applied and the paragraph gets a `pPrChange` whose snapshot is the twin's base properties, so that rejecting
+gives the twin's properties whichever answer 3.2.4 turns out to have. With **no twin** (X after the last paragraph, `RP039`)
 there is nothing to join into, the paragraph is copied from R, and edits are applied with no `pPrChange`. That is now
-only the paragraph after a table that ends its container, or after the last block of a content control that blocks follow.
+only the paragraph after a table that ends its container, after the last block of a content control that blocks follow,
+and the paragraph after one that a table, a content control or another block that is not a paragraph follows.
 
 **Run formatting of a new paragraph.** The run's `rPr` is a copy, by the copy rule, of the **mark's** `rPr` of the
 paragraph the new `pPr` was copied from (the original in Y, the twin or R in X), and no `rPr` when the mark has
@@ -1856,7 +1872,7 @@ These ten decisions settled the questions of the first version of this design. E
 | # | Decision | Applied in |
 |---|---|---|
 | 1 | A merge of paragraphs whose properties differ writes the alignment `pPrChange` | 3.2.3, 3.2.4 |
-| 2 | Insert-after uses Word's Enter shape (Y), insert-before the self-contained shape (X) | 3.2.1. Position decides: Y when a paragraph follows and the mark is clean, X otherwise (`RP039`) |
+| 2 | Insert-after uses Word's Enter shape (Y), insert-before the self-contained shape (X). **Revised (issue 18): Y keeps the anchor's children, empty ones included, and never goes after a paragraph that carries a section break; there, and wherever else Y is refused, the X is a copy of the next paragraph, so it starts the next section and needs no change of properties. X goes directly after the anchor, before any markup that follows, and copies the anchor when no paragraph follows. Two limits of Y remain: the anchor's copy is in schema order (a copy in another order would be a new `schema_non_canonical_order` finding), and accepting or rejecting the mark drops an empty `w:pPr` or mark `w:rPr` the anchor had (the resolver cannot tell it from one the mark emptied, and the join drops empty ones, 6.2)** | 3.2.1. Position decides: Y when a paragraph follows, the mark is clean and the anchor ends no section, or when nothing follows in the container; X otherwise (`RP039`) |
 | 3 | Deleting your own pending insertion removes it outright, and the receipt says what was removed | 4.1, `Effect::removed_own` and `swallowed` |
 | 4 | Formatting under another author's pending `*PrChange` is `readonly_region`. **Extended in review: untracked mode does not rewrite or hide another author's pending change either**, for text and properties alike: `readonly_region`, with a message saying to accept or reject that change first. Untracked still means the author's own changes go untracked | 4.3, 4.5, 5.5, `foreign.rs` |
 | 5 | `w:date` is the wall-clock time of the date the caller gives, with seconds and `Z`: Word's local time labelled `Z`. A UTC caller gets UTC. The CLI defaults to local time and the receipt records the date written. No `dateUtc` in 1.0 | 5.3, `RevStamp`. `FIDELITY.md` and checklist C4 |

@@ -208,6 +208,8 @@ mod tests_edit_files;
 #[cfg(test)]
 mod tests_edit_foreign;
 #[cfg(test)]
+mod tests_edit_insert_after;
+#[cfg(test)]
 mod tests_edit_manual;
 #[cfg(test)]
 mod tests_edit_ops;

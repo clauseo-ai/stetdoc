@@ -5,6 +5,8 @@
 //! an insertion; there is no `w:cellIns`, as in Word's own output. A deleted row has `w:trPr/w:del` and
 //! every paragraph of every cell deleted with its mark, the last of a cell included, because the row goes
 //! as a whole. A row that is the author's own insertion with content that is all hers is removed outright.
+//! A new row next to a repeating-section item's row is the content of a new item, and a removed row takes
+//! the wrappers that held only it (`row_controls.rs`).
 //! What a new or removed row does to merged cells around it is in `merge_rows.rs`.
 
 use super::blocks::{TEXT_ID, copy_ppr};
@@ -12,7 +14,7 @@ use super::compiler::Compiler;
 use super::errors::{cross_block, internal, invalid, readonly, stale};
 use super::gap::Boundary;
 use super::insert_run::check_new_text;
-use super::names::{is_w, is_word_ns, w_attr, w_child};
+use super::names::{is_w, is_word_ns};
 use super::outcome::{Effect, Origin, RemovedKind, RemovedOwn};
 use super::props::Direct;
 use super::props_edit::{ensure_chain, find_chain, place};
@@ -24,66 +26,6 @@ use crate::wordml::BlockKey;
 use crate::wordml::{Block, Cell, IdKind, NodeId, Row, Table, revision_at};
 use crate::xml::SpanTree;
 use std::sync::Arc;
-
-/// Gives the content controls that a copied row is wrapped in, around its cells, ids of their own: two
-/// controls with one id are not what Word writes. The new id is above every id in the part. A copy also
-/// loses its `dataBinding`: Word would show the bound value in place of the new text, and write the same
-/// data from two controls.
-fn renew_sdt_ids(tree: &mut SpanTree, row: NodeId) -> Result<(), StetError> {
-    let id_element = |sdt: &crate::xml::NodeRef<'_>| {
-        w_child(sdt, "sdtPr")
-            .and_then(|pr| w_child(&pr, "id"))
-            .map(|id| id.id())
-    };
-    // The controls around cells: the walk does not go into a cell, whose content is gone.
-    let mut copied: Vec<NodeId> = Vec::new();
-    let mut bindings: Vec<NodeId> = Vec::new();
-    let mut stack = vec![tree.node_ref(row)];
-    while let Some(n) = stack.pop() {
-        for c in n.child_elements() {
-            if is_w(&c, "tc") {
-                continue;
-            }
-            if is_w(&c, "sdt") {
-                if let Some(id) = id_element(&c) {
-                    copied.push(id);
-                }
-                if let Some(pr) = w_child(&c, "sdtPr") {
-                    // `w:dataBinding`, and `w15:dataBinding` of Word 2013.
-                    bindings.extend(
-                        pr.child_elements()
-                            .filter(|b| b.local_name() == "dataBinding")
-                            .map(|b| b.id()),
-                    );
-                }
-            }
-            stack.push(c);
-        }
-    }
-    for b in bindings {
-        super::tree_ops::detach(tree, b)?;
-    }
-    if copied.is_empty() {
-        return Ok(());
-    }
-    let mut highest = 0i64;
-    let mut stack = vec![tree.root()];
-    while let Some(n) = stack.pop() {
-        if is_w(&n, "sdt")
-            && let Some(id) = id_element(&n)
-            && let Some(v) = w_attr(&tree.node_ref(id), "val").and_then(|v| v.parse::<i64>().ok())
-        {
-            highest = highest.max(v);
-        }
-        stack.extend(n.child_elements());
-    }
-    let uri = super::names::wns(tree);
-    for id in copied {
-        highest = highest.saturating_add(1).min(i64::from(i32::MAX));
-        super::tree_ops::set_w_attr(tree, id, &uri, "val", &highest.to_string())?;
-    }
-    Ok(())
-}
 
 /// The enclosing table of a row.
 fn table_of(tree: &SpanTree, row: NodeId) -> Option<NodeId> {
@@ -137,7 +79,12 @@ impl Compiler<'_, '_> {
                     })
                 })
                 .collect();
-            let plan = super::merge_rows::plan_new_cells(tree, table, anchor.node(), side);
+            // Next to a repeating-section item's row, the new row lands beside the whole item (below), so its merged
+            // cells follow the item's first row (before) or its last (after), the row it really lands next to.
+            let landing = super::row_controls::item_of(tree, anchor.node())
+                .and_then(|item| super::row_controls::edge_row(tree, item, side))
+                .unwrap_or_else(|| anchor.node());
+            let plan = super::merge_rows::plan_new_cells(tree, table, anchor.node(), landing, side);
             (table, models.len(), plan, models)
         };
         if cells.len() > n_cells {
@@ -156,6 +103,7 @@ impl Compiler<'_, '_> {
             Some(ns) => Some((ns, self.tx.mint_id(IdKind::ParaId, &part)?)),
             None => None,
         };
+        let highest_id = super::row_controls::highest_sdt_id(self.tx.parts())?;
         let tree = self.tx.part_mut(&part)?;
         let new_tr = tree.edit().clone_subtree(anchor.node())?;
         let attrs: Vec<(String, String)> = tree
@@ -218,20 +166,38 @@ impl Compiler<'_, '_> {
             }
             if let Some(tcpr) = find_chain(tree, tc, &["tcPr"]) {
                 strip_all(tree, tcpr)?;
-                if let Some(cell) = plan.get(i) {
+            }
+            // A cell with no properties that must continue a merge gets a `w:tcPr` to say so.
+            if let Some(cell) = plan.get(i) {
+                let tcpr = match find_chain(tree, tc, &["tcPr"]) {
+                    Some(p) => Some(p),
+                    None if cell.merge == super::merge_rows::NewMerge::Continue => {
+                        Some(ensure_chain(tree, tc, &["tcPr"])?.0)
+                    }
+                    None => None,
+                };
+                if let Some(tcpr) = tcpr {
                     let ns = tree.node_ref(tc).namespace().to_owned();
                     super::merge_rows::apply_new_merge(tree, tcpr, &ns, cell.merge)?;
                 }
             }
         }
-        renew_sdt_ids(tree, new_tr)?;
-        let parent =
-            parent_of(tree, anchor.node()).ok_or_else(|| internal("a row has no parent"))?;
-        let at = match side {
-            Place::Before => Some(anchor.node()),
-            Place::After => next_sibling_of(tree, anchor.node()),
+        // Next to a repeating-section item's row, the new row is the content of a new item, placed beside
+        // that item, as Word inserts an item: an item holds one copy of the section's content.
+        let (top, beside) = match super::row_controls::item_of(tree, anchor.node()) {
+            Some(item) => (
+                super::row_controls::new_item_around(tree, item, new_tr)?,
+                item,
+            ),
+            None => (new_tr, anchor.node()),
         };
-        insert(tree, parent, at, new_tr)?;
+        super::row_controls::renew_sdt_ids(tree, top, highest_id)?;
+        let parent = parent_of(tree, beside).ok_or_else(|| internal("a row has no parent"))?;
+        let at = match side {
+            Place::Before => Some(beside),
+            Place::After => next_sibling_of(tree, beside),
+        };
+        insert(tree, parent, at, top)?;
         if self.tracked() {
             let id = self.next_id()?;
             let stamp = self
@@ -426,16 +392,16 @@ impl Compiler<'_, '_> {
             if let Some(t) = table_of(tree, row) {
                 super::merge_rows::promote_below(tree, t, row)?;
             }
-            let wrapper = table_of(tree, row)
-                .and_then(|t| super::resolve_table::child_toward(tree, t, row))
-                .filter(|w| *w != row);
+            let wrappers = super::row_controls::wrappers_of(tree, row);
             let hoisted = super::cleanup::hoist_out(tree, row)?;
             let mut swallowed = hoisted.swallowed.clone();
             let mut gainers = vec![hoisted];
-            // A row-level content control or custom XML element that held only this row goes with it.
-            if let Some(w) = wrapper
-                && !super::resolve_table::holds_row(tree, w)
-            {
+            // Each row-level content control or custom XML element that held only this row goes with it,
+            // innermost first: a repeating-section item, and its section when that was its last item.
+            for w in wrappers {
+                if super::resolve_table::holds_row(tree, w) {
+                    break;
+                }
                 let h = super::cleanup::hoist_out(tree, w)?;
                 swallowed.extend(h.swallowed.iter().copied());
                 gainers.push(h);

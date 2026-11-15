@@ -1,7 +1,8 @@
 //! Resolving rows and cells (design `revisions.md`, 3B and 3.4). Accepting a deleted row or rejecting an
 //! inserted one removes the row, and the refs of what was in it go with the reason of the change. A cell
 //! that is removed because it was deleted widens the nearest live cell before it, so that the row still
-//! covers the grid. A table left with no row is removed. A row removed with the start of a vertical merge, on accept
+//! covers the grid. Each row-level wrapper left with no row is removed, innermost first: a repeating-section
+//! item whose only row went, and the section with its last item. A table left with no row is removed. A row removed with the start of a vertical merge, on accept
 //! or reject, makes the continuation below it the new start (`merge_rows.rs`).
 
 use super::cleanup::{is_attached, prune_from, remove_hoisting};
@@ -76,12 +77,10 @@ impl Engine<'_, '_> {
         let part = self.part.clone();
         let rejected = !self.accept;
         let tree = self.tx.part_mut(&part)?;
-        // A row may stand in a row-level content control or a custom XML element inside its table: the
-        // table is the nearest one up, and the wrapper goes when the row was all it held.
+        // A row may stand in row-level content controls or custom XML elements inside its table: the
+        // table is the nearest one up, and each wrapper goes when the row was all it held, innermost first.
         let table = ancestor_table(tree, row);
-        let wrapper = table
-            .and_then(|t| child_toward(tree, t, row))
-            .filter(|w| *w != row);
+        let wrappers = super::row_controls::wrappers_of(tree, row);
         // A row that goes with the start of a vertical merge, by an accepted deletion or a rejected insertion, moves
         // the start to the row below. A row that stetdoc inserted never holds a start from the source (a new row
         // continues a merge or is plain), so a rejection that gives back the source never moves one.
@@ -97,14 +96,15 @@ impl Engine<'_, '_> {
         for (node, _) in blocks {
             self.record_removed(&BlockKey::new(part.clone(), node), rejected)?;
         }
-        if let Some(w) = wrapper {
+        for w in wrappers {
             let tree = self.tx.part_mut(&part)?;
-            if is_attached(tree, w) && !holds_row(tree, w) {
-                let (to, swallowed) = remove_hoisting(tree, w)?;
-                self.swallowed.extend(swallowed);
-                if is_w(&tree.node_ref(to), "p") {
-                    self.dirty.push(to);
-                }
+            if !is_attached(tree, w) || holds_row(tree, w) {
+                break;
+            }
+            let (to, swallowed) = remove_hoisting(tree, w)?;
+            self.swallowed.extend(swallowed);
+            if is_w(&tree.node_ref(to), "p") {
+                self.dirty.push(to);
             }
         }
         if let Some(table) = table {
@@ -324,18 +324,6 @@ fn ancestor_table(tree: &SpanTree, row: NodeId) -> Option<NodeId> {
         cur = n.parent();
     }
     None
-}
-
-/// The child of `ancestor` that holds `node` (or is it).
-pub(super) fn child_toward(tree: &SpanTree, ancestor: NodeId, node: NodeId) -> Option<NodeId> {
-    let mut cur = tree.node_ref(node);
-    loop {
-        let parent = cur.parent()?;
-        if parent.id() == ancestor {
-            return Some(cur.id());
-        }
-        cur = parent;
-    }
 }
 
 /// True if a row of this table stands in `el`, directly or in a wrapper, but not in a nested table.

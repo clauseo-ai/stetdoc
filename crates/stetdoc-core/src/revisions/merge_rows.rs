@@ -76,33 +76,57 @@ fn h_continues(cell: &Cell<'_>) -> bool {
         .is_some_and(|m| w_attr(&m, "val").as_deref() != Some("restart"))
 }
 
-/// The plan for each cell of a row inserted on `side` of `anchor`, in the anchor's cell order.
+/// The plan for each cell of a new row copied from `model` and placed on `side` of `landing`, in the model's cell
+/// order. `landing` is the model itself, except next to a repeating-section item's row, where the new row lands beside
+/// the whole item. A cell continues a vertical merge where the merge goes on past the new row: before `landing`, when
+/// `landing`'s cell in the same grid column continues one; after it, when `landing`'s cell is in one and the next row's
+/// cell in that column continues it. Otherwise a copied `w:vMerge` goes, and a cell with none keeps its properties.
 pub(super) fn plan_new_cells(
     tree: &SpanTree,
     table: NodeId,
-    anchor: NodeId,
+    model: NodeId,
+    landing: NodeId,
     side: Place,
 ) -> Vec<NewCell> {
-    let Some(row) = Row::new(tree, anchor) else {
+    let Some(row) = Row::new(tree, model) else {
         return Vec::new();
     };
+    let beside: Vec<(VMerge, usize)> = Row::new(tree, landing)
+        .map(|r| {
+            cells_with_columns(&r)
+                .into_iter()
+                .map(|(c, column)| (c.v_merge(), column))
+                .collect()
+        })
+        .unwrap_or_default();
+    let merge_at = |column: usize| {
+        beside
+            .iter()
+            .find(|(_, c)| *c == column)
+            .map_or(VMerge::None, |(m, _)| *m)
+    };
     let below = match side {
-        Place::After => next_row(tree, table, anchor),
+        Place::After => next_row(tree, table, landing),
         Place::Before => None,
     };
     cells_with_columns(&row)
         .into_iter()
         .map(|(c, column)| {
-            let merge = match (side, c.v_merge()) {
-                (_, VMerge::None) => NewMerge::Keep,
-                (Place::Before, VMerge::Restart) => NewMerge::Clear,
-                (Place::Before, VMerge::Continue) => NewMerge::Continue,
-                (Place::After, VMerge::Restart | VMerge::Continue) => {
-                    match below.and_then(|b| continuation_at(tree, b, column)) {
-                        Some(_) => NewMerge::Continue,
-                        None => NewMerge::Clear,
-                    }
+            let continues = match side {
+                Place::Before => merge_at(column) == VMerge::Continue,
+                Place::After => {
+                    merge_at(column) != VMerge::None
+                        && below
+                            .and_then(|b| continuation_at(tree, b, column))
+                            .is_some()
                 }
+            };
+            let merge = if continues {
+                NewMerge::Continue
+            } else if c.v_merge() == VMerge::None {
+                NewMerge::Keep
+            } else {
+                NewMerge::Clear
             };
             NewCell {
                 merge,

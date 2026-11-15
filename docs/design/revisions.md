@@ -954,6 +954,22 @@ The comparison is of **base properties**: the paragraph's `w:pPr` children witho
   naming the column and saying to pass `""`. A nested table in the
   anchor is not copied. `w14:paraId` on the row and its paragraphs is new if the anchor has one. The table is touched,
   because its list of rows changed.
+- **Repeating sections.** A table's repeating section is a `w:sdt` with `w15:repeatingSection` around the rows, and
+  each of its items a `w:sdt` with `w15:repeatingSectionItem` around one copy of the section's content, in a table
+  one row. A new row next to a row that is an item's content is the content of a new item, placed before or after that
+  item as `place` says, never inside it, as Word's "Insert item before" and "Insert item after" keep one copy per item
+  (`row_controls.rs`). The new item is a copy of the item's `w:sdtPr` and `w:sdtEndPr`, with a new `w:id` above every
+  content control id in the package (every story part: the body, the headers and footers, the footnotes and endnotes,
+  and the comments), with no `dataBinding` and no `w:showingPlcHdr`, since it holds new content and not the
+  placeholder. That is the rule for the controls a copied row holds too. Next to a row of an item with two rows, the new
+  item still goes beside the whole item, and its merged cells follow the row it lands next to, the item's first row
+  before it and its last row after it, not the anchor row: below the item's last row a cell continues a vertical merge
+  when that row's cell is in one and the next row's cell continues it, and above the item's first row when that row's
+  cell continues one. Tracked, the row has `trPr/ins` inside the new item, which holds
+  no revision of its own: rejecting the row removes the item with it, so rejecting every change gives the source back.
+  Deleting a row removes every wrapper between it and its table that is left with no row, innermost first: the item
+  whose only row it was, at once when the row is removed outright and on accept when it is tracked, and the repeating
+  section itself when that was its last item. An item with other rows stays.
 - **Delete a row** is `delete_block(row)`. It gives `trPr/del` to the row, deletes each cell's paragraphs as in 3.2.2
   but **with the mark deleted for the last paragraph of each cell too** (`FA/006`, `RP009`: the row goes away as a whole,
   so there is nothing to keep a cell valid), and recurses into nested tables. A row that is our own pending
@@ -967,9 +983,9 @@ The comparison is of **base properties**: the paragraph's `w:pPr` children witho
   no operation inserts or deletes a cell. `set_props(Cell)` writes `tcPrChange`.
 - **Accept and reject of rows** remove the row, so the audit retires its refs. A table left with no row is removed.
 
-**As built.** A row may stand in a row-level content control or custom XML element: its table is the nearest one up, a
-table whose other rows stand in such wrappers is not left with no row, and a wrapper that held only the removed row goes
-with it (`Strict01`). An untracked removal of a row or a table hoists its range markers and comment anchors as an
+**As built.** A row may stand in row-level content controls or custom XML elements: its table is the nearest one up, a
+table whose other rows stand in such wrappers is not left with no row, and each wrapper that held only the removed row
+goes with it, the innermost first (`Strict01`, issue 27). An untracked removal of a row or a table hoists its range markers and comment anchors as an
 accepted deletion does (3.6.5), a story or a cell that a removed table was all of keeps one empty paragraph, and a new row
 does not copy the range markers that stand between the model row's cells.
 
@@ -1834,6 +1850,7 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `blocks.rs`, `blocks_insert.rs`, `blocks_delete.rs`, `join.rs` | what the block primitives share; `insert_block` and `split_block` (shapes X and Y); `delete_block`, `delete_block_with_mark` and `merge_blocks`; the join of two paragraphs | 1,440 |
 | `tables.rs` | `insert_row` (the copy and the vertical merge), the row side of `delete_block`, nested tables | 460 |
 | `merge_rows.rs` | merged cells around a row that is inserted or removed: the plan of a new row's merges, the refusal of hidden text, the moved start | 200 |
+| `row_controls.rs` | content controls around a row: the ids of a copied row's controls, the new repeating-section item of a new row, the wrappers that go with a removed row | 130 |
 | `index.rs` | `ChangeIndex`: id to nodes, built at the first `resolve` of a batch and extended after each compiler call | 120 |
 | `changes.rs`, `changes_text.rs`, `changes_rows.rs`, `changes_marks.rs`, `moves.rs` | `changes()` and `Change`: the grouping of 6.1, over a window of entries; the atoms and text groups; rows; paragraphs and moves | 1,350 |
 | `resolve.rs`, `resolve_select.rs` | `resolve`: steps, selection (by id through the index, by window), closure, the driver, the report | 420 |

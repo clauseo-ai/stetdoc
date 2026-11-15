@@ -108,6 +108,7 @@ mod resolve_props;
 mod resolve_run;
 mod resolve_select;
 mod resolve_table;
+mod row_controls;
 mod snapshot;
 pub(crate) mod stamp;
 mod tables;

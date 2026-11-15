@@ -101,14 +101,17 @@ impl Compiler<'_, '_> {
         Ok(())
     }
 
-    /// Removes the hyperlinks of the paragraph that held text before the call and hold none now. Untracked, a deletion of all
-    /// of a link's text removes its runs, and the link would be left empty. Tracked, the link holds the `w:del` until the
-    /// deletion is accepted, and accepting it removes the link (`cleanup::prune_from`).
+    /// Removes the hyperlinks and simple fields of the paragraph that held text before the call and hold none now. Untracked, a
+    /// deletion of all of a link's text, or of a simple field's result, removes its runs, and the element would be left empty.
+    /// Tracked, the element holds the `w:del` until the deletion is accepted, and accepting it removes the element
+    /// (`cleanup::prune_from`).
     pub(super) fn unwrap_emptied_links(&mut self, p: &ParaView) -> Result<(), StetError> {
         let mut links: Vec<crate::wordml::NodeId> = Vec::new();
         for item in p.map.items().iter().filter(|i| i.len > 0) {
             for ctx in p.map.context(item.ctx) {
-                if ctx.kind == WrapperKind::Hyperlink && !links.contains(&ctx.node) {
+                let emptiable =
+                    matches!(ctx.kind, WrapperKind::Hyperlink | WrapperKind::FieldSimple);
+                if emptiable && !links.contains(&ctx.node) {
                     links.push(ctx.node);
                 }
             }
@@ -243,7 +246,10 @@ impl Compiler<'_, '_> {
                 .locate(Mode::Final, piece.start..piece.end)
                 .ok_or_else(|| invalid("a range lies outside the paragraph"))?;
             let loc = cover(p, loc)?;
-            self.check_items(p, loc.items.clone())?;
+            self.check_whole_items(p, loc.items.clone())?;
+            if self.tracked() {
+                self.refuse_empty_simple_fields(p, loc.items.clone())?;
+            }
             if !piece.with.is_empty() {
                 refuse_result_edit(p, piece, &loc)?;
             }
@@ -256,10 +262,7 @@ impl Compiler<'_, '_> {
             let gap = map
                 .gap(Mode::Final, piece.start)
                 .ok_or_else(|| invalid("an offset lies outside the paragraph"))?;
-            let neighbours = [gap.left, gap.right].into_iter().flatten();
-            for i in neighbours {
-                self.check_items(p, i..i + 1)?;
-            }
+            self.check_gap(p, gap.left, gap.right)?;
             self.refuse_foreign_gap(p, gap.left, gap.right)?;
         }
         Ok(())
@@ -268,6 +271,50 @@ impl Compiler<'_, '_> {
     /// Refuses a range of items that are in something this release does not edit: a locked or bound
     /// control, ruby text, alternate content, or a simple field.
     pub(super) fn check_items(&self, p: &ParaView, items: Range<usize>) -> Result<(), StetError> {
+        self.check_items_in(p, items, false)
+    }
+
+    /// `check_items` for a range that `cover` widened, which holds every field it touches whole: a simple field in it is
+    /// deleted or formatted whole, as a complex field is, and only the other refusals apply.
+    pub(super) fn check_whole_items(
+        &self,
+        p: &ParaView,
+        items: Range<usize>,
+    ) -> Result<(), StetError> {
+        self.check_items_in(p, items, true)
+    }
+
+    /// Refuses a tracked deletion of a `w:fldSimple` with no content (issue #17): it has no run that a `w:del` could hold, and
+    /// the element cannot stand in one, so a tracked deletion cannot mark it. Untracked, it goes with the range
+    /// (`apply_piece`'s `drop_empty_simple_fields`).
+    fn refuse_empty_simple_fields(
+        &self,
+        p: &ParaView,
+        items: Range<usize>,
+    ) -> Result<(), StetError> {
+        let tree = self.tree_ro(&p.part)?;
+        for i in items {
+            let Some(item) = p.map.items().get(i) else {
+                continue;
+            };
+            if item.kind == ItemKind::FieldBegin
+                && item.vis.in_mode(Mode::Final)
+                && super::cleanup::is_empty_simple_field(&tree.node_ref(item.node))
+            {
+                return Err(readonly(
+                    "this range holds a simple field with no result, which has no text that a tracked deletion could mark. Delete it untracked (--no-track), or edit the text around it.",
+                ));
+            }
+        }
+        Ok(())
+    }
+
+    fn check_items_in(
+        &self,
+        p: &ParaView,
+        items: Range<usize>,
+        whole_fields: bool,
+    ) -> Result<(), StetError> {
         let tree = self.tree_ro(&p.part)?;
         for i in items {
             let Some(item) = p.map.items().get(i) else {
@@ -288,7 +335,7 @@ impl Compiler<'_, '_> {
                             "this text is inside ruby text or alternate content, which this release does not edit",
                         ));
                     }
-                    WrapperKind::FieldSimple => {
+                    WrapperKind::FieldSimple if !whole_fields => {
                         return Err(readonly(
                             "this text is the result of a simple field, which is read-only",
                         ));
@@ -302,6 +349,67 @@ impl Compiler<'_, '_> {
 }
 
 impl Compiler<'_, '_> {
+    /// Refuses an insertion point that is strictly inside something whose text is read-only, given the items on its two sides
+    /// (design `revisions.md`, 4.2 rule 1). The point is inside a field, simple or complex, only when both neighbours are in
+    /// its result: at a field's start or end it is outside, and the gap rule puts the new text before or after the field.
+    /// Ruby text and alternate content are refused on either side.
+    pub(super) fn check_gap(
+        &self,
+        p: &ParaView,
+        left: Option<usize>,
+        right: Option<usize>,
+    ) -> Result<(), StetError> {
+        let tree = self.tree_ro(&p.part)?;
+        let items = p.map.items();
+        for i in [left, right].into_iter().flatten() {
+            let Some(item) = items.get(i) else {
+                continue;
+            };
+            for ctx in p.map.context(item.ctx) {
+                match ctx.kind {
+                    WrapperKind::Control => {
+                        let c = control(tree.node_ref(ctx.node));
+                        if c.lock.locks_content() || c.data_bound || c.showing_placeholder {
+                            return Err(readonly(
+                                "this text is in a content control that is locked, bound to data or showing its placeholder, so it cannot be edited",
+                            ));
+                        }
+                    }
+                    WrapperKind::Alternate | WrapperKind::Ruby => {
+                        return Err(unsupported(
+                            "this text is inside ruby text or alternate content, which this release does not edit",
+                        ));
+                    }
+                    _ => {}
+                }
+            }
+        }
+        let (Some(l), Some(r)) = (left, right) else {
+            return Ok(());
+        };
+        let fields_of = |i: usize| {
+            let mut out = Vec::new();
+            let mut id = items.get(i).map(|it| it.field).filter(|f| *f != NO_FIELD);
+            while let Some(f) = id {
+                out.push(f);
+                id = p
+                    .map
+                    .fields()
+                    .iter()
+                    .find(|r| r.id == f)
+                    .and_then(|r| r.parent);
+            }
+            out
+        };
+        let outer = fields_of(r);
+        if fields_of(l).iter().any(|f| outer.contains(f)) {
+            return Err(readonly(
+                "this position is inside a field, whose result is read-only",
+            ));
+        }
+        Ok(())
+    }
+
     /// Refuses a tracked deletion of an equation that already holds a tracked deletion (RP013: Word deletes a
     /// math run with a `w:del` inside its `m:r`). An equation is deleted whole, with a `w:del` around it, and
     /// that would put a `w:del` inside a `w:del` (W5); the deletion inside is another revision, which is

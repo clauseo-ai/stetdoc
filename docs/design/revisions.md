@@ -555,7 +555,7 @@ Both touch the paragraph. The ids are minted by the caller from `Tx::next_annota
 
 | Code | When |
 |---|---|
-| `readonly_region` | text or property edit in a deleted block; a range that cuts into a field, or a gap strictly inside a field result, or a delete, merge or split at a paragraph that begins or ends a field that spans paragraphs; text in a locked, data-bound or placeholder content control; a property edit on a container that holds another author's pending `*PrChange`; `merge_blocks` where either paragraph carries a section break, or where either holds another author's pending `pPrChange`; a tracked `insert_block(R, After)` where R ends both its container and a section; `split_block` inside an inline content control or a `w:fldSimple`; `delete_block` on a row that another revision already deletes |
+| `readonly_region` | text or property edit in a deleted block; a range that cuts into a field, or a gap strictly inside a field result, or a delete, merge or split at a paragraph that begins or ends a field that spans paragraphs; text in a locked, data-bound or placeholder content control; a property edit on a container that holds another author's pending `*PrChange`; `merge_blocks` where either paragraph carries a section break, or where either holds another author's pending `pPrChange`; a tracked `insert_block(R, After)` where R ends both its container and a section; `split_block` inside an inline content control or a `w:fldSimple`; a tracked deletion of a range that holds a `w:fldSimple` with no content; `delete_block` on a row that another revision already deletes |
 | `cross_block` | `merge_blocks` of two blocks that are not neighbouring paragraphs of one container (neighbouring in `Final`: only deleted blocks may lie between them); a table range for a paragraph primitive |
 | `invalid_payload` | an offset outside the text or inside an atom or surrogate pair, a character that cannot be written, an empty or over-long author, a date that is not a real ISO 8601 date and time, a `PropEdit` that cannot be placed |
 | `unsupported` | an edit whose target is inside a text box (the text boxes of `Story::text_boxes` have no refs, so `ops` refuses before the compiler), and a primitive that is not built in 1.0 |
@@ -994,9 +994,23 @@ and `end`, with `delInstrText` and `delText`. It writes an inserted field as `in
   `beta 1`, where `1` is a field's result, with `beta X` keeps `beta ` and leaves one piece that is exactly the result,
   which is refused, while replacing it with `new text` leaves one piece that holds the field. A deletion of a piece that
   is exactly the result deletes the field.
-- `w:fldSimple` cannot sit inside a `w:del` (schema), so a range that covers a `w:fldSimple` whole is
-  `readonly_region`. A range that is inside the result of a field is also refused, as the text model flags
-  results read-only.
+- A `w:fldSimple` takes the same edits as a complex field (issue #24): an insertion at its start or its end goes before or
+  after it, a range, paragraph or row deletion that holds it whole deletes it, and a range that holds it whole is replaced
+  as above. Changing its result alone is `readonly_region`. It cannot sit inside a `w:del` (schema: `w:del` takes no
+  `w:fldSimple`), and converting it to a complex field would not reject to the source, so **a tracked deletion of a
+  `w:fldSimple` is a `w:del` around its runs, inside the element**: `w:fldSimple > w:del > w:r > w:delText`, the shape
+  a hyperlink's deletion has (3.6.6). `carve` passes the element and takes its runs as the units. The text model reads a
+  `w:fldSimple` whose content is all in deletions as a field that is gone in `Final` (`wordml.md` 4.4), so the view shows
+  the field deleted. Accepting the deletion removes the emptied element, with its `w:fldData` (`cleanup::prune_from`), as
+  an untracked deletion removes it at once (`unwrap_emptied_links`); rejecting it unwraps the `w:del` and gives the source
+  back byte for byte. A `w:fldSimple` with no content (issue #17) holds no run that a `w:del` could hold, so a tracked
+  deletion of a range or a paragraph that holds one is `readonly_region`, and the message says to delete it untracked.
+  Untracked, the empty field goes with the range or the paragraph (`text_apply::drop_empty_simple_fields`).
+- A tracked deletion of text around a `w:fldSimple` is several `w:del` elements, one before the field, one inside it and
+  one after it, each with its own id, and `view` lists each. One element cannot be written: a `w:del` cannot hold the
+  `w:fldSimple`, and an id names one element. A `w:fldSimple` whose result is inside a hyperlink, control or smart tag
+  gets its `w:del` inside that, and the text model reads through those wrappers, so `Final` drops the field as accept does.
+- A range that is inside the result of a field is refused, as the text model flags results read-only.
 - Rejecting an inserted field and accepting a deleted one remove the field. Everything else leaves it.
 
 **3.6.4 Notes.** A deleted footnote is the reference run in a `w:del` in the body and the note's own paragraphs
@@ -1087,7 +1101,9 @@ the place from that.
 
 1. **Container.** If both neighbours are inside the same hyperlink, control or smart tag, the new run goes inside the
    innermost one that they share. Otherwise it goes at the level of the paragraph: text typed at the end of a
-   hyperlink is not part of the link. A gap inside a field's result is `readonly_region`.
+   hyperlink is not part of the link. A gap inside a field's result, simple or complex, is `readonly_region`: both
+   neighbours are in the result (`Compiler::check_gap`). At a field's start or end the gap is outside it, and the new run
+   goes before the field's `begin` or after its `end`, or before or after the `w:fldSimple` (`gap::settle`).
 2. **Position.** In that container the run goes after the left neighbour, after every range-**end** marker
    (`bookmarkEnd`, `commentRangeEnd`, `permEnd`, `moveFromRangeEnd`, `moveToRangeEnd`) and after every excluded
    item that follows it, and before the first range-**start** marker or the right neighbour, whichever

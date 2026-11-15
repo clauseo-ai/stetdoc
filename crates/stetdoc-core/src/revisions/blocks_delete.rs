@@ -147,6 +147,7 @@ impl Compiler<'_, '_> {
             for piece in pieces.iter().rev() {
                 self.apply_piece(&planned, &starts, piece, &(0..len))?;
             }
+            self.unwrap_emptied_links(&planned)?;
         } else {
             self.check_editable(&p)?;
         }

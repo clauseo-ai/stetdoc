@@ -812,7 +812,13 @@ it, so the model tracks fields precisely.
   `GOTOBUTTON` shows, which is in its code, for the view. A `w:fldSimple` with no content has no width
   either, for the same reason.
 - **Simple fields.** A `w:fldSimple` pushes a field already in the result phase for its content, with
-  the instruction taken from `w:instr`.
+  the instruction taken from `w:instr`. Its begin and end marks are the element, which no revision can wrap, so they take
+  the modes of its content: a `w:fldSimple` whose content is all in `w:del` or `w:moveFrom` is not in `Final`, and one whose
+  content is all in `w:ins` or `w:moveTo` is not in `Original`, as a complex field deleted or inserted whole is not. The
+  content is read through the hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo` elements that hold it, as a
+  deletion inside one of those goes inside it. Range markers, `w:fldData` and properties do not count, and a `w:fldSimple`
+  with no content is in the modes of what holds it. This is the
+  shape of stetdoc's tracked deletion of a simple field (`revisions.md` 3.6.3).
 - **Independent of wrappers.** The stack is driven by document order only. A `begin` inside a `w:ins`
   and an `end` outside it (three cases) work. The vis rule of 4.3 applies per item as always, so a
   field deleted whole is not in `Final` and a field whose `begin` is deleted but whose result is not

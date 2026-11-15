@@ -100,7 +100,7 @@ Tracked as revisions: yes. Reversible by rejecting what it wrote: yes.
 
 | Field | Kind | Required | Meaning |
 |---|---|---|---|
-| `ref` | ref | yes | The paragraph, table or first paragraph of the range. A deletion of all of a hyperlink's text removes the hyperlink too, at once untracked and when the deletion is accepted tracked. A bookmark, permission range or content control that a deletion empties stays. |
+| `ref` | ref | yes | The paragraph, table or first paragraph of the range. A deletion of all of a hyperlink's text removes the hyperlink too, at once untracked and when the deletion is accepted tracked. A deletion that covers all of a field's result deletes the whole field, a complex field or a simple field (`w:fldSimple`) alike, and a simple field's element goes at once untracked and when the deletion is accepted tracked. A simple field with no result holds no text a tracked deletion could mark, so a tracked deletion of a range or a paragraph that holds one is refused; untracked, the field goes with it. A bookmark, permission range or content control that a deletion empties stays. |
 | `to` | ref | no | The last paragraph of a range that spans paragraphs. Then `start` is an offset in `ref` and `end` an offset in `to`. |
 | `find` | text | no | The text to find in the paragraph's Final text. It must match once, or `occurrence` says which match. A newline matches a line break of the paragraph. |
 | `occurrence` | number | no | Which match of `find` to use, counted from 1. |

@@ -37,6 +37,32 @@ fn positions(tree: &SpanTree, p: NodeId) -> HashMap<NodeId, (usize, usize)> {
     pos
 }
 
+/// For the begin or end of a `w:fldSimple`, whether all of its content is in deletions (it is gone in `Final`) and whether all
+/// of it is in insertions (it is not there in `Original`). The content is read through hyperlinks, controls, smart tags, custom
+/// XML and `w:dir`/`w:bdo`; range markers, `w:fldData` and properties are not content.
+fn simple_field_sides(node: &NodeRef<'_>, kind: ItemKind) -> (bool, bool) {
+    if !matches!(kind, ItemKind::FieldBegin | ItemKind::FieldEnd) || !is_w(node, "fldSimple") {
+        return (false, false);
+    }
+    fn leaves<'a>(n: &NodeRef<'a>, out: &mut Vec<&'a str>) {
+        for c in n.child_elements() {
+            match c.local_name() {
+                "fldData" | "bookmarkStart" | "bookmarkEnd" | "commentRangeStart"
+                | "commentRangeEnd" | "permStart" | "permEnd" | "proofErr" | "sdtPr"
+                | "sdtEndPr" | "smartTagPr" | "customXmlPr" => {}
+                "hyperlink" | "smartTag" | "customXml" | "dir" | "bdo" | "sdt" | "sdtContent" => {
+                    leaves(&c, out)
+                }
+                name => out.push(name),
+            }
+        }
+    }
+    let mut content = Vec::new();
+    leaves(node, &mut content);
+    let all = |names: [&str; 2]| !content.is_empty() && content.iter().all(|n| names.contains(n));
+    (all(["del", "moveFrom"]), all(["ins", "moveTo"]))
+}
+
 /// The element names an item kind may be made from.
 fn names_of(kind: ItemKind) -> &'static [&'static str] {
     use ItemKind::*;
@@ -118,14 +144,16 @@ pub(super) fn check_items(tree: &SpanTree, p: NodeId, m: &TextMap) {
         let above = wrappers_above(tree, item);
         let chain: Vec<WrapperKind> = m.context(item.ctx).map(|c| c.kind).collect();
         assert_eq!(chain, above, "the context chain of {item:?}");
+        // A `w:fldSimple`'s begin and end also leave the modes that all of its content leaves (wordml.md 4.4).
+        let (gone_final, gone_original) = simple_field_sides(&node, item.kind);
         assert_eq!(
             item.vis.in_mode(FINAL),
-            !above.iter().any(|k| k.is_deletion()),
+            !above.iter().any(|k| k.is_deletion()) && !gone_final,
             "{item:?}"
         );
         assert_eq!(
             item.vis.in_mode(ORIGINAL),
-            !above.iter().any(|k| k.is_insertion()),
+            !above.iter().any(|k| k.is_insertion()) && !gone_original,
             "{item:?}"
         );
         assert!(item.vis.in_mode(REDLINE));

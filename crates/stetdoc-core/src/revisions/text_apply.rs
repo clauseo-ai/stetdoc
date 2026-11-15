@@ -5,7 +5,7 @@
 use super::carve::groups;
 use super::compiler::{Compiler, ParaView};
 use super::errors::{internal, readonly};
-use super::gap::SettleMode;
+use super::gap::{Boundary, SettleMode};
 use super::keep::{Keep, keep_for};
 use super::names::is_w;
 use super::text::Piece;
@@ -74,9 +74,11 @@ impl Compiler<'_, '_> {
             // the depth that counts is the one after the last item of the widened range, past the end of a field whose
             // result the range ends with. Replacing exactly a field's result was refused before (`refuse_result_edit`).
             let last_item = loc.items.end.checked_sub(1);
+            let empty_fields = self.empty_simple_fields(p, loc.items.clone())?;
             let carved = self.carve(p, &loc)?;
             let grouped = groups(self.tree_ro(&p.part)?, &carved.units);
             let boundary = self.delete_groups(p, grouped)?;
+            let boundary = self.drop_empty_simple_fields(p, empty_fields, boundary)?;
             if piece.with.is_empty() {
                 return Ok(());
             }
@@ -125,6 +127,54 @@ impl Compiler<'_, '_> {
         };
         self.place_run(&p.part, boundary, run)?;
         Ok(())
+    }
+
+    /// The simple fields with no content among a deletion's items, found before the deletion changes anything: a field that the
+    /// deletion itself empties is removed after the new text is placed (`unwrap_emptied_links`), as the place may be inside it.
+    fn empty_simple_fields(
+        &self,
+        p: &ParaView,
+        items: Range<usize>,
+    ) -> Result<Vec<NodeId>, StetError> {
+        let tree = self.tree_ro(&p.part)?;
+        Ok(p.map
+            .items()
+            .get(items)
+            .unwrap_or_default()
+            .iter()
+            .filter(|i| i.kind == ItemKind::FieldBegin && i.vis.in_mode(Mode::Final))
+            .map(|i| i.node)
+            .filter(|n| super::cleanup::is_empty_simple_field(&tree.node_ref(*n)))
+            .collect())
+    }
+
+    /// Removes the simple fields with no content that a deletion held (`empty_simple_fields`): untracked, they go with the text
+    /// around them, as they have no run to delete (issue #17). A tracked deletion of one was refused before
+    /// (`text::refuse_empty_simple_fields`). Their range markers stay where they were. Returns the place for the new text, moved
+    /// past a field that went.
+    fn drop_empty_simple_fields(
+        &mut self,
+        p: &ParaView,
+        fields: Vec<NodeId>,
+        mut boundary: Option<Boundary>,
+    ) -> Result<Option<Boundary>, StetError> {
+        if fields.is_empty() {
+            return Ok(boundary);
+        }
+        let tree = self.tx.part_mut(&p.part)?;
+        for field in fields {
+            if !super::cleanup::is_attached(tree, field) {
+                continue;
+            }
+            let next = tree.node_ref(field).next_sibling().map(|s| s.id());
+            super::cleanup::unwrap_emptied_links(tree, &[field])?;
+            if let Some(b) = boundary.as_mut()
+                && b.before == Some(field)
+            {
+                b.before = next;
+            }
+        }
+        Ok(boundary)
     }
 
     /// Untracked, an edit that lies inside one text node is done in the node, so that the runs of the

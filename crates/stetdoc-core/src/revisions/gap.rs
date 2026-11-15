@@ -59,7 +59,7 @@ enum Inside {
     Deletion,
     /// A hyperlink, smart tag, custom XML element, directional wrapper or the content of a control.
     Container,
-    /// A simple field: the boundary is inside a field.
+    /// A simple field: the boundary leaves it at its start or its end, and is refused strictly inside, in its result.
     SimpleField,
     /// Something that this release does not edit in: ruby, an alternate content branch.
     Unsupported,
@@ -358,8 +358,9 @@ impl Compiler<'_, '_> {
                     }),
                 };
                 // Something that holds content: a wrapper's children are runs and markers.
-                let content_before =
-                    before_node.is_some_and(|n| !is_w(&n, "pPr") && !is_w(&n, "sdtPr"));
+                let content_before = before_node.is_some_and(|n| {
+                    !is_w(&n, "pPr") && !is_w(&n, "sdtPr") && !is_w(&n, "fldData")
+                });
                 // A control's content is in w:sdtContent, and the node that goes out is the control.
                 let container = if parent.local_name() == "sdtContent" {
                     parent.parent().map(|c| c.id()).unwrap_or(b.parent)
@@ -379,9 +380,28 @@ impl Compiler<'_, '_> {
             match inside {
                 Inside::Paragraph => return Ok((b, ends)),
                 Inside::SimpleField => {
-                    return Err(readonly(
-                        "this position is inside a field, whose result is read-only",
-                    ));
+                    // At the start or the end of a simple field the boundary goes before or after it, as at a complex
+                    // field's, and leaving at the end passes the field's end. Strictly inside, it is in the result.
+                    let Some(grand) = wrapper_parent else {
+                        return Err(internal("a simple field has no parent"));
+                    };
+                    if content_before && content_after {
+                        return Err(readonly(
+                            "this position is inside a field, whose result is read-only",
+                        ));
+                    }
+                    b = if content_after {
+                        Boundary {
+                            parent: grand,
+                            before: Some(container),
+                        }
+                    } else {
+                        ends += 1;
+                        Boundary {
+                            parent: grand,
+                            before: wrapper_next,
+                        }
+                    };
                 }
                 Inside::Unsupported => {
                     return Err(unsupported(

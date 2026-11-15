@@ -163,6 +163,13 @@ impl Compiler<'_, '_> {
             if !item.vis.in_mode(Mode::Final) {
                 continue;
             }
+            // A simple field's begin and end are the `w:fldSimple`, which holds the field's runs: those are the units, and the
+            // element stays around them, as it cannot stand in a `w:del` (design `revisions.md`, 3.6.3).
+            if matches!(item.kind, ItemKind::FieldBegin | ItemKind::FieldEnd)
+                && is_w(&tree.node_ref(item.node), "fldSimple")
+            {
+                continue;
+            }
             let unit = match (i == i0, first_unit) {
                 (true, Some(unit)) => unit,
                 _ => unit_of(tree, item.node),

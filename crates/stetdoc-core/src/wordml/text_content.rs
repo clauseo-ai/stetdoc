@@ -9,7 +9,7 @@ use super::mc;
 use super::names::{M, XML, is_in, is_word_ns, w_attr, w_child};
 use super::text_build::{Builder, Frame, FrameKind, Info};
 use super::text_fields::{Instr, Sep};
-use super::text_model::{CDATA, ItemKind, WrapperKind};
+use super::text_model::{CDATA, ItemKind, Vis, WrapperKind};
 use crate::xml::{NodeKind, NodeRef};
 use std::ops::Range;
 
@@ -375,11 +375,18 @@ impl<'t> Builder<'t> {
             return;
         }
         let inner = self.wrap(info, WrapperKind::FieldSimple, c.id());
-        self.mark(ItemKind::FieldBegin, c.id(), inner);
+        let marks = Info {
+            vis: simple_field_vis(c, inner.vis),
+            ..inner
+        };
+        self.mark(ItemKind::FieldBegin, c.id(), marks);
         self.stack.push(Frame {
             it: c.children(),
             info: inner,
-            kind: FrameKind::Simple { node: c.id() },
+            kind: FrameKind::Simple {
+                node: c.id(),
+                marks,
+            },
         });
     }
 
@@ -412,5 +419,45 @@ impl<'t> Builder<'t> {
         let mut buf = [0u8; 4];
         let text = ch.encode_utf8(&mut buf);
         self.item(ItemKind::Symbol, c.id(), info, text, 0, 0);
+    }
+}
+
+/// The modes a `w:fldSimple`'s begin and end are in. A `w:fldSimple` cannot stand in a revision (the schema puts no
+/// `w:fldSimple` in `w:ins` or `w:del`), so a tracked deletion of one wraps all of its content in `w:del` and leaves the
+/// element: a field whose content is all in deletions (or moves away) is gone in `Final`, and one whose content is all in
+/// insertions (or moves in) is not there in `Original`, as accepting or rejecting removes it (`revisions/cleanup.rs`). The
+/// content is read through the hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo` elements that hold it, since
+/// a deletion inside one of those goes inside it. Range markers, `w:fldData` and a control's properties do not count. A field
+/// with no content, or with some outside a revision, is in the modes of what holds it.
+fn simple_field_vis(c: &NodeRef<'_>, vis: Vis) -> Vis {
+    let mut gone: Option<u8> = None;
+    let mut stack: Vec<NodeRef<'_>> = c.child_elements().collect();
+    stack.reverse();
+    while let Some(k) = stack.pop() {
+        if !is_word_ns(k.namespace()) {
+            return vis;
+        }
+        let side = match k.local_name() {
+            "fldData" | "bookmarkStart" | "bookmarkEnd" | "commentRangeStart"
+            | "commentRangeEnd" | "permStart" | "permEnd" | "proofErr" | "sdtPr" | "sdtEndPr"
+            | "smartTagPr" | "customXmlPr" => continue,
+            "hyperlink" | "smartTag" | "customXml" | "dir" | "bdo" | "sdt" | "sdtContent" => {
+                let mut kids: Vec<NodeRef<'_>> = k.child_elements().collect();
+                kids.reverse();
+                stack.extend(kids);
+                continue;
+            }
+            "del" | "moveFrom" => Vis::FINAL,
+            "ins" | "moveTo" => Vis::ORIGINAL,
+            _ => return vis,
+        };
+        match gone {
+            Some(g) if g != side => return vis,
+            _ => gone = Some(side),
+        }
+    }
+    match gone {
+        Some(g) => Vis(vis.0 & !g),
+        None => vis,
     }
 }

@@ -21,8 +21,9 @@ pub(super) enum FrameKind {
     Content,
     /// The content of a run: text, tabs, field characters, references.
     Run,
-    /// The content of a `w:fldSimple`, which closes its field when the frame ends.
-    Simple { node: NodeId },
+    /// The content of a `w:fldSimple`, which closes its field when the frame ends. `marks` is what the field's begin and
+    /// end are read with.
+    Simple { node: NodeId, marks: Info },
 }
 
 pub(super) struct Frame<'t> {
@@ -252,10 +253,10 @@ impl<'t> Builder<'t> {
 
     /// The end of a frame: a `w:fldSimple` closes its field.
     fn exit(&mut self, frame: Frame<'t>) {
-        let FrameKind::Simple { node } = frame.kind else {
+        let FrameKind::Simple { node, marks } = frame.kind else {
             return;
         };
-        self.mark(ItemKind::FieldEnd, node, frame.info);
+        self.mark(ItemKind::FieldEnd, node, marks);
         self.pop_field(node);
     }
 

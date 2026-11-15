@@ -1,7 +1,8 @@
 //! A field with no stored result has no width (issue #17). A complex field written as `begin`, instruction, `end`, with no
 //! `separate`, and a `w:fldSimple` with no content, are as wide as a field whose result is empty, which is nothing, whatever
 //! the instruction. Every offset after the field means the same character as in the text `view` shows, so an edit by offset
-//! changes what it names, and an offset past the visible text is refused. A range across a simple field stays read-only.
+//! changes what it names, and an offset past the visible text is refused. A tracked deletion of a range across a simple field
+//! with no content is refused, as it holds no run that a deletion could mark; untracked, the field goes with it (issue #24).
 
 use super::tests_edit::*;
 use super::*;
@@ -66,8 +67,8 @@ fn a_field_with_no_result_is_zero_width_in_offsets() {
         for (op, accepted, field) in rows {
             let mut doc = document();
             if token == "p4" && !field {
-                // A range across a simple field is refused whatever its width, so the rows that take the field away do not
-                // apply to it.
+                // A tracked range across a simple field with no content is refused, as it holds nothing a deletion could mark, so
+                // the rows that take the field away do not apply to it.
                 let e = fails(&mut doc, &format!(r#"{{"ref":"{token}",{op}}}"#));
                 assert_eq!(e.code(), ErrorCode::ReadonlyRegion, "{token} {op}: {e}");
                 continue;

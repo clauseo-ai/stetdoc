@@ -236,7 +236,7 @@ json_struct!(PropRev { kind => "kind", tag => "tag" });
 json_struct!(ParaFlags { hidden => "hidden", joins_next => "joins_next", readonly => "readonly" });
 json_struct!(Table { r#ref => "ref", style => "style", cols => "cols", revs => "revs", rows => "rows" });
 json_struct!(Row {
-    r#ref => "ref", change => "change", header => "header", revs => "revs", cells => "cells"
+    r#ref => "ref", change => "change", header => "header", item => "item", revs => "revs", cells => "cells"
 });
 json_struct!(RowRev { kind => "kind", tag => "tag" });
 json_struct!(Cell {

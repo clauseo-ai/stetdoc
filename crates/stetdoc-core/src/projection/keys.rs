@@ -148,6 +148,9 @@ pub(crate) struct RowKey {
     pub r#ref: Option<BlockRef>,
     /// A header row.
     pub header: bool,
+    /// The number of the repeating-section item the row is the content of, `item=N`. It is shown and never
+    /// edited: the alignment of an edited file with its baseline does not compare it (`Key::same_structure`).
+    pub item: Option<u32>,
     /// The row was inserted or deleted.
     pub change: Option<(RowChange, RevRef)>,
     /// Property changes of the row.
@@ -338,6 +341,22 @@ fn quoted(text: &str) -> String {
 }
 
 impl Key {
+    /// True if `edited`, a structure key of an edited file, says what `self`, the baseline's, says. A row's item
+    /// number is only shown, and a working copy written before it was shown has none, so a row line with no
+    /// `item=` matches a row of an item. A row line that shows a number must show the baseline's.
+    pub(crate) fn same_structure(&self, edited: &Key) -> bool {
+        match (self, edited) {
+            (Key::Row(want), Key::Row(got)) if got.item.is_none() => {
+                let shown = RowKey {
+                    item: None,
+                    ..want.clone()
+                };
+                shown == *got
+            }
+            _ => self == edited,
+        }
+    }
+
     /// The key named in plain words, for a message: "the deletion #4 by JD of \"Losses\"".
     pub(crate) fn describe(&self) -> String {
         match self {

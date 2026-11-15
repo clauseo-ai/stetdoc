@@ -537,6 +537,7 @@ impl<'a> StoryCx<'a> {
                 r#ref: self.ref_at(r),
                 change,
                 header,
+                item: crate::wordml::repeating_item(self.tree.node_ref(entry.node)).map(|(_, n)| n),
                 revs,
                 cells,
             },

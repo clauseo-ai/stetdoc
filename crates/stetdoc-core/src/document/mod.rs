@@ -259,3 +259,5 @@ mod tests_scale;
 mod tests_scope_frame;
 #[cfg(test)]
 mod tests_tamper;
+#[cfg(test)]
+mod tests_view_repeating;

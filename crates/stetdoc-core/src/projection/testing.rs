@@ -152,6 +152,7 @@ pub(super) fn sample() -> Projection {
             r#ref: Some(BlockRef::new(RefKind::Row, 1).unwrap()),
             change: None,
             header: true,
+            item: None,
             revs: Vec::new(),
             cells: vec![
                 cell(vec![plain(3, "Item")]),

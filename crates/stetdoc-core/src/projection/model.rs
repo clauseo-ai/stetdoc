@@ -380,6 +380,9 @@ pub(crate) struct Row {
     pub change: Option<RowRev>,
     /// A header row.
     pub header: bool,
+    /// The number of the repeating-section item that the row is the content of, from 1 in its section
+    /// (`wordml::repeating_item`). `None` for a row that is not in an item.
+    pub item: Option<u32>,
     /// Property changes of the row.
     pub revs: Vec<PropRev>,
     /// The cells, left to right.

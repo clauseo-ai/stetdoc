@@ -138,6 +138,7 @@ impl Gen {
                     tag: self.rev_tag(),
                 }),
                 header: self.rng.chance(20),
+                item: self.rng.chance(10).then(|| 1 + self.rng.below(3) as u32),
                 revs: self.prop_revs(),
                 cells: row_cells,
             });

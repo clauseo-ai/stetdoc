@@ -324,12 +324,23 @@ pub(super) fn row_key(r#ref: Option<BlockRef>, rest: &str, at: usize) -> Result<
         ));
     }
     let mut header = false;
+    let mut item = None;
     let mut change = None;
     let mut i = 1;
     while let Some(tok) = toks.get(i) {
         match tok {
             Tok::Word(w) if w == "header" => {
                 header = true;
+                i += 1;
+            }
+            Tok::Named(n, v) if n == "item" => {
+                let number = match &**v {
+                    Tok::Word(w) => w.parse::<u32>().ok().filter(|n| *n >= 1),
+                    _ => None,
+                };
+                item = Some(number.ok_or_else(|| {
+                    ParseError::Invalid("item= takes the item's number, from 1".to_string())
+                })?);
                 i += 1;
             }
             Tok::Word(w) if row_from(w).is_some() => {
@@ -340,7 +351,7 @@ pub(super) fn row_key(r#ref: Option<BlockRef>, rest: &str, at: usize) -> Result<
             }
             _ => {
                 return Err(ParseError::Invalid(
-                    "{row} takes `header`, `inserted` or `deleted`".to_string(),
+                    "{row} takes `header`, `item=N`, `inserted` or `deleted`".to_string(),
                 ));
             }
         }
@@ -349,6 +360,7 @@ pub(super) fn row_key(r#ref: Option<BlockRef>, rest: &str, at: usize) -> Result<
     Ok(Key::Row(RowKey {
         r#ref,
         header,
+        item,
         change,
         revs,
     }))

@@ -42,9 +42,10 @@ pub(crate) fn render_files_in(
 pub(crate) type FileHashes = Vec<(String, [u8; 32])>;
 
 /// The hashes of the readable files of a state as an earlier release rendered them, with every marker that `stet/1` gained
-/// since 0.9.3 turned off: no `label` on a field (decision 0017). A working copy that such a release wrote recorded these
-/// hashes, and its files parse here as they always did, so `document` takes them as this release's (design 5.10). `None`
-/// when no marker of the state is turned off, since then the files render the same either way.
+/// since 0.9.3 turned off: no `label` on a field (decision 0017) and no item number on a row (decision 0019). A working
+/// copy that such a release wrote recorded these hashes, and its files parse here as they always did, so `document` takes
+/// them as this release's (design 5.10). `None` when no marker of the state is turned off, since then the files render the
+/// same either way.
 pub(crate) fn hashes_as_earlier_release(
     state: &State,
     format: &FormatId,
@@ -85,6 +86,7 @@ fn blocks_as_earlier_release(blocks: &mut [Block]) -> bool {
             Block::Paragraph(p) => changed |= inlines_as_earlier_release(&mut p.inlines),
             Block::Table(t) => {
                 for row in &mut t.rows {
+                    changed |= row.item.take().is_some();
                     for cell in &mut row.cells {
                         changed |= blocks_as_earlier_release(&mut cell.blocks);
                     }

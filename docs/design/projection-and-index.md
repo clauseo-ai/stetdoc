@@ -1097,6 +1097,11 @@ p14 per unit
   free.
 - A row that Word marked inserted or deleted is `{row inserted #12 JD}` and `{row deleted #12 JD}`, and a cell is
   `{cell inserted ...}` in front of its cell tags. The paragraphs inside show no revision of their own.
+- A row that is the content of a repeating-section item (a `w:sdt` with `w15:repeatingSectionItem` inside one with
+  `w15:repeatingSection`) is `{row item=2}`, with the item's number in its section from 1, after `header` and before a
+  row change. The rows of one item share the number, and a new section starts at 1 again. It is shown only: the
+  alignment (6) compares a row line that has no `item=` without it, so a working copy written before the token existed
+  still packs, and a row line that shows a number must show the baseline's (decision 0019).
 
 ### 5.7 The knobs and the experiments
 
@@ -1182,7 +1187,10 @@ only blank space that is ignored is the five cases of 5.4.
    against the hash of that file as written, which the complement records, and answers `stale_files` on a
    mismatch: "these files were written by another release of stetdoc. Export again and redo the edit." The check
    is `document`'s, because `document` owns the complement, and `to_batch` hands over the baseline so that nothing
-   renders twice.
+   renders twice. One rendering is known to be an earlier release's and is taken as this one's: the files with every
+   marker that `stet/1` gained since 0.9.3 turned off, which are a field's `label` (decision 0017) and a row's `item=`
+   (decision 0019). On a mismatch, `document` hashes the files rendered that way (`projection::hashes_as_earlier_release`,
+   only when the state has such a marker) and takes a match, since those files parse to the same draft here.
 3. `document` applies the batch like any other (`ops::apply` into a `Tx`, `check`, the scope guard, commit or
    discard). The batch carries `Claim::Base(current token)`, so the version checks of refs cannot refuse it: the
    files were just verified to be at the current version, and a file edit is whole-file.

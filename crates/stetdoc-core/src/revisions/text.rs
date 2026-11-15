@@ -350,9 +350,10 @@ impl Compiler<'_, '_> {
 
 impl Compiler<'_, '_> {
     /// Refuses an insertion point that is strictly inside something whose text is read-only, given the items on its two sides
-    /// (design `revisions.md`, 4.2 rule 1). The point is inside a field, simple or complex, only when both neighbours are in
-    /// its result: at a field's start or end it is outside, and the gap rule puts the new text before or after the field.
-    /// Ruby text and alternate content are refused on either side.
+    /// (design `revisions.md`, 4.2 rule 1). The point is inside a field, simple or complex, or a content control that is
+    /// locked, bound to data or showing its placeholder, only when both neighbours are in it: at its start or its end the point
+    /// is outside, and the gap rule puts the new text before or after it. Ruby text and alternate content are refused on
+    /// either side.
     pub(super) fn check_gap(
         &self,
         p: &ParaView,
@@ -361,6 +362,18 @@ impl Compiler<'_, '_> {
     ) -> Result<(), StetError> {
         let tree = self.tree_ro(&p.part)?;
         let items = p.map.items();
+        let controls_of = |i: Option<usize>| -> Vec<crate::wordml::NodeId> {
+            i.and_then(|i| items.get(i))
+                .map(|item| {
+                    p.map
+                        .context(item.ctx)
+                        .filter(|c| c.kind == WrapperKind::Control)
+                        .map(|c| c.node)
+                        .collect()
+                })
+                .unwrap_or_default()
+        };
+        let (left_controls, right_controls) = (controls_of(left), controls_of(right));
         for i in [left, right].into_iter().flatten() {
             let Some(item) = items.get(i) else {
                 continue;
@@ -368,8 +381,12 @@ impl Compiler<'_, '_> {
             for ctx in p.map.context(item.ctx) {
                 match ctx.kind {
                     WrapperKind::Control => {
+                        let around =
+                            left_controls.contains(&ctx.node) && right_controls.contains(&ctx.node);
                         let c = control(tree.node_ref(ctx.node));
-                        if c.lock.locks_content() || c.data_bound || c.showing_placeholder {
+                        if around
+                            && (c.lock.locks_content() || c.data_bound || c.showing_placeholder)
+                        {
                             return Err(readonly(
                                 "this text is in a content control that is locked, bound to data or showing its placeholder, so it cannot be edited",
                             ));

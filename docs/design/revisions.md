@@ -998,7 +998,10 @@ resolves it as in 3B (an accepted deletion removes the whole `m:r`, where OpenXm
 
 **3.6.2 Content controls and custom XML.** A control is inserted or deleted by markers **around** the `w:sdt`,
 and its text is not wrapped. Edits to the text of an unlocked control are ordinary text edits, with the
-control as a wrapper kept around the new runs.
+control as a wrapper kept around the new runs. The text of a control that is locked against editing (`contentLocked`,
+`sdtContentLocked`), bound to data or showing its placeholder is `readonly_region`, but an insertion at its start or its
+end is outside it, as at a field's edge (4.2 rule 1, issue #26): it goes before or after the `w:sdt`, tracked or not, as
+beside an unlocked control. Only an insertion with both neighbours in the control's text is refused.
 
 **3.6.3 Fields.** Word writes a deleted field as one `w:del` around `begin`, the code, `separate`, the result
 and `end`, with `delInstrText` and `delText`. It writes an inserted field as `ins{begin, code}`, **then the
@@ -1134,9 +1137,12 @@ the place from that.
 
 1. **Container.** If both neighbours are inside the same hyperlink, control or smart tag, the new run goes inside the
    innermost one that they share. Otherwise it goes at the level of the paragraph: text typed at the end of a
-   hyperlink is not part of the link. A gap inside a field's result, simple or complex, is `readonly_region`: both
-   neighbours are in the result (`Compiler::check_gap`). At a field's start or end the gap is outside it, and the new run
-   goes before the field's `begin` or after its `end`, or before or after the `w:fldSimple` (`gap::settle`).
+   hyperlink is not part of the link. A gap inside a field's result, simple or complex, or inside the text of a content
+   control that is locked, bound to data or showing its placeholder, is `readonly_region`: both neighbours are in it
+   (`Compiler::check_gap`, the one test for the three). At its start or end the gap is outside it, and the new run goes
+   before the field's `begin` or after its `end`, before or after the `w:fldSimple`, or before or after the `w:sdt`
+   (`gap::settle`). This agrees with the rule for a replacement (`keep.rs`): a pure insertion at an element's end stays
+   outside it, and one at an element's start goes before it.
 2. **Position.** In that container the run goes after the left neighbour, after every range-**end** marker
    (`bookmarkEnd`, `commentRangeEnd`, `permEnd`, `moveFromRangeEnd`, `moveToRangeEnd`) and after every excluded
    item that follows it, and before the first range-**start** marker or the right neighbour, whichever

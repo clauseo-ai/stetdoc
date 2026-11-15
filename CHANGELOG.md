@@ -7,6 +7,19 @@ All notable changes to stetdoc are recorded here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `view` marks the label of a `MACROBUTTON` or `GOTOBUTTON` field that has no stored result with a trailing `label`:
+  `{field MACROBUTTON "Click here" label}`. Such a label comes from the field code and takes no offsets, while the same
+  text as a stored result takes one offset per character, so the word is the only way to tell the two apart. A field with
+  a stored result prints as before (#17).
+- `view` marks a row that is the content of a repeating section's item with the item's number in its section, counted
+  from 1: `r2 {row item=2}`. The JSON view has `item` on each row. A row insert next to such a row makes a new item, and
+  deleting it removes its item, so the number shows that before the edit (#27).
+- Working copies written by 0.9.3 still open and pack, though this release renders their files with these two markers.
+  The other way does not work: 0.9.3 refuses a working copy that holds `label` or `item=` with `stale_files`, so export
+  again with 0.9.3 if you need to pack there.
+
 ### Fixed
 
 - An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
@@ -51,6 +64,36 @@ All notable changes to stetdoc are recorded here. The format follows
   the same grid column does, as Word's Insert Rows leaves it. Text for a cell that continues a merge is refused with
   `invalid_payload`, which says to pass `""` for that column. Removing the row that holds a merge's start, untracked or
   by accepting or rejecting a tracked change, makes the next row's cell in that column the start (#21).
+- A `replace` whose range started before a field and ended where its result ended was refused as `readonly_region`, and
+  so was replacing all the text of a paragraph that ends with a field, though `delete` took the same range. Such a range
+  holds the whole field: the field is deleted and the new text goes where it was, tracked or not. The rule applies to each
+  piece of the word-level difference, so replacing `beta 1`, where `1` is a field's result, with `beta X` changes
+  only the result and is still refused, while replacing it with `new text` replaces the field (#23).
+- A simple field (`w:fldSimple`) was read-only beyond its result. An insertion right before or after it, a replace
+  starting right after it, a range, paragraph or row deletion over it, and a format of its paragraph were refused as
+  `readonly_region`, though a complex field took them all. A simple field now takes the same edits. A tracked deletion
+  marks its runs deleted inside the element, accepting it removes the field, and changing only its result is still
+  refused. A simple field with no content goes with an untracked deletion and is refused in a tracked one, since there is
+  no run to mark (#24).
+- A `delete` of a whole paragraph emptied it and kept it whenever no paragraph followed it in its container, so the last
+  paragraph of every cell and of the body, and every paragraph before a table, stayed behind, and the receipt said only
+  "deletion #0". Such a paragraph now goes whenever its container does not need it, tracked or not. One that is needed,
+  such as the only paragraph of a cell or the body, one after the last table or between two tables, the body's last
+  paragraph after a section break, or one that holds a section break, is still emptied and kept, and the receipt says so:
+  `p2 emptied and kept`, with the new warning `kept_required_paragraph` that gives the reason. An operation that names a
+  paragraph an earlier operation of the batch removed is refused, so deleting the last paragraph and then inserting after
+  it in the same batch no longer works: insert after the paragraph before it, or delete only its text (#25).
+- An insertion right before or right after an inline content control that is locked, bound to data or showing its
+  placeholder was refused as `readonly_region`, though the text would sit outside the control. It now goes before or after
+  the control, tracked or not, as beside an unlocked control. An insertion inside the control's text is still refused
+  (#26).
+- A `row` insert next to a row of a repeating section's item put the new row inside that item, so one item held two rows,
+  and deleting an item's only row left the empty item behind. The insert now adds a new item around the new row, before or
+  after that item, with a copy of its properties and a new id, as Word's "Insert item" does, and deleting an item's only
+  row removes the item. Deleting every item's row still removes the section (#27).
+- `accept` and `reject` by `author` did not find the revisions that earlier operations of the same batch made, so a
+  batch could not make tracked edits and then accept or reject exactly its own revisions in one call. They now find them.
+  A short author code still means the author that the view of the input showed (#28).
 
 ## [0.9.3] - 2026-11-09
 

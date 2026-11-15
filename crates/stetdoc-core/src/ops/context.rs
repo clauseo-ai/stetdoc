@@ -5,6 +5,7 @@
 //! scope guard and an error that names an operation find the operation of a block.
 
 use super::scope::ScopeSet;
+use crate::api::error::StetError;
 use crate::api::files::Origin as FileOrigin;
 use crate::api::options::{Markup, OffsetUnit, Quotes};
 use crate::api::view::Warning;
@@ -13,6 +14,7 @@ use crate::revisions::notes::RemovedNote;
 use crate::revisions::outcome::{Effect, Origin, Outcome};
 use crate::revisions::resolve::Resolution;
 use crate::revisions::stamp::RevStamp;
+use crate::state::PartsView;
 use crate::wordml::BlockKey;
 use std::collections::HashSet;
 
@@ -61,6 +63,9 @@ pub(crate) struct Marked {
     pub underlined: String,
 }
 
+/// How `ops` reads the authors of the parts as they are: `(code, name)` of each, in order of first appearance.
+pub(crate) type AuthorsOf = fn(PartsView<'_>) -> Result<Vec<(String, String)>, StetError>;
+
 /// What an edit asks of `apply`, besides the batch.
 pub(crate) struct Context<'a> {
     /// The author and the date. Tracked edits write them into every revision.
@@ -73,8 +78,13 @@ pub(crate) struct Context<'a> {
     pub quotes: Quotes,
     /// The unit that the offsets of the batch count.
     pub unit: OffsetUnit,
-    /// `(code, name)` of each revision author, for `accept` and `reject` by author.
+    /// `(code, name)` of each revision author of the document the edit started from: the codes the view showed the caller,
+    /// for `accept` and `reject` by author.
     pub authors: &'a [(String, String)],
+    /// Reads `(code, name)` of each revision author from the parts as they are, so that `accept` and `reject` by author see
+    /// the revisions that earlier operations of the batch made. `document` passes `projection::authors`, which `ops` may not
+    /// call itself.
+    pub authors_now: AuthorsOf,
     /// The blocks the edit may change, if it has a scope.
     pub scope: Option<&'a ScopeSet>,
     /// For an edit of readable files, where each operation came from, so that a message can name a file and a line and not an

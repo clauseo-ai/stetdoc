@@ -93,6 +93,7 @@ impl Document {
                 EditSource::Files(_) => OffsetUnit::Scalar,
             },
             authors: &authors,
+            authors_now: projection::authors,
             scope: scope.as_ref(),
             origins: &envelope.origins,
             notes: &notes,

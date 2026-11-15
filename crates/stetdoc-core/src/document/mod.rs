@@ -194,6 +194,8 @@ mod tests_drift;
 #[cfg(test)]
 mod tests_edit;
 #[cfg(test)]
+mod tests_edit_accept_own;
+#[cfg(test)]
 mod tests_edit_comment_ranges;
 #[cfg(test)]
 mod tests_edit_comment_tables;

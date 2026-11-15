@@ -15,40 +15,58 @@ fn invalid(message: impl Into<String>) -> StetError {
     StetError::new(ErrorCode::InvalidPayload, message)
 }
 
-/// The name of the author a payload means: a full name wins over a code when both match.
-fn author_name(cx: &Context<'_>, given: &str) -> Result<String, StetError> {
-    let by_name = cx.authors.iter().find(|(_, name)| name == given);
-    let by_code = cx.authors.iter().find(|(code, _)| code == given);
-    match by_name.or(by_code) {
-        Some((_, name)) => Ok(name.clone()),
-        None => {
-            let known: Vec<String> = cx
-                .authors
-                .iter()
-                .map(|(code, name)| format!("{code} ({name})"))
-                .collect();
-            Err(StetError::new(
-                ErrorCode::NotFound,
-                format!(
-                    "no revision or comment in the document is by `{given}`. The authors are {}.",
-                    if known.is_empty() {
-                        "none".to_string()
-                    } else {
-                        known.join(", ")
-                    }
-                ),
-            )
-            .with_next("Name an author as the view shows it, by code or by name."))
-        }
+/// The name of the author a payload means, looked up in the document as the batch's earlier operations left it, so that a batch
+/// can accept or reject the revisions it made itself. A full name wins over a code when both match. A code means first what the
+/// view of the document the edit started from showed, because a revision the batch made can come before every revision of an
+/// author in the document and so take that author's code; a code only the batch's own revisions have is looked up after it. A full
+/// name the batch wrote still wins over an equal code from the input's view.
+fn author_name(tx: &Tx<'_>, cx: &Context<'_>, given: &str) -> Result<String, StetError> {
+    let named = |table: &[(String, String)]| {
+        table
+            .iter()
+            .find(|(_, name)| name == given)
+            .map(|(_, name)| name.clone())
+    };
+    let coded = |table: &[(String, String)]| {
+        table
+            .iter()
+            .find(|(code, _)| code == given)
+            .map(|(_, name)| name.clone())
+    };
+    if let Some(name) = named(cx.authors) {
+        return Ok(name);
     }
+    let now = (cx.authors_now)(tx.parts())?;
+    if let Some(name) = named(&now)
+        .or_else(|| coded(cx.authors))
+        .or_else(|| coded(&now))
+    {
+        return Ok(name);
+    }
+    let known: Vec<String> = now
+        .iter()
+        .map(|(code, name)| format!("{code} ({name})"))
+        .collect();
+    Err(StetError::new(
+        ErrorCode::NotFound,
+        format!(
+            "no revision or comment in the document is by `{given}`. The authors are {}.",
+            if known.is_empty() {
+                "none".to_string()
+            } else {
+                known.join(", ")
+            }
+        ),
+    )
+    .with_next("Name an author as the view shows it, by code or by name."))
 }
 
 /// The selector of a payload, before any scope narrows it.
-fn selector(cx: &Context<'_>, op: &ReviewOp) -> Result<Selector, StetError> {
+fn selector(tx: &Tx<'_>, cx: &Context<'_>, op: &ReviewOp) -> Result<Selector, StetError> {
     match (op.all, &op.author, &op.ids) {
         (Some(true), None, None) => Ok(Selector::All),
         (None, Some(given), None) => {
-            let name = author_name(cx, given)?;
+            let name = author_name(tx, cx, given)?;
             // A revision with no author is shown as `Unknown`, and selected by an empty author.
             Ok(Selector::Author(if name == "Unknown" {
                 String::new()
@@ -71,7 +89,7 @@ pub(super) fn step(
     op: &ReviewOp,
     action: Action,
 ) -> Result<Step, StetError> {
-    let selector = selector(cx, op)?;
+    let selector = selector(tx, cx, op)?;
     let Some(scope) = cx.scope else {
         return Ok(Step { action, selector });
     };

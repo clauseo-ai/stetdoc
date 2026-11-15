@@ -402,9 +402,9 @@ op_specs! {
         one_of: ["all", "author", "ids"],
         example: "{\"op\":\"accept\",\"author\":\"JD\"}",
         fields: [
-            ("all", Bool, false, "Every revision.", &[]),
-            ("author", Text, false, "Every revision of this author, by name or by the short code the view shows.", &[]),
-            ("ids", NumberList, false, "The revisions with these ids, the numbers after `#` in the view. A change is resolved whole.", &[]),
+            ("all", Bool, false, "Every revision in the document as the batch's earlier operations left it, the revisions they made included.", &[]),
+            ("author", Text, false, "Every revision of this author, by name or by the short code the view shows. The author is looked up in the document as the batch's earlier operations left it, so a batch can resolve the revisions it made itself, and a code keeps the meaning the view of the input gave it, unless the batch's own author has that code as their full name, in which case the batch's author wins.", &[]),
+            ("ids", NumberList, false, "The revisions with these ids, the numbers after `#` in the view, looked up in the document as the batch's earlier operations left it. A change is resolved whole.", &[]),
         ],
     }
     Reject {
@@ -415,9 +415,9 @@ op_specs! {
         one_of: ["all", "author", "ids"],
         example: "{\"op\":\"reject\",\"ids\":[7,8]}",
         fields: [
-            ("all", Bool, false, "Every revision.", &[]),
-            ("author", Text, false, "Every revision of this author, by name or by the short code the view shows.", &[]),
-            ("ids", NumberList, false, "The revisions with these ids, the numbers after `#` in the view. A change is resolved whole.", &[]),
+            ("all", Bool, false, "Every revision in the document as the batch's earlier operations left it, the revisions they made included.", &[]),
+            ("author", Text, false, "Every revision of this author, by name or by the short code the view shows. The author is looked up in the document as the batch's earlier operations left it, so a batch can resolve the revisions it made itself, and a code keeps the meaning the view of the input gave it, unless the batch's own author has that code as their full name, in which case the batch's author wins.", &[]),
+            ("ids", NumberList, false, "The revisions with these ids, the numbers after `#` in the view, looked up in the document as the batch's earlier operations left it. A change is resolved whole.", &[]),
         ],
     }
 }

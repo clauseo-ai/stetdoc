@@ -72,10 +72,13 @@ pub(super) struct Overlay {
     owner: HashMap<BlockKey, BlockRef>,
 }
 
+/// What to do instead when an operation names a block that the batch deleted.
+const DELETED_NEXT: &str = "Name a block that is still there, such as the paragraph before it, or, to keep the paragraph for a later operation, delete only its text.";
+
 /// How a retirement reads to the operation that comes after it.
 fn earlier(r: BlockRef, reason: Reason) -> String {
     match reason {
-        Reason::Deleted => format!("{r} was deleted earlier in this batch."),
+        Reason::Deleted => format!("{r} was deleted earlier in this batch. {DELETED_NEXT}"),
         Reason::Rejected => {
             format!("{r} was removed earlier in this batch, when its insertion was rejected.")
         }
@@ -257,7 +260,9 @@ impl Tx<'_> {
     fn check_attached(&self, r: BlockRef, key: &BlockKey) -> Result<(), StetError> {
         let view = self.parts();
         if !view.is_attached(key)? {
-            return Err(stale(format!("{r} was deleted earlier in this batch.")));
+            return Err(stale(format!(
+                "{r} was deleted earlier in this batch. {DELETED_NEXT}"
+            )));
         }
         let in_story = match view.id(key.part()) {
             Some(part) => view.is_story(part)?,

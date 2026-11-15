@@ -156,6 +156,10 @@ can open the file`. Tell the user that the input did not open in Word and the ou
 After you insert, delete or re-level a list item, read any `ref_retargeted`, `ref_unresolved` or `definition_removed`
 warning and fix the typed references (such as `Clause 16.2(b)`) in the same batch, or confirm the move with the user.
 
+A `delete` of a paragraph that Word needs, such as the only paragraph of a cell or one between two tables, deletes its
+text and keeps the empty paragraph under the same ref. The receipt says `p2 emptied and kept` and gives a
+`kept_required_paragraph` warning with the reason.
+
 When the document holds tracked changes you did not make, receipts and views say so in a line such as
 `4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #0 insert p1 "shall pay ", ...`, followed by
 `Tell the user about them.` Do it: name who made them and what they change. `stetdoc view FILE --revisions --context 1`

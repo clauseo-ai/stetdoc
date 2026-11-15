@@ -75,6 +75,18 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
     let mut parts: Vec<String> = comment.into_iter().collect();
     let several = op.blocks.len() + op.added.len() > 1;
     parts.extend(op.marked.iter().map(|m| marked(m, several)));
+    // A deleted paragraph that its container needs is emptied, not removed, and the line says so before its revisions.
+    parts.extend(
+        op.warnings
+            .iter()
+            .filter(|w| w.code == WarningCode::KeptRequiredParagraph)
+            .map(|w| {
+                format!(
+                    "{} emptied and kept",
+                    w.block.as_deref().unwrap_or("a paragraph")
+                )
+            }),
+    );
     parts.extend(op.revisions.iter().map(|c| match c.ids.first() {
         Some(id) => format!("{} #{id}", kind_word(c.kind)),
         None => kind_word(c.kind).to_string(),

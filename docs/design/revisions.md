@@ -772,12 +772,45 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
 - The mark gets `del` when a paragraph follows P in the same container and P carries no section break.
   This is what Word writes (52 whole-paragraph deletions in the corpus), and the next paragraph's properties
   are left alone.
-- Otherwise the mark is left as it is: **the last paragraph of a container keeps its mark** (a `w:tc` must
-  end with a paragraph, and Word writes it that way: `RP040` deletes the content of its last paragraph and leaves the
-  mark plain), and **a paragraph that carries a section break keeps its mark**, so that accepting leaves an
-  empty paragraph that still ends the section. Word would delete the section break with the mark (it did in
-  `n830205`, 7 times). stetdoc does not, on purpose: a lost section drops its headers and footers silently. This is a
-  deliberate difference from Word, and `FIDELITY.md` will say so (decision 8).
+- The mark gets `del` as well when no paragraph follows P but its container does not need it
+  (`revisions/required.rs`, issue #25): the first block of a container before a table, a paragraph between a paragraph
+  and a table when a paragraph whose mark stays follows later in the container, and the last paragraph of a cell, the body, a header, a footer, a note or a comment when a paragraph whose
+  mark stays is left before it. Accepting removes the empty paragraph (3.2.5) and moves its range markers to the end of
+  the paragraph before it. Word's own gesture for the last paragraph is different: its final mark cannot be selected, so
+  it deletes the mark of the paragraph before and the last paragraph's text, and the survivor ends with the last
+  paragraph's properties. stetdoc deletes the last paragraph's own mark instead, so the survivor keeps its own properties,
+  and an insertion after the paragraph before it in the same batch still has a place (checklist C3).
+- Otherwise P is **required** and the mark is left as it is, so that accepting leaves P empty. The neighbours are read as
+  accepting would leave them: a paragraph whose mark is deleted joins the one after it, so it does not count. P is
+  required when removing it would leave a cell, the body, a header, a footer, a note, a comment or a text box with no
+  paragraph, or not ending with a paragraph directly (a `w:tc` must end with a paragraph, and Word writes it that way:
+  `RP040` deletes the content of its last paragraph and leaves the mark plain). So the last paragraph of such a container
+  stays when only tables, block-level content controls, custom XML elements or `w:altChunk` parts follow it, even when
+  the container already ended with one of them; when it stands between two tables, which
+  Word would join; when it is the body's last paragraph and the paragraph before it ends a section, which would leave the
+  last section empty; and when it is the last paragraph of a block-level content control or another wrapper of blocks.
+  **A paragraph that carries a section break keeps its mark** too, so that accepting leaves an empty paragraph that still
+  ends the section. Word would delete the section break with the mark (it did in `n830205`, 7 times). stetdoc does not,
+  on purpose: a lost section drops its headers and footers silently. This is a deliberate difference from Word, and
+  `FIDELITY.md` says so (decision 8). A required paragraph is reported: the call's `Effect::kept` names it with the
+  reason, and the receipt turns it into a `kept_required_paragraph` warning and says `p2 emptied and kept` in the
+  operation's line (decision 0018).
+- Untracked, the same rule decides: a paragraph that is not required is removed at once, and what is left in it (range
+  markers, comment references) goes to the start of the paragraph after it or, with no paragraph after it, to the end of
+  the paragraph before it. With neither, a paragraph that still holds markers is kept, and reported as required. Tracked,
+  such a paragraph keeps its mark for the same reason, since accepting would keep it to hold the markers.
+- A paragraph right before content that is not a block (a `w:altChunk`) is kept, tracked and untracked alike: a deleted
+  mark there reads as joining it with the paragraph after that content, which accepting cannot do (R8).
+- A paragraph that a batch removed is gone for the rest of the batch, whether it was in the middle or the last of its
+  container: a later `insert` after it or `merge` with it is refused (tracked `readonly_region`, since its mark is a
+  pending deletion; untracked `stale_ref`), and the message says to name the paragraph before it, or to delete only its
+  text so that it stays.
+- With no paragraph after it, a paragraph whose deletion leaves content that is not range markers or comment references
+  (the shell of a content control, a simple field) keeps its mark as well, since accepting a deleted mark there drops only
+  the revision (3.2.5), and the Final view and accept all would disagree. It is reported the same way. Untracked, such a
+  paragraph is kept too. The same holds for another author's pending deletion in it: accepting only the author's
+  revisions leaves that deletion, so the paragraph would stay and Final would disagree with it (law L5). Such a
+  paragraph keeps its mark, reported with the reason that the other author's change must be resolved first.
 - If the mark is our own pending `ins`, it is removed with the paragraph's content, and when all the
   content was ours too the element is removed outright (`removed_own`, 4.1), and whatever revision of ours was inside it
   is listed in `swallowed`. A mark that is another author's `ins` gets our `del` after it. A mark that is a `moveTo`
@@ -1266,7 +1299,7 @@ message says to accept or reject that change first.
 | properties | the properties are set on the container. The author's own pending `*PrChange` there stays, and its snapshot is still the baseline. Another author's is `readonly_region` (decision 4) |
 | `insert_block`, `split_block` | a new paragraph with no marks of ours |
 | `merge_blocks` | Q's base properties are aligned to P's, then the join of 6.2: P's element survives, Q's `w:pPr` moves into it, Q's content is appended and Q is removed. Declares `merge(first, second, into: P)` |
-| `delete_block` | the paragraph is removed. A paragraph with a section break, or the last one of a container, is emptied and kept |
+| `delete_block` | the paragraph is removed, unless its container needs it (3.2.2): then it is emptied and kept, and the receipt warns `kept_required_paragraph` |
 | rows | a row is copied by the copy rule and filled, or removed |
 
 The refusals that do not depend on tracking (a deleted block, a field, a locked control) still apply.
@@ -1637,7 +1670,7 @@ to change this design, and it is not entered in a list of exceptions. The one th
 | delete a word | `FA/001-DeletedRun`, `RP002-Deleted-Text` | `replace_text(.., "")` |
 | insert a run | `FA/010-InsertedRun`, `RP003-Inserted-Text` | `replace_text(at..at, text)` |
 | delete a paragraph | `FA/013-DeletedParagraph` | `delete_block` |
-| delete from the end of one paragraph through the end of the last | `RP040-Deleted-Paras-at-End` | `delete_block(P2)`, `delete_block(P3)`, `merge_blocks(P1, P3)`. Word's file has P1's text kept and its mark deleted, P2 deleted whole, and P3's content deleted with its mark kept |
+| delete from the end of one paragraph through the end of the last | `RP040-Deleted-Paras-at-End` | `delete_block(P2)`, `replace_text(P3, all, "")`, `merge_blocks(P1, P3)`. Word's file has P1's text kept and its mark deleted, P2 deleted whole, and P3's content deleted with its mark kept. `delete_block(P3)` would delete P3's own mark now (3.2.2), and a merge with it afterwards is refused, as it is for a deleted middle paragraph |
 | delete numbered paragraphs | `FA/002-DeletedNumberedParagraphs` | `delete_block` five times |
 | insert a paragraph before | `FA/009-InsertedParagraph` | `insert_block(Before)`: shape X before the twin |
 | append paragraphs | `RP039-Inserted-Paras-at-End` | `insert_block(P1, After)` and then `insert_block(P2, After)`: shape Y at the end, twice, since check C11 (3.2.1). Word's file has the first paragraph plain and an inserted mark and inserted content on each new one, which Word's Reject All resolves to an empty last paragraph; stetdoc's keeps the last mark live, so rejecting gives the original back |
@@ -1694,7 +1727,7 @@ does what is described".
 |---|---|---|
 | C1 | Tracked-delete the paragraph mark between a Heading 1 paragraph and a Normal paragraph that both have text. Accept all | which `pPr` the merged paragraph has when a deleted mark is accepted (3.2.4, 6.3). If Word keeps the first paragraph's, resolution changes to "first" and the alignment `pPrChange` becomes unnecessary. For rejecting an inserted mark `FA/005` already says "later" |
 | C2 | Press Enter inside a Heading 1 paragraph, set the second half to Normal, with tracking on. Reject all | the same, for an inserted mark, where the two halves differ (`FA/005` has equal ones in effect) |
-| C3 | Tracked-delete a mark that has no paragraph after it: the last paragraph of a cell, of the body, before a table. Accept all | the "nothing after" rule of 3.2.5 |
+| C3 | Tracked-delete a mark that has no paragraph after it: the last paragraph of a cell, of the body, before a table. Accept all | the "nothing after" rule of 3.2.5, and the removal of a paragraph its container does not need (3.2.2, issue #25). Open a file where stetdoc wrote `del` on the body's final mark: Word must open it, Accept All must leave the paragraph before it last with its own properties and no empty paragraph after it, and Reject All must give back the source. If Word keeps an empty final paragraph, the rule of 3.2.2 changes |
 | C4 | Open a file with `w:date="...T14:00:00Z"` and no `dateUtc`, and one with seconds (`14:03:27Z`) | decision 5 and 5.3: how Word shows a date with no `dateUtc`, and one with seconds |
 | C5 | Insert text, save, reopen after a minute, delete part of it with the same author | own pending text removed outright (4.1) |
 | C6 | Insert text in the middle of another author's insertion. Look at the Reviewing pane | the split in 4.2: three changes |

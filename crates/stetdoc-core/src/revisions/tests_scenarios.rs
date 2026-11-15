@@ -108,13 +108,13 @@ fn delete_a_paragraph_in_the_middle_deletes_its_content_and_its_mark_and_touches
 
 #[test]
 fn delete_from_the_end_of_one_paragraph_through_the_end_of_the_last_keeps_the_last_mark() {
-    // RP040-Deleted-Paras-at-End
+    // RP040-Deleted-Paras-at-End: Word deletes the last paragraph's text and keeps its mark, so the first paragraph's mark goes.
     let s = tracked(
         &format!("{}{}{}", p(&r("A")), p(&r("B")), p(&r("C"))),
         |c, _, ks| {
             vec![
                 c.delete_block(&ks[1]),
-                c.delete_block(&ks[2]),
+                c.replace_text(&ks[2], 0..1, ""),
                 c.merge_blocks(&ks[0], &ks[2]),
             ]
         },

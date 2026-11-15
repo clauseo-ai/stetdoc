@@ -329,11 +329,14 @@ pub enum WarningCode {
     RefUnresolved,
     /// The edit removed the definition of a term that the document still uses.
     DefinitionRemoved,
+    /// A deleted paragraph was emptied and kept, not removed, because its container needs it, for example as the only
+    /// paragraph of a cell, between two tables or holding a section break. The message names the reason (decision 0018).
+    KeptRequiredParagraph,
 }
 
 impl WarningCode {
     /// Every code, in the order of the design's table.
-    pub const ALL: [WarningCode; 38] = [
+    pub const ALL: [WarningCode; 39] = [
         WarningCode::LooksHidden,
         WarningCode::HiddenText,
         WarningCode::NumberingApproximate,
@@ -372,6 +375,7 @@ impl WarningCode {
         WarningCode::RefRetargeted,
         WarningCode::RefUnresolved,
         WarningCode::DefinitionRemoved,
+        WarningCode::KeptRequiredParagraph,
     ];
 
     /// The snake_case name used on the wire.
@@ -415,6 +419,7 @@ impl WarningCode {
             WarningCode::RefRetargeted => "ref_retargeted",
             WarningCode::RefUnresolved => "ref_unresolved",
             WarningCode::DefinitionRemoved => "definition_removed",
+            WarningCode::KeptRequiredParagraph => "kept_required_paragraph",
         }
     }
 

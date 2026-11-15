@@ -255,7 +255,7 @@ impl Compiler<'_, '_> {
                     return Err(readonly(if movable {
                         "the last paragraph of this container holds another author's pending change of paragraph properties, which a new paragraph after it would have to take over. Insert it without properties, or resolve that change first."
                     } else {
-                        "the mark of the last paragraph of this container is a pending deletion or move, so nothing can follow it. Resolve that change first."
+                        "the mark of the last paragraph of this container is a pending deletion or move, so nothing can follow it. Insert after the paragraph before it instead, or, to keep this paragraph, delete only its text. A deletion made before this batch must be resolved first."
                     }));
                 }
                 Shape::Y { anchor: entry.node }

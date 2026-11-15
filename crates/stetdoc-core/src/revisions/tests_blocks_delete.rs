@@ -55,11 +55,11 @@ fn deleting_a_paragraph_deletes_its_text_and_its_mark_and_leaves_the_next_paragr
 }
 
 #[test]
-fn the_last_paragraph_of_a_container_keeps_its_mark() {
+fn the_last_paragraph_of_a_container_loses_its_mark_when_a_paragraph_before_it_is_left() {
     let s = delete(&three(), 2);
     s.assert_clean();
-    assert!(!s.xml.contains("<w:rPr><w:del"), "{}", s.xml);
-    assert_eq!(s.xml.matches("<w:del ").count(), 1, "{}", s.xml);
+    assert!(s.xml.ends_with(&format!("<w:p><w:pPr>{}</w:pPr><w:del w:id=\"0\" {AT}><w:r><w:delText xml:space=\"preserve\">Last</w:delText></w:r></w:del></w:p>", mark_del(1))), "{}", s.xml);
+    assert!(s.effect(0).kept.is_empty());
 }
 
 #[test]
@@ -74,17 +74,6 @@ fn a_paragraph_that_carries_a_section_break_keeps_its_mark() {
     s.assert_clean();
     assert!(!s.xml.contains("<w:rPr><w:del"), "{}", s.xml);
     assert!(s.xml.contains("<w:sectPr>"), "{}", s.xml);
-}
-
-#[test]
-fn a_paragraph_before_a_table_keeps_its_mark_too() {
-    let body = format!(
-        "<w:p>{}</w:p><w:tbl><w:tblPr/><w:tblGrid><w:gridCol w:w=\"3000\"/></w:tblGrid><w:tr><w:tc><w:p/></w:tc></w:tr></w:tbl>",
-        r("before")
-    );
-    let s = delete(&body, 0);
-    s.assert_clean();
-    assert!(!s.xml.contains("<w:rPr><w:del"), "{}", s.xml);
 }
 
 #[test]
@@ -193,7 +182,7 @@ fn deleting_a_paragraph_nests_our_del_in_another_authors_insertion_and_marks_it(
 }
 
 #[test]
-fn untracked_a_deleted_paragraph_goes_unless_it_is_last_or_ends_a_section() {
+fn untracked_a_deleted_paragraph_goes_unless_its_container_needs_it() {
     let s = with_compiler(&three(), Track::Untracked, |c, _, ks| {
         vec![c.delete_block(&ks[1])]
     });
@@ -202,7 +191,7 @@ fn untracked_a_deleted_paragraph_goes_unless_it_is_last_or_ends_a_section() {
     let last = with_compiler(&three(), Track::Untracked, |c, _, ks| {
         vec![c.delete_block(&ks[2])]
     });
-    assert_eq!(last.fin, ["Title", "Body", ""]);
+    assert_eq!(last.fin, ["Title", "Body"]);
 }
 
 // --- merge

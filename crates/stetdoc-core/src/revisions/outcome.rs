@@ -52,6 +52,15 @@ pub(crate) struct Origin {
     pub from: Vec<BlockKey>,
 }
 
+/// A paragraph that a deletion emptied and kept, because its container needs it (`required.rs`).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct KeptParagraph {
+    /// The paragraph.
+    pub block: BlockKey,
+    /// Why it stays.
+    pub reason: super::required::KeptReason,
+}
+
 /// What one call did.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Effect {
@@ -65,6 +74,8 @@ pub(crate) struct Effect {
     pub folded: Vec<Folded>,
     /// Ids of revisions that went with an element removed outright.
     pub swallowed: Vec<i64>,
+    /// Paragraphs that a deletion emptied and kept, because their containers need them.
+    pub kept: Vec<KeptParagraph>,
     /// Elements created. Their refs are minted at commit.
     pub new_blocks: Vec<BlockKey>,
     /// Where each new or surviving block came from.
@@ -91,6 +102,7 @@ impl Effect {
             && self.removed_own.is_empty()
             && self.folded.is_empty()
             && self.swallowed.is_empty()
+            && self.kept.is_empty()
             && self.new_blocks.is_empty()
             && self.origins.is_empty()
             && self.survivor.is_none()

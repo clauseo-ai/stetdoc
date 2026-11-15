@@ -232,6 +232,8 @@ mod tests_edit_range_ends;
 #[cfg(test)]
 mod tests_edit_reject;
 #[cfg(test)]
+mod tests_edit_required;
+#[cfg(test)]
 mod tests_edit_review;
 #[cfg(test)]
 mod tests_edit_simple_fields;

@@ -124,11 +124,11 @@ fn a_paragraph_or_a_row_that_holds_a_simple_field_can_be_deleted() {
         r#"{"op":"row","ref":"r1","action":"delete"}"#,
         "See page {=PAGE|1} for details. / Ends with {=PAGE|1} / Other row / Tail.",
     );
-    // A paragraph that ends its container is kept, empty, and the field leaves it.
+    // A paragraph before a table goes with its field, as the body does not need it (issue 25).
     every_way_exactly(
         &body,
         r#"{"op":"delete","ref":"p2"}"#,
-        "See page {=PAGE|1} for details. /  / Page {=PAGE|1} / Other row / Tail.",
+        "See page {=PAGE|1} for details. / Page {=PAGE|1} / Other row / Tail.",
     );
 }
 
@@ -282,7 +282,7 @@ fn a_simple_field_with_no_content_goes_untracked_and_is_refused_tracked() {
         (r#"{"op":"delete","ref":"p1"}"#, "Tail. / Last {=PAGE|}one."),
         (
             r#"{"op":"delete","ref":"p3"}"#,
-            "Alpha {=PAGE|}beta. / Tail. / ",
+            "Alpha {=PAGE|}beta. / Tail.",
         ),
     ] {
         let mut doc = open(&body);

@@ -57,6 +57,10 @@ Each of these was decided in a design, with the evidence there.
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
+- **Deleting the last paragraph of a cell or of the body deletes its own mark**, when a paragraph is left before it, so
+  accepting removes it and the paragraph before keeps its own properties. Word deletes the mark of the paragraph before
+  instead, and the survivor ends with the last paragraph's properties. A paragraph the container needs is emptied and kept,
+  and the receipt says so (`kept_required_paragraph`). See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
 - **An insertion after a paragraph goes directly after it**, before any bookmark, permission range or other markup that
   follows, and **a section break stays on that paragraph**. Word's Enter shape moves the break onto the new paragraph, so
   after a paragraph that ends a section stetdoc writes a self-contained new paragraph instead, with the next paragraph's

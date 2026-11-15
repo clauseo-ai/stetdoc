@@ -229,6 +229,25 @@ fn run_review(
     Ok(())
 }
 
+/// A `kept_required_paragraph` warning for each paragraph that the operation's calls emptied and kept, because its
+/// container needs it.
+fn kept_warnings(compiler: &Compiler<'_, '_>, done: &mut Done) {
+    let kept: Vec<_> = done.effects.iter().flat_map(|e| e.kept.iter()).collect();
+    for k in kept {
+        let shown = compiler
+            .tx()
+            .parts()
+            .ref_of(&k.block)
+            .map_or_else(|| "the paragraph".to_string(), |r| r.to_string());
+        done.warnings.push(target::warning(
+            WarningCode::KeptRequiredParagraph,
+            compiler.tx(),
+            Some(&k.block),
+            k.reason.sentence(&shown),
+        ));
+    }
+}
+
 /// Applies a batch to a transaction. The first failure ends it, with the index of the operation. Nothing is committed here.
 ///
 /// One compiler serves the operations that write, and a run of `accept` and `reject` ends it, resolves, and starts a new one,
@@ -270,6 +289,7 @@ pub(crate) fn apply(
                     .remove_notes_of_dropped_references()
                     .map_err(|e| at(e, n))?;
                 done.notes_removed.extend(gone);
+                kept_warnings(&compiler, &mut done);
                 // The index of revisions is built at the first `resolve`, and kept current by what the calls did before it.
                 if ops.iter().skip(n + 1).any(is_review) {
                     for effect in &done.effects {

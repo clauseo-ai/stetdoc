@@ -100,6 +100,7 @@ mod redline_split;
 mod redline_text;
 pub(crate) mod redline_types;
 mod redline_wrap;
+pub(crate) mod required;
 pub(crate) mod resolve;
 mod resolve_control;
 mod resolve_mark;
@@ -189,6 +190,8 @@ mod tests_redline_blocks;
 mod tests_redline_law;
 #[cfg(test)]
 mod tests_refs;
+#[cfg(test)]
+mod tests_required;
 #[cfg(test)]
 mod tests_resolve;
 #[cfg(test)]

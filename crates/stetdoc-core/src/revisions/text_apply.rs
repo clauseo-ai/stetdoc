@@ -70,7 +70,10 @@ impl Compiler<'_, '_> {
                     self.format_source(p, left, right)?
                 }
             };
-            let last_item = loc.spans.last().map(|s| s.item);
+            // The new text goes where the whole range was, which `cover` widened to the whole of every field it touches:
+            // the depth that counts is the one after the last item of the widened range, past the end of a field whose
+            // result the range ends with. Replacing exactly a field's result was refused before (`refuse_result_edit`).
+            let last_item = loc.items.end.checked_sub(1);
             let carved = self.carve(p, &loc)?;
             let grouped = groups(self.tree_ro(&p.part)?, &carved.units);
             let boundary = self.delete_groups(p, grouped)?;

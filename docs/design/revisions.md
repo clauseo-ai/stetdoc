@@ -984,6 +984,16 @@ and `end`, with `delInstrText` and `delText`. It writes an inserted field as `in
   field that spans paragraphs (a table of contents) can be deleted only by deleting every paragraph that holds
   a piece, one `delete_block` each, and a paragraph that holds `begin` or the closing `end` of a field that goes
   beyond it is `readonly_region`.
+- A replacement works piece by piece of the word-level difference (2.5), and a piece that holds a whole field deletes the
+  field and puts its new text where it was. A piece holds the field when it covers all of the field's result and starts
+  before the field or ends after it, so a piece that starts before a field and ends where its result ends holds it, as
+  does the piece of a replacement of all the text of a paragraph that ends with a field (issue #23): the new text goes
+  where the field's `end` was, outside the field. A piece that starts where a field starts and ends where its result ends
+  is exactly the result: its new text would be the field's result, and the replacement is `readonly_region`
+  (`text::refuse_result_edit`, issue #16). The check is on the pieces, not on the range the operation names: replacing
+  `beta 1`, where `1` is a field's result, with `beta X` keeps `beta ` and leaves one piece that is exactly the result,
+  which is refused, while replacing it with `new text` leaves one piece that holds the field. A deletion of a piece that
+  is exactly the result deletes the field.
 - `w:fldSimple` cannot sit inside a `w:del` (schema), so a range that covers a `w:fldSimple` whole is
   `readonly_region`. A range that is inside the result of a field is also refused, as the text model flags
   results read-only.

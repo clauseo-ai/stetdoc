@@ -244,6 +244,9 @@ impl Compiler<'_, '_> {
                 .ok_or_else(|| invalid("a range lies outside the paragraph"))?;
             let loc = cover(p, loc)?;
             self.check_items(p, loc.items.clone())?;
+            if !piece.with.is_empty() {
+                refuse_result_edit(p, piece, &loc)?;
+            }
             if self.tracked() {
                 self.check_deletable(p, loc.items.clone())?;
             }
@@ -384,6 +387,40 @@ pub(super) fn cover(p: &ParaView, mut loc: Located) -> Result<Located, StetError
     }
     loc.items = lo..hi;
     Ok(loc)
+}
+
+/// Refuses new text in place of exactly a field's result: a range, widened by `cover`, that starts where a field starts and
+/// ends where its result ends. Both edges are at the field, so the new text would be the field's result, which is read-only
+/// (design `revisions.md`, 4.2). A range that starts before the field or ends after it holds the whole field, and its new
+/// text replaces the field.
+pub(super) fn refuse_result_edit(
+    p: &ParaView,
+    piece: &Piece,
+    loc: &Located,
+) -> Result<(), StetError> {
+    let items = p.map.items();
+    let starts = final_starts(&p.map);
+    let position = |node: crate::wordml::NodeId, kind: ItemKind| {
+        items.iter().position(|i| i.node == node && i.kind == kind)
+    };
+    for f in p.map.fields().iter().filter(|f| f.begins_here) {
+        let begin = position(f.begin, ItemKind::FieldBegin);
+        let end = f.end.and_then(|e| position(e, ItemKind::FieldEnd));
+        let (Some(b), Some(e)) = (begin, end) else {
+            continue;
+        };
+        let at = |i: usize| starts.get(i).copied();
+        if loc.items.contains(&b)
+            && loc.items.contains(&e)
+            && at(b) == Some(piece.start)
+            && at(e) == Some(piece.end)
+        {
+            return Err(readonly(
+                "this position is inside a field, whose result is read-only",
+            ));
+        }
+    }
+    Ok(())
 }
 
 /// Refuses text that XML cannot carry, and a carriage return, which is not a character of the text

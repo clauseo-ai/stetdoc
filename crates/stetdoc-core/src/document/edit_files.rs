@@ -108,6 +108,22 @@ fn changed_blocks(origins: &[Origin]) -> usize {
 }
 
 impl Document {
+    /// Checks the recorded hashes against what this release renders, and when they differ, against what an earlier release
+    /// rendered, with the markers that `stet/1` gained since turned off: such a release's files parse the same here.
+    fn check_skew_or_earlier_release(
+        &self,
+        files: &ReadableFiles,
+        now: &[(String, [u8; 32])],
+    ) -> Result<(), StetError> {
+        let Err(error) = check_skew(&files.rendered, now) else {
+            return Ok(());
+        };
+        match projection::hashes_as_earlier_release(&self.state, &files.format)? {
+            Some(before) if check_skew(&files.rendered, &before).is_ok() => Ok(()),
+            _ => Err(error),
+        }
+    }
+
     /// What an edit of these files comes to, ready to apply.
     pub(super) fn plan_files(&self, files: &ReadableFiles) -> Result<Envelope<'static>, StetError> {
         let planned = match projection::to_batch(&self.state, files, &self.limits) {
@@ -120,12 +136,12 @@ impl Document {
                         .iter()
                         .map(|(n, text)| (n.clone(), sha256(text.as_bytes())))
                         .collect();
-                    check_skew(&files.rendered, &hashes)?;
+                    self.check_skew_or_earlier_release(files, &hashes)?;
                 }
                 return Err(error);
             }
         };
-        check_skew(&files.rendered, &planned.baseline)?;
+        self.check_skew_or_earlier_release(files, &planned.baseline)?;
         let blocks = changed_blocks(&planned.origins);
         if blocks as u64 > u64::from(self.limits.max_batch_ops) {
             return Err(StetError::new(

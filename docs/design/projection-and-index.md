@@ -336,8 +336,8 @@ pub enum Inline {
 pub enum Atom { PageBreak, ColumnBreak, NoteRef { kind: NoteKind, ordinal: u32 }, NoteMark { kind: NoteKind },
                 Object(ObjectInfo), Math(String), Auto(AutoKind) }
 pub struct ObjectInfo { pub kind: ObjectKind, pub alt: Option<String>, pub text_box: Option<Vec<String>> }
-pub struct Field { pub keyword: String, pub text: String, pub width: u32, pub target: Option<BlockRef>,
-                   pub opens: bool, pub closes: bool, pub dirty: bool }
+pub struct Field { pub keyword: String, pub text: String, pub width: u32, pub label: bool,
+                   pub target: Option<BlockRef>, pub opens: bool, pub closes: bool, pub dirty: bool }
 pub struct RevTag { pub id: i64, pub author: u32 /* index into Head.authors */, pub date: Option<Arc<str>>,
                     pub peer: Option<i64> /* the id of the other end of a move */ }
 // The kind is carried by the place that holds the tag, so that no combination that cannot happen can be written:
@@ -369,7 +369,9 @@ pub struct RevTag { pub id: i64, pub author: u32 /* index into Head.authors */, 
   rejects edits, and a placeholder is not content (wordml 3.8, revisions 2.4).
 - **Fields** are atoms with their result. `text` is the displayed result with nested field codes dropped and
   nested atoms flattened, and `width` is the number of characters the result takes in the paragraph's `Final`
-  text, which is what keeps an offset exact when the text is shown differently from how it is counted. `target`
+  text, which is what keeps an offset exact when the text is shown differently from how it is counted. `label`
+  is true when `text` is not a stored result but the label that a `MACROBUTTON` or `GOTOBUTTON` with no stored
+  result shows from its field code, which takes no characters, so its `width` is 0. `target`
   is the block that a `REF` or `PAGEREF` resolves to, from `index`. A field that begins in one paragraph and ends
   in another gives each paragraph its part, with `opens` and `closes` saying which ends are here.
 - **Hidden and looks-hidden** wrap the runs they apply to. They are decided per run by `Cascade::hidden` and
@@ -533,7 +535,8 @@ staged state of a dry run. The steps:
    its result and the fields nested in either. The result is one string (an atom inside it takes one character of
    `width` and none of `text`), `width` counts the characters that are in `Final`, and `opens` and `closes` say
    which ends are in this paragraph. A zero-width comment mark inside an extent is kept after the field. A field
-   with no stored result has no width, and a `MACROBUTTON` or `GOTOBUTTON` with none shows the text its code holds.
+   with no stored result has no width, and a `MACROBUTTON` or `GOTOBUTTON` with none shows the text its code holds,
+   with `label` set.
 7. **Tables.** Through `wordml`'s block views, so the rows and cells are found as the scan found them: `cols` is the
    grid, or the widest row if that is more, a cell's column honours `gridBefore`, and a nested table is a block of
    its cell.
@@ -1016,7 +1019,7 @@ else in this document is independent of them.
 | `Atom::Object` | `{img "alt"}`, `{shape "alt"}`, `{chart "alt"}`, `{object "alt"}`, `{textbox box "line one / line two"}`, and `{textbox "alt" box "line one / line two"}` when it has both | one seam, the alt text and the text box text in the key |
 | `Atom::Math` | `{math "x^2 + y"}` | one seam |
 | `Atom::PageBreak`, `ColumnBreak`, `Auto` | `{pagebreak}`, `{colbreak}`, `{page}` | one seam |
-| `Field` | `{field REF "4.2" ->p57}`, and `{field TOC start "..."}`, `{field TOC more "..."}`, `{field TOC end "..."}` for a result that spans paragraphs | one seam, the keyword, the result and the target in the key |
+| `Field` | `{field REF "4.2" ->p57}`, `{field TOC start "..."}`, `{field TOC more "..."}`, `{field TOC end "..."}` for a result that spans paragraphs, `{field MACROBUTTON "Click here" label}` for a label that takes no offsets, and a trailing `dirty` when Word is asked to refresh the result | one seam, the keyword, the result and the target in the key; `label` is in the key and not in its equality |
 | `Link` (external) | `{link "https://example.com"}text{/link}` | `Open` and `Close` around editable text |
 | `Control`, editable | `{ctl date "Closing"}2026-10-01{/ctl}` | `Open` and `Close` around editable text |
 | `Control`, locked, bound or a placeholder | `{ctl text "Name" placeholder "Click to enter"}` | one seam |
@@ -1038,6 +1041,13 @@ Notes on the rows:
   of a table of contents (553 runs in the curated set). It is plain text. Only `vanish` is `{hidden "text"}`, and the
   paragraph flag is `{hidden-para}`, a different word so that neither can be read as the other.
 - **`{field ...}`** shows the keyword and the result, and for a `REF` or `PAGEREF` the block it resolves to.
+  A trailing `label` says that the quoted text is the label a `MACROBUTTON` or `GOTOBUTTON` with no stored result
+  shows from its field code. Such a label takes no offsets, while the same text as a stored result takes one offset
+  for each character, so `label` is the only way to tell the two apart. The reader accepts the word and leaves it
+  out of the key's equality, like a seam's width, because the document decides it: a working copy written before
+  the word existed, which has the same field without it, packs with no change (decision 0017). Such a copy recorded
+  the hash of its rendering without the word, and `hashes_as_earlier_release` gives the hashes of the files rendered
+  that way, which a pack also accepts.
   Every field is read-only, which is architecture rule 6, as the default that a per-keyword table can loosen
   later (wordml 4.4 says Word edits the display text of a `HYPERLINK` and a `FORMTEXT` normally).
 - **A text box** is one string: the text of its paragraphs joined by ` / `, which the model builds, so the key
@@ -1117,7 +1127,9 @@ section 6 run on drafts built by hand and on the JSON format, so a bug in `stet/
 `to_batch`. It is not a working-copy format and no file is ever rendered as JSON for an agent to edit:
 `render_files` and `to_batch` refuse it with `unsupported`, and the tests reach it through `render_files_in` and
 `to_batch_in`. Its shape
-is the model's shape, so it is versioned (`json/1`) and a change to a field is additive or a new version.
+is the model's shape, so it is versioned (`json/1`) and a change to a field is additive or a new version. An
+added field may be missing on the way back, and is then its default: a field's `label`, written next to its
+`width`, is false when it is missing.
 
 ### 5.9 The conformance suite
 

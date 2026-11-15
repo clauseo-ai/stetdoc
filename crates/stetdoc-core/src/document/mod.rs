@@ -202,6 +202,8 @@ mod tests_edit_comments;
 #[cfg(test)]
 mod tests_edit_empty_run;
 #[cfg(test)]
+mod tests_edit_field_label;
+#[cfg(test)]
 mod tests_edit_field_width;
 #[cfg(test)]
 mod tests_edit_fields;

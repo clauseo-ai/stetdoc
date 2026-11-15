@@ -62,12 +62,15 @@ impl<'a> StoryCx<'a> {
         if !shown {
             return;
         }
+        let mut label = false;
         if info.separate.is_none()
             && text.is_empty()
+            && width == 0
             && let Some(shown) = info.display_text()
         {
-            // a `MACROBUTTON` or `GOTOBUTTON` with no stored result shows the text in its code
+            // a `MACROBUTTON` or `GOTOBUTTON` with no stored result shows the text in its code, which takes no offsets
             text = shown;
+            label = true;
         }
         let ctx = at
             .items
@@ -79,6 +82,7 @@ impl<'a> StoryCx<'a> {
             keyword: info.keyword.clone(),
             text: text.into_boxed_str(),
             width,
+            label,
             target: self.field_target(info),
             opens,
             closes,

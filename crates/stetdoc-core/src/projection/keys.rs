@@ -84,12 +84,16 @@ pub(crate) struct ObjectKey {
 }
 
 /// A field with its result and target.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub(crate) struct FieldKey {
     /// The instruction's keyword.
     pub keyword: Box<str>,
     /// The displayed result.
     pub text: Box<str>,
+    /// The text is a label shown from the field code that takes no characters (`Field::label`). Not part of
+    /// equality: the document decides it, like a seam's width, and a working copy written before the flag
+    /// existed has the same field without it.
+    pub label: bool,
     /// The block a `REF` or `PAGEREF` resolves to.
     pub target: Option<BlockRef>,
     /// The field begins in this paragraph.
@@ -99,6 +103,19 @@ pub(crate) struct FieldKey {
     /// The result needs an update.
     pub dirty: bool,
 }
+
+impl PartialEq for FieldKey {
+    fn eq(&self, other: &FieldKey) -> bool {
+        self.keyword == other.keyword
+            && self.text == other.text
+            && self.target == other.target
+            && self.opens == other.opens
+            && self.closes == other.closes
+            && self.dirty == other.dirty
+    }
+}
+
+impl Eq for FieldKey {}
 
 /// A change anchored at a block that is not text.
 #[derive(Clone, Debug, PartialEq, Eq)]

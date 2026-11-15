@@ -13,6 +13,7 @@ fn field(text: &str, width: u32) -> Inline {
         keyword: "REF".into(),
         text: text.into(),
         width,
+        label: false,
         target: None,
         opens: true,
         closes: true,

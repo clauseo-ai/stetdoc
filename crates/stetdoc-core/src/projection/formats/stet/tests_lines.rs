@@ -129,6 +129,7 @@ fn what_a_marker_shows_is_wrapped_too() {
             keyword: "REF".into(),
             text: big.as_str().into(),
             width: 10,
+            label: false,
             target: BlockRef::parse("p5").ok(),
             opens: true,
             closes: true,

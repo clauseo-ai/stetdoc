@@ -204,7 +204,9 @@ EOF
 - **Refs** name blocks: `p` paragraphs, `t` tables, `r` rows, `c3` comments, `fn3` and `en2` notes. A batch cannot name a
   paragraph that it creates itself. The receipt gives the refs of new paragraphs and the new base for the next batch.
 - **Ranges.** Prefer `find`, which must match once in the paragraph (or add `occurrence: 2`). Use `start` and `end` offsets
-  only when `find` cannot say it. They count characters of the paragraph's text as `view --mode final` shows it.
+  only when `find` cannot say it. They count characters of the paragraph's text as `view --mode final` shows it. A field
+  counts as the characters of its quoted result, except one that ends in `label`, such as
+  `{field MACROBUTTON "Click here" label}`: that text is a label shown from the field code and counts as nothing.
 - **Scope.** When the task names a region, pass `--scope p40..p60`: a change outside it fails the whole batch
   (`scope_violation`) instead of landing.
 - **Quotes.** Type straight quotes. stetdoc follows the paragraph's own convention (curly or straight) and says so in the

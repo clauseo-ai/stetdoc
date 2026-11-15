@@ -109,18 +109,23 @@ fn entries_of(state: &State) -> Entries {
     Entries { by_ref, total }
 }
 
-/// True if the paragraph holds a `MACROBUTTON` or `GOTOBUTTON` that begins here with no `separate` and no result,
-/// the one field whose view text is not its result: the label the view shows comes from the field code and has no
-/// characters in the map, so M1's text comparison cannot hold for it. These are the paragraphs that the skip of the former
-/// `FieldValue` atom covered for these two instructions, and no more. The width check still runs on them.
-fn shows_its_code(map: &crate::wordml::TextMap) -> bool {
-    map.fields().iter().any(|f| {
-        let word = f.instr.split_whitespace().next().unwrap_or_default();
-        f.begins_here
-            && f.separate.is_none()
-            && (word.eq_ignore_ascii_case("MACROBUTTON") || word.eq_ignore_ascii_case("GOTOBUTTON"))
-            && !map.items().iter().any(|i| i.field == f.id && i.len > 0)
-    })
+/// The text of a list of inlines as `flatten` gives it, without the text of a field marked `label`: the label that a
+/// `MACROBUTTON` or `GOTOBUTTON` with no stored result shows from its code has no characters in the map, so M1 compares
+/// the rest of the paragraph and leaves the label out. The width check needs no such care, because a label takes none.
+fn text_without_labels(inlines: &[Inline]) -> String {
+    let mut out = String::new();
+    for inline in inlines {
+        match inline {
+            Inline::Field(f) if f.label => {}
+            Inline::Rev { inlines, .. }
+            | Inline::Link { inlines, .. }
+            | Inline::Control { inlines, .. }
+            | Inline::Hidden { inlines, .. }
+            | Inline::LooksHidden { inlines, .. } => out.push_str(&text_without_labels(inlines)),
+            other => out.push_str(&flatten(std::slice::from_ref(other))),
+        }
+    }
+    out
 }
 
 /// M1: the text of every paragraph of the model is the text of its map, in each mode, and the width of
@@ -135,13 +140,11 @@ fn m1(state: &State, mode: Mode, m: &Projection, e: &Entries) -> usize {
         let tree = parts.tree(part).unwrap();
         let wp: WPara<'_> = story.paragraph(tree, i).unwrap();
         let map = wp.map();
-        if !shows_its_code(&map) {
-            assert_eq!(
-                strip(&flatten(&par.inlines)),
-                strip(&map.text(mode)),
-                "M1 text of {r} in {mode:?}"
-            );
-        }
+        assert_eq!(
+            strip(&text_without_labels(&par.inlines)),
+            strip(&map.text(mode)),
+            "M1 text of {r} in {mode:?}"
+        );
         if mode != Mode::Original && par.flags.readonly != Some(ReadOnly::DeletedBlock) {
             assert_eq!(
                 width_of(&par.inlines) as usize,

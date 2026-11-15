@@ -237,6 +237,7 @@ fn a_merge_the_compiler_would_refuse_is_refused_here_and_never_written_as_delete
                 keyword: "TOC".into(),
                 text: "x".into(),
                 width: 1,
+                label: false,
                 target: None,
                 opens: true,
                 closes: false,

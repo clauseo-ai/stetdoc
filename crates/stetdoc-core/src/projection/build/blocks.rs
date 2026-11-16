@@ -129,12 +129,10 @@ impl<'a> StoryCx<'a> {
             return Ok(None);
         };
         let map = p.map();
-        // An empty paragraph that joins the next is not shown, unless the next is one that takes it (`takes_joined`): then
-        // it stands for the two, and the next is not shown.
-        if top_level
+        // An empty paragraph that joins the next is not shown, in a cell too when it leads to one that `takes_joined`.
+        if (top_level || self.joins_a_taker(i))
             && p.joins_next(self.mode)
             && super::scan::shows_nothing(&map, self.mode)
-            && !self.takes_joined(i + 1)
             || self.takes_joined(i)
         {
             return Ok(None);
@@ -198,7 +196,7 @@ impl<'a> StoryCx<'a> {
             revs,
             flags: ParaFlags {
                 hidden,
-                joins_next: spec_vanish || p.joins_next(self.mode) && !self.takes_joined(i + 1),
+                joins_next: spec_vanish || p.joins_next(self.mode) && !self.joins_a_taker(i),
                 readonly,
             },
             inlines: built.inlines,

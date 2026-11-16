@@ -12,8 +12,8 @@
 //! differ (an element the view shows another way) is not checked by block, and the entry check of L2 still holds for it.
 //!
 //! What a batch touches: the blocks its operations name (`ref`, `to`, `second`, and every block from `ref` through `to`), the
-//! block after a merge's paragraph, the block before the body's last paragraph when a tracked `delete` removes it (its mark
-//! is the one that goes), and the table that holds a named paragraph or row. A merge's paragraph after is the next
+//! block after a merge's paragraph, the paragraph with text before the body's last paragraph when a tracked `delete` removes
+//! it (its mark is the one that goes), and the table that holds a named paragraph or row. A merge's paragraph after is the next
 //! one the operations before it left: a deleted paragraph, an earlier merge's second and, untracked, a table whose last row a
 //! `row` operation deleted are passed over. An `accept` or `reject` touches every block with revision markup, an operation
 //! on an existing comment every block with that comment's markers, a `delete-note` every block with a note reference, and a
@@ -199,7 +199,17 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
         let last = facts.top.iter().skip(to + 1).all(|r| gone.contains(r));
         if g.tracked && last {
             let before = facts.top.get(..from).unwrap_or_default();
-            if let Some(prev) = before.iter().rev().find(|r| !gone.contains(*r)) {
+            // Only a paragraph with text takes the last one's place: after a table, or an empty paragraph, the last one is
+            // kept and the block before it is left alone.
+            let joins = |r: &String| {
+                facts
+                    .paras
+                    .iter()
+                    .any(|p| p.r == *r && p.story == "body" && !p.text.is_empty())
+            };
+            if let Some(prev) = before.iter().rev().find(|r| !gone.contains(*r))
+                && joins(prev)
+            {
                 t.tops.insert(prev.clone());
             }
         }
@@ -244,7 +254,16 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
                     to.as_deref().and_then(index),
                 ) {
                     (Some(a), Some(b)) => {
-                        if whole {
+                        // A range from the start of its first paragraph to the end of its last takes both whole.
+                        let at = |k: &str| v.get(k).and_then(Value::as_u64);
+                        let to_len = v
+                            .get("to")
+                            .and_then(Value::as_str)
+                            .and_then(|r| facts.paras.iter().find(|p| p.r == r))
+                            .map(|p| p.text.len() as u64);
+                        let ends = at("end").is_none() || at("end") == to_len;
+                        let starts = at("start").is_none_or(|s| s == 0);
+                        if whole || ends && starts && v.get("find").is_none() {
                             before_last(&mut t, &gone, a.min(b), a.max(b));
                         }
                         for r in facts.top.get(a.min(b)..=a.max(b)).into_iter().flatten() {
@@ -421,6 +440,56 @@ mod tests {
     /// The bytes after an untracked batch of `ops`.
     fn edited(bytes: &[u8], ops: &str) -> Vec<u8> {
         run_batch(bytes, &[], ops, false).unwrap().unwrap().saved
+    }
+
+    #[test]
+    fn a_tracked_range_to_the_end_of_the_body_touches_the_paragraph_before_it() {
+        // fdo64256.docx, batch 42 of seed 787681986111147656: the range takes p4 and the empty p5 whole, so the mark that goes
+        // is p3's, the paragraph with text left before them.
+        let para = |t: &str| format!("<w:p><w:r><w:t>{t}</w:t></w:r></w:p>");
+        let body = format!("{}{}{}{}<w:p/>", para("S"), para("s"), para("t"), para("u"));
+        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+        let facts =
+            Facts::of(&Document::open(bytes.clone(), &OpenOptions::default()).unwrap()).unwrap();
+        let op = r#"{"op":"delete","ref":"p4","to":"p5","start":0,"end":0}"#;
+        let g = generated(&[("delete", op)], true);
+        let after = run_batch(&bytes, &[], &g.json(), true)
+            .unwrap()
+            .unwrap()
+            .saved;
+        per_block(&bytes, &after, &facts, &g).unwrap();
+        assert!(touched(&facts, &g).tops.contains("p3"));
+        // From inside the first paragraph, its text takes the last one's place, and the one before is not touched.
+        let op = r#"{"op":"delete","ref":"p4","to":"p5","start":1,"end":0}"#;
+        assert!(
+            !touched(&facts, &generated(&[("delete", op)], true))
+                .tops
+                .contains("p3")
+        );
+    }
+
+    #[test]
+    fn a_tracked_delete_of_the_last_paragraph_touches_the_paragraph_before_only_when_it_has_text() {
+        let para = |t: &str| format!("<w:p><w:r><w:t>{t}</w:t></w:r></w:p>");
+        let table = r#"<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr><w:p/></w:tc></w:tr></w:tbl>"#;
+        for (before, touched_before) in [
+            (para("Lead."), true),
+            (table.to_string(), false),
+            ("<w:p/>".to_string(), false),
+        ] {
+            let body = format!("{before}{}", para("Last."));
+            let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+            let facts =
+                Facts::of(&Document::open(bytes, &OpenOptions::default()).unwrap()).unwrap();
+            let last = facts.top.last().cloned().unwrap();
+            let first = facts.top.first().cloned().unwrap();
+            let g = generated(
+                &[("delete", &format!(r#"{{"op":"delete","ref":"{last}"}}"#))],
+                true,
+            );
+            let t = touched(&facts, &g);
+            assert_eq!(t.tops.contains(&first), touched_before, "{body}");
+        }
     }
 
     #[test]

@@ -46,9 +46,12 @@ pub(crate) enum KeptReason {
     Holds,
     /// It holds another author's pending deletion, which accepting the author's revisions does not remove.
     Pending,
-    /// It ends its container, and the paragraph before it, whose mark a tracked deletion deletes in its place, cannot be
-    /// joined with it.
-    CannotJoin,
+    /// It ends its container, and it cannot be joined with the paragraph before it, whose mark a tracked deletion deletes
+    /// in its place, for the cause the words give, such as `the paragraph before it is read-only`.
+    CannotJoin(&'static str),
+    /// It ends its container, and the paragraph before it is empty: joined, the two would read as that empty paragraph,
+    /// whose ref accepting retires, so the line left would be named by the deleted paragraph's ref.
+    EmptyBefore,
 }
 
 impl KeptReason {
@@ -86,8 +89,11 @@ impl KeptReason {
             KeptReason::Pending => format!(
                 "{shown} holds another author's pending deletion, and no paragraph follows it to take that, so it can go only once that change is resolved"
             ),
-            KeptReason::CannotJoin => format!(
-                "{shown} ends its container, and the paragraph before it cannot be joined with it, because that paragraph is read-only, ends inside a field or has another author's pending change to its properties"
+            KeptReason::CannotJoin(cause) => format!(
+                "{shown} ends its container and cannot be joined with the paragraph before it, because {cause}"
+            ),
+            KeptReason::EmptyBefore => format!(
+                "{shown} ends its container and the paragraph before it is empty, so there is no text to take its place"
             ),
             KeptReason::Markers => format!(
                 "{shown} holds bookmarks, comment ranges or other markers, and no paragraph stands beside it to take them"
@@ -243,6 +249,15 @@ pub(super) fn required(tree: &SpanTree, para: NodeId) -> Option<KeptReason> {
 /// then does a deleted mark of `para` join it with a paragraph that stays.
 pub(super) fn live_after(tree: &SpanTree, para: NodeId) -> bool {
     matches!(side(tree, para, true), Side::Paragraph(_))
+}
+
+/// The last paragraph of the container after `para`, when the paragraphs between are joined on to it through deleted marks:
+/// the paragraph a pending merge of `para` ends in, when that is the container's end.
+pub(super) fn end_joined_from(tree: &SpanTree, para: NodeId) -> Option<NodeId> {
+    match side(tree, para, true) {
+        Side::Paragraph(last) if side(tree, last, true) == Side::Nothing => Some(last),
+        Side::Paragraph(_) | Side::Nothing | Side::Table | Side::Block(_) => None,
+    }
 }
 
 /// The paragraph whose mark a tracked deletion of `para` deletes in place of `para`'s own, when `para` is the last

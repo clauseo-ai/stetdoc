@@ -44,7 +44,8 @@ Option 2.
   paragraph before it. Untracked, it is removed at once, the same way. The last paragraph of a container is the
   exception, tracked: Word cannot accept a deleted mark there (Word for Mac 16.114.4 left the body's revision pending and
   removed a whole table for a cell's), so its mark stays and the mark of the paragraph before it is deleted, as Word's own
-  gesture does, with an alignment change that keeps that paragraph's properties on the survivor (amended 2026-11-16).
+  gesture does, with alignment changes that keep that paragraph's properties and its mark's run properties on the
+  survivor. After an empty paragraph the last paragraph is kept instead (amended 2026-11-16).
 - **A kept paragraph is reported.** Its content is deleted and the empty paragraph stays, as before. The compiler's
   `Effect::kept` names it with the reason, and `ops` turns each one into a warning with the code
   `kept_required_paragraph`, the paragraph's ref in `Warning.block`, and a message that names the ref and the reason, such

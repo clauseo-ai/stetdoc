@@ -223,7 +223,7 @@ impl Compiler<'_, '_> {
             // The last paragraph of a container keeps its mark, and the paragraph before it loses its own.
             let prev = super::required::previous_to_join(self.tree_ro(&part)?, p.node);
             if let Some(prev) = prev {
-                return self.delete_last_by_join(block, prev);
+                return self.delete_last_by_join(block, prev, false);
             }
         }
         // A paragraph of a row that goes whole keeps its mark before content that is not a block, as above.
@@ -231,6 +231,11 @@ impl Compiler<'_, '_> {
             return Ok(());
         }
         if mark_now.is_deleted() {
+            // It joins on to the emptied last paragraph that an earlier deletion of this batch left: that one now takes
+            // the text of the paragraph before this one, as if the two had been deleted top-down.
+            if !force_mark && self.tracked() {
+                return self.join_emptied_end(&part, p.node);
+            }
             return Ok(());
         }
         let own = match mark_now.ins {

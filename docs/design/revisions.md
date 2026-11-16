@@ -786,8 +786,16 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
   paragraph's text with its own properties under either rule of 3.2.4, and Reject All gives back the source. Accepting
   joins the two, and the last paragraph's ref is retired as merged into the earlier one. An insertion after the earlier
   paragraph in the same batch goes after the paragraph its deleted mark joins into (a Y on the last paragraph), so it
-  stays a paragraph of its own. When the two cannot be merged (the earlier paragraph is read-only, ends inside a field, or
-  has another author's pending change to its properties), the last paragraph is kept and reported. A note whose whole
+  stays a paragraph of its own, and so does an insertion before the last paragraph (it goes after it). The mark's run
+  properties are carried the same way, with an `rPrChange` on the last paragraph's mark. A paragraph whose mark is
+  already deleted and that joins on to such an emptied last paragraph, when it is deleted in turn, makes the paragraph
+  before it lose its mark too, so deleting the last two paragraphs from the bottom up gives what deleting them from the
+  top down gives. When a paragraph with text whose mark is deleted already joins on to the last paragraph (a range
+  deleted from inside a paragraph to the end), that text takes its place, and no other mark is deleted. When the
+  paragraph before is empty, the last paragraph is kept and reported: joined, the two would
+  read as that empty paragraph, whose ref accepting retires. When the two cannot be merged (another author's pending
+  change to the properties of either, the earlier paragraph read-only or ending inside a field), the last paragraph is
+  kept, and the warning names the cause. A note whose whole
   body goes still deletes every mark, its last too, as Word writes it (`RP050`, 3.6.4).
 - Otherwise P is **required** and the mark is left as it is, so that accepting leaves P empty. The neighbours are read as
   accepting would leave them: a paragraph whose mark is deleted joins the one after it, so it does not count. P is

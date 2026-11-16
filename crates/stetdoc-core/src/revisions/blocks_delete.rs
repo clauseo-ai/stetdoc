@@ -194,9 +194,11 @@ impl Compiler<'_, '_> {
         if !self.tracked() {
             return self.untracked_remove(block, &p, next_is_paragraph);
         }
-        // With no paragraph after it, accepting the deleted mark removes the paragraph only when nothing but markers is left,
-        // and markers need a paragraph before it to go to, as `untracked_remove_last` does at once.
-        if !force_mark && !next_is_paragraph {
+        // With no paragraph after it that stays (the paragraphs whose marks are deleted are passed over), accepting the deleted
+        // mark removes the paragraph only when nothing but markers is left, and markers need a paragraph before it to go to,
+        // as `untracked_remove_last` does at once.
+        let live_after = super::required::live_after(self.tree_ro(&part)?, p.node);
+        if !force_mark && !live_after {
             let reason = {
                 let tree = self.tree_ro(&part)?;
                 let author = self.stamp().map(|s| s.author());
@@ -217,6 +219,11 @@ impl Compiler<'_, '_> {
                     reason,
                 });
                 return Ok(());
+            }
+            // The last paragraph of a container keeps its mark, and the paragraph before it loses its own.
+            let prev = super::required::previous_to_join(self.tree_ro(&part)?, p.node);
+            if let Some(prev) = prev {
+                return self.delete_last_by_join(block, prev);
             }
         }
         // A paragraph of a row that goes whole keeps its mark before content that is not a block, as above.
@@ -397,7 +404,11 @@ impl Compiler<'_, '_> {
         }
     }
 
-    fn merge_inner(&mut self, first: &BlockKey, second: &BlockKey) -> Result<(), StetError> {
+    pub(super) fn merge_inner(
+        &mut self,
+        first: &BlockKey,
+        second: &BlockKey,
+    ) -> Result<(), StetError> {
         let part = first.part().clone();
         if second.part() != first.part() {
             return Err(cross_block(

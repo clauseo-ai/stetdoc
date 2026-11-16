@@ -41,10 +41,10 @@ Option 2.
   a deleted paragraph cannot be joined. So is a last paragraph that still holds another author's pending deletion, which
   accepting only the author's revisions would leave. Tracked and untracked deletions apply the same tests.
 - **Every other paragraph goes.** Tracked, its mark is deleted, and accepting removes it and moves its range markers to the
-  paragraph before it. Untracked, it is removed at once, the same way. For the last paragraph of a container this deletes
-  that paragraph's own mark, where Word's gesture deletes the mark before and leaves the last paragraph's properties on
-  the survivor. stetdoc's form keeps the survivor's properties and leaves a place for an insertion after it in the same
-  batch.
+  paragraph before it. Untracked, it is removed at once, the same way. The last paragraph of a container is the
+  exception, tracked: Word cannot accept a deleted mark there (Word for Mac 16.114.4 left the body's revision pending and
+  removed a whole table for a cell's), so its mark stays and the mark of the paragraph before it is deleted, as Word's own
+  gesture does, with an alignment change that keeps that paragraph's properties on the survivor (amended 2026-11-16).
 - **A kept paragraph is reported.** Its content is deleted and the empty paragraph stays, as before. The compiler's
   `Effect::kept` names it with the reason, and `ops` turns each one into a warning with the code
   `kept_required_paragraph`, the paragraph's ref in `Warning.block`, and a message that names the ref and the reason, such
@@ -62,11 +62,13 @@ Option 2.
   that kept none is as it was.
 - A range delete whose last paragraph goes whole now removes that paragraph too when the container does not need it,
   instead of leaving it empty.
-- Checklist C3 in the revisions design asks a person with Word to open a file with a deleted final mark of the body and to
-  check that Accept All leaves no empty paragraph and Reject All gives back the source. If Word keeps an empty paragraph,
-  the rule for the body's last paragraph is revisited.
-- A removed last paragraph is gone for the rest of the batch, as a removed middle paragraph already was: an `insert` after
-  it or a `merge` with it later in the batch is refused (`readonly_region` tracked, `stale_ref` untracked), and the message
-  says to insert after the paragraph before it, or to delete only its text so that it stays.
+- Checklist C3 in the revisions design asked a person with Word to open a file with a deleted final mark of the body. Word
+  kept an empty paragraph with the revision pending, and in a cell it removed the table, so the rule for a container's
+  last paragraph was revisited as above.
+- A removed paragraph is gone for the rest of the batch: an `insert` after it or a `merge` with it later in the batch is
+  refused (`readonly_region` tracked, `stale_ref` untracked), and the message says to insert after the paragraph before
+  it, or to delete only its text so that it stays. A tracked delete of a container's last paragraph keeps that
+  paragraph's mark, so an insertion after it still has a place, and accepting leaves the new paragraph after the one
+  before it. After accept all, its ref is retired as merged into the paragraph before it.
 - Out of scope: a flag that refuses instead of keeping. A caller that wants it can treat the warning as a failure.
 - A caller that matches `WarningCode` exhaustively needs a wildcard arm, as it is `non_exhaustive`.

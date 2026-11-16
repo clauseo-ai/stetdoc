@@ -46,6 +46,9 @@ pub(crate) enum KeptReason {
     Holds,
     /// It holds another author's pending deletion, which accepting the author's revisions does not remove.
     Pending,
+    /// It ends its container, and the paragraph before it, whose mark a tracked deletion deletes in its place, cannot be
+    /// joined with it.
+    CannotJoin,
 }
 
 impl KeptReason {
@@ -82,6 +85,9 @@ impl KeptReason {
             ),
             KeptReason::Pending => format!(
                 "{shown} holds another author's pending deletion, and no paragraph follows it to take that, so it can go only once that change is resolved"
+            ),
+            KeptReason::CannotJoin => format!(
+                "{shown} ends its container, and the paragraph before it cannot be joined with it, because that paragraph is read-only, ends inside a field or has another author's pending change to its properties"
             ),
             KeptReason::Markers => format!(
                 "{shown} holds bookmarks, comment ranges or other markers, and no paragraph stands beside it to take them"
@@ -230,6 +236,29 @@ pub(super) fn required(tree: &SpanTree, para: NodeId) -> Option<KeptReason> {
                 .then_some(KeptReason::AfterSectionBreak),
             },
         },
+    }
+}
+
+/// True if a paragraph whose mark stays follows `para` among its siblings, past the paragraphs whose marks are deleted: only
+/// then does a deleted mark of `para` join it with a paragraph that stays.
+pub(super) fn live_after(tree: &SpanTree, para: NodeId) -> bool {
+    matches!(side(tree, para, true), Side::Paragraph(_))
+}
+
+/// The paragraph whose mark a tracked deletion of `para` deletes in place of `para`'s own, when `para` is the last
+/// paragraph of a container and a paragraph whose mark stays comes before it. Word cannot accept a deleted mark on the last
+/// paragraph of a container: in the body the revision stays pending, and in a cell Word removes the table (hand check, Word
+/// for Mac 16.114.4). Word's own gesture deletes the mark of the paragraph before and the last paragraph's text, and so does
+/// stetdoc.
+pub(super) fn previous_to_join(tree: &SpanTree, para: NodeId) -> Option<NodeId> {
+    let parent = tree.node_ref(para).parent()?;
+    container_words(&parent).ok()?;
+    if side(tree, para, true) != Side::Nothing {
+        return None;
+    }
+    match side(tree, para, false) {
+        Side::Paragraph(prev) => Some(prev),
+        Side::Nothing | Side::Table | Side::Block(_) => None,
     }
 }
 

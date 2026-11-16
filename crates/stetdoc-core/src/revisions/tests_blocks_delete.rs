@@ -55,10 +55,21 @@ fn deleting_a_paragraph_deletes_its_text_and_its_mark_and_leaves_the_next_paragr
 }
 
 #[test]
-fn the_last_paragraph_of_a_container_loses_its_mark_when_a_paragraph_before_it_is_left() {
+fn the_last_paragraph_of_a_container_keeps_its_mark_and_the_paragraph_before_it_loses_its_own() {
+    // Word cannot accept a deleted mark on a container's last paragraph (issue #25, Word for Mac 16.114.4), so the mark of
+    // the paragraph before it is deleted, as Word's own gesture does, and the last paragraph takes that paragraph's
+    // properties in a change of its own, so that the survivor keeps them whichever paragraph's properties a join keeps.
     let s = delete(&three(), 2);
     s.assert_clean();
-    assert!(s.xml.ends_with(&format!("<w:p><w:pPr>{}</w:pPr><w:del w:id=\"0\" {AT}><w:r><w:delText xml:space=\"preserve\">Last</w:delText></w:r></w:del></w:p>", mark_del(1))), "{}", s.xml);
+    assert!(
+        s.xml.ends_with(&format!(
+            "<w:p><w:pPr><w:jc w:val=\"center\"/>{}</w:pPr>{}</w:p><w:p><w:pPr><w:jc w:val=\"center\"/><w:pPrChange w:id=\"1\" {AT}><w:pPr/></w:pPrChange></w:pPr><w:del w:id=\"0\" {AT}><w:r><w:delText xml:space=\"preserve\">Last</w:delText></w:r></w:del></w:p>",
+            mark_del(2),
+            r("Body")
+        )),
+        "{}",
+        s.xml
+    );
     assert!(s.effect(0).kept.is_empty());
 }
 

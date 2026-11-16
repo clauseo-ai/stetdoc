@@ -436,33 +436,37 @@ fn accepting_the_removal_of_a_paragraph_retires_its_ref() {
         .iter()
         .map(|r| (r.r#ref.as_str(), r.reason.as_str()))
         .collect();
-    assert_eq!(retired, [("p2", "deleted")], "{}", receipt.text);
+    // The paragraph before it lost its mark in its place, so accepting joins the two and the ref of the last goes into it.
+    assert_eq!(retired, [("p2", "merged into p1")], "{}", receipt.text);
 }
 
 #[test]
-fn deleting_the_last_paragraph_and_then_inserting_after_it_is_refused_and_says_what_to_do() {
+fn deleting_the_last_paragraph_and_then_inserting_after_it() {
+    // Tracked, the last paragraph keeps its mark (the paragraph before it loses its own), so an insertion after it has a
+    // place, and accepting leaves the paragraph before it and the new one. Untracked, it is gone, and the refusal says
+    // what to do instead.
     let ops = r#"{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"after","paragraphs":["New."]}"#;
-    for tracked in [true, false] {
-        let mut doc = open(&format!("{}{}", para("Lead."), para("Gone.")));
-        let e = Edit::ops(batch(&doc, ops), stamp());
-        let err = doc
-            .edit(if tracked { e } else { e.untracked() })
-            .err()
-            .unwrap();
-        let (code, hint) = if tracked {
-            (
-                crate::api::error::ErrorCode::ReadonlyRegion,
-                "Insert after the paragraph before it instead, or, to keep this paragraph, delete only its text.",
-            )
-        } else {
-            (
-                crate::api::error::ErrorCode::StaleRef,
-                "Name a block that is still there, such as the paragraph before it, or, to keep the paragraph for a later operation, delete only its text.",
-            )
-        };
-        assert_eq!(err.code(), code, "tracked {tracked}: {err:?}");
-        assert!(err.message().contains(hint), "tracked {tracked}: {err:?}");
-    }
+    let mut doc = open(&format!("{}{}", para("Lead."), para("Gone.")));
+    edit(&mut doc, ops, true);
+    edit(&mut doc, r#"{"op":"accept","all":true}"#, true);
+    assert_eq!(
+        body(&doc).replace("<w:t>", r#"<w:t xml:space="preserve">"#),
+        format!("{}{}", para("Lead."), para("New."))
+    );
+    let mut doc = open(&format!("{}{}", para("Lead."), para("Gone.")));
+    let err = doc
+        .edit(Edit::ops(batch(&doc, ops), stamp()).untracked())
+        .err()
+        .unwrap();
+    assert_eq!(
+        err.code(),
+        crate::api::error::ErrorCode::StaleRef,
+        "{err:?}"
+    );
+    assert!(
+        err.message().contains("Name a block that is still there, such as the paragraph before it, or, to keep the paragraph for a later operation, delete only its text."),
+        "{err:?}"
+    );
 }
 
 #[test]
@@ -505,4 +509,64 @@ fn a_last_paragraph_that_holds_another_authors_deletion_is_kept_so_accepting_the
     edit(&mut doc, r#"{"op":"accept","author":"Clauseo"}"#, true);
     assert_eq!(lines(&doc), before);
     assert!(!body(&doc).contains("<w:rPr><w:del"), "{}", body(&doc));
+}
+
+#[test]
+fn a_containers_last_paragraph_keeps_its_mark_and_the_paragraph_before_it_loses_its_own_as_word_needs()
+ {
+    // Word cannot accept a deleted mark on a container's last paragraph: in the body the revision stays pending, and in a cell
+    // Word's Accept All removes the whole table (Word for Mac 16.114.4, batch 2, folders 02 and 19). So the last paragraph
+    // keeps its mark, the paragraph before it loses its own, and the last paragraph takes that paragraph's properties in a
+    // change of its own, so that accepting keeps the earlier paragraph's properties whichever paragraph a join keeps.
+    const AT: &str = r#"w:author="Clauseo" w:date="2026-10-06T10:00:00Z""#;
+    let lead = r#"<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:t xml:space="preserve">Lead.</w:t></w:r></w:p>"#;
+    let gone = r#"<w:p><w:pPr><w:spacing w:after="240"/></w:pPr><w:r><w:t xml:space="preserve">Gone.</w:t></w:r></w:p>"#;
+    let cell = table(&format!("{}{}", para("Cell one."), para("Cell two.")));
+    let cases = [
+        (
+            format!("{lead}{gone}"),
+            format!(
+                r#"<w:p><w:pPr><w:jc w:val="center"/><w:rPr><w:del w:id="2" {AT}/></w:rPr></w:pPr><w:r><w:t xml:space="preserve">Lead.</w:t></w:r></w:p><w:p><w:pPr><w:jc w:val="center"/><w:pPrChange w:id="1" {AT}><w:pPr><w:spacing w:after="240"/></w:pPr></w:pPrChange></w:pPr><w:del w:id="0" {AT}><w:r><w:delText xml:space="preserve">Gone.</w:delText></w:r></w:del></w:p>"#
+            ),
+            lead.to_string(),
+        ),
+        (
+            format!("{cell}{}", para("After.")),
+            format!(
+                r#"<w:tbl><w:tblPr/><w:tblGrid><w:gridCol w:w="2400"/></w:tblGrid><w:tr><w:tc><w:p><w:pPr><w:rPr><w:del w:id="1" {AT}/></w:rPr></w:pPr><w:r><w:t xml:space="preserve">Cell one.</w:t></w:r></w:p><w:p><w:del w:id="0" {AT}><w:r><w:delText xml:space="preserve">Cell two.</w:delText></w:r></w:del></w:p></w:tc></w:tr></w:tbl>{}"#,
+                para("After.")
+            ),
+            format!("{}{}", table(&para("Cell one.")), para("After.")),
+        ),
+    ];
+    for (source, tracked, accepted) in cases {
+        let mut doc = open(&source);
+        let receipt = edit(&mut doc, r#"{"op":"delete","ref":"p2"}"#, true);
+        assert!(kept(&receipt).is_empty(), "{}", receipt.text);
+        assert_eq!(body(&doc), tracked);
+        let mut rejected = open(&source);
+        edit(&mut rejected, r#"{"op":"delete","ref":"p2"}"#, true);
+        edit(&mut doc, r#"{"op":"accept","all":true}"#, true);
+        assert_eq!(body(&doc), accepted);
+        edit(&mut rejected, r#"{"op":"reject","all":true}"#, true);
+        assert_eq!(body(&rejected), source);
+    }
+}
+
+#[test]
+fn rejecting_an_insertion_after_a_last_paragraph_of_markers_keeps_them_in_it() {
+    // A tracked delete of a last paragraph can leave it with nothing but range markers, and an insertion after it is then
+    // the Y shape. Rejecting it gives the paragraph back with its markers inside (the soak's R2, document 18).
+    let source = format!(
+        r#"{}<w:p><w:bookmarkStart w:id="1" w:name="b"/><w:bookmarkEnd w:id="1"/></w:p>"#,
+        para("Lead.")
+    );
+    let mut doc = open(&source);
+    edit(
+        &mut doc,
+        r#"{"op":"insert","ref":"p2","place":"after","paragraphs":["days"]}"#,
+        true,
+    );
+    edit(&mut doc, r#"{"op":"reject","all":true}"#, true);
+    assert_eq!(body(&doc), source);
 }

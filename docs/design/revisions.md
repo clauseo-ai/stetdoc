@@ -774,12 +774,21 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
   are left alone.
 - The mark gets `del` as well when no paragraph follows P but its container does not need it
   (`revisions/required.rs`, issue #25): the first block of a container before a table, a paragraph between a paragraph
-  and a table when a paragraph whose mark stays follows later in the container, and the last paragraph of a cell, the body, a header, a footer, a note or a comment when a paragraph whose
-  mark stays is left before it. Accepting removes the empty paragraph (3.2.5) and moves its range markers to the end of
-  the paragraph before it. Word's own gesture for the last paragraph is different: its final mark cannot be selected, so
-  it deletes the mark of the paragraph before and the last paragraph's text, and the survivor ends with the last
-  paragraph's properties. stetdoc deletes the last paragraph's own mark instead, so the survivor keeps its own properties,
-  and an insertion after the paragraph before it in the same batch still has a place (checklist C3).
+  and a table when a paragraph whose mark stays follows later in the container. Accepting removes the empty paragraph
+  (3.2.5) and moves its range markers to the end of the paragraph before it.
+- **The last paragraph of a container never gets a deleted mark.** Word cannot accept one: with `del` on the body's final
+  mark, Accept All left an empty paragraph and the revision pending, and with `del` on a cell's last mark Accept All removed
+  the whole table (Word for Mac 16.114.4, batch 2, folders 02 and 19). So when the last paragraph of a cell, the body, a
+  header, a footer, a note, a comment or a text box goes and a paragraph whose mark stays is left before it, its text is
+  deleted, its mark stays, and the mark of that paragraph before it gets `del`, which is Word's own gesture
+  (`revisions/blocks_delete_last.rs`). This is a tracked merge of the two (3.2.3), with the alignment: when their base
+  properties differ, the last paragraph takes the earlier one's in a `pPrChange`, so accepting leaves the earlier
+  paragraph's text with its own properties under either rule of 3.2.4, and Reject All gives back the source. Accepting
+  joins the two, and the last paragraph's ref is retired as merged into the earlier one. An insertion after the earlier
+  paragraph in the same batch goes after the paragraph its deleted mark joins into (a Y on the last paragraph), so it
+  stays a paragraph of its own. When the two cannot be merged (the earlier paragraph is read-only, ends inside a field, or
+  has another author's pending change to its properties), the last paragraph is kept and reported. A note whose whole
+  body goes still deletes every mark, its last too, as Word writes it (`RP050`, 3.6.4).
 - Otherwise P is **required** and the mark is left as it is, so that accepting leaves P empty. The neighbours are read as
   accepting would leave them: a paragraph whose mark is deleted joins the one after it, so it does not count. P is
   required when removing it would leave a cell, the body, a header, a footer, a note, a comment or a text box with no
@@ -805,7 +814,8 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
   container: a later `insert` after it or `merge` with it is refused (tracked `readonly_region`, since its mark is a
   pending deletion; untracked `stale_ref`), and the message says to name the paragraph before it, or to delete only its
   text so that it stays.
-- With no paragraph after it, a paragraph whose deletion leaves content that is not range markers or comment references
+- With no paragraph after it whose mark stays (paragraphs whose marks are already deleted are passed over, since they join
+  on to what follows them), a paragraph whose deletion leaves content that is not range markers or comment references
   (the shell of a content control, a simple field) keeps its mark as well, since accepting a deleted mark there drops only
   the revision (3.2.5), and the Final view and accept all would disagree. It is reported the same way. Untracked, such a
   paragraph is kept too. The same holds for another author's pending deletion in it: accepting only the author's
@@ -1764,7 +1774,7 @@ does what is described".
 |---|---|---|
 | C1 | Tracked-delete the paragraph mark between a Heading 1 paragraph and a Normal paragraph that both have text. Accept all | which `pPr` the merged paragraph has when a deleted mark is accepted (3.2.4, 6.3). If Word keeps the first paragraph's, resolution changes to "first" and the alignment `pPrChange` becomes unnecessary. For rejecting an inserted mark `FA/005` already says "later" |
 | C2 | Press Enter inside a Heading 1 paragraph, set the second half to Normal, with tracking on. Reject all | the same, for an inserted mark, where the two halves differ (`FA/005` has equal ones in effect) |
-| C3 | Tracked-delete a mark that has no paragraph after it: the last paragraph of a cell, of the body, before a table. Accept all | the "nothing after" rule of 3.2.5, and the removal of a paragraph its container does not need (3.2.2, issue #25). Open a file where stetdoc wrote `del` on the body's final mark: Word must open it, Accept All must leave the paragraph before it last with its own properties and no empty paragraph after it, and Reject All must give back the source. If Word keeps an empty final paragraph, the rule of 3.2.2 changes |
+| C3 | Tracked-delete a mark that has no paragraph after it: the last paragraph of a cell, of the body, before a table. Accept all | the "nothing after" rule of 3.2.5, and the removal of a paragraph its container does not need (3.2.2, issue #25). Word for Mac 16.114.4 did not accept `del` on the body's final mark (an empty paragraph and a pending revision were left) and removed the whole table for `del` on a cell's last mark, so 3.2.2 now deletes the mark of the paragraph before instead. Check that Accept All leaves the paragraph before last with its own properties and no empty paragraph after it, that the table stays, and that Reject All gives back the source |
 | C4 | Open a file with `w:date="...T14:00:00Z"` and no `dateUtc`, and one with seconds (`14:03:27Z`) | decision 5 and 5.3: how Word shows a date with no `dateUtc`, and one with seconds |
 | C5 | Insert text, save, reopen after a minute, delete part of it with the same author | own pending text removed outright (4.1) |
 | C6 | Insert text in the middle of another author's insertion. Look at the Reviewing pane | the split in 4.2: three changes |

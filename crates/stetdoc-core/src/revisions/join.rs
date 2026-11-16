@@ -257,7 +257,20 @@ pub(super) fn join(
     {
         // What stands between the two comes after what was in the first, as it did.
         let gap = markers_between(tree, first, second);
-        place_leftovers(tree, first, left, second, gap)?;
+        if why == Why::SecondRejected {
+            // The first held the original paragraph's markers, so they go back into the paragraph, at the start of the
+            // second, which is the original once its insertion is rejected; between blocks they would leave it.
+            let at = tree
+                .node_ref(second)
+                .child_elements()
+                .find(|c| !is_w(c, "pPr"))
+                .map(|c| c.id());
+            for n in left.into_iter().chain(gap) {
+                move_to(tree, n, second, at)?;
+            }
+        } else {
+            place_leftovers(tree, first, left, second, gap)?;
+        }
         if why == Why::SecondRejected {
             // The second is the new half of a Y paragraph, emptied by the rejection, and the first held the original's content
             // and element: the empty runs left in the first go to the start of the second, and the attributes of the first that

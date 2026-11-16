@@ -521,6 +521,10 @@ staged state of a dry run. The steps:
    (inserted, moved in) and that has nothing left, and a row that is deleted in `Final` or inserted in `Original`
    (with its table, if no row is left). A table with no rows at all, which some producers write, is kept, so that
    every block appears once.
+   In `Final`, a paragraph that shows nothing and takes the text of the paragraph before it, whose mark is deleted, is not
+   shown when that paragraph shows text or its own text was deleted. That paragraph then does not get `{joins-next}`
+   and is shown even when it is empty: the two read as one, the earlier one, as accept all leaves them. A tracked delete of a container's last paragraph writes this (`revisions.md`
+   3.2.2) (`StoryCx::takes_joined`).
 5. **Items to inlines.** One pass over the items, each with its chain of wrappers, outermost first: the tracked
    changes (only in `Redline`: `Final` and `Original` are read without change markup), the external link, the
    inline content control and, innermost, the hidden or looks-hidden run. Neighbours that share a prefix of the

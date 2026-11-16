@@ -12,7 +12,7 @@ use crate::projection::model::UnitKind;
 use crate::refs::{BlockKey, BlockRef};
 use crate::state::{PartId, PartsView, SiteHandle};
 use crate::styles::Cascade;
-use crate::wordml::{BlockEntry, Rels, Section, SpanTree, Story, StoryKind, StyleDefs};
+use crate::wordml::{BlockEntry, BlockKind, Rels, Section, SpanTree, Story, StoryKind, StyleDefs};
 use std::cell::OnceCell;
 use std::sync::Arc;
 
@@ -94,6 +94,42 @@ impl<'a> StoryCx<'a> {
         let entry = self.entry(i)?;
         self.parts
             .ref_of(&BlockKey::new(self.name.clone(), entry.node))
+    }
+
+    /// True if, in `Final`, the paragraph at entry `i` shows nothing and takes the text of the paragraph before it, whose
+    /// mark is deleted, and either that paragraph shows text or this one's own text was deleted: the two read as one paragraph, the earlier one, as accepting leaves them, so this one is not shown and
+    /// the earlier one does not say that it joins the next. A tracked delete of a container's last paragraph writes this
+    /// (design `revisions.md`, 3.2.2): the last paragraph keeps its mark and loses its text, and the one before loses its mark.
+    pub(super) fn takes_joined(&self, i: usize) -> bool {
+        if self.mode != Mode::Final {
+            return false;
+        }
+        let Some(prev) = i.checked_sub(1) else {
+            return false;
+        };
+        let (Some(e), Some(pe)) = (self.entry(i), self.entry(prev)) else {
+            return false;
+        };
+        let parent = |n| self.tree.node_ref(n).parent().map(|p| p.id());
+        if e.kind != BlockKind::Paragraph
+            || pe.kind != BlockKind::Paragraph
+            || parent(e.node) != parent(pe.node)
+        {
+            return false;
+        }
+        let (Some(p), Some(q)) = (
+            self.story.paragraph(self.tree, i),
+            self.story.paragraph(self.tree, prev),
+        ) else {
+            return false;
+        };
+        // When both are empty, the later one stands for the two unless its own text was deleted: an empty paragraph whose
+        // mark is deleted goes on accept, and a deleted paragraph before an empty one is not the one that stays.
+        let p_map = p.map();
+        !p.joins_next(self.mode)
+            && super::scan::shows_nothing(&p_map, self.mode)
+            && q.joins_next(self.mode)
+            && (!super::scan::shows_nothing(&q.map(), self.mode) || p_map.len(Mode::Original) > 0)
     }
 
     /// The sections of the body, read on first use. Any other story has none.

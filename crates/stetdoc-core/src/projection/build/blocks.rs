@@ -129,7 +129,14 @@ impl<'a> StoryCx<'a> {
             return Ok(None);
         };
         let map = p.map();
-        if top_level && p.joins_next(self.mode) && super::scan::shows_nothing(&map, self.mode) {
+        // An empty paragraph that joins the next is not shown, unless the next is one that takes it (`takes_joined`): then
+        // it stands for the two, and the next is not shown.
+        if top_level
+            && p.joins_next(self.mode)
+            && super::scan::shows_nothing(&map, self.mode)
+            && !self.takes_joined(i + 1)
+            || self.takes_joined(i)
+        {
             return Ok(None);
         }
         let r#ref = self.ref_at(i);
@@ -191,7 +198,7 @@ impl<'a> StoryCx<'a> {
             revs,
             flags: ParaFlags {
                 hidden,
-                joins_next: spec_vanish || p.joins_next(self.mode),
+                joins_next: spec_vanish || p.joins_next(self.mode) && !self.takes_joined(i + 1),
                 readonly,
             },
             inlines: built.inlines,

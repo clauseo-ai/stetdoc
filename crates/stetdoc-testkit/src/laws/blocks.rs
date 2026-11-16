@@ -12,7 +12,8 @@
 //! differ (an element the view shows another way) is not checked by block, and the entry check of L2 still holds for it.
 //!
 //! What a batch touches: the blocks its operations name (`ref`, `to`, `second`, and every block from `ref` through `to`), the
-//! block after a merge's paragraph, and the table that holds a named paragraph or row. A merge's paragraph after is the next
+//! block after a merge's paragraph, the block before the body's last paragraph when a tracked `delete` removes it (its mark
+//! is the one that goes), and the table that holds a named paragraph or row. A merge's paragraph after is the next
 //! one the operations before it left: a deleted paragraph, an earlier merge's second and, untracked, a table whose last row a
 //! `row` operation deleted are passed over. An `accept` or `reject` touches every block with revision markup, an operation
 //! on an existing comment every block with that comment's markers, a `delete-note` every block with a note reference, and a
@@ -191,6 +192,18 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
     // The rows that `row` operations deleted so far, for the table that loses its last row.
     let mut rows_gone: BTreeSet<String> = BTreeSet::new();
     let mut t = Touched::default();
+    // Tracked, the body's last paragraph keeps its mark and the paragraph before it loses its own (revisions.md 3.2.2): when a
+    // whole delete of the blocks `from..=to` reaches the end of the body, the block before them is touched, past the ones
+    // earlier operations removed.
+    let before_last = |t: &mut Touched, gone: &BTreeSet<String>, from: usize, to: usize| {
+        let last = facts.top.iter().skip(to + 1).all(|r| gone.contains(r));
+        if g.tracked && last {
+            let before = facts.top.get(..from).unwrap_or_default();
+            if let Some(prev) = before.iter().rev().find(|r| !gone.contains(*r)) {
+                t.tops.insert(prev.clone());
+            }
+        }
+    };
     for op in &g.ops {
         let Ok(v) = serde_json::from_str::<Value>(&op.json) else {
             continue;
@@ -231,11 +244,15 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
                     to.as_deref().and_then(index),
                 ) {
                     (Some(a), Some(b)) => {
+                        if whole {
+                            before_last(&mut t, &gone, a.min(b), a.max(b));
+                        }
                         for r in facts.top.get(a.min(b)..=a.max(b)).into_iter().flatten() {
                             gone.insert(r.clone());
                         }
                     }
-                    (Some(_), None) if whole && is_top(v.get("ref").and_then(Value::as_str)) => {
+                    (Some(at), None) if whole && is_top(v.get("ref").and_then(Value::as_str)) => {
+                        before_last(&mut t, &gone, at, at);
                         gone.extend(first.clone());
                     }
                     _ => {}

@@ -170,6 +170,12 @@ impl Compiler<'_, '_> {
     ) -> Result<(), StetError> {
         check_carriable(&spec.text)?;
         check_new_text(&spec.text)?;
+        // After a pending merge, the new paragraph follows the paragraph the merge joins into.
+        let joined = match place {
+            Place::After => self.join_end(anchor)?,
+            Place::Before => None,
+        };
+        let anchor = joined.as_ref().unwrap_or(anchor);
         let part = anchor.part().clone();
         let carried = run
             .last

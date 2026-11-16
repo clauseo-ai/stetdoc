@@ -39,7 +39,7 @@ fn base_of(tree: &SpanTree, para: NodeId) -> Vec<NodeRef<'_>> {
 /// A paragraph's base properties as the copy rule copies them (design `revisions.md`, 2.2): without a change-tracking element
 /// at any depth, such as the `w:numberingChange` in a `w:numPr`. Its id is the paragraph's own, and a copy of it on another
 /// paragraph would give two tracked changes the same id.
-fn copied_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
+pub(super) fn copied_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
     fn strip(mut e: PropElement) -> PropElement {
         e.children = e
             .children

@@ -82,9 +82,11 @@ All notable changes to stetdoc are recorded here. The format follows
   "deletion #0". Such a paragraph now goes whenever its container does not need it, tracked or not. One that is needed,
   such as the only paragraph of a cell or the body, one after the last table or between two tables, the body's last
   paragraph after a section break, or one that holds a section break, is still emptied and kept, and the receipt says so:
-  `p2 emptied and kept`, with the new warning `kept_required_paragraph` that gives the reason. An operation that names a
-  paragraph an earlier operation of the batch removed is refused, so deleting the last paragraph and then inserting after
-  it in the same batch no longer works: insert after the paragraph before it, or delete only its text (#25).
+  `p2 emptied and kept`, with the new warning `kept_required_paragraph` that gives the reason. Word cannot accept a deleted
+  mark on a container's last paragraph, so a tracked delete of one keeps its mark and deletes the mark of the paragraph
+  before it instead, with a property change that keeps that paragraph's formatting; in the body Word for Mac needs a second
+  Accept All to clear that change, which alters nothing visible. An operation that names a paragraph an earlier operation
+  of the batch removed is refused (#25).
 - An insertion right before or right after an inline content control that is locked, bound to data or showing its
   placeholder was refused as `readonly_region`, though the text would sit outside the control. It now goes before or after
   the control, tracked or not, as beside an unlocked control. An insertion inside the control's text is still refused

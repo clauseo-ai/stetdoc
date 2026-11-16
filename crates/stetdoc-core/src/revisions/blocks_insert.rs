@@ -135,7 +135,7 @@ impl Compiler<'_, '_> {
         let done = self
             .insert_block_inner(run, anchor, place, spec)
             .and_then(|()| match before_taker {
-                true => self.restore_original_props(anchor.part()),
+                true => self.restore_original_props(anchor),
                 false => Ok(()),
             });
         match done {
@@ -181,7 +181,9 @@ impl Compiler<'_, '_> {
         // goes after it, so that it does not take the merged text.
         let (joined, place) = match place {
             Place::After => (self.join_end(anchor)?, Place::After),
-            Place::Before if self.takes_a_join(anchor)? => (None, Place::After),
+            Place::Before if self.takes_a_join(anchor)? => {
+                (Some(self.container_end(anchor)?), Place::After)
+            }
             Place::Before => (None, Place::Before),
         };
         let anchor = joined.as_ref().unwrap_or(anchor);

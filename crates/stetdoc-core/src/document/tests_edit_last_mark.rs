@@ -270,3 +270,88 @@ fn an_insertion_before_the_deleted_last_paragraph_has_its_original_properties() 
         source
     );
 }
+
+#[test]
+fn two_insertions_before_the_deleted_last_paragraph_keep_their_order() {
+    let source = format!("{}{}", para("Lead.", ""), para("Gone.", ""));
+    let ops = r#"{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]},{"op":"insert","ref":"p2","place":"before","paragraphs":["Two."]}"#;
+    let mut doc = open(&source);
+    let receipt = edit(&mut doc, ops);
+    assert!(
+        !receipt.text.contains("resolved by a later operation"),
+        "{}",
+        receipt.text
+    );
+    assert_eq!(
+        accepted(&source, ops),
+        format!(
+            "{}{}{}",
+            para("Lead.", ""),
+            para("New.", ""),
+            para("Two.", "")
+        )
+    );
+}
+
+#[test]
+fn another_authors_change_to_a_mark_with_nothing_to_carry_does_not_keep_the_paragraph() {
+    let other = r#"<w:rPrChange w:id="9" w:author="Other" w:date="2020-01-01T00:00:00Z"><w:rPr/></w:rPrChange>"#;
+    let changed = format!(r#"<w:pPr><w:rPr><w:b/>{other}</w:rPr></w:pPr>"#);
+    let bold = r#"<w:pPr><w:rPr><w:b/></w:rPr></w:pPr>"#;
+    let source = format!("{}{}", para("Lead.", bold), para("Gone.", &changed));
+    let mut doc = open(&source);
+    let receipt = edit(&mut doc, r#"{"op":"delete","ref":"p2"}"#);
+    assert!(
+        !receipt
+            .warnings
+            .iter()
+            .any(|w| w.code == WarningCode::KeptRequiredParagraph),
+        "{}",
+        receipt.text
+    );
+}
+
+#[test]
+fn an_insertion_before_the_deleted_last_paragraph_has_its_original_mark_and_own_changes() {
+    let bold = r#"<w:pPr><w:rPr><w:b/></w:rPr></w:pPr>"#;
+    let italic = r#"<w:pPr><w:rPr><w:i/></w:rPr></w:pPr>"#;
+    let ops = r#"{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#;
+    let source = format!("{}{}", para("Lead.", bold), para("Gone.", italic));
+    assert_eq!(
+        accepted(&source, ops),
+        format!("{}{}", para("Lead.", bold), para("New.", italic))
+    );
+    // The author's own pending change from an earlier batch is what the paragraph has, and the new one has it too.
+    let own = r#"<w:pPr><w:ind w:left="720"/><w:pPrChange w:id="9" w:author="Clauseo" w:date="2020-01-01T00:00:00Z"><w:pPr/></w:pPrChange></w:pPr>"#;
+    let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", own));
+    assert_eq!(
+        accepted(&source, ops),
+        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
+    );
+    // So does a change of the same batch.
+    let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", ""));
+    let ops = r#"{"op":"paragraph","ref":"p2","indent_left":"0.5in"},{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#;
+    assert_eq!(
+        accepted(&source, ops),
+        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
+    );
+}
+
+#[test]
+fn an_insertion_in_a_later_batch_beside_the_deleted_last_paragraph_stays_a_paragraph_of_its_own() {
+    let source = format!("{}{}", para("Lead.", ""), para("Gone.", ""));
+    for insert in [
+        r#"{"op":"insert","ref":"p1","place":"after","paragraphs":["New."]}"#,
+        r#"{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#,
+    ] {
+        let mut doc = open(&source);
+        edit(&mut doc, r#"{"op":"delete","ref":"p2"}"#);
+        edit(&mut doc, insert);
+        edit(&mut doc, r#"{"op":"accept","all":true}"#);
+        assert_eq!(
+            body(&doc),
+            format!("{}{}", para("Lead.", ""), para("New.", "")),
+            "{insert}"
+        );
+    }
+}

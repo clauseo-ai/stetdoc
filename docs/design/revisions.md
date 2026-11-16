@@ -787,7 +787,9 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
   joins the two, and the last paragraph's ref is retired as merged into the earlier one. An insertion after the earlier
   paragraph in the same batch goes after the paragraph its deleted mark joins into (a Y on the last paragraph), so it
   stays a paragraph of its own, and so does an insertion before the last paragraph (it goes after it, with the
-  properties the last paragraph had before the alignment, as an insertion before it had in 0.9.3). The mark's run
+  properties and mark run properties the last paragraph had before the alignment, as an insertion before it had in
+  0.9.3, and after the paragraphs earlier such insertions put there, so they keep their order). Both hold for the author's
+  own deleted mark of an earlier batch too. The mark's run
   properties are carried the same way, with an `rPrChange` on the last paragraph's mark. A paragraph whose mark is
   already deleted and that joins on to such an emptied last paragraph, when it is deleted in turn, makes the paragraph
   before it lose its mark too, so deleting the last two paragraphs from the bottom up gives what deleting them from the

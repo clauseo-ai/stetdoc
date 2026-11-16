@@ -67,8 +67,11 @@ Each of these was decided in a design, with the evidence there.
 - **Deleting the last paragraph of a container deletes the mark of the paragraph before it** and the last paragraph's
   text, when a paragraph with text is left before it, so accepting leaves that paragraph last, with its own properties.
   This is what Word writes in a cell, but in the body Word's own triple-click delete tracks only the text and leaves an
-  empty last paragraph after accepting. A paragraph the container needs is emptied and kept, and the receipt says so
-  (`kept_required_paragraph`). See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
+  empty last paragraph after accepting. When the two paragraphs' properties differ, the last one also gets a
+  paragraph-property change that gives it the earlier one's. In the body only, Word for Mac's single Accept All leaves that
+  change pending on the merged paragraph, which already looks right, and a second Accept All clears it; a table cell clears
+  in one pass. stetdoc keeps the change because without it accepting would reformat a paragraph the user did not touch. A
+  paragraph the container needs is emptied and kept, and the receipt says so (`kept_required_paragraph`). See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
 - **An insertion after a paragraph goes directly after it**, before any bookmark, permission range or other markup that
   follows, and **a section break stays on that paragraph**. Word's Enter shape moves the break onto the new paragraph, so
   after a paragraph that ends a section stetdoc writes a self-contained new paragraph instead, with the next paragraph's

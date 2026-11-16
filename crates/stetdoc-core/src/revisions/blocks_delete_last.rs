@@ -48,14 +48,18 @@ impl Compiler<'_, '_> {
         if self.paragraph(&first)?.map.len(Mode::Final) == 0 {
             return keep(self, KeptReason::EmptyBefore);
         }
-        if let Some(cause) = self.join_blocker(&part, prev, block.node())? {
+        // The mark's run properties are part of what accepting keeps of the last paragraph: they are the earlier one's.
+        let (marks, base) = {
+            let tree = self.tree_ro(&part)?;
+            (
+                (mark_base(tree, prev), mark_base(tree, block.node())),
+                super::blocks_delete::copied_base(tree, block.node()),
+            )
+        };
+        if let Some(cause) = self.join_blocker(&part, prev, block.node(), marks.0 != marks.1)? {
             return keep(self, KeptReason::CannotJoin(cause));
         }
-        // The mark's run properties are part of what accepting keeps of the last paragraph: they are the earlier one's.
-        let marks = {
-            let tree = self.tree_ro(&part)?;
-            (mark_base(tree, prev), mark_base(tree, block.node()))
-        };
+        self.before_join.push((block.node(), base, marks.1.clone()));
         match self.merge_inner(&first, block) {
             Ok(()) => {}
             Err(e) if matches!(e.code(), ErrorCode::ReadonlyRegion | ErrorCode::CrossBlock) => {
@@ -135,6 +139,7 @@ impl Compiler<'_, '_> {
         part: &std::sync::Arc<str>,
         prev: NodeId,
         last: NodeId,
+        carries_mark: bool,
     ) -> Result<Option<&'static str>, StetError> {
         let Some(stamp) = self.stamp() else {
             return Ok(None);
@@ -160,9 +165,9 @@ impl Compiler<'_, '_> {
                 .and_then(|c| crate::wordml::revision_at(&c))
                 .is_some_and(|r| r.author.as_deref() != Some(stamp.author()))
         };
-        Ok(if foreign_mark(last) {
+        Ok(if carries_mark && foreign_mark(last) {
             Some("its paragraph mark has another author's pending change to its formatting")
-        } else if foreign_mark(prev) {
+        } else if carries_mark && foreign_mark(prev) {
             Some(
                 "the mark of the paragraph before it has another author's pending change to its formatting",
             )
@@ -187,58 +192,147 @@ impl Compiler<'_, '_> {
             super::resolve_mark::previous_paragraph(tree, anchor.node()).is_some_and(|prev| {
                 mark_of(tree, prev)
                     .del
-                    .is_some_and(|d| self.is_created_node(tree, d))
+                    .is_some_and(|d| self.own_deletion(tree, d))
             })
         };
         Ok(joins && self.paragraph(anchor)?.map.len(Mode::Final) == 0)
     }
 
-    /// After an insertion before an emptied last paragraph, which went after it as a Y: the new paragraph holds the last
-    /// paragraph's mark and properties, which the join aligned to the earlier paragraph's with a change of this batch. It
-    /// takes the properties the last paragraph had before, which the change holds, as an insertion before it did in 0.9.3.
-    pub(super) fn restore_original_props(
-        &mut self,
-        part: &std::sync::Arc<str>,
-    ) -> Result<(), StetError> {
+    /// After an insertion before an emptied last paragraph `anchor`, which went after it as a Y: the new paragraph holds the
+    /// last paragraph's mark and properties, which the join aligned to the earlier paragraph's. It takes the properties and
+    /// mark run properties the last paragraph had before the join, as an insertion before it did in 0.9.3, and a change of
+    /// this batch that is left with nothing to change goes.
+    pub(super) fn restore_original_props(&mut self, anchor: &BlockKey) -> Result<(), StetError> {
+        let part = anchor.part().clone();
         let Some(new) = self.fx.new_blocks.first().map(|k| k.node()) else {
             return Ok(());
         };
-        let (ppr, change) = {
+        let Some((_, base, mark)) = self
+            .before_join
+            .iter()
+            .find(|(n, ..)| *n == anchor.node())
+            .cloned()
+        else {
+            return Ok(());
+        };
+        let (now_base, now_mark) = {
+            let tree = self.tree_ro(&part)?;
+            (
+                super::blocks_delete::copied_base(tree, new),
+                mark_base(tree, new),
+            )
+        };
+        // The new text took the aligned mark's run properties, as a paragraph made by Enter does; before the last paragraph
+        // it has none, as in 0.9.3.
+        if now_mark != mark && !now_mark.is_empty() {
+            let runs: Vec<NodeId> = {
+                let tree = self.tree_ro(&part)?;
+                tree.node_ref(new)
+                    .child_elements()
+                    .filter(|c| is_w(c, "ins") && self.is_created_node(tree, c.id()))
+                    .flat_map(|ins| {
+                        ins.child_elements()
+                            .filter(|r| is_w(r, "r"))
+                            .map(|r| r.id())
+                            .collect::<Vec<_>>()
+                    })
+                    .filter_map(|r| {
+                        let rpr = tree.node_ref(r).child_elements().find(|c| is_w(c, "rPr"))?;
+                        let props: Vec<PropElement> =
+                            rpr.child_elements().map(|e| prop_element_of(&e)).collect();
+                        (props == now_mark).then_some(rpr.id())
+                    })
+                    .collect()
+            };
+            let tree = self.tx.part_mut(&part)?;
+            for rpr in runs {
+                super::tree_ops::detach(tree, rpr)?;
+            }
+        }
+        let direct = self.own_mark(&part, new)?;
+        for (path, want, now) in [
+            (&["pPr"][..], base, now_base),
+            (&["pPr", "rPr"][..], mark, now_mark),
+        ] {
+            if want == now {
+                continue;
+            }
+            let clear = now
+                .iter()
+                .filter(|c| !want.iter().any(|f| f.local == c.local && f.ns == c.ns))
+                .map(|c| (c.ns.clone(), c.local.clone()))
+                .collect();
+            let edit = PropEdit { set: want, clear };
+            self.edit_container(&part, new, path, direct, &edit)?;
+        }
+        self.drop_noop_change(&part, new, &["pPr"], "pPrChange")?;
+        self.drop_noop_change(&part, new, &["pPr", "rPr"], "rPrChange")
+    }
+
+    /// Removes the change of this batch in the properties at `path` of `owner` when its snapshot is what the properties are.
+    fn drop_noop_change(
+        &mut self,
+        part: &std::sync::Arc<str>,
+        owner: NodeId,
+        path: &[&str],
+        change: &str,
+    ) -> Result<(), StetError> {
+        let found = {
             let tree = self.tree_ro(part)?;
-            let Some(ppr) = find_chain(tree, new, &["pPr"]) else {
+            let Some(container) = find_chain(tree, owner, path) else {
                 return Ok(());
             };
-            let change = tree
-                .node_ref(ppr)
+            let node = tree.node_ref(container);
+            let Some(c) = node
                 .child_elements()
-                .find(|c| is_w(c, "pPrChange"))
-                .map(|c| c.id())
-                .filter(|c| self.is_created_node(tree, *c));
-            (ppr, change)
+                .find(|c| is_w(c, change))
+                .filter(|c| self.is_created_node(tree, c.id()))
+            else {
+                return Ok(());
+            };
+            let props = |n: &crate::xml::NodeRef<'_>| -> Vec<PropElement> {
+                n.child_elements()
+                    .filter(|e| {
+                        !(is_word_ns(e.namespace())
+                            && (is_change_tracking(e.local_name())
+                                || matches!(
+                                    e.local_name(),
+                                    "ins" | "del" | "moveFrom" | "moveTo" | "rPr" | "sectPr"
+                                ) && !(path.len() == 2 && e.local_name() == "rPr")))
+                    })
+                    .map(|e| prop_element_of(&e))
+                    .collect()
+            };
+            let snapshot = c
+                .child_elements()
+                .next()
+                .map(|s| props(&s))
+                .unwrap_or_default();
+            (snapshot == props(&node)).then_some(c.id())
         };
-        let Some(change) = change else { return Ok(()) };
-        let tree = self.tx.part_mut(part)?;
-        let snapshot = tree
-            .node_ref(change)
-            .child_elements()
-            .find(|c| is_w(c, "pPr"))
-            .map(|c| c.child_elements().map(|e| e.id()).collect::<Vec<_>>())
-            .unwrap_or_default();
-        let (base, kept): (Vec<NodeId>, Vec<NodeId>) = tree
-            .node_ref(ppr)
-            .child_elements()
-            .filter(|c| c.id() != change)
-            .map(|c| c.id())
-            .partition(|c| !matches!(tree.node_ref(*c).local_name(), "rPr" | "sectPr"));
-        for n in base {
-            super::tree_ops::detach(tree, n)?;
+        if let Some(c) = found {
+            super::tree_ops::detach(self.tx.part_mut(part)?, c)?;
         }
-        let first_kept = kept.first().copied();
-        for n in snapshot {
-            super::tree_ops::move_to(tree, n, ppr, first_kept.or(Some(change)))?;
-        }
-        super::tree_ops::detach(tree, change)?;
         Ok(())
+    }
+
+    /// True if the mark deletion `del` is the author's own, made by this batch or an earlier one.
+    fn own_deletion(&self, tree: &SpanTree, del: NodeId) -> bool {
+        self.stamp().is_some_and(|s| {
+            crate::wordml::revision_at(&tree.node_ref(del))
+                .is_some_and(|r| r.author.as_deref() == Some(s.author()))
+        })
+    }
+
+    /// The last paragraph of the container from `anchor` on: an insertion before an emptied last paragraph goes after it, and
+    /// after the paragraphs that earlier such insertions put there, so that they keep their order.
+    pub(super) fn container_end(&self, anchor: &BlockKey) -> Result<BlockKey, StetError> {
+        let tree = self.tree_ro(anchor.part())?;
+        let mut cur = anchor.node();
+        while let Some(n) = next_paragraph(tree, cur) {
+            cur = n;
+        }
+        Ok(BlockKey::new(anchor.part().clone(), cur))
     }
 
     /// The paragraph that a paragraph with live text and a mark this batch deleted, a pending merge, joins into, which is where an
@@ -248,11 +342,11 @@ impl Compiler<'_, '_> {
         let start = anchor.node();
         let end = {
             let tree = self.tree_ro(anchor.part())?;
-            // Only a deletion this batch made: after a mark deleted earlier, the new paragraph follows the anchor directly,
-            // as it did in 0.9.3, and accepting joins the anchor into it.
+            // Only a deletion of the author's own, of this batch or an earlier one: after another author's deleted mark the
+            // new paragraph follows the anchor directly, as it did in 0.9.3, and accepting joins the anchor into it.
             let made_here = mark_of(tree, start)
                 .del
-                .is_some_and(|d| self.is_created_node(tree, d));
+                .is_some_and(|d| self.own_deletion(tree, d));
             if !is_w(&tree.node_ref(start), "p") || !made_here {
                 return Ok(None);
             }

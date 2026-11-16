@@ -72,7 +72,9 @@ impl Compiler<'_, '_> {
     ///
     /// A field that was not in `Original` (`inserted`: all of its content is in insertions) must stay out of it, so its runs go in
     /// a deletion of their own inside a copy of the first insertion and of the last, under new ids that the outcome records as
-    /// copies. A field whose content does not start and end with a `w:ins` is left as it is.
+    /// copies. That needs its content to be insertions of one change (`one_insertion`): with two, rejecting one would take a
+    /// marker and leave the other's text without a field, while the source keeps the field. Such a field, and one whose content
+    /// has another shape, is left as it is (design `revisions.md`, 3.6.3).
     fn unfold(&mut self, part: &Arc<str>, field: NodeId, inserted: bool) -> Result<(), StetError> {
         let stamp = self
             .stamp()
@@ -109,7 +111,9 @@ impl Compiler<'_, '_> {
                 runs.last().and_then(|r| rpr_of(r)),
                 ours(content.first().cloned()),
                 ours(content.last().cloned()),
-                ins(content.first()).zip(ins(content.last())),
+                one_insertion(&content)
+                    .then(|| ins(content.first()).zip(ins(content.last())))
+                    .flatten(),
             )
         };
         if inserted && wraps.is_none() {
@@ -326,6 +330,25 @@ impl Compiler<'_, '_> {
         detach(tree, del)?;
         Ok(other)
     }
+}
+
+/// True if every element of `content` is a `w:ins` with the author and date of the first, which makes them one change: the
+/// copies that hold a field's begin and end are then decided with the rest, and the field goes or stays whole.
+fn one_insertion(content: &[NodeRef<'_>]) -> bool {
+    let stamp = |c: &NodeRef<'_>| {
+        let get = |local: &str| {
+            c.attrs()
+                .find(|a| a.local_name() == local && a.namespace() == c.namespace())
+                .map(|a| a.value().into_owned())
+        };
+        (get("author"), get("date"))
+    };
+    let Some(first) = content.first() else {
+        return false;
+    };
+    content
+        .iter()
+        .all(|c| is_w(c, "ins") && stamp(c) == stamp(first))
 }
 
 /// The `w:id` of a revision element, if it has a numeric one.

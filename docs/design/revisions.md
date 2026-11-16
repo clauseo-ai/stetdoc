@@ -1092,7 +1092,9 @@ and `end`, with `delInstrText` and `delText`. It writes an inserted field as `in
   back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is what
   Word's Reject All gives too. A field whose result is all in insertions was not in `Original` and must stay out of it, so
   its runs go in a new `w:del` inside a copy of the first and of the last `w:ins`, under new ids recorded as copies; a field
-  whose content does not start and end with a `w:ins` then stays a `w:fldSimple`. An insertion that holds only deletions
+  whose content is not all insertions of one change (one author and date) then stays a `w:fldSimple` with its runs
+  deleted inside it. With two changes, rejecting one would take a marker and leave the other's text without a field,
+  while the source keeps the field; Word's Accept All may leave an empty field there, a known gap. An insertion that holds only deletions
   (another author's text that this call deleted) is in neither mode, so a result made of deleted text and such insertions
   is deleted whole, and the field is written as a complex field.
 
@@ -2188,7 +2190,9 @@ not, or where it settled something the design left open. Each was found by a tes
     paragraphs that a split cut inside a hyperlink or a smart tag makes the two halves one element again.
 22. **`changes()`** chains an Enter, the text typed, and the next Enter into one `ParagraphInserted` change, takes the
     copy of a text-box revision in the untaken branch into the change of the taken one, and groups the `rPrChange` of
-    consecutive runs and the `pPrChange` of consecutive paragraphs by their old properties and not by their ids.
+    consecutive runs and the `pPrChange` of consecutive paragraphs by their old properties and not by their ids. The runs
+    of a field's begin, code, separate and end count though they have no width, so the copies of a result's format
+    change that a simple field written as a complex field carries (3.6.3) are one change with it.
 23. **`changes(range)` costs what the blocks of the range cost.** It reads a window of entries around the range, widened
     to whole tables and grown by four while a change reaches its edge, and reads the whole story when the window holds
     a move or a custom XML range, which are grouped by a name or an id that can be anywhere, or a wrapper around blocks

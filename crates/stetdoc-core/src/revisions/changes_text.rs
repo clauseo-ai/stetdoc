@@ -406,7 +406,9 @@ pub(super) fn snapshot_key(tree: &SpanTree, change: NodeId) -> String {
 }
 
 /// The `rPrChange` atoms of consecutive runs with the same author, date and old properties, grouped: a
-/// carve that copies a pending change under a new id does not split a change.
+/// carve that copies a pending change under a new id does not split a change. The runs of a field's begin, code, separate
+/// and end have no width but count: a simple field written as a complex field copies its result's change onto them
+/// (`simple_unfold`). Other items with no width, such as markers, neither join nor part a group.
 pub(super) fn run_format_groups(
     map: &TextMap,
     tree: &SpanTree,
@@ -415,10 +417,12 @@ pub(super) fn run_format_groups(
 ) -> Vec<Vec<usize>> {
     let mut groups: Vec<Vec<usize>> = Vec::new();
     let mut current: Option<(String, usize)> = None;
-    for item in map.items().iter().filter(|i| i.len > 0) {
+    for item in map.items() {
         let atom = item.run.and_then(|r| atoms.by_run.get(&r).copied());
         let Some(a) = atom else {
-            current = None;
+            if item.len > 0 {
+                current = None;
+            }
             continue;
         };
         let Some(r) = atoms.list.get(a) else { continue };

@@ -58,7 +58,9 @@ Each of these was decided in a design, with the evidence there.
   `w:del`, and Word does not take a `w:fldSimple` whose runs are deleted inside it as a deleted field, so stetdoc writes
   the field's begin, code, separate, result and end as runs, all deleted, as Word's own tracked deletion does. Rejecting
   gives back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is
-  also what Word's Reject All gives. See [revisions 3.6.3](docs/design/revisions.md#36-other-places).
+  also what Word's Reject All gives. One known gap: a field whose result two other authors' insertions make up keeps
+  the `w:fldSimple` with its runs deleted inside it, so that rejecting one of them keeps the field as the source does,
+  and Word's Accept All may leave an empty field there. See [revisions 3.6.3](docs/design/revisions.md#36-other-places).
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).

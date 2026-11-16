@@ -250,6 +250,8 @@ mod tests_edit_review;
 #[cfg(test)]
 mod tests_edit_simple_fields;
 #[cfg(test)]
+mod tests_edit_simple_unfold;
+#[cfg(test)]
 mod tests_edit_toc;
 #[cfg(test)]
 mod tests_inspect;

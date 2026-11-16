@@ -334,22 +334,37 @@ fn an_insertion_before_the_deleted_last_paragraph_has_its_original_mark_and_own_
         accepted(&source, ops),
         format!("{}{new}", para("Lead.", bold))
     );
-    // The values come from the join's changes in the file. When the last paragraph already had the author's own pending
-    // change from an earlier batch, the join's alignment is folded into it, and the change is not the join's (its date is
-    // older), so it stays, and the new paragraph has the aligned properties, the earlier paragraph's (a known difference
-    // from 0.9.3, which gave the last paragraph's).
+    // The author's own pending change from an earlier batch, then the delete and the insertion in one batch: the join
+    // recorded what the paragraph had, and the new paragraph has it, as in 0.9.3.
     let own = r#"<w:pPr><w:ind w:left="720"/><w:pPrChange w:id="9" w:author="Clauseo" w:date="2020-01-01T00:00:00Z"><w:pPr/></w:pPrChange></w:pPr>"#;
     let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", own));
     assert_eq!(
         accepted(&source, ops),
-        format!("{}{}", para("Lead.", CENTRED), para("New.", CENTRED))
+        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
     );
-    // A change of the same batch has the join's stamp, so the new paragraph has what the paragraph had before it.
+    // So does a `paragraph` operation of the same batch.
     let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", ""));
     let ops = r#"{"op":"paragraph","ref":"p2","indent_left":"0.5in"},{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#;
     assert_eq!(
         accepted(&source, ops),
-        format!("{}{}", para("Lead.", CENTRED), para("New.", ""))
+        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
+    );
+    // Across batches the join folded its alignment into that change, so what the paragraph had is no longer in the file:
+    // nothing is guessed, and the new paragraph has the paragraph before's properties (a known difference from 0.9.3).
+    let mut doc = open(&source);
+    edit(
+        &mut doc,
+        r#"{"op":"paragraph","ref":"p2","indent_left":"0.5in"}"#,
+    );
+    edit(&mut doc, r#"{"op":"delete","ref":"p2"}"#);
+    edit(
+        &mut doc,
+        r#"{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#,
+    );
+    edit(&mut doc, r#"{"op":"accept","all":true}"#);
+    assert_eq!(
+        body(&doc),
+        format!("{}{}", para("Lead.", CENTRED), para("New.", CENTRED))
     );
 }
 

@@ -3,7 +3,10 @@
 //! author or another, in the body or a cell, with equal or different properties. `last_mark_0_9_3.tsv` holds 0.9.3's
 //! results, made with its release binary: one line per case, the name, then the body after accept all and after reject
 //! all. 0.9.3 refused an insertion after the deleted last paragraph (`readonly_region`), since its mark was deleted; that
-//! now works, and reads as an insertion after the paragraph before it.
+//! now works, and reads as an insertion after the paragraph before it. Two more kinds put the author's own pending
+//! paragraph formatting on the last paragraph first: in the same batch (`para`), which reads as in 0.9.3, and in an
+//! earlier batch (`ownearlier`), a known difference: the join folds its alignment into that change, so the paragraph's
+//! own formatting is no longer in the file, and the insertion reads as one after the paragraph before it.
 
 use super::tests_edit::batch;
 use super::*;
@@ -42,6 +45,7 @@ fn inserts(kind: &str) -> Vec<&'static str> {
         "before" => vec![before],
         "after1" => vec![r#"{"op":"insert","ref":"p1","place":"after","paragraphs":["New."]}"#],
         "after2" => vec![r#"{"op":"insert","ref":"p2","place":"after","paragraphs":["New."]}"#],
+        "para" | "ownearlier" => vec![before],
         _ => vec![
             before,
             r#"{"op":"insert","ref":"p2","place":"before","paragraphs":["Two."]}"#,
@@ -134,6 +138,9 @@ fn insertions_beside_a_deleted_last_paragraph_read_as_they_did_in_0_9_3() {
         let (accept, reject) = if accept.starts_with("refused") {
             let other = name.replace("after2", "after1");
             expected[other.as_str()]
+        } else if kind == "ownearlier" {
+            let other = format!("{container}-{props}-later-same-after1");
+            (expected[other.as_str()].0, *reject)
         } else {
             (*accept, *reject)
         };
@@ -149,7 +156,19 @@ fn insertions_beside_a_deleted_last_paragraph_read_as_they_did_in_0_9_3() {
         let mut results = Vec::new();
         for action in ["accept", "reject"] {
             let mut doc = open();
-            if timing == "same" {
+            let para = r#"{"op":"paragraph","ref":"p2","align":"right"}"#;
+            if kind == "para" {
+                apply(
+                    &mut doc,
+                    &[para, r#"{"op":"delete","ref":"p2"}"#, ops[0]],
+                    "Alice",
+                    "06",
+                );
+            } else if kind == "ownearlier" {
+                apply(&mut doc, &[para], "Alice", "05");
+                apply(&mut doc, &[r#"{"op":"delete","ref":"p2"}"#], "Alice", "06");
+                apply(&mut doc, &ops, "Alice", "07");
+            } else if timing == "same" {
                 let mut all = vec![r#"{"op":"delete","ref":"p2"}"#];
                 all.extend(&ops);
                 apply(&mut doc, &all, "Alice", "06");
@@ -174,5 +193,5 @@ fn insertions_beside_a_deleted_last_paragraph_read_as_they_did_in_0_9_3() {
         assert_eq!(results[1], normalized(reject), "{name}: reject all");
         checked += 1;
     }
-    assert_eq!(checked, 48);
+    assert_eq!(checked, 56);
 }

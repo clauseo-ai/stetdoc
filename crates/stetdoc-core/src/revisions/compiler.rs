@@ -26,6 +26,14 @@ pub(crate) struct Compiler<'t, 's> {
     call_start: Range<u32>,
     /// True once a call has deleted a footnote or endnote reference, since `remove_notes_of_dropped_references` last looked.
     pub(super) dropped_reference: bool,
+    /// The properties and mark run properties that a container's last paragraph had when a deletion of this batch joined it
+    /// with the paragraph before it, by element. An insertion before it in the same batch takes them, since the join may have
+    /// folded the author's own pending change, which then no longer holds them (`blocks_insert_joined.rs`).
+    pub(super) before_join: Vec<(
+        NodeId,
+        Vec<super::types::PropElement>,
+        Vec<super::types::PropElement>,
+    )>,
 }
 
 /// A paragraph read for an edit: everything the primitives need, owned, so that the transaction can
@@ -56,6 +64,7 @@ impl<'t, 's> Compiler<'t, 's> {
             warnings: Vec::new(),
             call_start: 0..0,
             dropped_reference: false,
+            before_join: Vec::new(),
         })
     }
 

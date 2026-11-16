@@ -791,10 +791,12 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
   alone (`revisions/blocks_insert_joined.rs`): a paragraph whose mark is deleted, then the container's last paragraph,
   which keeps its mark and has all its text deleted. So it holds for any author and any batch. An insertion before the
   last paragraph takes the properties, the mark's run properties and the run formatting that the last paragraph had
-  before the join, read from the join's own property changes (the ones with the stamp of the join's mark deletion), as
-  0.9.3 gave. When the last paragraph already had the author's own pending property change from an earlier batch, the
-  alignment is folded into it, the change is not recognised as the join's, and the insertion takes the earlier
-  paragraph's properties: a known difference from 0.9.3. Another author's change is never taken for the alignment. An insertion after the paragraph before takes that paragraph's properties, as 0.9.3 gave. A
+  before the join, as 0.9.3 gave: in the batch of the join, from what the join recorded; in a later batch, from the
+  join's own property changes, known by the author, date and ids next to the join's mark deletion. When the last
+  paragraph already had the author's own pending property change, the join folds its alignment into it, and in a later
+  batch what the paragraph had is no longer in the file: nothing is guessed, and the insertion takes the earlier
+  paragraph's properties, its mark's run properties and run formatting alike (a known difference from 0.9.3, in
+  FIDELITY.md). Another author's change is never taken for the alignment. An insertion after the paragraph before takes that paragraph's properties, as 0.9.3 gave. A
   matrix test compares accept all and reject all with 0.9.3's results (`document/last_mark_0_9_3.tsv`). The mark's run
   properties are carried the same way, with an `rPrChange` on the last paragraph's mark. A paragraph whose mark is
   already deleted and that joins on to such an emptied last paragraph, when it is deleted in turn, makes the paragraph

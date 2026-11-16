@@ -136,7 +136,7 @@ impl Compiler<'_, '_> {
         let done = self
             .insert_block_inner(run, anchor, place, spec)
             .and_then(|()| match before_taker {
-                true => self.restore_original_props(anchor.part()),
+                true => self.restore_original_props(anchor),
                 false => Ok(()),
             });
         match done {

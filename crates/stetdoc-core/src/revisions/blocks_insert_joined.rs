@@ -105,13 +105,20 @@ impl Compiler<'_, '_> {
     /// paragraph takes what those changes hold, the properties the last paragraph had before the join, and the changes move to
     /// the paragraph the Y left with the inserted mark, which is the one that joins the earlier paragraph. The new text takes
     /// the mark's run properties, as an insertion before the last paragraph did in 0.9.3.
-    pub(super) fn restore_original_props(
-        &mut self,
-        part: &std::sync::Arc<str>,
-    ) -> Result<(), StetError> {
+    pub(super) fn restore_original_props(&mut self, anchor: &BlockKey) -> Result<(), StetError> {
+        let part = anchor.part();
         let Some(new) = self.fx.new_blocks.first().map(|k| k.node()) else {
             return Ok(());
         };
+        // A join of this batch recorded what the last paragraph had, which a folded own change may no longer hold.
+        if let Some((_, base, mark)) = self
+            .before_join
+            .iter()
+            .find(|(n, ..)| *n == anchor.node())
+            .cloned()
+        {
+            return self.give_recorded(part, new, base, mark);
+        }
         // The join wrote its alignment with the stamp of the mark it deleted, the mark of the paragraph before the last.
         let (left, stamp) = {
             let tree = self.tree_ro(part)?;
@@ -121,10 +128,38 @@ impl Compiler<'_, '_> {
             let stamp = previous_paragraph(tree, left)
                 .and_then(|q| mark_of(tree, q).del)
                 .and_then(|d| crate::wordml::revision_at(&tree.node_ref(d)))
-                .map(|r| (r.author, r.date));
+                .and_then(|r| {
+                    Some(JoinStamp {
+                        author: r.author,
+                        date: r.date,
+                        id: r.id?,
+                    })
+                });
             let Some(stamp) = stamp else { return Ok(()) };
             (left, stamp)
         };
+        // A change that is not the join's, such as the author's own earlier change that the join folded its alignment into,
+        // no longer holds what the paragraph had: then nothing is guessed, and the new paragraph keeps the aligned values,
+        // the earlier paragraph's, for its properties and its mark alike.
+        let foreign = {
+            let tree = self.tree_ro(part)?;
+            [("pPr", &["pPr"][..]), ("rPr", &["pPr", "rPr"][..])]
+                .iter()
+                .any(|(_, path)| {
+                    let change = if path.len() == 1 {
+                        "pPrChange"
+                    } else {
+                        "rPrChange"
+                    };
+                    find_chain(tree, new, path)
+                        .and_then(|c| tree.node_ref(c).child_elements().find(|e| is_w(e, change)))
+                        .and_then(|c| crate::wordml::revision_at(&c))
+                        .is_some_and(|r| !stamp.made(&r, path.len() == 2))
+                })
+        };
+        if foreign {
+            return Ok(());
+        }
         let mut moved = false;
         for path in [&["pPr"][..], &["pPr", "rPr"][..]] {
             moved |= self.move_alignment(part, new, left, path, &stamp)?;
@@ -142,39 +177,53 @@ impl Compiler<'_, '_> {
                     .collect()
             })
             .unwrap_or_default();
-        let runs: Vec<NodeId> = tree
-            .node_ref(new)
-            .child_elements()
-            .filter(|c| is_w(c, "ins"))
-            .flat_map(|ins| {
-                ins.child_elements()
-                    .filter(|r| is_w(r, "r"))
-                    .map(|r| r.id())
-                    .collect::<Vec<_>>()
-            })
-            .collect();
-        for run in runs {
-            let old = tree
-                .node_ref(run)
-                .child_elements()
-                .find(|c| is_w(c, "rPr"))
-                .map(|c| c.id());
-            if let Some(old) = old {
-                detach(tree, old)?;
-            }
-            if mark.is_empty() {
+        format_runs(tree, new, &mark)
+    }
+
+    /// Gives `new` the recorded properties and mark run properties, as tracked edits that fold into the property changes it
+    /// holds (the join's, which keep what the last paragraph had before this batch, for a reject), and its runs the mark's run
+    /// properties.
+    fn give_recorded(
+        &mut self,
+        part: &std::sync::Arc<str>,
+        new: NodeId,
+        base: Vec<PropElement>,
+        mark: Vec<PropElement>,
+    ) -> Result<(), StetError> {
+        let (now_base, now_mark) = {
+            let tree = self.tree_ro(part)?;
+            (
+                super::blocks_delete::copied_base(tree, new),
+                mark_base(tree, new),
+            )
+        };
+        let direct = self.own_mark(part, new)?;
+        for (path, want, now) in [
+            (&["pPr"][..], base, now_base),
+            (&["pPr", "rPr"][..], mark, now_mark),
+        ] {
+            if want == now {
                 continue;
             }
-            let uri = super::names::wns(tree);
-            let rpr = super::tree_ops::create_w(tree, &uri, "rPr")?;
-            for m in &mark {
-                let copy = tree.edit().clone_subtree(*m)?;
-                insert(tree, rpr, None, copy)?;
-            }
-            let first = tree.node_ref(run).first_child().map(|c| c.id());
-            insert(tree, run, first, rpr)?;
+            let clear = now
+                .iter()
+                .filter(|c| !want.iter().any(|f| f.local == c.local && f.ns == c.ns))
+                .map(|c| (c.ns.clone(), c.local.clone()))
+                .collect();
+            let edit = super::types::PropEdit { set: want, clear };
+            self.edit_container(part, new, path, direct, &edit)?;
         }
-        Ok(())
+        let tree = self.tx.part_mut(part)?;
+        let mark: Vec<NodeId> = find_chain(tree, new, &["pPr", "rPr"])
+            .map(|rpr| {
+                tree.node_ref(rpr)
+                    .child_elements()
+                    .filter(|c| !is_revision(c.local_name()))
+                    .map(|c| c.id())
+                    .collect()
+            })
+            .unwrap_or_default();
+        format_runs(tree, new, &mark)
     }
 
     /// Moves the property change at `path` (`pPr`, or the mark's `pPr/rPr`) of `new` to `left`, when it is the join's
@@ -187,7 +236,7 @@ impl Compiler<'_, '_> {
         new: NodeId,
         left: NodeId,
         path: &[&str],
-        stamp: &(Option<String>, Option<String>),
+        stamp: &JoinStamp,
     ) -> Result<bool, StetError> {
         let change = if path.len() == 1 {
             "pPrChange"
@@ -207,7 +256,7 @@ impl Compiler<'_, '_> {
                 return Ok(false);
             };
             let by_join =
-                crate::wordml::revision_at(&c).is_some_and(|r| (r.author, r.date) == *stamp);
+                crate::wordml::revision_at(&c).is_some_and(|r| stamp.made(&r, path.len() == 2));
             if !by_join || base(tree, new, path) != base(tree, left, path) {
                 return Ok(false);
             }
@@ -249,6 +298,61 @@ impl Compiler<'_, '_> {
         }
         Ok(true)
     }
+}
+
+/// The join's mark deletion, by which its own property changes are known: the same author and date, and the ids next to it,
+/// since the join mints the paragraph's alignment right before the deletion and the mark's right after it. A change of the
+/// author's that the join folded its alignment into keeps its older id, so it is not taken for the join's.
+struct JoinStamp {
+    author: Option<String>,
+    date: Option<String>,
+    id: i64,
+}
+
+impl JoinStamp {
+    /// True if `r` is the join's change of the paragraph's properties, or of its mark's (`mark`).
+    fn made(&self, r: &crate::wordml::Revision, mark: bool) -> bool {
+        let next = if mark { self.id + 1 } else { self.id - 1 };
+        r.author == self.author && r.date == self.date && r.id == Some(next)
+    }
+}
+
+/// Gives the runs of the insertions in `new` the run properties `mark` (children of `new`'s mark `w:rPr`), copied, as
+/// an insertion before the last paragraph had them in 0.9.3.
+fn format_runs(tree: &mut SpanTree, new: NodeId, mark: &[NodeId]) -> Result<(), StetError> {
+    let runs: Vec<NodeId> = tree
+        .node_ref(new)
+        .child_elements()
+        .filter(|c| is_w(c, "ins"))
+        .flat_map(|ins| {
+            ins.child_elements()
+                .filter(|r| is_w(r, "r"))
+                .map(|r| r.id())
+                .collect::<Vec<_>>()
+        })
+        .collect();
+    for run in runs {
+        let old = tree
+            .node_ref(run)
+            .child_elements()
+            .find(|c| is_w(c, "rPr"))
+            .map(|c| c.id());
+        if let Some(old) = old {
+            detach(tree, old)?;
+        }
+        if mark.is_empty() {
+            continue;
+        }
+        let uri = super::names::wns(tree);
+        let rpr = super::tree_ops::create_w(tree, &uri, "rPr")?;
+        for m in mark {
+            let copy = tree.edit().clone_subtree(*m)?;
+            insert(tree, rpr, None, copy)?;
+        }
+        let first = tree.node_ref(run).first_child().map(|c| c.id());
+        insert(tree, run, first, rpr)?;
+    }
+    Ok(())
 }
 
 /// True for a revision or change-tracking element of a mark's `w:rPr`.

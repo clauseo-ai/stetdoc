@@ -49,13 +49,17 @@ impl Compiler<'_, '_> {
             return keep(self, KeptReason::EmptyBefore);
         }
         // The mark's run properties are part of what accepting keeps of the last paragraph: they are the earlier one's.
-        let marks = {
+        let (marks, base) = {
             let tree = self.tree_ro(&part)?;
-            (mark_base(tree, prev), mark_base(tree, block.node()))
+            (
+                (mark_base(tree, prev), mark_base(tree, block.node())),
+                super::blocks_delete::copied_base(tree, block.node()),
+            )
         };
         if let Some(cause) = self.join_blocker(&part, prev, block.node(), marks.0 != marks.1)? {
             return keep(self, KeptReason::CannotJoin(cause));
         }
+        self.before_join.push((block.node(), base, marks.1.clone()));
         match self.merge_inner(&first, block) {
             Ok(()) => {}
             Err(e) if matches!(e.code(), ErrorCode::ReadonlyRegion | ErrorCode::CrossBlock) => {

@@ -11,7 +11,7 @@ use stetdoc_testkit::fixtures::{parts, zip::Zip};
 
 pub(super) const W15: &str = "http://schemas.microsoft.com/office/word/2012/wordml";
 
-fn row(text: &str) -> String {
+pub(super) fn row(text: &str) -> String {
     format!(
         r#"<w:tr><w:tc><w:tcPr><w:tcW w:w="4800" w:type="dxa"/></w:tcPr><w:p><w:r><w:t xml:space="preserve">{text}</w:t></w:r></w:p></w:tc></w:tr>"#
     )
@@ -23,7 +23,7 @@ pub(super) fn item(id: u32, rows: &str) -> String {
     )
 }
 
-fn package(items: &str) -> Vec<u8> {
+pub(super) fn package(items: &str) -> Vec<u8> {
     let body = format!(
         concat!(
             r#"<w:p><w:r><w:t>Lead paragraph.</w:t></w:r></w:p>"#,
@@ -42,7 +42,7 @@ fn package(items: &str) -> Vec<u8> {
 }
 
 /// `a23-repeating.docx` of the issue: two items of one row each, then a plain row.
-fn repeating() -> Vec<u8> {
+pub(super) fn repeating() -> Vec<u8> {
     package(&format!(
         "{}{}",
         item(11, &row("Item one.")),
@@ -159,7 +159,7 @@ pub(super) fn insert(row: &str, place: &str) -> String {
     )
 }
 
-fn delete(row: &str) -> String {
+pub(super) fn delete(row: &str) -> String {
     format!(r#"{{"op":"row","ref":"{row}","action":"delete"}}"#)
 }
 
@@ -190,15 +190,6 @@ fn an_insert_after_the_last_item_row_is_a_new_last_item() {
     assert_eq!(
         done,
         "{10 section {11 item [Item one.]} {12 item [Item two.]} {13 item [New row.]}} [Plain row.]"
-    );
-}
-
-#[test]
-fn an_insert_before_the_first_item_row_is_a_new_first_item() {
-    let (_, done) = outcome(&repeating(), &insert("r1", "before"));
-    assert_eq!(
-        done,
-        "{10 section {13 item [New row.]} {11 item [Item one.]} {12 item [Item two.]}} [Plain row.]"
     );
 }
 

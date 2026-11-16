@@ -110,6 +110,12 @@ fn merges(doc: &Document) -> Vec<String> {
 /// Runs `op` untracked and tracked then accepted (with `outcome`'s checks), and returns the merges of both, which must agree.
 fn merged_outcome(source: &[u8], op: &str) -> Vec<String> {
     outcome(source, op);
+    merges_both(source, op)
+}
+
+/// The merges of `op` run untracked and tracked then accepted, which must agree, when the two differ in their items: a
+/// tracked row before the first item goes above the section (decision 0020).
+fn merges_both(source: &[u8], op: &str) -> Vec<String> {
     let mut untracked = open(source);
     let b = batch(&untracked, op);
     untracked.edit(Edit::ops(b, stamp()).untracked()).unwrap();
@@ -148,8 +154,9 @@ fn m1_an_insert_after_the_plain_row_of_an_item_continues_the_merge_that_crosses_
 
 #[test]
 fn m2_an_insert_before_a_continuation_row_of_an_item_is_plain_above_the_item() {
+    // Item one is the first item, so tracked the row goes above the section, and untracked it is a new first item.
     assert_eq!(
-        merged_outcome(&m2(), &insert_cells("r2", "before", r#"["","n"]"#)),
+        merges_both(&m2(), &insert_cells("r2", "before", r#"["","n"]"#)),
         [" n", "^A a", "| b", "C c", "Plain. plain"]
     );
     assert_eq!(

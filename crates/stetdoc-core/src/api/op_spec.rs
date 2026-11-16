@@ -314,7 +314,7 @@ op_specs! {
         example: "{\"op\":\"row\",\"ref\":\"r17\",\"action\":\"delete\"}",
         fields: [
             ("ref", Ref, true, "The row.", &[]),
-            ("action", Choice, true, "Whether to insert a row next to this one or delete it. Next to a row of a repeating section's item, the new row is a new item of its own, before or after that item. A deleted row takes with it the item whose only row it was, and the repeating section too when it was the last item's.", &["insert", "delete"]),
+            ("action", Choice, true, "Whether to insert a row next to this one or delete it. Next to a row of a repeating section's item, the new row is a new item of its own, before or after that item. Tracked, a row before the section's first item goes above the section as a plain row instead, with a `row_outside_repeating_section` warning, because Word's Reject All of a tracked first item removes the whole section. A deleted row takes with it the item whose only row it was, and the repeating section too when it was the last item's.", &["insert", "delete"]),
             ("place", Choice, false, "For an insert, whether the new row goes before or after. After by default.", &["before", "after"]),
             ("cells", List, false, "For an insert, the text of each cell, in order. A newline inside one is a line break of the cell. A cell that continues a merged cell takes \"\", since Word shows only a merge's first cell.", &[]),
         ],

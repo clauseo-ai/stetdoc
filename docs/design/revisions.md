@@ -977,6 +977,12 @@ The comparison is of **base properties**: the paragraph's `w:pPr` children witho
   when that row's cell is in one and the next row's cell continues it, and above the item's first row when that row's
   cell continues one. Tracked, the row has `trPr/ins` inside the new item, which holds
   no revision of its own: rejecting the row removes the item with it, so rejecting every change gives the source back.
+  The one exception is a tracked row before the section's first item, from any row of that item: it goes before the
+  section, and before each row-level wrapper above the section that starts with the same row, as a plain row and not
+  an item, and the receipt warns `row_outside_repeating_section` (`row_controls::before_first_item`, decision 0020).
+  Word keeps the start of a control that wraps rows in its first row, so Word's Reject All of a tracked first row took
+  the section's start with it and removed the section and every item, keeping their rows (Word for Mac 16.114.4).
+  Untracked, nothing is rejected, and the row is a new first item.
   Deleting a row removes every wrapper between it and its table that is left with no row, innermost first: the item
   whose only row it was, at once when the row is removed outright and on accept when it is tracked, and the repeating
   section itself when that was its last item. An item with other rows stays.
@@ -1875,7 +1881,7 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `blocks.rs`, `blocks_insert.rs`, `blocks_delete.rs`, `join.rs` | what the block primitives share; `insert_block` and `split_block` (shapes X and Y); `delete_block`, `delete_block_with_mark` and `merge_blocks`; the join of two paragraphs | 1,440 |
 | `tables.rs` | `insert_row` (the copy and the vertical merge), the row side of `delete_block`, nested tables | 460 |
 | `merge_rows.rs` | merged cells around a row that is inserted or removed: the plan of a new row's merges, the refusal of hidden text, the moved start | 200 |
-| `row_controls.rs` | content controls around a row: the ids of a copied row's controls, the new repeating-section item of a new row, the wrappers that go with a removed row | 130 |
+| `row_controls.rs` | content controls around a row: the ids of a copied row's controls, the new repeating-section item of a new row, where a tracked row before the first item goes, the wrappers that go with a removed row | 130 |
 | `index.rs` | `ChangeIndex`: id to nodes, built at the first `resolve` of a batch and extended after each compiler call | 120 |
 | `changes.rs`, `changes_text.rs`, `changes_rows.rs`, `changes_marks.rs`, `moves.rs` | `changes()` and `Change`: the grouping of 6.1, over a window of entries; the atoms and text groups; rows; paragraphs and moves | 1,350 |
 | `resolve.rs`, `resolve_select.rs` | `resolve`: steps, selection (by id through the index, by window), closure, the driver, the report | 420 |

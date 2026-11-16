@@ -8,7 +8,8 @@
 //! that item, as Word's "Insert item before" and "Insert item after" do. Its merged cells follow the row it lands
 //! next to, the item's first row or its last, not the anchor row. A removed row takes with it every
 //! wrapper between it and its table that holds no other row: an item whose only row it was, and the section
-//! too when that was its last item.
+//! too when that was its last item. A tracked new row before the first item goes above the section instead and
+//! is not an item, because Word's Reject All of a section's first row removes the section (decision 0020).
 
 use super::names::{is_w, w_attr, w_child};
 use super::tree_ops::{create_w, detach};
@@ -112,6 +113,29 @@ pub(super) fn edge_row(tree: &SpanTree, item: NodeId, side: Place) -> Option<Nod
         Place::Before => rows.first().copied(),
         Place::After => rows.last().copied(),
     }
+}
+
+/// What a tracked new row before `item` goes before when `item` is the first item of its repeating section: the
+/// section, or the outermost row-level wrapper above it that starts with the same row. None when another item comes
+/// first. Word keeps the start of a control that wraps rows in its first row, so a rejected row at the top of a section
+/// takes the start with it, and Word's Reject All then removes the section and every item, keeping their rows.
+pub(super) fn before_first_item(tree: &SpanTree, item: NodeId) -> Option<NodeId> {
+    let first = edge_row(tree, item, Place::Before)?;
+    let wrappers = wrappers_of(tree, first);
+    let at = wrappers.iter().position(|&w| w == item)?;
+    let section = wrappers
+        .iter()
+        .skip(at + 1)
+        .position(|&w| is_w(&tree.node_ref(w), "sdt"))
+        .map(|k| at + 1 + k)?;
+    let mut top = None;
+    for &w in wrappers.iter().skip(section) {
+        if edge_row(tree, w, Place::Before) != Some(first) {
+            break;
+        }
+        top = Some(w);
+    }
+    top
 }
 
 /// The repeating-section item that `row` is the content of (`wordml::repeating_item`).

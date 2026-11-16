@@ -104,6 +104,7 @@ impl Compiler<'_, '_> {
             None => None,
         };
         let highest_id = super::row_controls::highest_sdt_id(self.tx.parts())?;
+        let tracked = self.tracked();
         let tree = self.tx.part_mut(&part)?;
         let new_tr = tree.edit().clone_subtree(anchor.node())?;
         let attrs: Vec<(String, String)> = tree
@@ -183,14 +184,27 @@ impl Compiler<'_, '_> {
             }
         }
         // Next to a repeating-section item's row, the new row is the content of a new item, placed beside
-        // that item, as Word inserts an item: an item holds one copy of the section's content.
-        let (top, beside) = match super::row_controls::item_of(tree, anchor.node()) {
-            Some(item) => (
+        // that item, as Word inserts an item: an item holds one copy of the section's content. A tracked row
+        // before the first item goes above the section and is no item, since Word's Reject All of the
+        // section's first row would remove the section (decision 0020).
+        let item = super::row_controls::item_of(tree, anchor.node());
+        let above = match item {
+            Some(item) if tracked && side == Place::Before => {
+                super::row_controls::before_first_item(tree, item)
+            }
+            _ => None,
+        };
+        let (top, beside) = match (item, above) {
+            (_, Some(section)) => (new_tr, section),
+            (Some(item), None) => (
                 super::row_controls::new_item_around(tree, item, new_tr)?,
                 item,
             ),
-            None => (new_tr, anchor.node()),
+            (None, None) => (new_tr, anchor.node()),
         };
+        if above.is_some() {
+            self.fx.outside_section.push(anchor.clone());
+        }
         super::row_controls::renew_sdt_ids(tree, top, highest_id)?;
         let parent = parent_of(tree, beside).ok_or_else(|| internal("a row has no parent"))?;
         let at = match side {

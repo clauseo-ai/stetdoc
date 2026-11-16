@@ -698,6 +698,7 @@ that `reconcile` removed are listed with the comment they belonged to.
 | `Receipt.revisions` | the same, grouped by author | by construction one author, the stamp's. `AuthorRevisions::group` also groups the list of `Document::revisions`, for `check` of a file with nothing pending |
 | removals the agent must know | `Effect::removed_own`, `folded`, `swallowed` | the structured `OpResult.removed_own`, `folded` and `swallowed`, and the warnings `own_text_removed`, `property_change_folded`, `revision_removed_with_text`, so an operation that took an earlier change of the agent's away says so (`revisions` H2) |
 | paragraphs a deletion kept | `Effect::kept` | the warning `kept_required_paragraph`, built by `ops` with the paragraph's ref and the reason, and `p2 emptied and kept` in the operation's line, so a caller that keeps its own map of the document knows the ref is still there (decision 0018) |
+| tracked rows put above a repeating section | `Effect::outside_section` | the warning `row_outside_repeating_section`, built by `ops` with the anchor row's ref: a tracked `row` insert before the section's first item went above the section and is no item (decision 0020) |
 | `operations[i].notes_removed` | the notes that `Compiler::remove_notes_of_dropped_references` took out after the operation's calls, and those of an untracked `delete-note` | a note goes with its last reference: an untracked edit, or the removal of the author's own pending reference, takes the reference out at once and the note with it, as an accepted deletion does. The text says so after what the operation did. Left out of the JSON when empty |
 | `operations[i].resolution` | `Resolution` of the run, shown on its first operation | counts by author and kind, the refs retired (`Removed`, with the reason), the joins, the notes removed, the `revisions` warnings |
 | `comments` | `comments`'s `CommentEffect`, with the ids as `c3`, and `reconcile`'s removals | an added comment is listed with its id so the next operation can name it, which a ref cannot do within a batch (`comments-and-notes` 7). A removal by `reconcile` carries the `comment_removed` warning, which names the blocks whose markers went |
@@ -1189,7 +1190,8 @@ testkit through `Document`.
   `projection`'s and `ops` may not read them. `ops` calls the function on the staged parts, so an author whose only revisions the batch made is found.
 - `Warning.story` is an `Option<String>`, and `WarningCode` holds the codes of 4.2: `no_change`, `own_text_removed`,
   `property_change_folded`, `revision_removed_with_text`, `quotes_curled`, `quotes_straightened`, `find_matched_loosely`, `already_resolved`, `reply_to_resolved`, `anchor_emptied`,
-  `comment_removed`, `ref_retargeted`, `ref_unresolved`, `definition_removed` and `kept_required_paragraph`. A warning about an operation and not a block has no story.
+  `comment_removed`, `ref_retargeted`, `ref_unresolved`, `definition_removed`, `kept_required_paragraph` and
+  `row_outside_repeating_section`. A warning about an operation and not a block has no story.
 - `ReadableFiles` has `rendered: Vec<(String, String)>` (file name and hex SHA-256), empty from `render_files` and filled by `pending_files`. `Lookup` has
   `text: String`.
 - On the files path `max_batch_ops` counts the **changed blocks**, and the refusal says how many there are and that the edit should be applied in parts.

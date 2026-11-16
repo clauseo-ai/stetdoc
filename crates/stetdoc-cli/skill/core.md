@@ -171,6 +171,8 @@ tell the user about them if you did not make them.
 `document.md` holds the body, `notes.md` the footnotes and endnotes, `headers.md` the headers and footers. Each paragraph is
 one line that starts with its **ref** (`p42`); tables show `t` and `r` lines. A row that is an item of a repeating section
 says so, `r4 {row item=2}`: a `row` insert next to it adds a new item, and deleting the item's only row removes the item.
+A tracked insert before the first item (`item=1`) goes above the section as a plain row, with a
+`row_outside_repeating_section` warning; insert untracked if it must be the first item.
 
 - Change the text after a ref with your own edit tool. stetdoc diffs it word by word into insertions and deletions.
 - Delete a paragraph by deleting its whole line. Add paragraphs as new lines **without** a ref after the line they follow.

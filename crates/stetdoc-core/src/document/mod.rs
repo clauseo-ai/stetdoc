@@ -238,6 +238,8 @@ mod tests_edit_reject;
 #[cfg(test)]
 mod tests_edit_repeating;
 #[cfg(test)]
+mod tests_edit_repeating_first;
+#[cfg(test)]
 mod tests_edit_repeating_more;
 #[cfg(test)]
 mod tests_edit_required;

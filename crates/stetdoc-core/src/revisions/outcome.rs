@@ -76,6 +76,9 @@ pub(crate) struct Effect {
     pub swallowed: Vec<i64>,
     /// Paragraphs that a deletion emptied and kept, because their containers need them.
     pub kept: Vec<KeptParagraph>,
+    /// The anchor of each tracked new row that went above a repeating section, not into it as a first item
+    /// (decision 0020).
+    pub outside_section: Vec<BlockKey>,
     /// Elements created. Their refs are minted at commit.
     pub new_blocks: Vec<BlockKey>,
     /// Where each new or surviving block came from.
@@ -103,6 +106,7 @@ impl Effect {
             && self.folded.is_empty()
             && self.swallowed.is_empty()
             && self.kept.is_empty()
+            && self.outside_section.is_empty()
             && self.new_blocks.is_empty()
             && self.origins.is_empty()
             && self.survivor.is_none()

@@ -92,7 +92,9 @@ All notable changes to stetdoc are recorded here. The format follows
 - A `row` insert next to a row of a repeating section's item put the new row inside that item, so one item held two rows,
   and deleting an item's only row left the empty item behind. The insert now adds a new item around the new row, before or
   after that item, with a copy of its properties and a new id, as Word's "Insert item" does, and deleting an item's only
-  row removes the item. Deleting every item's row still removes the section (#27).
+  row removes the item. Deleting every item's row still removes the section. A tracked insert before the first item
+  goes above the section as a plain row instead, with the new warning `row_outside_repeating_section`, because Word's
+  Reject All of a tracked first item removed the whole section; untracked, it is a new first item (#27).
 - `accept` and `reject` by `author` did not find the revisions that earlier operations of the same batch made, so a
   batch could not make tracked edits and then accept or reject exactly its own revisions in one call. They now find them.
   A short author code still means the author that the view of the input showed (#28).

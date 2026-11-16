@@ -230,7 +230,8 @@ fn run_review(
 }
 
 /// A `kept_required_paragraph` warning for each paragraph that the operation's calls emptied and kept, because its
-/// container needs it.
+/// container needs it, and a `row_outside_repeating_section` warning for each tracked new row that went above a repeating
+/// section and not into it (decision 0020).
 fn kept_warnings(compiler: &Compiler<'_, '_>, done: &mut Done) {
     let kept: Vec<_> = done.effects.iter().flat_map(|e| e.kept.iter()).collect();
     for k in kept {
@@ -244,6 +245,27 @@ fn kept_warnings(compiler: &Compiler<'_, '_>, done: &mut Done) {
             compiler.tx(),
             Some(&k.block),
             k.reason.sentence(&shown),
+        ));
+    }
+    let outside: Vec<_> = done
+        .effects
+        .iter()
+        .flat_map(|e| e.outside_section.iter())
+        .collect();
+    for anchor in outside {
+        let shown = compiler
+            .tx()
+            .parts()
+            .ref_of(anchor)
+            .map_or_else(|| "the row".to_string(), |r| r.to_string());
+        done.warnings.push(target::warning(
+            WarningCode::RowOutsideRepeatingSection,
+            compiler.tx(),
+            Some(anchor),
+            format!(
+                "The new row before {shown} is above the repeating section, not a new first item in it: Word's Reject All of \
+                 a tracked first item removes the whole section. Insert it untracked to make it the first item."
+            ),
         ));
     }
 }

@@ -94,7 +94,11 @@ All notable changes to stetdoc are recorded here. The format follows
   after that item, with a copy of its properties and a new id, as Word's "Insert item" does, and deleting an item's only
   row removes the item. Deleting every item's row still removes the section. A tracked insert before the first item
   goes above the section as a plain row instead, with the new warning `row_outside_repeating_section`, because Word's
-  Reject All of a tracked first item removed the whole section; untracked, it is a new first item (#27).
+  Reject All of a tracked first item removed the whole section; untracked, it is a new first item. A tracked delete of
+  the first item's first row, with other items left, is written with the new warning
+  `repeating_section_unwrapped_by_word`: Word's Accept All removes the section's control around the rows that stay,
+  though the text and rows come out right. An item whose row sits inside a plain content control now counts as an item
+  for all of this and for `item=N` (#27).
 - `accept` and `reject` by `author` did not find the revisions that earlier operations of the same batch made, so a
   batch could not make tracked edits and then accept or reject exactly its own revisions in one call. They now find them.
   A short author code still means the author that the view of the input showed (#28).

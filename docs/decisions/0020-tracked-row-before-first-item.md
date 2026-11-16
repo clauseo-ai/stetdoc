@@ -1,7 +1,7 @@
-# 0020. A tracked row before a repeating section's first item goes above the section
+# 0020. The row that holds a repeating section's start: a tracked row before it goes above the section, and a tracked deletion of it warns
 
 - **Date:** 2026-11-16
-- **Status:** accepted on 2026-11-16, to be confirmed by a Word for Mac pass
+- **Status:** accepted on 2026-11-16. Word for Mac 16.114.4 confirmed the cause and the insert rule (batch 3).
 
 ## Context
 
@@ -17,6 +17,18 @@ control that wraps rows. Word stores the control's start in the first row it wra
 start in the tracked inserted row, Reject All deletes that row, the start goes with it, and Word unwraps the section. If
 that holds, any tracked inserted row at the top of a section fails, inside a new item or inside item one alike, so no
 item encoding survives Reject All there.
+
+Word batch 3 confirmed it. The tracked row inside item one, as its first row, lost the section and both items on Reject
+All, and the rule below kept one section with two items through Accept All and Reject All. The same batch showed the
+other side. Word's Accept All of a tracked deletion of item one's only row, with item two left, removed the section's
+control and left two plain rows, where stetdoc's own accept keeps the section with one item.
+
+Word's own edits, done by hand, agree. Word's tracked Table > Delete > Rows on "Item one." writes one section with two
+items, and Reject All keeps them. Its Accept All also removes the section, and Word marks that in its own file:
+`w:customXmlDelRangeStart` and `w:customXmlDelRangeEnd` around the starts and ends of the section and of item one,
+deleted with the row. So Word's own tracked deletion loses the section on accept too. Word's Insert Rows Above on
+"Item one." makes a new first item holding a copy of the row and does not track that insertion, only the text typed
+into it, so Word never writes a tracked row at the top of a section.
 
 ## Options considered
 
@@ -38,17 +50,30 @@ Option 1.
 - **The warning.** The compiler's `Effect::outside_section` names the anchor, and `ops` turns each into a warning with
   the code `row_outside_repeating_section`, the anchor's ref in `Warning.block`, and a message that says the row is above
   the section and not an item, why, and that an untracked insert makes it the first item.
-- **New public item.** `WarningCode::RowOutsideRepeatingSection`, `row_outside_repeating_section` on the wire. A warning
-  code is public by kind in decision 0004, so its list needs no change.
+- **A tracked deletion of the row that holds the start.** It is written as any row deletion: the redline is right, and
+  only the control around the rows that stay is lost in Word. Refusing would block a common tracked edit. The compiler's
+  `Effect::section_start_deleted` names the row when it is the first row of the section's first item
+  (`row_controls::section_started_by`), and `ops` asks once the run of operations has ended whether the section still
+  holds a row that no tracked change deletes (`Compiler::section_unwrapped_by_word`). If it does, the receipt warns
+  `repeating_section_unwrapped_by_word` with the row's ref. The warning says that Word's Accept All removes the
+  repeating-section control around the rows that remain, that the text and rows come out right, and that an untracked
+  delete keeps the section. A batch that deletes every item's row is not warned, since the section goes anyway. The
+  rule is kept in those two places so that an encoding copied from Word's own tracked deletion of a first item, if a hand
+  check finds one that keeps the section, can replace it.
+- **Items in plain controls.** An item whose row sits in a plain content control is still an item
+  (`wordml::repeating_item` looks past controls that are not items), so both rules, and `item=N` in the view, see it.
+  Before, such a row was not an item, and a tracked insert before it became the section's first row, the encoding that
+  fails.
+- **New public items.** `WarningCode::RowOutsideRepeatingSection`, `row_outside_repeating_section` on the wire, and
+  `WarningCode::RepeatingSectionUnwrappedByWord`, `repeating_section_unwrapped_by_word`. A warning code is public by
+  kind in decision 0004, so its list needs no change.
 
 ## Consequences
 
 - Tracked, the new row is not an item after Accept All, and a later Word user who adds items does not get copies of it.
   The receipt says so, so the caller can choose to insert untracked instead.
-- The cause is a theory until Word confirms it. The batch for Word holds the tracked row inside item one as its first row
-  (the theory says that fails too), the old encoding as a known failure, and this rule. If the row inside item one
-  passes, the theory is wrong and this rule is revisited.
-- The same cause would hit a tracked deletion of the first item's row while other items remain: accepting it deletes the
-  row that holds the section's start. That case goes to Word first, and is not changed here.
+- A tracked deletion of the first item's first row still loses the section's control in Word on accept. The receipt says
+  so, and the caller can delete untracked instead.
+- A new item copied next to an item whose row sits in a plain control holds the row only, not a copy of the plain control.
 - A tracked row before the first row of another row-level control, not a repeating section, may meet the same Word
   behaviour. It is not changed here.

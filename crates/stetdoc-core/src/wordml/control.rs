@@ -164,30 +164,30 @@ pub fn control(node: NodeRef<'_>) -> Control {
 }
 
 /// The repeating-section item that the row `row` is the content of, and its number in its section, from 1:
-/// the nearest `w:sdt` above the row and below its table, when its `w:sdtPr` holds `w15:repeatingSectionItem`
-/// and the nearest `w:sdt` above it, still below the table, is a repeating section (`w15:repeatingSection`).
-/// Word writes an item around each copy of the section's content, in a table one row, and the section around
-/// the items. The number counts the item and the items before it in the section's `w:sdtContent`.
+/// the nearest `w:sdt` above the row and below its table whose `w:sdtPr` holds `w15:repeatingSectionItem`, when
+/// the nearest `w:sdt` above that, still below the table, is a repeating section (`w15:repeatingSection`). Plain
+/// controls may stand between the item and the row: an item's content can be a control around the row. Word writes
+/// an item around each copy of the section's content, in a table one row, and the section around the items. The
+/// number counts the item and the items before it in the section's `w:sdtContent`.
 pub fn repeating_item(row: NodeRef<'_>) -> Option<(NodeRef<'_>, u32)> {
-    let mut sdts = Vec::new();
+    let mut item = None;
     let mut cur = row.parent();
     while let Some(n) = cur {
         if is_w(&n, "tbl") {
-            break;
+            return None;
         }
         if is_w(&n, "sdt") {
-            sdts.push(n);
-            if sdts.len() == 2 {
-                break;
+            match item {
+                None if is_item(&n) => item = Some(n),
+                None => {}
+                Some(_) => break,
             }
         }
         cur = n.parent();
     }
-    let (item, section) = match sdts.as_slice() {
-        [item, section] => (*item, *section),
-        _ => return None,
-    };
-    if !is_item(&item) || control(section).kind != ControlKind::RepeatingSection {
+    let section = cur?;
+    let item = item?;
+    if control(section).kind != ControlKind::RepeatingSection {
         return None;
     }
     let mut number = 1u32;

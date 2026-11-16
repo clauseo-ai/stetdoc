@@ -79,6 +79,9 @@ pub(crate) struct Effect {
     /// The anchor of each tracked new row that went above a repeating section, not into it as a first item
     /// (decision 0020).
     pub outside_section: Vec<BlockKey>,
+    /// Each row deleted tracked that holds the start of its repeating section: Word's Accept All removes the section's
+    /// control around the rows that stay (decision 0020). `ops` warns once the run has ended and rows still stay.
+    pub section_start_deleted: Vec<BlockKey>,
     /// Elements created. Their refs are minted at commit.
     pub new_blocks: Vec<BlockKey>,
     /// Where each new or surviving block came from.
@@ -111,6 +114,7 @@ impl Effect {
             && self.swallowed.is_empty()
             && self.kept.is_empty()
             && self.outside_section.is_empty()
+            && self.section_start_deleted.is_empty()
             && self.new_blocks.is_empty()
             && self.origins.is_empty()
             && self.survivor.is_none()

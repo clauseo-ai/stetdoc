@@ -172,7 +172,8 @@ tell the user about them if you did not make them.
 one line that starts with its **ref** (`p42`); tables show `t` and `r` lines. A row that is an item of a repeating section
 says so, `r4 {row item=2}`: a `row` insert next to it adds a new item, and deleting the item's only row removes the item.
 A tracked insert before the first item (`item=1`) goes above the section as a plain row, with a
-`row_outside_repeating_section` warning; insert untracked if it must be the first item.
+`row_outside_repeating_section` warning; insert untracked if it must be the first item. A tracked delete of that item's
+first row warns `repeating_section_unwrapped_by_word`: Word's Accept All drops the section control around the rest.
 
 - Change the text after a ref with your own edit tool. stetdoc diffs it word by word into insertions and deletions.
 - Delete a paragraph by deleting its whole line. Add paragraphs as new lines **without** a ref after the line they follow.

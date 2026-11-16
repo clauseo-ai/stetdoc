@@ -456,6 +456,12 @@ impl Compiler<'_, '_> {
         }
         self.add_row_del(part, row)?;
         self.touch(&BlockKey::new(part.clone(), row));
+        // A row that holds its repeating section's start: Word's Accept All removes the section's control (decision 0020).
+        if super::row_controls::section_started_by(self.tree_ro(part)?, row).is_some() {
+            self.fx
+                .section_start_deleted
+                .push(BlockKey::new(part.clone(), row));
+        }
         Ok(false)
     }
 

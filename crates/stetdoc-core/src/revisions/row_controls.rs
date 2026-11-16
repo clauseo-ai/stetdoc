@@ -16,7 +16,7 @@ use super::tree_ops::{create_w, detach};
 use super::types::Place;
 use crate::api::error::StetError;
 use crate::state::PartsView;
-use crate::wordml::NodeId;
+use crate::wordml::{BlockKey, NodeId};
 use crate::xml::{NodeRef, SpanTree};
 
 /// The id of a content control, its `w:sdtPr/w:id` element.
@@ -92,11 +92,10 @@ pub(super) fn renew_sdt_ids(
     Ok(())
 }
 
-/// The row of `item` that a new row placed on `side` of it lands next to: its first row before it, its last row after
-/// it. A row of a table nested in a cell does not count.
-pub(super) fn edge_row(tree: &SpanTree, item: NodeId, side: Place) -> Option<NodeId> {
+/// The rows of `node`, in document order. A row of a table nested in a cell does not count.
+fn rows_of(tree: &SpanTree, node: NodeId) -> Vec<NodeId> {
     let mut rows = Vec::new();
-    let mut stack = vec![tree.node_ref(item)];
+    let mut stack = vec![tree.node_ref(node)];
     while let Some(n) = stack.pop() {
         if is_w(&n, "tr") {
             rows.push(n.id());
@@ -109,10 +108,32 @@ pub(super) fn edge_row(tree: &SpanTree, item: NodeId, side: Place) -> Option<Nod
         let kids: Vec<NodeRef<'_>> = n.child_elements().collect();
         stack.extend(kids.into_iter().rev());
     }
+    rows
+}
+
+/// The row of `item` that a new row placed on `side` of it lands next to: its first row before it, its last row after
+/// it. A row of a table nested in a cell does not count.
+pub(super) fn edge_row(tree: &SpanTree, item: NodeId, side: Place) -> Option<NodeId> {
+    let rows = rows_of(tree, item);
     match side {
         Place::Before => rows.first().copied(),
         Place::After => rows.last().copied(),
     }
+}
+
+/// The repeating section of `item`: the nearest `w:sdt` above it, below its table.
+fn section_of(tree: &SpanTree, item: NodeId) -> Option<NodeId> {
+    let mut cur = tree.node_ref(item).parent();
+    while let Some(n) = cur {
+        if is_w(&n, "tbl") {
+            return None;
+        }
+        if is_w(&n, "sdt") {
+            return Some(n.id());
+        }
+        cur = n.parent();
+    }
+    None
 }
 
 /// What a tracked new row before `item` goes before when `item` is the first item of its repeating section: the
@@ -121,21 +142,53 @@ pub(super) fn edge_row(tree: &SpanTree, item: NodeId, side: Place) -> Option<Nod
 /// takes the start with it, and Word's Reject All then removes the section and every item, keeping their rows.
 pub(super) fn before_first_item(tree: &SpanTree, item: NodeId) -> Option<NodeId> {
     let first = edge_row(tree, item, Place::Before)?;
+    let section = section_of(tree, item)?;
     let wrappers = wrappers_of(tree, first);
-    let at = wrappers.iter().position(|&w| w == item)?;
-    let section = wrappers
-        .iter()
-        .skip(at + 1)
-        .position(|&w| is_w(&tree.node_ref(w), "sdt"))
-        .map(|k| at + 1 + k)?;
+    let at = wrappers.iter().position(|&w| w == section)?;
     let mut top = None;
-    for &w in wrappers.iter().skip(section) {
+    for &w in wrappers.iter().skip(at) {
         if edge_row(tree, w, Place::Before) != Some(first) {
             break;
         }
         top = Some(w);
     }
     top
+}
+
+/// The repeating section whose start `row` holds: the section, when `row` is the first row of the section's first
+/// item (`wordml::repeating_item`, which sees an item through plain controls around its row). Word keeps a control's
+/// start in its first row, so accepting a tracked deletion of this row in Word removes the section's control and keeps
+/// the rows that remain (decision 0020).
+pub(super) fn section_started_by(tree: &SpanTree, row: NodeId) -> Option<NodeId> {
+    let item = item_of(tree, row)?;
+    before_first_item(tree, item)?;
+    (edge_row(tree, item, Place::Before) == Some(row))
+        .then(|| section_of(tree, item))
+        .flatten()
+}
+
+/// True if `section` holds a row other than `row` that no tracked change deletes: a row that stays when the deletions
+/// are accepted.
+pub(super) fn holds_other_row(tree: &SpanTree, section: NodeId, row: NodeId) -> bool {
+    rows_of(tree, section).into_iter().any(|r| {
+        r != row
+            && !w_child(&tree.node_ref(r), "trPr")
+                .is_some_and(|pr| pr.child_elements().any(|c| is_w(&c, "del")))
+    })
+}
+
+impl super::compiler::Compiler<'_, '_> {
+    /// True if Word's Accept All would remove the repeating-section control around rows that stay: `row`, deleted
+    /// tracked, holds the start of its section, and the section holds a row that no tracked change deletes. Asked after
+    /// the last operation of a run, so a batch that deletes every item's row is not warned.
+    pub(crate) fn section_unwrapped_by_word(&self, row: &BlockKey) -> Result<bool, StetError> {
+        let tree = self.tree_ro(row.part())?;
+        if crate::wordml::Row::new(tree, row.node()).is_none() {
+            return Ok(false);
+        }
+        Ok(section_started_by(tree, row.node())
+            .is_some_and(|section| holds_other_row(tree, section, row.node())))
+    }
 }
 
 /// The repeating-section item that `row` is the content of (`wordml::repeating_item`).

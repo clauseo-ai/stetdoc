@@ -428,6 +428,7 @@ code is.
 | `definition_removed` | in a receipt: the edit removed the last definition of a term, or its last real one when only paragraphs that give the meaning by pointing elsewhere remain, and the Final text still uses the term | The uses are left without a meaning. The message names the blocks that use the term and the blocks that cite the one that defined it |
 | `kept_required_paragraph` | in a receipt: a `delete` of a whole paragraph emptied it and kept it, because its container needs it: the only paragraph of a cell or of the body, one that ends one after a table, one between two tables, the body's last paragraph after a section break, or one that holds a section break ([decision 0018](../decisions/0018-kept-required-paragraph.md)) | The ref is still there, empty. A caller that keeps its own map of the document would otherwise take the paragraph for removed |
 | `row_outside_repeating_section` | in a receipt: a tracked `row` insert before a repeating section's first item put the row above the section, as a plain row, and not into it as a new first item ([decision 0020](../decisions/0020-tracked-row-before-first-item.md)) | Word's Reject All of a tracked first item removes the whole section. The row is no item; insert it untracked to make it the first item |
+| `repeating_section_unwrapped_by_word` | in a receipt: a tracked deletion of the row that holds a repeating section's start, the first row of its first item, while rows of the section stay ([decision 0020](../decisions/0020-tracked-row-before-first-item.md)) | Word's Accept All removes the repeating-section control around the rows that stay, though the text and rows come out right. An untracked delete keeps the section |
 | `outline_shown` | a view of the whole body (`Auto`) that does not fit the budget shows its outline | Its next step names the range of the whole body and `--all`, so the agent reads the body without guessing a flag |
 | `unreferenced_note` | a note no reference points at | It is in `notes.md` and nowhere in the text |
 | `duplicate_number` | in `render_blocks` for a receipt: a paragraph's text starts with its own computed clause number | The agent typed a number Word also adds |
@@ -1103,7 +1104,7 @@ p14 per unit
   free.
 - A row that Word marked inserted or deleted is `{row inserted #12 JD}` and `{row deleted #12 JD}`, and a cell is
   `{cell inserted ...}` in front of its cell tags. The paragraphs inside show no revision of their own.
-- A row that is the content of a repeating-section item (a `w:sdt` with `w15:repeatingSectionItem` inside one with
+- A row that is the content of a repeating-section item, directly or inside plain controls (a `w:sdt` with `w15:repeatingSectionItem` inside one with
   `w15:repeatingSection`) is `{row item=2}`, with the item's number in its section from 1, after `header` and before a
   row change. The rows of one item share the number, and a new section starts at 1 again. It is shown only: the
   alignment (6) compares a row line that has no `item=` without it, so a working copy written before the token existed

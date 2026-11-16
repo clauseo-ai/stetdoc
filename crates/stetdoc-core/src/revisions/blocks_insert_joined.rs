@@ -89,15 +89,26 @@ impl Compiler<'_, '_> {
         Ok((made_here || self.is_joined_end(&key)?).then_some(key))
     }
 
-    /// The last paragraph of the container from `anchor` on: an insertion before an emptied last paragraph goes after it, and
-    /// after the paragraphs that earlier such insertions put there, so that they keep their order.
-    pub(super) fn container_end(&self, anchor: &BlockKey) -> Result<BlockKey, StetError> {
-        let tree = self.tree_ro(anchor.part())?;
-        let mut cur = anchor.node();
-        while let Some(n) = next_paragraph(tree, cur) {
-            cur = n;
+    /// Where an insertion before `anchor` goes when it takes a join: after `anchor`, and after the paragraphs that earlier
+    /// such insertions of this batch put there, so that they keep their order. Never further: the paragraphs after those are
+    /// not the insertion's.
+    pub(super) fn after_taker(&self, anchor: &BlockKey) -> BlockKey {
+        let node = self
+            .after_join
+            .iter()
+            .rev()
+            .find(|(a, _)| *a == anchor.node())
+            .map_or(anchor.node(), |(_, last)| *last);
+        BlockKey::new(anchor.part().clone(), node)
+    }
+
+    /// After an insertion before `anchor` that went after it: notes the last new paragraph, for the next such insertion, and
+    /// gives the new paragraph what the last paragraph had before the join.
+    pub(super) fn took_a_join(&mut self, anchor: &BlockKey) -> Result<(), StetError> {
+        if let Some(last) = self.fx.new_blocks.last() {
+            self.after_join.push((anchor.node(), last.node()));
         }
-        Ok(BlockKey::new(anchor.part().clone(), cur))
+        self.restore_original_props(anchor)
     }
 
     /// After an insertion that went after a joined container end as a Y: the new paragraph holds the last paragraph's
@@ -105,7 +116,7 @@ impl Compiler<'_, '_> {
     /// paragraph takes what those changes hold, the properties the last paragraph had before the join, and the changes move to
     /// the paragraph the Y left with the inserted mark, which is the one that joins the earlier paragraph. The new text takes
     /// the mark's run properties, as an insertion before the last paragraph did in 0.9.3.
-    pub(super) fn restore_original_props(&mut self, anchor: &BlockKey) -> Result<(), StetError> {
+    fn restore_original_props(&mut self, anchor: &BlockKey) -> Result<(), StetError> {
         let part = anchor.part();
         let Some(new) = self.fx.new_blocks.first().map(|k| k.node()) else {
             return Ok(());

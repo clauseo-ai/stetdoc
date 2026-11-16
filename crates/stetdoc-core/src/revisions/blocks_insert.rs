@@ -136,7 +136,7 @@ impl Compiler<'_, '_> {
         let done = self
             .insert_block_inner(run, anchor, place, spec)
             .and_then(|()| match before_taker {
-                true => self.restore_original_props(anchor),
+                true => self.took_a_join(anchor),
                 false => Ok(()),
             });
         match done {
@@ -183,7 +183,7 @@ impl Compiler<'_, '_> {
         let (joined, place) = match place {
             Place::After => (self.join_end(anchor)?, Place::After),
             Place::Before if self.takes_a_join(anchor)? => {
-                (Some(self.container_end(anchor)?), Place::After)
+                (Some(self.after_taker(anchor)), Place::After)
             }
             Place::Before => (None, Place::Before),
         };

@@ -22,6 +22,8 @@ pub struct Para {
     pub in_table: bool,
     /// Whether the view says it joins the next paragraph (its mark is deleted, pending).
     pub joins_next: bool,
+    /// True if its mark is deleted or moved away: in `Final` it joins the paragraph after it.
+    pub mark_gone: bool,
     /// The top-level block of its story that holds it: its own ref, or the ref of its table.
     pub top: String,
     /// The part that holds its story, such as `word/document.xml` or `word/footer1.xml`.
@@ -218,6 +220,10 @@ impl Facts {
                         .pointer("/flags/joins_next")
                         .and_then(Value::as_bool)
                         .unwrap_or(false),
+                    mark_gone: matches!(
+                        p.pointer("/mark/kind").and_then(Value::as_str),
+                        Some("deleted" | "moved_from")
+                    ),
                 });
             }
             if let Some(t) = b.get("table") {

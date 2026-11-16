@@ -404,3 +404,31 @@ fn another_authors_change_on_the_last_mark_is_not_taken_for_the_joins_alignment(
     edit(&mut doc, r#"{"op":"reject","author":"Clauseo"}"#);
     assert_eq!(body(&doc), source);
 }
+
+#[test]
+fn an_insertion_before_a_deleted_middle_paragraph_stays_beside_it() {
+    // fdo79131.docx, seed 101, batch 43: the insertion before p3 goes after it, not to the container's end, so p5 is left as
+    // it was.
+    let source = format!(
+        "{}{}{}{}{}",
+        para("Lead.", ""),
+        para("Two.", ""),
+        para("Three.", ""),
+        para("Four.", ""),
+        para("End.", "")
+    );
+    let ops = r#"{"op":"delete","ref":"p2","to":"p4"},{"op":"insert","ref":"p3","place":"before","paragraphs":["New."]},{"op":"insert","ref":"p3","place":"before","paragraphs":["Next."]}"#;
+    let mut doc = open(&source);
+    edit(&mut doc, ops);
+    assert!(body(&doc).ends_with(&para("End.", "")), "{}", body(&doc));
+    assert_eq!(
+        accepted(&source, ops),
+        format!(
+            "{}{}{}{}",
+            para("Lead.", ""),
+            para("New.", ""),
+            para("Next.", ""),
+            para("End.", "")
+        )
+    );
+}

@@ -29,6 +29,9 @@ pub(crate) struct Compiler<'t, 's> {
     /// The properties and mark run properties that a container's last paragraph had when a deletion of this batch joined it
     /// with the paragraph before it, by element. An insertion before it in the same batch takes them, since the join may have
     /// folded the author's own pending change, which then no longer holds them (`blocks_insert_joined.rs`).
+    /// For each paragraph that an insertion before it went after (`blocks_insert_joined.rs`), the last paragraph such
+    /// insertions of this batch put there: the next one goes after it, so that they keep their order.
+    pub(super) after_join: Vec<(NodeId, NodeId)>,
     pub(super) before_join: Vec<(
         NodeId,
         Vec<super::types::PropElement>,
@@ -64,6 +67,7 @@ impl<'t, 's> Compiler<'t, 's> {
             warnings: Vec::new(),
             call_start: 0..0,
             dropped_reference: false,
+            after_join: Vec::new(),
             before_join: Vec::new(),
         })
     }

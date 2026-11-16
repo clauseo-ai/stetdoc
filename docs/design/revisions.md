@@ -991,9 +991,10 @@ The comparison is of **base properties**: the paragraph's `w:pPr` children witho
   Word keeps the start of a control that wraps rows in its first row, so Word's Reject All of a tracked first row took
   the section's start with it and removed the section and every item, keeping their rows (Word for Mac 16.114.4).
   Untracked, nothing is rejected, and the row is a new first item. The other side of the same Word behaviour: a tracked
-  deletion of the row that holds the section's start, the first row of the first item, is written as any row deletion,
-  and when the section still holds a row that no tracked change deletes once the run of operations has ended, the
-  receipt warns `repeating_section_unwrapped_by_word` (`row_controls::section_started_by`, `Effect::section_start_deleted`).
+  deletion of the row that holds the section's start, the first row of the first item, is written as any row deletion.
+  When the batch's final state still deletes the row and a section whose start it holds, the innermost or any outer one,
+  still holds a row that no tracked change deletes, the receipt warns `repeating_section_unwrapped_by_word`
+  (`row_controls::sections_started_by`, `row_controls::section_unwrapped_by_word`, `Effect::section_start_deleted`).
   Word's Accept All then removes the section's control around the rows that stay, while the text and the rows come out
   right; stetdoc's own accept keeps the section. Untracked, the row goes at once and the section stays. An item is seen
   through plain controls around its row (`wordml::repeating_item`), for both rules and for `item=N` in the view.

@@ -155,40 +155,55 @@ pub(super) fn before_first_item(tree: &SpanTree, item: NodeId) -> Option<NodeId>
     top
 }
 
-/// The repeating section whose start `row` holds: the section, when `row` is the first row of the section's first
-/// item (`wordml::repeating_item`, which sees an item through plain controls around its row). Word keeps a control's
-/// start in its first row, so accepting a tracked deletion of this row in Word removes the section's control and keeps
-/// the rows that remain (decision 0020).
-pub(super) fn section_started_by(tree: &SpanTree, row: NodeId) -> Option<NodeId> {
-    let item = item_of(tree, row)?;
-    before_first_item(tree, item)?;
-    (edge_row(tree, item, Place::Before) == Some(row))
-        .then(|| section_of(tree, item))
-        .flatten()
+/// The repeating sections whose start `row` holds, innermost first: each repeating section above the row, below its
+/// table, whose first row it is. An outer section whose first item holds an inner section starts at the inner one's
+/// first row too. Word keeps a control's start in its first row, so accepting a tracked deletion of this row in Word
+/// removes each of these sections' controls and keeps the rows that remain (decision 0020). An item is seen through
+/// plain controls around its row.
+pub(super) fn sections_started_by(tree: &SpanTree, row: NodeId) -> Vec<NodeId> {
+    wrappers_of(tree, row)
+        .into_iter()
+        .filter(|&w| {
+            let n = tree.node_ref(w);
+            is_w(&n, "sdt")
+                && crate::wordml::control(n).kind == crate::wordml::ControlKind::RepeatingSection
+                && edge_row(tree, w, Place::Before) == Some(row)
+        })
+        .collect()
 }
 
 /// True if `section` holds a row other than `row` that no tracked change deletes: a row that stays when the deletions
 /// are accepted.
-pub(super) fn holds_other_row(tree: &SpanTree, section: NodeId, row: NodeId) -> bool {
-    rows_of(tree, section).into_iter().any(|r| {
-        r != row
-            && !w_child(&tree.node_ref(r), "trPr")
-                .is_some_and(|pr| pr.child_elements().any(|c| is_w(&c, "del")))
-    })
+fn holds_other_row(tree: &SpanTree, section: NodeId, row: NodeId) -> bool {
+    rows_of(tree, section)
+        .into_iter()
+        .any(|r| r != row && !is_deleted(tree, r))
 }
 
-impl super::compiler::Compiler<'_, '_> {
-    /// True if Word's Accept All would remove the repeating-section control around rows that stay: `row`, deleted
-    /// tracked, holds the start of its section, and the section holds a row that no tracked change deletes. Asked after
-    /// the last operation of a run, so a batch that deletes every item's row is not warned.
-    pub(crate) fn section_unwrapped_by_word(&self, row: &BlockKey) -> Result<bool, StetError> {
-        let tree = self.tree_ro(row.part())?;
-        if crate::wordml::Row::new(tree, row.node()).is_none() {
-            return Ok(false);
-        }
-        Ok(section_started_by(tree, row.node())
-            .is_some_and(|section| holds_other_row(tree, section, row.node())))
+/// True if a tracked change deletes the row: its `w:trPr` holds a `w:del`.
+fn is_deleted(tree: &SpanTree, row: NodeId) -> bool {
+    w_child(&tree.node_ref(row), "trPr")
+        .is_some_and(|pr| pr.child_elements().any(|c| is_w(&c, "del")))
+}
+
+/// True if Word's Accept All would remove a repeating-section control around rows that stay: `row` is still in the
+/// document and deleted by a tracked change, holds the start of a repeating section, and that section holds a row that
+/// no tracked change deletes. `ops` asks it of the batch's final state, so a batch that deletes every item's row, or
+/// rejects or accepts its own deletion, is not warned (decision 0020).
+pub(crate) fn section_unwrapped_by_word(
+    parts: PartsView<'_>,
+    row: &BlockKey,
+) -> Result<bool, StetError> {
+    let Some(id) = parts.id(row.part()) else {
+        return Ok(false);
+    };
+    let tree = parts.tree(id)?;
+    if crate::wordml::Row::new(tree, row.node()).is_none() || !is_deleted(tree, row.node()) {
+        return Ok(false);
     }
+    Ok(sections_started_by(tree, row.node())
+        .into_iter()
+        .any(|section| holds_other_row(tree, section, row.node())))
 }
 
 /// The repeating-section item that `row` is the content of (`wordml::repeating_item`).

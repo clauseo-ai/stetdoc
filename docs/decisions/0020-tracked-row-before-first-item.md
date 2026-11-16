@@ -53,11 +53,13 @@ Option 1.
 - **A tracked deletion of the row that holds the start.** It is written as any row deletion: the redline is right, and
   only the control around the rows that stay is lost in Word. Refusing would block a common tracked edit. The compiler's
   `Effect::section_start_deleted` names the row when it is the first row of the section's first item
-  (`row_controls::section_started_by`), and `ops` asks once the run of operations has ended whether the section still
-  holds a row that no tracked change deletes (`Compiler::section_unwrapped_by_word`). If it does, the receipt warns
+  or of an outer section whose first item holds the inner one (`row_controls::sections_started_by`). `ops` asks of the
+  batch's final state whether the row is still deleted and one of those sections still holds a row that no tracked
+  change deletes (`row_controls::section_unwrapped_by_word`). If so, the receipt warns
   `repeating_section_unwrapped_by_word` with the row's ref. The warning says that Word's Accept All removes the
   repeating-section control around the rows that remain, that the text and rows come out right, and that an untracked
-  delete keeps the section. A batch that deletes every item's row is not warned, since the section goes anyway. The
+  delete keeps the section. A batch that deletes every item's row is not warned, since the section goes anyway, and
+  neither is one that rejects or accepts its own deletion before it ends. The
   rule is kept in those two places so that an encoding copied from Word's own tracked deletion of a first item, if a hand
   check finds one that keeps the section, can replace it.
 - **Items in plain controls.** An item whose row sits in a plain content control is still an item

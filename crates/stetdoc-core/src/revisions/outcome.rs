@@ -80,7 +80,7 @@ pub(crate) struct Effect {
     /// (decision 0020).
     pub outside_section: Vec<BlockKey>,
     /// Each row deleted tracked that holds the start of its repeating section: Word's Accept All removes the section's
-    /// control around the rows that stay (decision 0020). `ops` warns once the run has ended and rows still stay.
+    /// control around the rows that stay (decision 0020). `ops` warns from the batch's final state, when the row is still deleted and rows still stay.
     pub section_start_deleted: Vec<BlockKey>,
     /// Elements created. Their refs are minted at commit.
     pub new_blocks: Vec<BlockKey>,

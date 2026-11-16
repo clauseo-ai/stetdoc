@@ -8,11 +8,12 @@
 
 use super::tests_edit::*;
 use super::tests_edit_repeating::{
-    delete, document_xml, insert, item, open, outcome, package, repeating, row, table,
+    W15, delete, document_xml, insert, item, open, outcome, package, repeating, row, table,
 };
 use crate::api::edit::Edit;
 use crate::api::receipt::Receipt;
 use crate::api::view::WarningCode;
+use stetdoc_testkit::fixtures::{parts, zip::Zip};
 
 fn outside(receipt: &Receipt) -> Vec<(String, String)> {
     receipt
@@ -221,4 +222,64 @@ fn the_view_numbers_a_row_in_a_plain_control_as_its_item() {
         .unwrap_or_default();
     assert!(body.contains("r1 {row item=1}"), "{body}");
     assert!(body.contains("r2 {row item=2}"), "{body}");
+}
+
+/// An outer section 30 whose item 31 holds section 10, with one item around r1, and whose item 32 holds r2: r1 holds the
+/// start of both sections.
+fn nested_sections() -> Vec<u8> {
+    let inner = format!(
+        r#"<w:sdt><w:sdtPr><w:id w:val="10"/><w15:repeatingSection/></w:sdtPr><w:sdtContent>{}</w:sdtContent></w:sdt>"#,
+        item(11, &row("Item one."))
+    );
+    let body = format!(
+        concat!(
+            r#"<w:tbl><w:tblPr><w:tblW w:w="4800" w:type="dxa"/></w:tblPr><w:tblGrid><w:gridCol w:w="4800"/></w:tblGrid>"#,
+            r#"<w:sdt><w:sdtPr><w:id w:val="30"/><w15:repeatingSection/></w:sdtPr><w:sdtContent>{}{}</w:sdtContent></w:sdt>"#,
+            r#"{}</w:tbl><w:p/>"#
+        ),
+        item(31, &inner),
+        item(32, &row("Item two.")),
+        row("Plain row.")
+    );
+    let xml = parts::Doc::new()
+        .root_attrs(&format!(r#" xmlns:w15="{W15}""#))
+        .body(&body)
+        .bytes();
+    Zip::new(parts::entries_doc(&xml)).build()
+}
+
+#[test]
+fn a_tracked_delete_of_a_row_that_starts_an_outer_section_too_warns() {
+    let mut doc = open(&nested_sections());
+    assert_eq!(
+        table(&doc),
+        "{30 section {31 item {10 section {11 item [Item one.]}}} {32 item [Item two.]}} [Plain row.]"
+    );
+    let receipt = run(&mut doc, &delete("r1"));
+    let warnings = unwrapped(&receipt);
+    assert_eq!(warnings.len(), 1, "{:?}", receipt.warnings);
+    assert_eq!(warnings[0].0, "r1");
+    assert!(doc.check().ok, "{:?}", doc.check());
+}
+
+#[test]
+fn no_unwrap_warning_when_the_same_batch_rejects_or_accepts_the_deletion() {
+    for review in [
+        r#"{"op":"reject","all":true}"#,
+        r#"{"op":"accept","all":true}"#,
+    ] {
+        let mut doc = open(&repeating());
+        let receipt = run(&mut doc, &format!("{},{review}", delete("r1")));
+        assert!(
+            unwrapped(&receipt).is_empty(),
+            "{review}: {:?}",
+            receipt.warnings
+        );
+    }
+    let mut doc = open(&repeating());
+    run(
+        &mut doc,
+        &format!("{},{}", delete("r1"), r#"{"op":"reject","all":true}"#),
+    );
+    assert_eq!(document_xml(&doc), document_xml(&open(&repeating())));
 }

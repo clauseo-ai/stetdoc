@@ -270,32 +270,27 @@ fn kept_warnings(compiler: &Compiler<'_, '_>, done: &mut Done) {
     }
 }
 
-/// A `repeating_section_unwrapped_by_word` warning for each row of the run from `first` that an operation deleted tracked
-/// and that holds the start of its repeating section, when the section still holds a row that stays. Asked once the run
-/// has ended, so a batch that deletes every item's row is not warned (decision 0020).
-fn section_warnings(
-    compiler: &Compiler<'_, '_>,
-    applied: &mut Applied,
-    first: usize,
-) -> Result<(), StetError> {
-    for op in applied.ops.iter_mut().skip(first) {
+/// A `repeating_section_unwrapped_by_word` warning for each row that an operation deleted tracked and that holds the start
+/// of a repeating section, when the batch's final state still deletes the row and the section still holds a row that
+/// stays. So a batch that deletes every item's row, or rejects or accepts its own deletion, is not warned (decision 0020).
+fn section_warnings(tx: &Tx<'_>, applied: &mut Applied) -> Result<(), StetError> {
+    for op in applied.ops.iter_mut() {
         let rows: Vec<_> = op
             .effects
             .iter()
             .flat_map(|e| e.section_start_deleted.iter().cloned())
             .collect();
         for row in rows {
-            if !compiler.section_unwrapped_by_word(&row)? {
+            if !crate::revisions::row_controls::section_unwrapped_by_word(tx.parts(), &row)? {
                 continue;
             }
-            let shown = compiler
-                .tx()
+            let shown = tx
                 .parts()
                 .ref_of(&row)
                 .map_or_else(|| "the row".to_string(), |r| r.to_string());
             op.warnings.push(target::warning(
                 WarningCode::RepeatingSectionUnwrappedByWord,
-                compiler.tx(),
+                tx,
                 Some(&row),
                 format!(
                     "{shown} holds the start of its repeating section, so Word's Accept All of its tracked deletion removes \
@@ -374,8 +369,6 @@ pub(crate) fn apply(
                     notes_removed: done.notes_removed,
                 });
             }
-            section_warnings(&compiler, &mut applied, i)
-                .map_err(|e| at(e, end.saturating_sub(1)))?;
             let outcome = compiler
                 .finish()
                 .map_err(|e| at(e, end.saturating_sub(1)))?;
@@ -387,6 +380,7 @@ pub(crate) fn apply(
         }
         i = end;
     }
+    section_warnings(tx, &mut applied)?;
     applied.touched_by_ops = tx.touched().len();
     reconcile(tx, &track, &mut applied)?;
     // A hyperlink relationship whose last use the batch removed goes with it. The edit that removed the use was itself checked

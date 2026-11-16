@@ -546,23 +546,54 @@ fn white_space_at_the_ends_of_a_w_t_without_xml_space_counts_as_word_shows_it() 
 }
 
 #[test]
-fn the_laws_take_a_simple_field_and_its_complex_form_as_equal() {
-    // A tracked deletion of a whole simple field writes it as a complex field, which rejecting gives back (3.6.3).
+fn the_laws_read_a_simple_field_as_a_complex_field_only_where_a_batch_unfolded_it() {
+    // A tracked deletion of a whole simple field writes it as a complex field, which rejecting gives back (3.6.3). R1 and R2
+    // read the fields the batch unfolded in that form on the original side, and every other comparison stays strict, so an
+    // untouched simple field that changes form is still a difference.
     let b = "<w:rPr><w:b/></w:rPr>";
     let simple = format!(
-        r#"<w:p><w:fldSimple w:instr=" PAGE " w:fldLock="1"><w:fldData>AA</w:fldData><w:r>{b}<w:t>1</w:t></w:r></w:fldSimple></w:p>"#
+        r#"<w:fldSimple w:instr=" PAGE " w:fldLock="1"><w:fldData>AA</w:fldData><w:r>{b}<w:t>1</w:t></w:r></w:fldSimple>"#
     );
     let complex = format!(
         concat!(
-            r#"<w:p><w:r>{b}<w:fldChar w:fldCharType="begin" w:fldLock="1"><w:fldData>AA</w:fldData></w:fldChar></w:r>"#,
+            r#"<w:r>{b}<w:fldChar w:fldCharType="begin" w:fldLock="1"><w:fldData>AA</w:fldData></w:fldChar></w:r>"#,
             r#"<w:r>{b}<w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r>{b}<w:fldChar w:fldCharType="separate"/></w:r>"#,
-            r#"<w:r>{b}<w:t>1</w:t></w:r><w:r>{b}<w:fldChar w:fldCharType="end"/></w:r></w:p>"#
+            r#"<w:r>{b}<w:t>1</w:t></w:r><w:r>{b}<w:fldChar w:fldCharType="end"/></w:r>"#
         ),
         b = b
     );
-    assert_eq!(normalized_body(&simple), normalized_body(&complex));
+    // Two simple fields; the comparison is told the first one was unfolded.
+    let source = state(&format!("<w:p>{simple}</w:p><w:p>{simple}</w:p>"));
+    let view = source.parts();
+    let tree = view.tree(view.id(MAIN).unwrap()).unwrap();
+    let mut fields = Vec::new();
+    let mut stack = vec![tree.root()];
+    while let Some(n) = stack.pop() {
+        if n.local_name() == "fldSimple" {
+            fields.push(n.id());
+        }
+        let mut kids: Vec<_> = n.child_elements().collect();
+        kids.reverse();
+        stack.extend(kids);
+    }
+    let unfold =
+        |ids: &[crate::wordml::NodeId]| super::laws_norm::normalize_unfolding(tree, false, ids);
+    let first_unfolded = normalized_body(&format!("<w:p>{complex}</w:p><w:p>{simple}</w:p>"));
+    let both_unfolded = normalized_body(&format!("<w:p>{complex}</w:p><w:p>{complex}</w:p>"));
+    assert_eq!(unfold(&fields[..1]), first_unfolded);
+    // The untouched second field written as a complex field is a difference, in `normalize` and in R1 and R2's form.
+    assert_ne!(unfold(&fields[..1]), both_unfolded);
+    assert_ne!(normalized_part(&view), first_unfolded);
     assert_ne!(
-        normalized_body(&simple),
-        normalized_body(&complex.replace(" PAGE ", " DATE "))
+        normalized_body(&format!("<w:p>{simple}</w:p>")),
+        normalized_body(&format!("<w:p>{complex}</w:p>"))
+    );
+    // A different code is a difference even for an unfolded field.
+    assert_ne!(
+        unfold(&fields[..1]),
+        normalized_body(&format!(
+            "<w:p>{}</w:p><w:p>{simple}</w:p>",
+            complex.replace(" PAGE ", " DATE ")
+        ))
     );
 }

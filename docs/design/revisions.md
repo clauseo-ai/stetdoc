@@ -1070,18 +1070,27 @@ and `end`, with `delInstrText` and `delText`. It writes an inserted field as `in
   `w:del` inside the element, and then `simple_unfold` replaces the element by the runs of a complex field around that
   content: `w:fldChar` begin, the code from `w:instr` as `w:delInstrText`, separate, the result as it was, end. The begin
   carries the element's `w:fldLock`, `w:dirty` and `w:fldData`. The field's runs take the properties of the result's first
-  run, the end those of its last, from before any pending change of them, so the field looks and updates the same. The new
+  run, the end those of its last, so the field looks and updates the same. A pending `w:rPrChange` there is copied with
+  them under a new id, which the outcome records as a copy (`split`), so accepting or rejecting that change formats the
+  field's runs as it formats the result. The new
   runs join the deletion that holds the result, and that one joins a deletion this call wrote just before or after the
   field, so a deleted paragraph with a field is one `w:del`, as Word writes it. Accepting removes the field; rejecting gives
   back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is what
-  Word's Reject All gives too.
+  Word's Reject All gives too. A field whose result is all in insertions was not in `Original` and must stay out of it, so
+  its runs go in a new `w:del` inside a copy of the first and of the last `w:ins`, under new ids recorded as copies; a field
+  whose content does not start and end with a `w:ins` then stays a `w:fldSimple`. An insertion that holds only deletions
+  (another author's text that this call deleted) is in neither mode, so a result made of deleted text and such insertions
+  is deleted whole, and the field is written as a complex field.
 
   The first build (issue #24) kept the element, `w:fldSimple > w:del > w:r > w:delText`, so that rejecting gave the
   source back byte for byte. Word for Mac 16.114 does not read that as a deleted field: its Accept All removed the text
   and left an empty `{ PAGE }` field, in the next paragraph when the paragraph mark was deleted too. Word's own tracked
   deletion of a paragraph that holds a `w:fldSimple` writes the complex form, all in one `w:del`, and its Reject All gives
-  back a complex field. Word also writes every `w:fldSimple` as a complex field when it saves. So law R2 compares the two
-  forms as equal: `normalize` writes every `w:fldSimple` as the runs of a complex field, by the same rule (7.1). The text
+  back a complex field. Word also writes every `w:fldSimple` as a complex field when it saves. So laws R1 and R2 allow the
+  change of form for exactly the fields the batch wrote as complex fields: each call lists them (`Effect::unfolded`, by
+  node), and on the original side only, R1 and R2 read those elements as the runs of a complex field by the same rule
+  (`normalize_unfolding`, 7.1). Every other comparison, and every other field, stays strict, so an untouched
+  `w:fldSimple` that changes form is still a difference. The text
   model still reads a `w:fldSimple` whose content is all in deletions as a field that is gone in `Final` (`wordml.md` 4.4),
   and accepting such a deletion removes the emptied element with its `w:fldData` (`cleanup::prune_from`), for the files
   that hold that shape. An untracked deletion removes the element at once (`unwrap_emptied_links`). A `w:fldSimple` with
@@ -1602,8 +1611,9 @@ For a document D, a batch B (a list of compiler calls with one stamp) and the do
   5. renumber `w:id` by document order and compare author and date as written;
   6. sort attributes, drop white space between elements, and compare namespaces by URI;
   7. leave the order of elements alone (it carries meaning);
-  8. write every `w:fldSimple` as the runs of a complex field, by the rule of 3.6.3, since a tracked deletion of a whole
-     simple field writes it that way and rejecting gives back the complex field (issue #24).
+  8. for R1 and R2 only, on the original side only, write the `w:fldSimple` elements that the batch's tracked deletions
+     wrote as complex fields (`Effect::unfolded`) as the runs of a complex field, by the rule of 3.6.3, since rejecting such
+     a deletion gives back the complex field (issue #24). Every other `w:fldSimple` is compared as it is.
   `normalize` is a function of the XML of the story parts that a batch can touch. It is written once, in the
   testkit, and the laws call it.
 

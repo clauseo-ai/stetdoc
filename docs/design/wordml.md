@@ -816,7 +816,8 @@ it, so the model tracks fields precisely.
   the modes of its content: a `w:fldSimple` whose content is all in `w:del` or `w:moveFrom` is not in `Final`, and one whose
   content is all in `w:ins` or `w:moveTo` is not in `Original`, as a complex field deleted or inserted whole is not. The
   content is read through the hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo` elements that hold it, as a
-  deletion inside one of those goes inside it. Range markers, `w:fldData` and properties do not count, and a `w:fldSimple`
+  deletion inside one of those goes inside it. An insertion that holds only deletions is in neither mode and counts for
+  neither, so a result of deleted text and deleted insertions is gone in `Final`. Range markers, `w:fldData` and properties do not count, and a `w:fldSimple`
   with no content is in the modes of what holds it. The first build of issue #24 wrote this shape for a tracked deletion
   of a simple field. stetdoc now writes a complex field instead, as Word does (`revisions.md` 3.6.3), and this reading
   stays for the files that hold the shape.

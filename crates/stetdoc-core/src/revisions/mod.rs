@@ -130,6 +130,8 @@ mod laws_gen;
 #[cfg(test)]
 mod laws_norm;
 #[cfg(test)]
+mod laws_norm_fields;
+#[cfg(test)]
 mod laws_refs;
 #[cfg(test)]
 mod laws_select;

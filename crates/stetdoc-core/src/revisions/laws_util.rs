@@ -128,15 +128,18 @@ pub(super) fn strip_law_markers(tx: &mut crate::state::Tx<'_>) {
 /// The normalized main part of a state after a resolution of selected elements. The elements named in
 /// `gone` are removed first, each with what it holds: the revisions that a call declared as swallowed.
 pub(super) fn after(state: &State, gone: &[i64], steps: &[Step]) -> String {
-    after_with(state, gone, steps, false)
+    after_unfolding(state, gone, steps, false, &[])
 }
 
-/// [`after`], with the properties of the last paragraph of the body left out if `last_ppr_free`.
-pub(super) fn after_with(
+/// [`after`], with the properties of the last paragraph of the body left out if `last_ppr_free`, and the simple fields
+/// `unfold` of the main part written as complex fields: the original side of R1 and
+/// R2, for the fields that the batch's tracked deletions wrote as complex fields (`Effect::unfolded`).
+pub(super) fn after_unfolding(
     state: &State,
     gone: &[i64],
     steps: &[Step],
     last_ppr_free: bool,
+    unfold: &[crate::wordml::NodeId],
 ) -> String {
     let mut tx = state.begin();
     strip_law_markers(&mut tx);
@@ -158,11 +161,7 @@ pub(super) fn after_with(
     }
     let view = tx.parts();
     let tree = view.tree(view.id(MAIN).unwrap()).unwrap();
-    if last_ppr_free {
-        super::laws_norm::normalize_without_last_ppr(tree)
-    } else {
-        normalize(tree)
-    }
+    super::laws_norm::normalize_unfolding(tree, last_ppr_free, unfold)
 }
 
 /// True if the last paragraph of the body of a state has a mark that is an insertion.

@@ -428,17 +428,19 @@ impl<'t> Builder<'t> {
 /// deletions (or moves away) is gone in `Final`, and one whose content is all in
 /// insertions (or moves in) is not there in `Original`, as accepting or rejecting removes it (`revisions/cleanup.rs`). The
 /// content is read through the hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo` elements that hold it, since
-/// a deletion inside one of those goes inside it. Range markers, `w:fldData` and a control's properties do not count. A field
-/// with no content, or with some outside a revision, is in the modes of what holds it.
+/// a deletion inside one of those goes inside it. An insertion that holds only deletions (another author's insertion that was
+/// deleted) is in neither mode, so it counts for neither. Range markers, `w:fldData` and a control's properties do not count.
+/// A field with no content, or with some outside a revision, is in the modes of what holds it.
 pub fn simple_field_vis(c: &NodeRef<'_>, vis: Vis) -> Vis {
-    let mut gone: Option<u8> = None;
+    let mut present: u8 = 0;
+    let mut any = false;
     let mut stack: Vec<NodeRef<'_>> = c.child_elements().collect();
     stack.reverse();
     while let Some(k) = stack.pop() {
         if !is_word_ns(k.namespace()) {
             return vis;
         }
-        let side = match k.local_name() {
+        let modes = match k.local_name() {
             "fldData" | "bookmarkStart" | "bookmarkEnd" | "commentRangeStart"
             | "commentRangeEnd" | "permStart" | "permEnd" | "proofErr" | "sdtPr" | "sdtEndPr"
             | "smartTagPr" | "customXmlPr" => continue,
@@ -448,17 +450,28 @@ pub fn simple_field_vis(c: &NodeRef<'_>, vis: Vis) -> Vis {
                 stack.extend(kids);
                 continue;
             }
-            "del" | "moveFrom" => Vis::FINAL,
-            "ins" | "moveTo" => Vis::ORIGINAL,
+            "del" | "moveFrom" => Vis::ORIGINAL,
+            "ins" | "moveTo" if holds_only_removals(&k) => 0,
+            "ins" | "moveTo" => Vis::FINAL,
             _ => return vis,
         };
-        match gone {
-            Some(g) if g != side => return vis,
-            _ => gone = Some(side),
+        any = true;
+        present |= modes;
+    }
+    if any { Vis(vis.0 & present) } else { vis }
+}
+
+/// True for an insertion whose content is all deletions, which is in neither mode: accepting keeps the insertion and
+/// removes the deletion, and rejecting removes the insertion. Range markers do not count.
+fn holds_only_removals(ins: &NodeRef<'_>) -> bool {
+    let mut any = false;
+    for k in ins.child_elements() {
+        match k.local_name() {
+            "del" | "moveFrom" if is_word_ns(k.namespace()) => any = true,
+            "bookmarkStart" | "bookmarkEnd" | "commentRangeStart" | "commentRangeEnd"
+            | "permStart" | "permEnd" | "proofErr" => {}
+            _ => return false,
         }
     }
-    match gone {
-        Some(g) => Vis(vis.0 & !g),
-        None => vis,
-    }
+    any
 }

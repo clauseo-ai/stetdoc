@@ -429,8 +429,8 @@ fn the_complex_field_keeps_the_simple_fields_formatting_and_attributes() {
         r#"{"op":"delete","ref":"p1","start":9,"end":10}"#,
         "See page  for details.",
     );
-    // A pending format of the result: the field's runs take its formatting from before that change, so that rejecting both
-    // leaves no trace of it.
+    // Another author's pending format of the result: the field's runs take the result's properties with a copy of that
+    // change, so that accepting or rejecting it formats the field as it formats the result.
     let changed = body.replace(
         "<w:rPr><w:b/></w:rPr>",
         r#"<w:rPr><w:i/><w:rPrChange w:id="90" w:author="Other" w:date="2026-01-01T00:00:00Z"><w:rPr><w:b/></w:rPr></w:rPrChange></w:rPr>"#,
@@ -442,8 +442,60 @@ fn the_complex_field_keeps_the_simple_fields_formatting_and_attributes() {
         true,
     )
     .unwrap();
-    run(&mut doc, r#"{"op":"reject","all":true}"#);
-    assert_eq!(main_xml(&doc), main_xml(&open(&rejected)));
+    let tracked = main_xml(&doc);
+    assert_eq!(tracked.matches("<w:rPrChange ").count(), 5, "{tracked}");
+    assert!(doc.check().ok, "{:?}", doc.check());
+    let mut rejected_all = open(&changed);
+    edit(
+        &mut rejected_all,
+        r#"{"op":"delete","ref":"p1","start":9,"end":10}"#,
+        true,
+    )
+    .unwrap();
+    run(&mut rejected_all, r#"{"op":"reject","all":true}"#);
+    assert_eq!(main_xml(&rejected_all), main_xml(&open(&rejected)));
+    // Rejecting only the deletion, then accepting the other author's change: italic everywhere, as without the edit.
+    run(&mut doc, r#"{"op":"reject","author":"Clauseo"}"#);
+    run(&mut doc, r#"{"op":"accept","all":true}"#);
+    let xml = main_xml(&doc);
+    assert!(!xml.contains("<w:b/>"), "{xml}");
+    assert_eq!(xml.matches("<w:i/>").count(), 5, "{xml}");
+}
+
+#[test]
+fn a_simple_field_whose_result_holds_another_authors_insertion_is_written_as_a_complex_field() {
+    // Part of the result is another author's insertion: deleting the field leaves no `w:fldSimple`, which Word would leave as
+    // an empty field. Rejecting everything removes the insertion and gives back a complex field with the rest.
+    let other = r#"w:id="90" w:author="Other" w:date="2026-01-01T00:00:00Z""#;
+    let partly = format!(
+        "<w:p>{}{}{}</w:p>",
+        wr("See "),
+        simple_with(&format!("{}<w:ins {other}>{}</w:ins>", wr("1"), wr("2"))),
+        wr(" tail")
+    );
+    // All of the result is the insertion: the field was not in the original, and stays out of it.
+    let all = format!(
+        "<w:p>{}{}{}</w:p>",
+        wr("See "),
+        simple_with(&format!("<w:ins {other}>{}</w:ins>", wr("12"))),
+        wr(" tail")
+    );
+    for (body, rejected) in [(&partly, "See {PAGE|1} tail"), (&all, "See  tail")] {
+        let ops = r#"{"op":"delete","ref":"p1","start":4,"end":6}"#;
+        let mut doc = open(body);
+        edit(&mut doc, ops, true).unwrap();
+        let xml = main_xml(&doc);
+        assert!(!xml.contains("<w:fldSimple"), "{xml}");
+        assert!(doc.check().ok, "{:?}", doc.check());
+        assert!(!final_view_line(&doc, "p1").contains("{field"), "{xml}");
+        let mut accepted = open(body);
+        edit(&mut accepted, ops, true).unwrap();
+        run(&mut accepted, r#"{"op":"accept","all":true}"#);
+        assert_eq!(shape(&accepted), "See  tail", "{xml}");
+        run(&mut doc, r#"{"op":"reject","all":true}"#);
+        assert_eq!(shape(&doc), rejected, "{xml}");
+        assert!(doc.check().ok, "{:?}", doc.check());
+    }
 }
 
 #[test]

@@ -95,6 +95,10 @@ pub(crate) struct Effect {
     /// Compare only: each definition (a style, a numbering definition) and each part that the import added, with what it was
     /// copied from, so that `check` keys it as foreign.
     pub imported_defs: Vec<super::redline_types::ImportedDef>,
+    /// Each `w:fldSimple` that a tracked deletion of this call wrote as a complex field (`simple_unfold`), by its part and its
+    /// node in the document before the call: rejecting the deletion gives back a complex field where that element was, which
+    /// the laws R1 and R2 allow for exactly these fields.
+    pub unfolded: Vec<(Arc<str>, NodeId)>,
 }
 
 impl Effect {
@@ -113,6 +117,7 @@ impl Effect {
             && self.touched.is_empty()
             && self.imported.is_empty()
             && self.imported_defs.is_empty()
+            && self.unfolded.is_empty()
     }
 }
 

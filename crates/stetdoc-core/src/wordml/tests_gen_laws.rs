@@ -38,8 +38,9 @@ fn positions(tree: &SpanTree, p: NodeId) -> HashMap<NodeId, (usize, usize)> {
 }
 
 /// For the begin or end of a `w:fldSimple`, whether all of its content is in deletions (it is gone in `Final`) and whether all
-/// of it is in insertions (it is not there in `Original`). The content is read through hyperlinks, controls, smart tags, custom
-/// XML and `w:dir`/`w:bdo`; range markers, `w:fldData` and properties are not content.
+/// of it is in insertions (it is not there in `Original`). An insertion that holds only deletions is in neither mode, so it
+/// counts as both. The content is read through hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo`; range
+/// markers, `w:fldData` and properties are not content.
 fn simple_field_sides(node: &NodeRef<'_>, kind: ItemKind) -> (bool, bool) {
     if !matches!(kind, ItemKind::FieldBegin | ItemKind::FieldEnd) || !is_w(node, "fldSimple") {
         return (false, false);
@@ -53,14 +54,38 @@ fn simple_field_sides(node: &NodeRef<'_>, kind: ItemKind) -> (bool, bool) {
                 "hyperlink" | "smartTag" | "customXml" | "dir" | "bdo" | "sdt" | "sdtContent" => {
                     leaves(&c, out)
                 }
+                "ins" | "moveTo"
+                    if c.child_elements().next().is_some()
+                        && c.child_elements().all(|k| {
+                            matches!(
+                                k.local_name(),
+                                "del"
+                                    | "moveFrom"
+                                    | "bookmarkStart"
+                                    | "bookmarkEnd"
+                                    | "commentRangeStart"
+                                    | "commentRangeEnd"
+                                    | "permStart"
+                                    | "permEnd"
+                                    | "proofErr"
+                            )
+                        })
+                        && c.child_elements()
+                            .any(|k| matches!(k.local_name(), "del" | "moveFrom")) =>
+                {
+                    out.push("removed")
+                }
                 name => out.push(name),
             }
         }
     }
     let mut content = Vec::new();
     leaves(node, &mut content);
-    let all = |names: [&str; 2]| !content.is_empty() && content.iter().all(|n| names.contains(n));
-    (all(["del", "moveFrom"]), all(["ins", "moveTo"]))
+    let all = |names: [&str; 3]| !content.is_empty() && content.iter().all(|n| names.contains(n));
+    (
+        all(["del", "moveFrom", "removed"]),
+        all(["ins", "moveTo", "removed"]),
+    )
 }
 
 /// The element names an item kind may be made from.

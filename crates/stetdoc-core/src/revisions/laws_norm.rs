@@ -7,10 +7,12 @@
 //! and adjacent insertions, deletions or moves of one side with equal author and date; unwrap a wrapper with no child; drop an
 //! empty `w:rPr`, `w:pPr`, `w:numPr`, `w:trPr`, `w:tcPr`, wrapper and hyperlink or smart tag, and `xml:space`; drop a property change whose snapshot equals the
 //! properties it sits in; renumber the revision ids by document order; sort attributes and drop white space
-//! between elements; write a `w:fldSimple` as the runs of a complex field. The order of elements is left alone, except among
-//! the properties of a container.
+//! between elements. The order of elements is left alone, except among the properties of a container. `normalize_unfolding`
+//! also writes the `w:fldSimple` elements it is given as the runs of a complex field, for the laws that allow that for the
+//! fields a batch unfolded.
 
-use crate::xml::{NodeRef, SpanTree};
+use super::laws_norm_fields::complex_of;
+use crate::xml::{NodeId, NodeRef, SpanTree};
 
 const W: &str = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const W_STRICT: &str = "http://purl.oclc.org/ooxml/wordprocessingml/main";
@@ -21,7 +23,7 @@ fn is_word(ns: &str) -> bool {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-enum N {
+pub(super) enum N {
     El {
         ns: String,
         local: String,
@@ -37,7 +39,7 @@ fn is_noise_bookmark(name: &str) -> bool {
     name == "_GoBack" || name.starts_with("lawbm")
 }
 
-fn is(n: &N, local: &str) -> bool {
+pub(super) fn is(n: &N, local: &str) -> bool {
     matches!(n, N::El { ns, local: l, .. } if is_word(ns) && l == local)
 }
 
@@ -60,7 +62,7 @@ fn local_of(n: &N) -> &str {
 }
 
 /// Text nodes of a `w:t` are kept even if they are white space only.
-fn load(n: &NodeRef<'_>) -> N {
+fn load(n: &NodeRef<'_>, unfold: &[NodeId]) -> N {
     let l = n.local_name();
     if matches!(l, "t" | "delText" | "instrText" | "delInstrText") {
         return N::El {
@@ -86,95 +88,18 @@ fn load(n: &NodeRef<'_>) -> N {
         ns: n.namespace().to_owned(),
         local: l.to_owned(),
         attrs,
-        kids: n.child_elements().map(|c| load(&c)).collect(),
+        kids: n
+            .child_elements()
+            .flat_map(|c| {
+                let k = load(&c, unfold);
+                if unfold.contains(&c.id()) && is(&k, "fldSimple") {
+                    complex_of(k)
+                } else {
+                    vec![k]
+                }
+            })
+            .collect(),
     }
-}
-
-/// Writes each `w:fldSimple` below `n` as the runs of a complex field, as a tracked deletion of a whole simple field does
-/// (design `revisions.md`, 3.6.3): rejecting that deletion gives back a complex field where the source had the element, and
-/// the laws take the two forms as equal. The begin carries `w:fldLock`, `w:dirty` and the `w:fldData`, and the field's
-/// runs take the properties of the content's first run, the end those of its last, from before any change of them.
-fn unfold_simple_fields(n: &mut N) {
-    let Some(kids) = kids_of(n) else { return };
-    for k in kids.iter_mut() {
-        unfold_simple_fields(k);
-    }
-    if !kids.iter().any(|k| is(k, "fldSimple")) {
-        return;
-    }
-    for k in std::mem::take(kids) {
-        if is(&k, "fldSimple") {
-            kids.extend(complex_of(k));
-        } else {
-            kids.push(k);
-        }
-    }
-}
-
-/// The runs of a complex field for the `w:fldSimple` `f`: begin, code, separate, its content, end.
-fn complex_of(f: N) -> Vec<N> {
-    let N::El {
-        ns, attrs, kids, ..
-    } = f
-    else {
-        return vec![f];
-    };
-    let mut runs: Vec<&N> = Vec::new();
-    let mut stack: Vec<&N> = kids.iter().rev().collect();
-    while let Some(k) = stack.pop() {
-        if is(k, "r") {
-            runs.push(k);
-        } else if let N::El { kids: inner, .. } = k
-            && !is(k, "fldData")
-        {
-            stack.extend(inner.iter().rev());
-        }
-    }
-    let old = |r: &N| -> Option<N> {
-        let N::El { kids, .. } = r else { return None };
-        let rpr = kids.iter().find(|k| is(k, "rPr"))?;
-        let N::El { kids: props, .. } = rpr else {
-            return None;
-        };
-        match props.iter().find(|k| is(k, "rPrChange")) {
-            Some(N::El { kids: change, .. }) => change.iter().find(|k| is(k, "rPr")).cloned(),
-            _ => Some(rpr.clone()),
-        }
-    };
-    let (first, last) = (
-        runs.first().and_then(|r| old(r)),
-        runs.last().and_then(|r| old(r)),
-    );
-    let el = |local: &str, attrs: Vec<(String, String, String)>, kids: Vec<N>| N::El {
-        ns: ns.clone(),
-        local: local.to_owned(),
-        attrs,
-        kids,
-    };
-    let run = |rpr: &Option<N>, c: N| el("r", Vec::new(), rpr.iter().cloned().chain([c]).collect());
-    let kind = |k: &str| (ns.clone(), "fldCharType".to_owned(), k.to_owned());
-    let mut begin_attrs = vec![kind("begin")];
-    begin_attrs.extend(
-        attrs
-            .iter()
-            .filter(|a| a.0 == ns && matches!(a.1.as_str(), "fldLock" | "dirty"))
-            .cloned(),
-    );
-    begin_attrs.sort();
-    let instr = attrs
-        .iter()
-        .find(|a| a.0 == ns && a.1 == "instr")
-        .map(|a| a.2.clone())
-        .unwrap_or_default();
-    let (data, content): (Vec<N>, Vec<N>) = kids.into_iter().partition(|k| is(k, "fldData"));
-    let mut out = vec![
-        run(&first, el("fldChar", begin_attrs, data)),
-        run(&first, el("instrText", Vec::new(), vec![N::Text(instr)])),
-        run(&first, el("fldChar", vec![kind("separate")], Vec::new())),
-    ];
-    out.extend(content);
-    out.push(run(&last, el("fldChar", vec![kind("end")], Vec::new())));
-    out
 }
 
 /// The namespaces in which Word writes `paraId`, `textId` and `editId`: the 2010 one, and the ones of the
@@ -260,7 +185,7 @@ fn run_props(run: &N) -> Option<N> {
 
 /// The run properties of a run as they are, with the ids of a change: the first of two runs that merge
 /// keeps them, so that the ids are renumbered the same as in a document that never had the two.
-fn run_own_props(run: &N) -> Option<N> {
+pub(super) fn run_own_props(run: &N) -> Option<N> {
     let N::El { kids, .. } = run else { return None };
     kids.iter().find(|k| is(k, "rPr")).cloned()
 }
@@ -556,7 +481,18 @@ fn write(n: &N, out: &mut String) {
 
 /// The comparison form of a part.
 pub(super) fn normalize(tree: &SpanTree) -> String {
-    normalize_with(tree, false)
+    normalize_with(tree, false, &[])
+}
+
+/// `normalize`, with the `w:fldSimple` elements `unfold` written as the runs of a complex field (`complex_of`), and the
+/// properties of the body's last paragraph left out if `drop_last_ppr`: the original side of R1 and R2, where a batch's
+/// tracked deletion of those simple fields wrote them as complex fields (design `revisions.md`, 3.6.3 and 7.1).
+pub(super) fn normalize_unfolding(
+    tree: &SpanTree,
+    drop_last_ppr: bool,
+    unfold: &[NodeId],
+) -> String {
+    normalize_with(tree, drop_last_ppr, unfold)
 }
 
 /// The comparison form of a part with the properties of the last paragraph of the body left out. They are
@@ -564,12 +500,11 @@ pub(super) fn normalize(tree: &SpanTree) -> String {
 /// cannot remove the last mark, and which paragraph's properties the text before it keeps is a convention
 /// of the resolver that the laws do not fix.
 pub(super) fn normalize_without_last_ppr(tree: &SpanTree) -> String {
-    normalize_with(tree, true)
+    normalize_with(tree, true, &[])
 }
 
-fn normalize_with(tree: &SpanTree, drop_last_ppr: bool) -> String {
-    let mut root = load(&tree.root());
-    unfold_simple_fields(&mut root);
+fn normalize_with(tree: &SpanTree, drop_last_ppr: bool, unfold: &[NodeId]) -> String {
+    let mut root = load(&tree.root(), unfold);
     // The ids of the `_GoBack` bookmarks, whose ends go too.
     let mut gone = Vec::new();
     let mut stack = vec![&root];

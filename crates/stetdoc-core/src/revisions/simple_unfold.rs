@@ -11,7 +11,7 @@ use super::compiler::{Compiler, ParaView};
 use super::errors::internal;
 use super::insert_run::write_revision_attrs;
 use super::names::{XML_NS, is_w, wns};
-use super::tree_ops::{create_w, detach, insert, set_w_attr};
+use super::tree_ops::{copy_attrs, create_w, detach, insert, set_w_attr};
 use crate::api::error::StetError;
 use crate::wordml::{ItemKind, Mode, NodeId, Vis, simple_field_vis};
 use crate::xml::{NodeRef, SpanTree};
@@ -26,19 +26,23 @@ impl Compiler<'_, '_> {
         p: &ParaView,
         fields: &[NodeId],
     ) -> Result<(), StetError> {
-        let mut left: Vec<NodeId> = fields
+        // Each field that was in `Final`, with whether it was in `Original` too.
+        let mut left: Vec<(NodeId, bool)> = fields
             .iter()
-            .copied()
-            .filter(|f| {
-                p.map.items().iter().any(|i| {
-                    i.kind == ItemKind::FieldBegin && i.node == *f && i.vis.in_mode(Mode::Final)
-                })
+            .filter_map(|f| {
+                p.map
+                    .items()
+                    .iter()
+                    .find(|i| {
+                        i.kind == ItemKind::FieldBegin && i.node == *f && i.vis.in_mode(Mode::Final)
+                    })
+                    .map(|i| (*f, i.vis.in_mode(Mode::Original)))
             })
             .collect();
         loop {
             let before = left.len();
             let mut kept = Vec::with_capacity(left.len());
-            for field in left {
+            for (field, original) in left {
                 let gone = {
                     let tree = self.tree_ro(&p.part)?;
                     let n = tree.node_ref(field);
@@ -47,9 +51,9 @@ impl Compiler<'_, '_> {
                         && !simple_field_vis(&n, Vis::BOTH).in_mode(Mode::Final)
                 };
                 if gone {
-                    self.unfold(&p.part, field)?;
+                    self.unfold(&p.part, field, !original)?;
                 } else {
-                    kept.push(field);
+                    kept.push((field, original));
                 }
             }
             if kept.len() == before {
@@ -63,13 +67,18 @@ impl Compiler<'_, '_> {
     /// The begin, code and separate runs go at the start of the first deletion inside the element when this call made it,
     /// and the end run at the end of the last, so the field is one revision with its result; otherwise each gets a deletion
     /// of its own. The begin carries the element's `w:fldLock`, `w:dirty` and `w:fldData`, the code is its `w:instr`, and the
-    /// field's runs take the formatting of the result's first run, the end that of its last, as it was before the call.
-    fn unfold(&mut self, part: &Arc<str>, field: NodeId) -> Result<(), StetError> {
+    /// field's runs take the properties of the result's first run, the end those of its last, with a copy of a pending change
+    /// of them under a new id, so that accepting or rejecting that change formats the field as it formats the result.
+    ///
+    /// A field that was not in `Original` (`inserted`: all of its content is in insertions) must stay out of it, so its runs go in
+    /// a deletion of their own inside a copy of the first insertion and of the last, under new ids that the outcome records as
+    /// copies. A field whose content does not start and end with a `w:ins` is left as it is.
+    fn unfold(&mut self, part: &Arc<str>, field: NodeId, inserted: bool) -> Result<(), StetError> {
         let stamp = self
             .stamp()
             .cloned()
             .ok_or_else(|| internal("a tracked deletion has no stamp"))?;
-        let (wns_uri, instr, lock, dirty, data, first_rpr, last_rpr, head, tail) = {
+        let (wns_uri, instr, lock, dirty, data, first_rpr, last_rpr, head, tail, wraps) = {
             let tree = self.tree_ro(part)?;
             let n = tree.node_ref(field);
             let attr = |local: &str| {
@@ -79,9 +88,10 @@ impl Compiler<'_, '_> {
             };
             let runs = runs_below(&n);
             let ours = |c: Option<NodeRef<'_>>| {
-                c.filter(|c| is_w(c, "del") && self.is_created_node(tree, c.id()))
+                c.filter(|c| !inserted && is_w(c, "del") && self.is_created_node(tree, c.id()))
                     .map(|c| c.id())
             };
+            let ins = |c: Option<&NodeRef<'_>>| c.filter(|c| is_w(c, "ins")).map(|c| c.id());
             let content: Vec<NodeRef<'_>> = n
                 .child_elements()
                 .filter(|c| !is_w(c, "fldData") && !super::carve::is_transparent(c))
@@ -95,12 +105,16 @@ impl Compiler<'_, '_> {
                     .filter(|c| is_w(c, "fldData"))
                     .map(|c| c.id())
                     .collect::<Vec<_>>(),
-                runs.first().and_then(|r| old_rpr(r)),
-                runs.last().and_then(|r| old_rpr(r)),
+                runs.first().and_then(|r| rpr_of(r)),
+                runs.last().and_then(|r| rpr_of(r)),
                 ours(content.first().cloned()),
                 ours(content.last().cloned()),
+                ins(content.first()).zip(ins(content.last())),
             )
         };
+        if inserted && wraps.is_none() {
+            return Ok(());
+        }
         let tree = self.tx.part_mut(part)?;
         let begin = field_char(tree, &wns_uri, "begin")?;
         for (local, value) in [("fldLock", &lock), ("dirty", &dirty)] {
@@ -123,7 +137,29 @@ impl Compiler<'_, '_> {
             opening.push(field_run(tree, &wns_uri, first_rpr, c)?);
         }
         let closing = field_run(tree, &wns_uri, last_rpr, end)?;
+        let new_runs: Vec<NodeId> = opening.iter().copied().chain([closing]).collect();
         let first_child = tree.node_ref(field).first_child().map(|c| c.id());
+        if let Some((first_ins, last_ins)) = wraps {
+            let mut dels = Vec::new();
+            let mut copies = Vec::new();
+            for (runs, from, before) in [
+                (opening, first_ins, first_child),
+                (vec![closing], last_ins, None),
+            ] {
+                let copy = create_w(tree, &wns_uri, "ins")?;
+                copy_attrs(tree, from, copy)?;
+                let del = create_w(tree, &wns_uri, "del")?;
+                insert(tree, copy, None, del)?;
+                for r in runs {
+                    insert(tree, del, None, r)?;
+                }
+                insert(tree, field, before, copy)?;
+                dels.push(del);
+                copies.push((copy, from));
+            }
+            unwrap_element(tree, field)?;
+            return self.finish_inserted(part, &dels, &copies, &new_runs, field);
+        }
         let open_del = match head {
             Some(del) => del,
             None => {
@@ -169,6 +205,71 @@ impl Compiler<'_, '_> {
             let id = self.next_id()?;
             let tree = self.tx.part_mut(part)?;
             write_revision_attrs(tree, del, &wns_uri, id, &stamp)?;
+        }
+        self.renumber_copied_changes(part, &new_runs, &wns_uri)?;
+        self.fx.unfolded.push((part.clone(), field));
+        Ok(())
+    }
+
+    /// The ids of what `unfold` wrote for a field that was in insertions: each new deletion gets one, and each copy of an
+    /// insertion gets a new one that the outcome records as a copy of the insertion's.
+    fn finish_inserted(
+        &mut self,
+        part: &Arc<str>,
+        dels: &[NodeId],
+        copies: &[(NodeId, NodeId)],
+        runs: &[NodeId],
+        field: NodeId,
+    ) -> Result<(), StetError> {
+        let stamp = self
+            .stamp()
+            .cloned()
+            .ok_or_else(|| internal("a tracked deletion has no stamp"))?;
+        let wns_uri = wns(self.tree_ro(part)?);
+        let wns_uri = wns_uri.as_str();
+        for &del in dels {
+            let id = self.next_id()?;
+            let tree = self.tx.part_mut(part)?;
+            write_revision_attrs(tree, del, wns_uri, id, &stamp)?;
+        }
+        for &(copy, from) in copies {
+            let old = id_of(&self.tree_ro(part)?.node_ref(from));
+            let new = self.next_id()?;
+            let tree = self.tx.part_mut(part)?;
+            set_w_attr(tree, copy, wns_uri, "id", &new.to_string())?;
+            if let Some(old) = old {
+                self.note_split(old, i64::from(new))?;
+            }
+        }
+        self.renumber_copied_changes(part, runs, wns_uri)?;
+        self.fx.unfolded.push((part.clone(), field));
+        Ok(())
+    }
+
+    /// Gives the copy of a pending `w:rPrChange` in each of `runs` a new id, which the outcome records as a copy of the old one,
+    /// as one id names one element.
+    fn renumber_copied_changes(
+        &mut self,
+        part: &Arc<str>,
+        runs: &[NodeId],
+        wns_uri: &str,
+    ) -> Result<(), StetError> {
+        for &run in runs {
+            let change = {
+                let tree = self.tree_ro(part)?;
+                let rpr = tree.node_ref(run).child_elements().find(|c| is_w(c, "rPr"));
+                rpr.and_then(|r| r.child_elements().find(|c| is_w(c, "rPrChange")))
+                    .map(|c| (c.id(), id_of(&c)))
+            };
+            let Some((change, old)) = change else {
+                continue;
+            };
+            let new = self.next_id()?;
+            let tree = self.tx.part_mut(part)?;
+            set_w_attr(tree, change, wns_uri, "id", &new.to_string())?;
+            if let Some(old) = old {
+                self.note_split(old, i64::from(new))?;
+            }
         }
         Ok(())
     }
@@ -227,6 +328,13 @@ impl Compiler<'_, '_> {
     }
 }
 
+/// The `w:id` of a revision element, if it has a numeric one.
+fn id_of(n: &NodeRef<'_>) -> Option<i64> {
+    n.attrs()
+        .find(|a| a.local_name() == "id" && a.namespace() == n.namespace())
+        .and_then(|a| a.value().parse::<i64>().ok())
+}
+
 /// True if an attribute of `n` in namespace `ns` is in the element's own namespace, as the `w:` attributes are.
 fn is_w_attr_ns(ns: &str, n: &NodeRef<'_>) -> bool {
     ns == n.namespace()
@@ -249,17 +357,11 @@ fn runs_below<'t>(n: &NodeRef<'t>) -> Vec<NodeRef<'t>> {
     out
 }
 
-/// The run properties of `run` as they were before any tracked change of them: the old properties inside its
-/// `w:rPrChange`, or its `w:rPr`.
-fn old_rpr(run: &NodeRef<'_>) -> Option<NodeId> {
-    let rpr = run.child_elements().find(|c| is_w(c, "rPr"))?;
-    match rpr.child_elements().find(|c| is_w(c, "rPrChange")) {
-        Some(change) => change
-            .child_elements()
-            .find(|c| is_w(c, "rPr"))
-            .map(|c| c.id()),
-        None => Some(rpr.id()),
-    }
+/// The run properties of `run`, with any pending change of them.
+fn rpr_of(run: &NodeRef<'_>) -> Option<NodeId> {
+    run.child_elements()
+        .find(|c| is_w(c, "rPr"))
+        .map(|c| c.id())
 }
 
 /// A new `w:fldChar` of the type `kind`.

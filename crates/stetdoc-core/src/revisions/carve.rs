@@ -164,7 +164,8 @@ impl Compiler<'_, '_> {
                 continue;
             }
             // A simple field's begin and end are the `w:fldSimple`, which holds the field's runs: those are the units, and the
-            // element stays around them, as it cannot stand in a `w:del` (design `revisions.md`, 3.6.3).
+            // element stays around them, as it cannot stand in a `w:del`. Once the deletion is written, a field it deleted whole
+            // becomes a complex field (`simple_unfold`, design `revisions.md`, 3.6.3).
             if matches!(item.kind, ItemKind::FieldBegin | ItemKind::FieldEnd)
                 && is_w(&tree.node_ref(item.node), "fldSimple")
             {

@@ -113,7 +113,18 @@ pub(super) fn merged(xml: &str) -> String {
 /// untracked bodies have the shape `want`, the rejected main part is the source's up to the cut runs (`merged`), and each
 /// document checks clean, the tracked one before it is reviewed too. Returns the tracked document before review.
 pub(super) fn every_way(body: &str, ops: &str, want: &str) -> Document {
-    let source = main_xml(&open(body));
+    every_way_rejecting_to(body, body, ops, want)
+}
+
+/// `every_way`, with the rejected main part `rejected`'s instead of the source's: a tracked deletion of a whole simple field
+/// writes it as a complex field, which rejecting gives back (design `revisions.md`, 3.6.3).
+pub(super) fn every_way_rejecting_to(
+    body: &str,
+    rejected: &str,
+    ops: &str,
+    want: &str,
+) -> Document {
+    let source = main_xml(&open(rejected));
     let mut tracked = open(body);
     edit(&mut tracked, ops, true).unwrap_or_else(|e| panic!("{ops} tracked: {e}"));
     assert!(tracked.check().ok, "{ops} tracked: {:?}", tracked.check());

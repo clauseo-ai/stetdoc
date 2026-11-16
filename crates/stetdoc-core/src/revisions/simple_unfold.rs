@@ -1,0 +1,286 @@
+//! A tracked deletion of a whole simple field, written as a complex field (issue #24, design `revisions.md`, 3.6.3).
+//!
+//! A `w:fldSimple` cannot stand in a `w:del`, so a tracked deletion first wraps the field's runs in a `w:del` inside the
+//! element. Word does not read that as a deleted field: its Accept All removes the runs and leaves an empty field. Word does
+//! delete a complex field whose runs are all in deletions, so once a tracked deletion has deleted all of a simple field's
+//! content, the element becomes the runs of a complex field, all deleted: begin, code, separate, the result as it was, end.
+//! Rejecting then gives back a complex field where the source had a `w:fldSimple`, with the same code, result and formatting.
+
+use super::cleanup::{is_attached, unwrap_element};
+use super::compiler::{Compiler, ParaView};
+use super::errors::internal;
+use super::insert_run::write_revision_attrs;
+use super::names::{XML_NS, is_w, wns};
+use super::tree_ops::{create_w, detach, insert, set_w_attr};
+use crate::api::error::StetError;
+use crate::wordml::{ItemKind, Mode, NodeId, Vis, simple_field_vis};
+use crate::xml::{NodeRef, SpanTree};
+use std::sync::Arc;
+
+impl Compiler<'_, '_> {
+    /// Writes as complex fields the simple fields of `fields` that the paragraph `p` showed in `Final` before the call and
+    /// that a tracked deletion of the call has now deleted whole. A simple field that holds another is deleted whole only once
+    /// the inner one is a complex field, so the passes repeat until one writes nothing.
+    pub(super) fn unfold_deleted_simple_fields(
+        &mut self,
+        p: &ParaView,
+        fields: &[NodeId],
+    ) -> Result<(), StetError> {
+        let mut left: Vec<NodeId> = fields
+            .iter()
+            .copied()
+            .filter(|f| {
+                p.map.items().iter().any(|i| {
+                    i.kind == ItemKind::FieldBegin && i.node == *f && i.vis.in_mode(Mode::Final)
+                })
+            })
+            .collect();
+        loop {
+            let before = left.len();
+            let mut kept = Vec::with_capacity(left.len());
+            for field in left {
+                let gone = {
+                    let tree = self.tree_ro(&p.part)?;
+                    let n = tree.node_ref(field);
+                    is_attached(tree, field)
+                        && is_w(&n, "fldSimple")
+                        && !simple_field_vis(&n, Vis::BOTH).in_mode(Mode::Final)
+                };
+                if gone {
+                    self.unfold(&p.part, field)?;
+                } else {
+                    kept.push(field);
+                }
+            }
+            if kept.len() == before {
+                return Ok(());
+            }
+            left = kept;
+        }
+    }
+
+    /// Replaces the `w:fldSimple` `field`, whose content is all deleted, by the runs of a complex field around that content.
+    /// The begin, code and separate runs go at the start of the first deletion inside the element when this call made it,
+    /// and the end run at the end of the last, so the field is one revision with its result; otherwise each gets a deletion
+    /// of its own. The begin carries the element's `w:fldLock`, `w:dirty` and `w:fldData`, the code is its `w:instr`, and the
+    /// field's runs take the formatting of the result's first run, the end that of its last, as it was before the call.
+    fn unfold(&mut self, part: &Arc<str>, field: NodeId) -> Result<(), StetError> {
+        let stamp = self
+            .stamp()
+            .cloned()
+            .ok_or_else(|| internal("a tracked deletion has no stamp"))?;
+        let (wns_uri, instr, lock, dirty, data, first_rpr, last_rpr, head, tail) = {
+            let tree = self.tree_ro(part)?;
+            let n = tree.node_ref(field);
+            let attr = |local: &str| {
+                n.attrs()
+                    .find(|a| a.local_name() == local && is_w_attr_ns(a.namespace(), &n))
+                    .map(|a| a.value().into_owned())
+            };
+            let runs = runs_below(&n);
+            let ours = |c: Option<NodeRef<'_>>| {
+                c.filter(|c| is_w(c, "del") && self.is_created_node(tree, c.id()))
+                    .map(|c| c.id())
+            };
+            let content: Vec<NodeRef<'_>> = n
+                .child_elements()
+                .filter(|c| !is_w(c, "fldData") && !super::carve::is_transparent(c))
+                .collect();
+            (
+                wns(tree),
+                attr("instr").unwrap_or_default(),
+                attr("fldLock"),
+                attr("dirty"),
+                n.child_elements()
+                    .filter(|c| is_w(c, "fldData"))
+                    .map(|c| c.id())
+                    .collect::<Vec<_>>(),
+                runs.first().and_then(|r| old_rpr(r)),
+                runs.last().and_then(|r| old_rpr(r)),
+                ours(content.first().cloned()),
+                ours(content.last().cloned()),
+            )
+        };
+        let tree = self.tx.part_mut(part)?;
+        let begin = field_char(tree, &wns_uri, "begin")?;
+        for (local, value) in [("fldLock", &lock), ("dirty", &dirty)] {
+            if let Some(v) = value {
+                set_w_attr(tree, begin, &wns_uri, local, v)?;
+            }
+        }
+        for d in data {
+            detach(tree, d)?;
+            insert(tree, begin, None, d)?;
+        }
+        let code = create_w(tree, &wns_uri, "delInstrText")?;
+        tree.edit().set_attr(code, XML_NS, "space", "preserve")?;
+        let text = tree.edit().create_text(&instr)?;
+        insert(tree, code, None, text)?;
+        let separate = field_char(tree, &wns_uri, "separate")?;
+        let end = field_char(tree, &wns_uri, "end")?;
+        let mut opening = Vec::new();
+        for c in [begin, code, separate] {
+            opening.push(field_run(tree, &wns_uri, first_rpr, c)?);
+        }
+        let closing = field_run(tree, &wns_uri, last_rpr, end)?;
+        let first_child = tree.node_ref(field).first_child().map(|c| c.id());
+        let open_del = match head {
+            Some(del) => del,
+            None => {
+                let del = create_w(tree, &wns_uri, "del")?;
+                insert(tree, field, first_child, del)?;
+                del
+            }
+        };
+        let open_before = tree.node_ref(open_del).first_child().map(|c| c.id());
+        for r in opening {
+            insert(tree, open_del, open_before, r)?;
+        }
+        let close_del = match tail {
+            Some(del) => del,
+            None => {
+                let del = create_w(tree, &wns_uri, "del")?;
+                insert(tree, field, None, del)?;
+                del
+            }
+        };
+        insert(tree, close_del, None, closing)?;
+        unwrap_element(tree, field)?;
+        // A deletion this call made just before or after the field takes the field's, as Word writes a deleted paragraph
+        // with its field in one `w:del`.
+        let opened = self.join_created(part, open_del, true)?;
+        let close_del = if close_del == open_del {
+            opened
+        } else {
+            close_del
+        };
+        self.join_created(part, close_del, false)?;
+        // The ids last, as `next_id` needs the transaction that the tree borrows.
+        let mut made: Vec<NodeId> = Vec::new();
+        for (new, del) in [(head.is_none(), open_del), (tail.is_none(), close_del)] {
+            if new && !made.contains(&del) {
+                made.push(del);
+            }
+        }
+        for del in made {
+            if !is_attached(self.tree_ro(part)?, del) {
+                continue;
+            }
+            let id = self.next_id()?;
+            let tree = self.tx.part_mut(part)?;
+            write_revision_attrs(tree, del, &wns_uri, id, &stamp)?;
+        }
+        Ok(())
+    }
+
+    /// Joins the deletion `del` to the one this call made just before it (`before`) or just after it, with only range
+    /// markers between, which go into the deletion too. Returns the deletion that holds `del`'s content now.
+    fn join_created(
+        &mut self,
+        part: &Arc<str>,
+        del: NodeId,
+        before: bool,
+    ) -> Result<NodeId, StetError> {
+        let (other, between) = {
+            let tree = self.tree_ro(part)?;
+            let step = |n: &NodeRef<'_>| -> Option<NodeId> {
+                if before {
+                    n.prev_sibling().map(|s| s.id())
+                } else {
+                    n.next_sibling().map(|s| s.id())
+                }
+            };
+            let mut between = Vec::new();
+            let mut cur = step(&tree.node_ref(del));
+            let mut other = None;
+            while let Some(c) = cur.map(|id| tree.node_ref(id)) {
+                if super::carve::is_transparent(&c) {
+                    between.push(c.id());
+                    cur = step(&c);
+                } else {
+                    if is_w(&c, "del") && self.is_created_node(tree, c.id()) {
+                        other = Some(c.id());
+                    }
+                    break;
+                }
+            }
+            (other, between)
+        };
+        let Some(other) = other else {
+            return Ok(del);
+        };
+        let tree = self.tx.part_mut(part)?;
+        let kids = super::tree_ops::child_ids(tree, del);
+        if before {
+            // `between` runs from `del` back to `other`.
+            for n in between.into_iter().rev().chain(kids) {
+                super::tree_ops::move_to(tree, n, other, None)?;
+            }
+        } else {
+            let first = tree.node_ref(other).first_child().map(|c| c.id());
+            for n in kids.into_iter().chain(between) {
+                super::tree_ops::move_to(tree, n, other, first)?;
+            }
+        }
+        detach(tree, del)?;
+        Ok(other)
+    }
+}
+
+/// True if an attribute of `n` in namespace `ns` is in the element's own namespace, as the `w:` attributes are.
+fn is_w_attr_ns(ns: &str, n: &NodeRef<'_>) -> bool {
+    ns == n.namespace()
+}
+
+/// The `w:r` elements below `n`, in document order, leaving out what a `w:fldData` holds.
+fn runs_below<'t>(n: &NodeRef<'t>) -> Vec<NodeRef<'t>> {
+    let mut out = Vec::new();
+    let mut stack: Vec<NodeRef<'t>> = n.child_elements().collect();
+    stack.reverse();
+    while let Some(c) = stack.pop() {
+        if is_w(&c, "r") {
+            out.push(c);
+        } else if !is_w(&c, "fldData") {
+            let mut kids: Vec<NodeRef<'t>> = c.child_elements().collect();
+            kids.reverse();
+            stack.extend(kids);
+        }
+    }
+    out
+}
+
+/// The run properties of `run` as they were before any tracked change of them: the old properties inside its
+/// `w:rPrChange`, or its `w:rPr`.
+fn old_rpr(run: &NodeRef<'_>) -> Option<NodeId> {
+    let rpr = run.child_elements().find(|c| is_w(c, "rPr"))?;
+    match rpr.child_elements().find(|c| is_w(c, "rPrChange")) {
+        Some(change) => change
+            .child_elements()
+            .find(|c| is_w(c, "rPr"))
+            .map(|c| c.id()),
+        None => Some(rpr.id()),
+    }
+}
+
+/// A new `w:fldChar` of the type `kind`.
+fn field_char(tree: &mut SpanTree, wns_uri: &str, kind: &str) -> Result<NodeId, StetError> {
+    let el = create_w(tree, wns_uri, "fldChar")?;
+    set_w_attr(tree, el, wns_uri, "fldCharType", kind)?;
+    Ok(el)
+}
+
+/// A new run holding `content`, with a copy of the properties `rpr` if there are any.
+fn field_run(
+    tree: &mut SpanTree,
+    wns_uri: &str,
+    rpr: Option<NodeId>,
+    content: NodeId,
+) -> Result<NodeId, StetError> {
+    let run = create_w(tree, wns_uri, "r")?;
+    if let Some(rpr) = rpr {
+        let copy = tree.edit().clone_subtree(rpr)?;
+        insert(tree, run, None, copy)?;
+    }
+    insert(tree, run, None, content)?;
+    Ok(run)
+}

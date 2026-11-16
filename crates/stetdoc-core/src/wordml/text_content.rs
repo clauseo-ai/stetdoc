@@ -423,13 +423,14 @@ impl<'t> Builder<'t> {
 }
 
 /// The modes a `w:fldSimple`'s begin and end are in. A `w:fldSimple` cannot stand in a revision (the schema puts no
-/// `w:fldSimple` in `w:ins` or `w:del`), so a tracked deletion of one wraps all of its content in `w:del` and leaves the
-/// element: a field whose content is all in deletions (or moves away) is gone in `Final`, and one whose content is all in
+/// `w:fldSimple` in `w:ins` or `w:del`), so a deletion of one can only wrap its content in `w:del` inside the element (stetdoc
+/// then writes it as a complex field, as Word does, but documents can hold the first shape): a field whose content is all in
+/// deletions (or moves away) is gone in `Final`, and one whose content is all in
 /// insertions (or moves in) is not there in `Original`, as accepting or rejecting removes it (`revisions/cleanup.rs`). The
 /// content is read through the hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo` elements that hold it, since
 /// a deletion inside one of those goes inside it. Range markers, `w:fldData` and a control's properties do not count. A field
 /// with no content, or with some outside a revision, is in the modes of what holds it.
-fn simple_field_vis(c: &NodeRef<'_>, vis: Vis) -> Vis {
+pub fn simple_field_vis(c: &NodeRef<'_>, vis: Vis) -> Vis {
     let mut gone: Option<u8> = None;
     let mut stack: Vec<NodeRef<'_>> = c.child_elements().collect();
     stack.reverse();

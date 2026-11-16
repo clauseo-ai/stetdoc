@@ -544,3 +544,25 @@ fn white_space_at_the_ends_of_a_w_t_without_xml_space_counts_as_word_shows_it() 
         s.xml
     );
 }
+
+#[test]
+fn the_laws_take_a_simple_field_and_its_complex_form_as_equal() {
+    // A tracked deletion of a whole simple field writes it as a complex field, which rejecting gives back (3.6.3).
+    let b = "<w:rPr><w:b/></w:rPr>";
+    let simple = format!(
+        r#"<w:p><w:fldSimple w:instr=" PAGE " w:fldLock="1"><w:fldData>AA</w:fldData><w:r>{b}<w:t>1</w:t></w:r></w:fldSimple></w:p>"#
+    );
+    let complex = format!(
+        concat!(
+            r#"<w:p><w:r>{b}<w:fldChar w:fldCharType="begin" w:fldLock="1"><w:fldData>AA</w:fldData></w:fldChar></w:r>"#,
+            r#"<w:r>{b}<w:instrText xml:space="preserve"> PAGE </w:instrText></w:r><w:r>{b}<w:fldChar w:fldCharType="separate"/></w:r>"#,
+            r#"<w:r>{b}<w:t>1</w:t></w:r><w:r>{b}<w:fldChar w:fldCharType="end"/></w:r></w:p>"#
+        ),
+        b = b
+    );
+    assert_eq!(normalized_body(&simple), normalized_body(&complex));
+    assert_ne!(
+        normalized_body(&simple),
+        normalized_body(&complex.replace(" PAGE ", " DATE "))
+    );
+}

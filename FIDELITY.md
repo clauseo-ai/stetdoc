@@ -54,6 +54,11 @@ Each of these was decided in a design, with the evidence there.
   replacement, deletion before insertion, as a careful reviewer would write it. See
   [revisions 2.5](docs/design/revisions.md#25-cleaning-the-word-diff).
 - **Moves are written as a deletion plus an insertion**, in edits and in compare. Writing true moves is the next release.
+- **A tracked deletion of a simple field writes it as a complex field** (normalized). A `w:fldSimple` cannot stand in a
+  `w:del`, and Word does not take a `w:fldSimple` whose runs are deleted inside it as a deleted field, so stetdoc writes
+  the field's begin, code, separate, result and end as runs, all deleted, as Word's own tracked deletion does. Rejecting
+  gives back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is
+  also what Word's Reject All gives. See [revisions 3.6.3](docs/design/revisions.md#36-other-places).
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).

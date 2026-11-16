@@ -357,7 +357,8 @@ pub(super) fn is_empty_link(n: &NodeRef<'_>) -> bool {
 
 /// True for a `w:fldSimple` that holds nothing but range markers, white space and its `w:fldData`. A removal that empties a
 /// simple field removes the field, as deleting all of a complex field's result deletes the field (`text::cover`): at once
-/// untracked, and tracked when the deletion inside it is accepted, since a `w:fldSimple` cannot stand in a `w:del`.
+/// untracked, and tracked when a deletion inside it is accepted. stetdoc writes a tracked deletion of a whole simple field as a
+/// complex field (`simple_unfold`), but a document can hold a `w:fldSimple` whose content is all in a `w:del`.
 pub(super) fn is_empty_simple_field(n: &NodeRef<'_>) -> bool {
     is_w(n, "fldSimple")
         && n.children().all(|c| {

@@ -1049,19 +1049,32 @@ and `end`, with `delInstrText` and `delText`. It writes an inserted field as `in
 - A `w:fldSimple` takes the same edits as a complex field (issue #24): an insertion at its start or its end goes before or
   after it, a range, paragraph or row deletion that holds it whole deletes it, and a range that holds it whole is replaced
   as above. Changing its result alone is `readonly_region`. It cannot sit inside a `w:del` (schema: `w:del` takes no
-  `w:fldSimple`), and converting it to a complex field would not reject to the source, so **a tracked deletion of a
-  `w:fldSimple` is a `w:del` around its runs, inside the element**: `w:fldSimple > w:del > w:r > w:delText`, the shape
-  a hyperlink's deletion has (3.6.6). `carve` passes the element and takes its runs as the units. The text model reads a
-  `w:fldSimple` whose content is all in deletions as a field that is gone in `Final` (`wordml.md` 4.4), so the view shows
-  the field deleted. Accepting the deletion removes the emptied element, with its `w:fldData` (`cleanup::prune_from`), as
-  an untracked deletion removes it at once (`unwrap_emptied_links`); rejecting it unwraps the `w:del` and gives the source
-  back byte for byte. A `w:fldSimple` with no content (issue #17) holds no run that a `w:del` could hold, so a tracked
+  `w:fldSimple`), so **a tracked deletion of a whole `w:fldSimple` writes it as a complex field whose runs are all
+  deleted**, as Word does. `carve` passes the element and takes its runs as the units, the deletion wraps them in a
+  `w:del` inside the element, and then `simple_unfold` replaces the element by the runs of a complex field around that
+  content: `w:fldChar` begin, the code from `w:instr` as `w:delInstrText`, separate, the result as it was, end. The begin
+  carries the element's `w:fldLock`, `w:dirty` and `w:fldData`. The field's runs take the properties of the result's first
+  run, the end those of its last, from before any pending change of them, so the field looks and updates the same. The new
+  runs join the deletion that holds the result, and that one joins a deletion this call wrote just before or after the
+  field, so a deleted paragraph with a field is one `w:del`, as Word writes it. Accepting removes the field; rejecting gives
+  back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is what
+  Word's Reject All gives too.
+
+  The first build (issue #24) kept the element, `w:fldSimple > w:del > w:r > w:delText`, so that rejecting gave the
+  source back byte for byte. Word for Mac 16.114 does not read that as a deleted field: its Accept All removed the text
+  and left an empty `{ PAGE }` field, in the next paragraph when the paragraph mark was deleted too. Word's own tracked
+  deletion of a paragraph that holds a `w:fldSimple` writes the complex form, all in one `w:del`, and its Reject All gives
+  back a complex field. Word also writes every `w:fldSimple` as a complex field when it saves. So law R2 compares the two
+  forms as equal: `normalize` writes every `w:fldSimple` as the runs of a complex field, by the same rule (7.1). The text
+  model still reads a `w:fldSimple` whose content is all in deletions as a field that is gone in `Final` (`wordml.md` 4.4),
+  and accepting such a deletion removes the emptied element with its `w:fldData` (`cleanup::prune_from`), for the files
+  that hold that shape. An untracked deletion removes the element at once (`unwrap_emptied_links`). A `w:fldSimple` with
+  no content (issue #17) holds no run that a `w:del` could hold, so a tracked
   deletion of a range or a paragraph that holds one is `readonly_region`, and the message says to delete it untracked.
   Untracked, the empty field goes with the range or the paragraph (`text_apply::drop_empty_simple_fields`).
-- A tracked deletion of text around a `w:fldSimple` is several `w:del` elements, one before the field, one inside it and
-  one after it, each with its own id, and `view` lists each. One element cannot be written: a `w:del` cannot hold the
-  `w:fldSimple`, and an id names one element. A `w:fldSimple` whose result is inside a hyperlink, control or smart tag
-  gets its `w:del` inside that, and the text model reads through those wrappers, so `Final` drops the field as accept does.
+- A `w:fldSimple` whose result is inside a hyperlink, control or smart tag gets its `w:del` inside that, and the complex
+  field's begin and end runs get a `w:del` of their own around the wrapper. A field that holds another simple field is
+  written as a complex field once the inner one is, so both become complex fields.
 - A range that is inside the result of a field is refused, as the text model flags results read-only.
 - Rejecting an inserted field and accepting a deleted one remove the field. Everything else leaves it.
 
@@ -1572,7 +1585,9 @@ For a document D, a batch B (a list of compiler calls with one stamp) and the do
      created (W11);
   5. renumber `w:id` by document order and compare author and date as written;
   6. sort attributes, drop white space between elements, and compare namespaces by URI;
-  7. leave the order of elements alone (it carries meaning).
+  7. leave the order of elements alone (it carries meaning);
+  8. write every `w:fldSimple` as the runs of a complex field, by the rule of 3.6.3, since a tracked deletion of a whole
+     simple field writes it that way and rejecting gives back the complex field (issue #24).
   `normalize` is a function of the XML of the story parts that a batch can touch. It is written once, in the
   testkit, and the laws call it.
 

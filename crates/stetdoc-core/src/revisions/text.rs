@@ -103,7 +103,8 @@ impl Compiler<'_, '_> {
 
     /// Removes the hyperlinks and simple fields of the paragraph that held text before the call and hold none now. Untracked, a
     /// deletion of all of a link's text, or of a simple field's result, removes its runs, and the element would be left empty.
-    /// Tracked, the element holds the `w:del` until the deletion is accepted, and accepting it removes the element
+    /// Tracked, a simple field whose content the call deleted whole becomes a complex field, all deleted, as Word writes it
+    /// (`unfold_deleted_simple_fields`), and a link holds the `w:del` until the deletion is accepted, which removes the link
     /// (`cleanup::prune_from`).
     pub(super) fn unwrap_emptied_links(&mut self, p: &ParaView) -> Result<(), StetError> {
         let mut links: Vec<crate::wordml::NodeId> = Vec::new();
@@ -118,6 +119,9 @@ impl Compiler<'_, '_> {
         }
         if links.is_empty() {
             return Ok(());
+        }
+        if self.tracked() {
+            self.unfold_deleted_simple_fields(p, &links)?;
         }
         let tree = self.tx.part_mut(&p.part)?;
         super::cleanup::unwrap_emptied_links(tree, &links)

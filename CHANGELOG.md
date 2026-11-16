@@ -72,9 +72,11 @@ All notable changes to stetdoc are recorded here. The format follows
 - A simple field (`w:fldSimple`) was read-only beyond its result. An insertion right before or after it, a replace
   starting right after it, a range, paragraph or row deletion over it, and a format of its paragraph were refused as
   `readonly_region`, though a complex field took them all. A simple field now takes the same edits. A tracked deletion
-  marks its runs deleted inside the element, accepting it removes the field, and changing only its result is still
-  refused. A simple field with no content goes with an untracked deletion and is refused in a tracked one, since there is
-  no run to mark (#24).
+  writes the field as a complex field whose runs are all deleted, as Word does, since Word does not take a simple field
+  whose runs are deleted inside it as deleted: its Accept All left an empty field behind. Accepting removes the field,
+  rejecting gives back a complex field with the same code and result, and changing only its result is still refused. A
+  simple field with no content goes with an untracked deletion and is refused in a tracked one, since there is no run to
+  mark (#24).
 - A `delete` of a whole paragraph emptied it and kept it whenever no paragraph followed it in its container, so the last
   paragraph of every cell and of the body, and every paragraph before a table, stayed behind, and the receipt said only
   "deletion #0". Such a paragraph now goes whenever its container does not need it, tracked or not. One that is needed,

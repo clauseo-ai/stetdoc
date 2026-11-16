@@ -26,13 +26,6 @@ pub(crate) struct Compiler<'t, 's> {
     call_start: Range<u32>,
     /// True once a call has deleted a footnote or endnote reference, since `remove_notes_of_dropped_references` last looked.
     pub(super) dropped_reference: bool,
-    /// The properties and mark run properties that a container's last paragraph had before a deletion joined it with the
-    /// paragraph before it and aligned them, by element, for an insertion before it (`blocks_delete_last.rs`).
-    pub(super) before_join: Vec<(
-        NodeId,
-        Vec<super::types::PropElement>,
-        Vec<super::types::PropElement>,
-    )>,
 }
 
 /// A paragraph read for an edit: everything the primitives need, owned, so that the transaction can
@@ -63,7 +56,6 @@ impl<'t, 's> Compiler<'t, 's> {
             warnings: Vec::new(),
             call_start: 0..0,
             dropped_reference: false,
-            before_join: Vec::new(),
         })
     }
 

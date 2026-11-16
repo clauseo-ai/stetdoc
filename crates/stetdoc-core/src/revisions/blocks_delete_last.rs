@@ -4,7 +4,7 @@
 //! with the mark of the paragraph before it, which is Word's own gesture: a tracked merge of the two, with the alignment
 //! that makes the survivor keep the earlier paragraph's properties under either rule of 3.2.4.
 
-use super::blocks::{mark_of, prop_element_of};
+use super::blocks::prop_element_of;
 use super::compiler::Compiler;
 use super::names::is_w;
 use super::names::is_word_ns;
@@ -49,17 +49,13 @@ impl Compiler<'_, '_> {
             return keep(self, KeptReason::EmptyBefore);
         }
         // The mark's run properties are part of what accepting keeps of the last paragraph: they are the earlier one's.
-        let (marks, base) = {
+        let marks = {
             let tree = self.tree_ro(&part)?;
-            (
-                (mark_base(tree, prev), mark_base(tree, block.node())),
-                super::blocks_delete::copied_base(tree, block.node()),
-            )
+            (mark_base(tree, prev), mark_base(tree, block.node()))
         };
         if let Some(cause) = self.join_blocker(&part, prev, block.node(), marks.0 != marks.1)? {
             return keep(self, KeptReason::CannotJoin(cause));
         }
-        self.before_join.push((block.node(), base, marks.1.clone()));
         match self.merge_inner(&first, block) {
             Ok(()) => {}
             Err(e) if matches!(e.code(), ErrorCode::ReadonlyRegion | ErrorCode::CrossBlock) => {
@@ -179,191 +175,6 @@ impl Compiler<'_, '_> {
             None
         })
     }
-
-    /// True if `anchor` is an emptied paragraph that the paragraph before it joins on to through a mark this batch deleted:
-    /// the last paragraph of a container that a tracked delete left. An insertion before it goes after it instead, since
-    /// before it, it would take the earlier paragraph's text.
-    pub(super) fn takes_a_join(&self, anchor: &BlockKey) -> Result<bool, StetError> {
-        let joins = {
-            let tree = self.tree_ro(anchor.part())?;
-            if !is_w(&tree.node_ref(anchor.node()), "p") {
-                return Ok(false);
-            }
-            super::resolve_mark::previous_paragraph(tree, anchor.node()).is_some_and(|prev| {
-                mark_of(tree, prev)
-                    .del
-                    .is_some_and(|d| self.own_deletion(tree, d))
-            })
-        };
-        Ok(joins && self.paragraph(anchor)?.map.len(Mode::Final) == 0)
-    }
-
-    /// After an insertion before an emptied last paragraph `anchor`, which went after it as a Y: the new paragraph holds the
-    /// last paragraph's mark and properties, which the join aligned to the earlier paragraph's. It takes the properties and
-    /// mark run properties the last paragraph had before the join, as an insertion before it did in 0.9.3, and a change of
-    /// this batch that is left with nothing to change goes.
-    pub(super) fn restore_original_props(&mut self, anchor: &BlockKey) -> Result<(), StetError> {
-        let part = anchor.part().clone();
-        let Some(new) = self.fx.new_blocks.first().map(|k| k.node()) else {
-            return Ok(());
-        };
-        let Some((_, base, mark)) = self
-            .before_join
-            .iter()
-            .find(|(n, ..)| *n == anchor.node())
-            .cloned()
-        else {
-            return Ok(());
-        };
-        let (now_base, now_mark) = {
-            let tree = self.tree_ro(&part)?;
-            (
-                super::blocks_delete::copied_base(tree, new),
-                mark_base(tree, new),
-            )
-        };
-        // The new text took the aligned mark's run properties, as a paragraph made by Enter does; before the last paragraph
-        // it has none, as in 0.9.3.
-        if now_mark != mark && !now_mark.is_empty() {
-            let runs: Vec<NodeId> = {
-                let tree = self.tree_ro(&part)?;
-                tree.node_ref(new)
-                    .child_elements()
-                    .filter(|c| is_w(c, "ins") && self.is_created_node(tree, c.id()))
-                    .flat_map(|ins| {
-                        ins.child_elements()
-                            .filter(|r| is_w(r, "r"))
-                            .map(|r| r.id())
-                            .collect::<Vec<_>>()
-                    })
-                    .filter_map(|r| {
-                        let rpr = tree.node_ref(r).child_elements().find(|c| is_w(c, "rPr"))?;
-                        let props: Vec<PropElement> =
-                            rpr.child_elements().map(|e| prop_element_of(&e)).collect();
-                        (props == now_mark).then_some(rpr.id())
-                    })
-                    .collect()
-            };
-            let tree = self.tx.part_mut(&part)?;
-            for rpr in runs {
-                super::tree_ops::detach(tree, rpr)?;
-            }
-        }
-        let direct = self.own_mark(&part, new)?;
-        for (path, want, now) in [
-            (&["pPr"][..], base, now_base),
-            (&["pPr", "rPr"][..], mark, now_mark),
-        ] {
-            if want == now {
-                continue;
-            }
-            let clear = now
-                .iter()
-                .filter(|c| !want.iter().any(|f| f.local == c.local && f.ns == c.ns))
-                .map(|c| (c.ns.clone(), c.local.clone()))
-                .collect();
-            let edit = PropEdit { set: want, clear };
-            self.edit_container(&part, new, path, direct, &edit)?;
-        }
-        self.drop_noop_change(&part, new, &["pPr"], "pPrChange")?;
-        self.drop_noop_change(&part, new, &["pPr", "rPr"], "rPrChange")
-    }
-
-    /// Removes the change of this batch in the properties at `path` of `owner` when its snapshot is what the properties are.
-    fn drop_noop_change(
-        &mut self,
-        part: &std::sync::Arc<str>,
-        owner: NodeId,
-        path: &[&str],
-        change: &str,
-    ) -> Result<(), StetError> {
-        let found = {
-            let tree = self.tree_ro(part)?;
-            let Some(container) = find_chain(tree, owner, path) else {
-                return Ok(());
-            };
-            let node = tree.node_ref(container);
-            let Some(c) = node
-                .child_elements()
-                .find(|c| is_w(c, change))
-                .filter(|c| self.is_created_node(tree, c.id()))
-            else {
-                return Ok(());
-            };
-            let props = |n: &crate::xml::NodeRef<'_>| -> Vec<PropElement> {
-                n.child_elements()
-                    .filter(|e| {
-                        !(is_word_ns(e.namespace())
-                            && (is_change_tracking(e.local_name())
-                                || matches!(
-                                    e.local_name(),
-                                    "ins" | "del" | "moveFrom" | "moveTo" | "rPr" | "sectPr"
-                                ) && !(path.len() == 2 && e.local_name() == "rPr")))
-                    })
-                    .map(|e| prop_element_of(&e))
-                    .collect()
-            };
-            let snapshot = c
-                .child_elements()
-                .next()
-                .map(|s| props(&s))
-                .unwrap_or_default();
-            (snapshot == props(&node)).then_some(c.id())
-        };
-        if let Some(c) = found {
-            super::tree_ops::detach(self.tx.part_mut(part)?, c)?;
-        }
-        Ok(())
-    }
-
-    /// True if the mark deletion `del` is the author's own, made by this batch or an earlier one.
-    fn own_deletion(&self, tree: &SpanTree, del: NodeId) -> bool {
-        self.stamp().is_some_and(|s| {
-            crate::wordml::revision_at(&tree.node_ref(del))
-                .is_some_and(|r| r.author.as_deref() == Some(s.author()))
-        })
-    }
-
-    /// The last paragraph of the container from `anchor` on: an insertion before an emptied last paragraph goes after it, and
-    /// after the paragraphs that earlier such insertions put there, so that they keep their order.
-    pub(super) fn container_end(&self, anchor: &BlockKey) -> Result<BlockKey, StetError> {
-        let tree = self.tree_ro(anchor.part())?;
-        let mut cur = anchor.node();
-        while let Some(n) = next_paragraph(tree, cur) {
-            cur = n;
-        }
-        Ok(BlockKey::new(anchor.part().clone(), cur))
-    }
-
-    /// The paragraph that a paragraph with live text and a mark this batch deleted, a pending merge, joins into, which is where an
-    /// insertion after it goes: in the Final view the two read as one, and a new paragraph right after the first would take
-    /// its text. `None` when `anchor` is not such a paragraph.
-    pub(super) fn join_end(&self, anchor: &BlockKey) -> Result<Option<BlockKey>, StetError> {
-        let start = anchor.node();
-        let end = {
-            let tree = self.tree_ro(anchor.part())?;
-            // Only a deletion of the author's own, of this batch or an earlier one: after another author's deleted mark the
-            // new paragraph follows the anchor directly, as it did in 0.9.3, and accepting joins the anchor into it.
-            let made_here = mark_of(tree, start)
-                .del
-                .is_some_and(|d| self.own_deletion(tree, d));
-            if !is_w(&tree.node_ref(start), "p") || !made_here {
-                return Ok(None);
-            }
-            let mut cur = start;
-            while mark_of(tree, cur).is_deleted() {
-                match next_paragraph(tree, cur) {
-                    Some(n) => cur = n,
-                    None => break,
-                }
-            }
-            cur
-        };
-        if end == start || self.paragraph(anchor)?.map.len(Mode::Final) == 0 {
-            return Ok(None);
-        }
-        Ok(Some(BlockKey::new(anchor.part().clone(), end)))
-    }
 }
 
 /// The cause of a refused merge, in the words of a receipt, from the refusal's message.
@@ -380,7 +191,7 @@ fn cause_of(message: &str) -> &'static str {
 }
 
 /// The run properties of a paragraph's mark, without its revisions and change tracking.
-fn mark_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
+pub(super) fn mark_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
     fn strip(mut e: PropElement) -> PropElement {
         e.children = e
             .children

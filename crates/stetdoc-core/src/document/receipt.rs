@@ -302,7 +302,7 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
             added_count,
             revisions: written
                 .iter()
-                .filter(|w| w.op == Some(index))
+                .filter(|w| w.ops.contains(&index))
                 .map(|w| changes::entry(&w.info))
                 .collect(),
             removed_own,

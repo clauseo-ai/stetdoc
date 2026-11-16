@@ -132,11 +132,6 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
         match (op.changed, tracked) {
             (false, _) => "no change".to_string(),
             (true, false) => "applied directly".to_string(),
-            // A new paragraph at a container's end that follows one an earlier operation made extends that paragraph
-            // insertion, which lists it.
-            (true, true) if !op.added.is_empty() => {
-                "its new paragraph extends the paragraph insertion of an earlier operation, listed there".to_string()
-            }
             (true, true) => "its revisions were resolved by a later operation".to_string(),
         }
     } else {

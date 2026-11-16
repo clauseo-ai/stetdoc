@@ -63,6 +63,7 @@ mod blocks;
 mod blocks_delete;
 mod blocks_delete_last;
 mod blocks_insert;
+mod blocks_insert_joined;
 pub(crate) mod canonical;
 mod carve;
 pub(crate) mod changes;

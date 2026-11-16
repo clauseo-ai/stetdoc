@@ -251,6 +251,12 @@ pub(super) fn live_after(tree: &SpanTree, para: NodeId) -> bool {
     matches!(side(tree, para, true), Side::Paragraph(_))
 }
 
+/// True if nothing but blocks that are passed over (range markers, a container's properties) follows `para` among its
+/// siblings: it is the last block of its container.
+pub(super) fn ends_container(tree: &SpanTree, para: NodeId) -> bool {
+    side(tree, para, true) == Side::Nothing && after(tree, para) == (false, None)
+}
+
 /// The last paragraph of the container after `para`, when the paragraphs between are joined on to it through deleted marks:
 /// the paragraph a pending merge of `para` ends in, when that is the container's end.
 pub(super) fn end_joined_from(tree: &SpanTree, para: NodeId) -> Option<NodeId> {

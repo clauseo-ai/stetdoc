@@ -282,6 +282,17 @@ fn two_insertions_before_the_deleted_last_paragraph_keep_their_order() {
         "{}",
         receipt.text
     );
+    // Each insertion lists the paragraph insertion its revisions are in.
+    for line in ["1 insert", "2 insert"] {
+        assert!(
+            receipt
+                .text
+                .lines()
+                .any(|l| l.starts_with(line) && l.contains("paragraph insertion #")),
+            "{}",
+            receipt.text
+        );
+    }
     assert_eq!(
         accepted(&source, ops),
         format!(
@@ -317,23 +328,28 @@ fn an_insertion_before_the_deleted_last_paragraph_has_its_original_mark_and_own_
     let italic = r#"<w:pPr><w:rPr><w:i/></w:rPr></w:pPr>"#;
     let ops = r#"{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#;
     let source = format!("{}{}", para("Lead.", bold), para("Gone.", italic));
+    // As in 0.9.3, its text has the mark's run properties too.
+    let new = r#"<w:p><w:pPr><w:rPr><w:i/></w:rPr></w:pPr><w:r><w:rPr><w:i/></w:rPr><w:t xml:space="preserve">New.</w:t></w:r></w:p>"#;
     assert_eq!(
         accepted(&source, ops),
-        format!("{}{}", para("Lead.", bold), para("New.", italic))
+        format!("{}{new}", para("Lead.", bold))
     );
-    // The author's own pending change from an earlier batch is what the paragraph has, and the new one has it too.
+    // The values come from the join's changes in the file. When the last paragraph already had the author's own pending
+    // change from an earlier batch, the join's alignment is folded into it, and the change is not the join's (its date is
+    // older), so it stays, and the new paragraph has the aligned properties, the earlier paragraph's (a known difference
+    // from 0.9.3, which gave the last paragraph's).
     let own = r#"<w:pPr><w:ind w:left="720"/><w:pPrChange w:id="9" w:author="Clauseo" w:date="2020-01-01T00:00:00Z"><w:pPr/></w:pPrChange></w:pPr>"#;
     let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", own));
     assert_eq!(
         accepted(&source, ops),
-        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
+        format!("{}{}", para("Lead.", CENTRED), para("New.", CENTRED))
     );
-    // So does a change of the same batch.
+    // A change of the same batch has the join's stamp, so the new paragraph has what the paragraph had before it.
     let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", ""));
     let ops = r#"{"op":"paragraph","ref":"p2","indent_left":"0.5in"},{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#;
     assert_eq!(
         accepted(&source, ops),
-        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
+        format!("{}{}", para("Lead.", CENTRED), para("New.", ""))
     );
 }
 
@@ -354,4 +370,22 @@ fn an_insertion_in_a_later_batch_beside_the_deleted_last_paragraph_stays_a_parag
             "{insert}"
         );
     }
+}
+
+#[test]
+fn another_authors_change_on_the_last_mark_is_not_taken_for_the_joins_alignment() {
+    // The soak's case (document 0, sequence 322): the marks' run properties are equal, so the join carries nothing, and the
+    // other author's change on the last mark stays with the paragraph that an insertion before it leaves. Reject all gives
+    // back the source.
+    let other = r#"<w:rPrChange w:id="9" w:author="Other" w:date="2020-01-01T00:00:00Z"><w:rPr/></w:rPrChange>"#;
+    let bold = r#"<w:pPr><w:rPr><w:b/></w:rPr></w:pPr>"#;
+    let changed = format!(r#"<w:pPr><w:rPr><w:b/>{other}</w:rPr></w:pPr>"#);
+    let source = format!("{}{}", para("Lead.", bold), para("Gone.", &changed));
+    let mut doc = open(&source);
+    edit(
+        &mut doc,
+        r#"{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#,
+    );
+    edit(&mut doc, r#"{"op":"reject","author":"Clauseo"}"#);
+    assert_eq!(body(&doc), source);
 }

@@ -131,11 +131,12 @@ impl Compiler<'_, '_> {
         spec: &NewParagraph,
     ) -> Result<Effect, StetError> {
         self.begin();
+        // Before a joined end the new paragraph takes the last paragraph's own properties (after it, the alignment's).
         let before_taker = place == Place::Before && self.takes_a_join(anchor).unwrap_or(false);
         let done = self
             .insert_block_inner(run, anchor, place, spec)
             .and_then(|()| match before_taker {
-                true => self.restore_original_props(anchor),
+                true => self.restore_original_props(anchor.part()),
                 false => Ok(()),
             });
         match done {

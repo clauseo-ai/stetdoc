@@ -223,3 +223,50 @@ fn a_range_that_ends_at_the_start_of_an_empty_last_paragraph() {
     edit(&mut doc, r#"{"op":"accept","all":true}"#);
     assert_eq!(body(&doc), format!("{}{}", para("A", ""), para("B", "")));
 }
+
+#[test]
+fn another_authors_change_to_a_mark_keeps_the_last_paragraph_and_says_so() {
+    let other = r#"<w:rPrChange w:id="9" w:author="Other" w:date="2020-01-01T00:00:00Z"><w:rPr/></w:rPrChange>"#;
+    let bold = r#"<w:pPr><w:rPr><w:b/></w:rPr></w:pPr>"#;
+    let changed = format!(r#"<w:pPr><w:rPr><w:i/>{other}</w:rPr></w:pPr>"#);
+    let two = format!("{}{}", para("Lead.", bold), para("Gone.", &changed));
+    let cell = format!(
+        r#"<w:tbl><w:tblPr/><w:tblGrid><w:gridCol w:w="2400"/></w:tblGrid><w:tr><w:tc>{two}</w:tc></w:tr></w:tbl>{}"#,
+        para("After.", "")
+    );
+    for source in [two.clone(), cell] {
+        let mut doc = open(&source);
+        let receipt = edit(&mut doc, r#"{"op":"delete","ref":"p2"}"#);
+        assert!(
+            receipt
+                .warnings
+                .iter()
+                .any(|w| w.code == WarningCode::KeptRequiredParagraph
+                    && w.message.contains(
+                        "its paragraph mark has another author's pending change to its formatting"
+                    )),
+            "{}",
+            receipt.text
+        );
+        assert!(body(&doc).contains(other), "{}", body(&doc));
+    }
+}
+
+#[test]
+fn an_insertion_before_the_deleted_last_paragraph_has_its_original_properties() {
+    // As in 0.9.3: the new paragraph has the properties of the paragraph it was inserted before, and the paragraph before
+    // keeps its own.
+    let source = format!("{}{}", para("Lead.", CENTRED), para("Gone.", INDENTED));
+    let ops = r#"{"op":"delete","ref":"p2"},{"op":"insert","ref":"p2","place":"before","paragraphs":["New."]}"#;
+    assert_eq!(
+        accepted(&source, ops),
+        format!("{}{}", para("Lead.", CENTRED), para("New.", INDENTED))
+    );
+    let mut doc = open(&source);
+    edit(&mut doc, ops);
+    edit(&mut doc, r#"{"op":"reject","all":true}"#);
+    assert_eq!(
+        body(&doc).replace("</w:t></w:r><w:r><w:t xml:space=\"preserve\">", ""),
+        source
+    );
+}

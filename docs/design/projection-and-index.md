@@ -526,8 +526,10 @@ staged state of a dry run. The steps:
    In `Final`, a paragraph that shows nothing and keeps its mark, after paragraphs that join on to it through deleted
    marks, the first of them with text and the rest with none, is not shown, nor are the empty ones between, and the one
    with text does not get `{joins-next}`: they read as that one, as accept all leaves them. A tracked delete of a
-   container's last paragraph writes this (`revisions.md` 3.2.2). With no paragraph with text among them, the view is as
-   before (`StoryCx::takes_joined`).
+   container's last paragraph writes this (`revisions.md` 3.2.2), and so does a Word document whose deletion runs from
+   the middle of one paragraph through the whole of the next: there too the emptied paragraph is not shown, as accept
+   leaves it, and the refs stay right, since the paragraph with text is the one accept keeps. With no paragraph with
+   text among them, the view is as before (`StoryCx::takes_joined`).
 5. **Items to inlines.** One pass over the items, each with its chain of wrappers, outermost first: the tracked
    changes (only in `Redline`: `Final` and `Original` are read without change markup), the external link, the
    inline content control and, innermost, the hidden or looks-hidden run. Neighbours that share a prefix of the

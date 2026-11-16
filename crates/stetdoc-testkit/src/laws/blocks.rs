@@ -260,7 +260,7 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
                             .get("to")
                             .and_then(Value::as_str)
                             .and_then(|r| facts.paras.iter().find(|p| p.r == r))
-                            .map(|p| p.text.len() as u64);
+                            .map(|p| p.text.len() as u64); // `text` is a `Vec<char>`: characters, as offsets count
                         let ends = at("end").is_none() || at("end") == to_len;
                         let starts = at("start").is_none_or(|s| s == 0);
                         if whole || ends && starts && v.get("find").is_none() {
@@ -459,6 +459,22 @@ mod tests {
             .saved;
         per_block(&bytes, &after, &facts, &g).unwrap();
         assert!(touched(&facts, &g).tops.contains("p3"));
+        // Offsets count characters: a last paragraph of non-ASCII text taken to its end is taken whole.
+        let body = format!("{}{}{}", para("S"), para("s"), para("Ünïcödé"));
+        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+        let wide = Facts::of(&Document::open(bytes, &OpenOptions::default()).unwrap()).unwrap();
+        let op = r#"{"op":"delete","ref":"p2","to":"p3","start":0,"end":7}"#;
+        assert!(
+            touched(&wide, &generated(&[("delete", op)], true))
+                .tops
+                .contains("p1")
+        );
+        let op = r#"{"op":"delete","ref":"p2","to":"p3","start":0,"end":6}"#;
+        assert!(
+            !touched(&wide, &generated(&[("delete", op)], true))
+                .tops
+                .contains("p1")
+        );
         // From inside the first paragraph, its text takes the last one's place, and the one before is not touched.
         let op = r#"{"op":"delete","ref":"p4","to":"p5","start":1,"end":0}"#;
         assert!(

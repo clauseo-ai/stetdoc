@@ -128,8 +128,8 @@ impl Compiler<'_, '_> {
         Ok(false)
     }
 
-    /// Why `prev` and `last` cannot be merged, in the words of a receipt, for the causes the merge would refuse with: another
-    /// author's pending change to the properties of either.
+    /// Why `prev` and `last` cannot be merged, in the words of a receipt, for the causes the merge, or the carrying of the
+    /// mark's run properties, would refuse with: another author's pending change to the properties or the mark of either.
     fn join_blocker(
         &self,
         part: &std::sync::Arc<str>,
@@ -150,7 +150,23 @@ impl Compiler<'_, '_> {
                 .and_then(|c| crate::wordml::revision_at(&c))
                 .is_some_and(|r| r.author.as_deref() != Some(stamp.author()))
         };
-        Ok(if foreign(last) {
+        let foreign_mark = |para: NodeId| {
+            find_chain(tree, para, &["pPr", "rPr"])
+                .and_then(|rpr| {
+                    tree.node_ref(rpr)
+                        .child_elements()
+                        .find(|c| is_w(c, "rPrChange"))
+                })
+                .and_then(|c| crate::wordml::revision_at(&c))
+                .is_some_and(|r| r.author.as_deref() != Some(stamp.author()))
+        };
+        Ok(if foreign_mark(last) {
+            Some("its paragraph mark has another author's pending change to its formatting")
+        } else if foreign_mark(prev) {
+            Some(
+                "the mark of the paragraph before it has another author's pending change to its formatting",
+            )
+        } else if foreign(last) {
             Some("it has another author's pending change to its properties")
         } else if foreign(prev) {
             Some("the paragraph before it has another author's pending change to its properties")
@@ -175,6 +191,54 @@ impl Compiler<'_, '_> {
             })
         };
         Ok(joins && self.paragraph(anchor)?.map.len(Mode::Final) == 0)
+    }
+
+    /// After an insertion before an emptied last paragraph, which went after it as a Y: the new paragraph holds the last
+    /// paragraph's mark and properties, which the join aligned to the earlier paragraph's with a change of this batch. It
+    /// takes the properties the last paragraph had before, which the change holds, as an insertion before it did in 0.9.3.
+    pub(super) fn restore_original_props(
+        &mut self,
+        part: &std::sync::Arc<str>,
+    ) -> Result<(), StetError> {
+        let Some(new) = self.fx.new_blocks.first().map(|k| k.node()) else {
+            return Ok(());
+        };
+        let (ppr, change) = {
+            let tree = self.tree_ro(part)?;
+            let Some(ppr) = find_chain(tree, new, &["pPr"]) else {
+                return Ok(());
+            };
+            let change = tree
+                .node_ref(ppr)
+                .child_elements()
+                .find(|c| is_w(c, "pPrChange"))
+                .map(|c| c.id())
+                .filter(|c| self.is_created_node(tree, *c));
+            (ppr, change)
+        };
+        let Some(change) = change else { return Ok(()) };
+        let tree = self.tx.part_mut(part)?;
+        let snapshot = tree
+            .node_ref(change)
+            .child_elements()
+            .find(|c| is_w(c, "pPr"))
+            .map(|c| c.child_elements().map(|e| e.id()).collect::<Vec<_>>())
+            .unwrap_or_default();
+        let (base, kept): (Vec<NodeId>, Vec<NodeId>) = tree
+            .node_ref(ppr)
+            .child_elements()
+            .filter(|c| c.id() != change)
+            .map(|c| c.id())
+            .partition(|c| !matches!(tree.node_ref(*c).local_name(), "rPr" | "sectPr"));
+        for n in base {
+            super::tree_ops::detach(tree, n)?;
+        }
+        let first_kept = kept.first().copied();
+        for n in snapshot {
+            super::tree_ops::move_to(tree, n, ppr, first_kept.or(Some(change)))?;
+        }
+        super::tree_ops::detach(tree, change)?;
+        Ok(())
     }
 
     /// The paragraph that a paragraph with live text and a mark this batch deleted, a pending merge, joins into, which is where an

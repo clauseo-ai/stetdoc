@@ -42,6 +42,12 @@ All notable changes to stetdoc are recorded here. The format follows
 - The hint of a `limit_exceeded` error named the open options, which the command line and MCP do not have. Those surfaces
   now say to use a smaller input, and that a Node or Rust caller can raise the limit in its open options. A batch limit
   keeps its own hint, which says to apply the batch in parts.
+- `compare` ignored three kinds of difference without a word. A hyperlink whose address changed and whose text did not
+  now shows as the old link deleted next to the new one inserted. An edited comment is now tracked inside the comment,
+  so Reject All gives back the original's text. A change of table, row or cell properties is now a `w:tblPrChange`,
+  `w:trPrChange` or `w:tcPrChange`, counted in the receipt's `counts.props`. A comment whose author or initials
+  changed has no tracked form, so the new warning `compare_not_tracked` names it. A deleted hyperlink keeps its
+  address now, through a new relationship when the revised document has none for it (decision 0022).
 - An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
   over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in
   its part, referenced by nothing, while the receipt and `check` said nothing. The note now goes with its reference, as

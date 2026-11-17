@@ -74,6 +74,17 @@ impl<'s> ImportWriter<'_, 's> {
         self.tx.part_mut(name)
     }
 
+    /// Adds a relationship from `source` to an external target (a hyperlink's address that the document has no relationship
+    /// for) and returns its id. It names no part, so nothing is declared.
+    pub(crate) fn add_external_relationship(
+        &mut self,
+        source: &str,
+        rel_type: &str,
+        target: &str,
+    ) -> Result<String, StetError> {
+        self.tx.add_relationship(source, rel_type, target)
+    }
+
     /// Adds an empty part that is not a story (a style sheet or a numbering part the document lacks), which declares nothing
     /// because it holds nothing of the other package.
     pub(crate) fn add_empty_part(&mut self, new: NewPart<'_>) -> Result<Option<String>, StetError> {

@@ -16,7 +16,7 @@ use super::outcome::Effect;
 use super::redline_types::{ParaRedline, RedlineEdit, RunSnapshot};
 use super::redline_wrap::{Rev, wrappable};
 use super::text::{cover, final_starts};
-use super::tree_ops::{insert, parent_of};
+use super::tree_ops::{child_ids, detach, insert, parent_of};
 use crate::api::error::StetError;
 use crate::wordml::{BlockKey, Mode, NodeId};
 use std::sync::Arc;
@@ -381,15 +381,36 @@ impl Compiler<'_, '_> {
                 group.iter().all(|&n| is_w(&tree.node_ref(n), "r"))
             };
             if is_runs {
-                // the runs go into the tree in front of the boundary, then into their wrapper
+                // the runs go into the tree in front of the boundary, then into their wrapper; text that no link held in the
+                // original goes out of a revised link that starts or ends there (decision 0022)
                 let tree = self.tx.part_mut(part)?;
+                let at = out_of_links(tree, boundary);
                 for &n in &group {
-                    insert(tree, boundary.parent, boundary.before, n)?;
+                    insert(tree, at.parent, at.before, n)?;
                 }
                 self.wrap_nodes(part, &group, Rev::Del)?;
             } else if let Some(&holder) = group.first() {
                 let tree = self.tx.part_mut(part)?;
-                insert(tree, boundary.parent, boundary.before, holder)?;
+                let link = is_w(&tree.node_ref(holder), "hyperlink");
+                let kids = child_ids(tree, holder);
+                let all_runs = kids.iter().all(|&k| is_w(&tree.node_ref(k), "r"));
+                if link && all_runs && !kids.is_empty() && same_link_around(tree, boundary, holder)
+                {
+                    // inside a link to the same place, the deleted runs need no link of their own
+                    for &k in &kids {
+                        detach(tree, k)?;
+                        insert(tree, boundary.parent, boundary.before, k)?;
+                    }
+                    self.wrap_nodes(part, &kids, Rev::Del)?;
+                    continue;
+                }
+                // a deleted hyperlink goes beside the revised one it would otherwise land in, never inside it
+                let at = if link {
+                    out_of_links(tree, boundary)
+                } else {
+                    boundary
+                };
+                insert(tree, at.parent, at.before, holder)?;
                 self.wrap_content(part, holder, Rev::Del)?;
             }
         }
@@ -413,4 +434,81 @@ impl Compiler<'_, '_> {
         }
         Ok(())
     }
+}
+
+/// True if `n` is a run or holds one.
+fn holds_run(n: &crate::xml::NodeRef<'_>) -> bool {
+    n.is_element() && (is_w(n, "r") || n.children().any(|c| holds_run(&c)))
+}
+
+/// A boundary at the start or the end of the content of a hyperlink, moved out in front of it or after it, as far out as
+/// hyperlinks go. A boundary between two runs of a hyperlink stays where it is.
+fn out_of_links(tree: &crate::xml::SpanTree, mut b: Boundary) -> Boundary {
+    loop {
+        let parent = tree.node_ref(b.parent);
+        if !is_w(&parent, "hyperlink") {
+            return b;
+        }
+        let Some(grand) = parent.parent() else {
+            return b;
+        };
+        let (mut before_runs, mut after_runs) = (false, false);
+        let mut seen = b.before.is_none();
+        for c in parent.children() {
+            if Some(c.id()) == b.before {
+                seen = true;
+            }
+            if holds_run(&c) {
+                if seen {
+                    after_runs = true;
+                } else {
+                    before_runs = true;
+                }
+            }
+        }
+        if !before_runs {
+            b = Boundary {
+                parent: grand.id(),
+                before: Some(parent.id()),
+            };
+        } else if !after_runs {
+            b = Boundary {
+                parent: grand.id(),
+                before: parent.next_sibling().map(|n| n.id()),
+            };
+        } else {
+            return b;
+        }
+    }
+}
+
+/// True if the nearest hyperlink around the boundary points where `link` does: the same relationship, anchor and document
+/// location.
+fn same_link_around(tree: &crate::xml::SpanTree, b: Boundary, link: NodeId) -> bool {
+    let mut cur = Some(tree.node_ref(b.parent));
+    while let Some(n) = cur {
+        if is_w(&n, "p") {
+            return false;
+        }
+        if is_w(&n, "hyperlink") {
+            let key = |e: &crate::xml::NodeRef<'_>| {
+                let mut out: Vec<(String, String, String)> = e
+                    .attrs()
+                    .filter(|a| matches!(a.local_name(), "id" | "anchor" | "docLocation"))
+                    .map(|a| {
+                        (
+                            a.namespace().to_owned(),
+                            a.local_name().to_owned(),
+                            a.value().into_owned(),
+                        )
+                    })
+                    .collect();
+                out.sort();
+                out
+            };
+            return key(&n) == key(&tree.node_ref(link));
+        }
+        cur = n.parent();
+    }
+    false
 }

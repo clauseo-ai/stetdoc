@@ -254,6 +254,11 @@ fn receipt_of(
     for e in &rc.exclusions {
         warnings.push(exclusion_warning(e, &shown));
     }
+    for n in &rc.notices {
+        let at = shown(&n.block);
+        let message = format!("{}: {}.", at.as_deref().unwrap_or("a block"), n.message);
+        warnings.push(warn(warning_code(n.code), at, message));
+    }
     for block in merged {
         let at = shown(block);
         let message = format!(

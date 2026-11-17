@@ -226,8 +226,7 @@ fn link(rid: &str, text: &str) -> String {
 }
 
 #[test]
-fn a_hyperlink_keeps_its_address_when_the_revised_part_has_one_and_loses_the_link_when_it_does_not()
-{
+fn a_hyperlink_keeps_its_address_through_the_revised_part_s_relationship_or_a_new_one() {
     let ext = |id: &str, url: &str| (id.to_owned(), "hyperlink".to_owned(), url.to_owned());
     let o = Pk {
         external: vec![ext("rId20", "https://example.com/a")],
@@ -247,13 +246,25 @@ fn a_hyperlink_keeps_its_address_when_the_revised_part_has_one_and_loses_the_lin
         external: vec![ext("rId31", "https://example.com/b")],
         ..Pk::new("<w:p/>")
     };
-    let out = copy_first(&o, &other, &[]);
+    let out = copy_first(&o, &other, &["word/_rels/document.xml.rels"]);
     assert!(
-        !out.body.contains("hyperlink") && out.body.contains("click"),
+        out.body.contains("<w:hyperlink r:id=")
+            && !out.body.contains("rId31")
+            && out.body.contains("click"),
         "{}",
         out.body
     );
-    assert_eq!(out.stats.hyperlinks_unlinked, 1);
+    let rels = &out
+        .tx_xml
+        .iter()
+        .find(|(n, _)| n.ends_with(".rels"))
+        .expect("the relationships part")
+        .1;
+    assert!(
+        rels.contains("https://example.com/a") && rels.contains("https://example.com/b"),
+        "{rels}"
+    );
+    assert_eq!(out.stats.hyperlinks_unlinked, 0);
 }
 
 #[test]

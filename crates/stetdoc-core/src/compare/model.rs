@@ -64,6 +64,10 @@ pub(super) struct ParaInfo {
     /// True if the paragraph holds markup-compatibility content (`mc:AlternateContent`), which only a deleted copy of the whole
     /// paragraph carries.
     pub alternate: bool,
+    /// The character ranges of its hyperlinks, each with a key of what it points to (`links`).
+    pub links: Vec<(std::ops::Range<usize>, u64)>,
+    /// The comment references in the paragraph: the offset in the text and the comment's `w:id`.
+    pub comments: Vec<(usize, i64)>,
 }
 
 /// A row of a table.
@@ -125,14 +129,14 @@ impl Container {
 pub(super) struct StoryModel {
     /// Every container of the story, the roots first in the order they were read.
     pub containers: Vec<Container>,
-    /// The roots: one for a body, a header or a footer, and one for each note of a notes part.
+    /// The roots: one for a body, a header or a footer, and one for each note of a notes part or comment of the comments part.
     pub roots: Vec<Root>,
 }
 
 /// A root container: the whole story, or one note.
 #[derive(Clone, Copy, Debug)]
 pub(super) struct Root {
-    /// The note's `w:id`, or `None` for a body, header or footer.
+    /// The note's or the comment's `w:id`, or `None` for a body, header or footer.
     pub note: Option<i64>,
     /// The container.
     pub container: usize,
@@ -166,12 +170,11 @@ pub(super) fn story_model(
             }
         }
         StoryKind::Header | StoryKind::Footer => reader.root(None, tree.root(), 0),
-        StoryKind::Footnotes | StoryKind::Endnotes => {
+        StoryKind::Footnotes | StoryKind::Endnotes | StoryKind::Comments => {
             for unit in story.units() {
                 reader.root(unit.id, tree.node_ref(unit.node), 0);
             }
         }
-        StoryKind::Comments => {}
     }
     Ok(reader.out)
 }
@@ -354,7 +357,17 @@ impl<'a> Reader<'_, 'a> {
         let text = map.text(Mode::Final).into_owned();
         let mut chars: Vec<char> = text.chars().collect();
         let mut notes = Vec::new();
+        let mut comments = Vec::new();
         for item in map.items() {
+            if item.kind == ItemKind::CommentRef && item.vis.in_mode(Mode::Final) {
+                let id = self
+                    .tree
+                    .node_ref(item.node)
+                    .attrs()
+                    .find(|a| a.local_name() == "id")
+                    .and_then(|a| a.value().trim().parse::<i64>().ok());
+                comments.extend(id.map(|id| (item.at as usize, id)));
+            }
             if item.len != 1 || !item.vis.in_mode(Mode::Final) {
                 continue;
             }
@@ -395,6 +408,8 @@ impl<'a> Reader<'_, 'a> {
             notes,
             fields: field_ranges(&map),
             alternate: holds_alternate(&self.tree.node_ref(p.id())),
+            links: super::links::link_ranges(&map, self.tree, self.rels),
+            comments,
         }
     }
 

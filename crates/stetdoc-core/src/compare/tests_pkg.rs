@@ -22,6 +22,8 @@ pub(super) struct Pk {
     pub numbering: Option<String>,
     /// The footnotes, as `w:footnote` elements.
     pub footnotes: Option<String>,
+    /// The comments, as `w:comment` elements.
+    pub comments: Option<String>,
     /// Other parts: name under `word/`, content type, bytes, and the relationship id to it.
     pub media: Vec<(String, String, Vec<u8>, String)>,
     /// External relationships: id, type suffix, target.
@@ -84,6 +86,15 @@ impl Pk {
                 "rId11",
                 "numbering",
                 format!("{}<w:numbering {W}>{s}</w:numbering>", parts::DECL),
+            );
+        }
+        if let Some(s) = &self.comments {
+            add(
+                "comments.xml",
+                "comments",
+                "rId13",
+                "comments",
+                format!("{}<w:comments {W}>{s}</w:comments>", parts::DECL),
             );
         }
         if let Some(s) = &self.footnotes {

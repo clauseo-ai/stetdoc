@@ -415,7 +415,21 @@ pub(super) fn check_pair(original: Vec<u8>, revised: Vec<u8>) -> Result<Verdict,
         let want = want_rev.sides.get(part).unwrap_or(&none);
         failures.extend(first_difference(&format!("N1 accept {part}"), got, want));
     }
+    failures.extend(first_difference(
+        "N1 accept comments",
+        &accepted.comments,
+        &want_rev.comments,
+    ));
     let rejected = dump(&resolved(&redline, Action::Reject)?, &on_rejected)?;
+    // A comment that only one input has is not a change compare can show (decision 0022): the comments are compared when each
+    // input has as many.
+    if want_orig.comments.len() == want_rev.comments.len() {
+        failures.extend(first_difference(
+            "N2 reject comments",
+            &rejected.comments,
+            &want_orig.comments,
+        ));
+    }
     failures.extend(first_difference(
         "N2 reject",
         &without_emptied_notes(&rejected.body, &want_orig.empty_notes),

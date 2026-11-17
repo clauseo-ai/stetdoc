@@ -543,6 +543,8 @@ pub struct Imported { pub node: NodeId, /* detached, in the redline's tree */ pu
   `trailing`), and N4 does not call it kept. N1 and N2 do **not** inherit R8's exclusion of trailing paragraphs: the redline has no
   paragraph more or less than the two inputs. The call declares an `Origin` with an empty `from` for each block, and
   `Effect::imported` lists `(block, source)` for each (an addition to `Effect`, for `document`'s `Declared`).
+- **`set_container_snapshot`** (decision 0022) writes a `w:tblPrChange`, `w:trPrChange` or `w:tcPrChange` with the original's
+  table, row or cell properties into the revised element's container, creating it when missing, and changes nothing else.
 - **`set_snapshot`** is `set_props` with the old value given and the new one left alone: it checks the container for a
   pending `*PrChange` (none will exist, because revisions were accepted first and this transaction writes one per
   container), writes `w:pPrChange` last in `w:pPr` with the snapshot (the paragraph's, minus `rPr`, `sectPr` and `pPrChange`, by
@@ -744,14 +746,18 @@ count, as `Receipt.warnings` deduplicates:
 | `compare_bookmarks_dropped` | an imported bookmark's name was taken (count) |
 | `compare_story_unmatched` | a header or footer slot that exists on one side only, or has no one-to-one partner, was skipped (count) |
 | `compare_table_replaced` | rows whose cells changed shape were written as a deleted row and an inserted row (count) |
-| `compare_not_compared` | styles, numbering, table, row, cell or section properties differ and were left as the revised document has them (a count of each kind) |
+| `compare_not_compared` | styles, numbering or section properties differ and were left as the revised document has them (a count of each kind) |
+| `compare_not_tracked` | a difference has no tracked form, such as a paired comment's author or initials: one warning for each, with the block's ref and what differs (decision 0022) |
 
 ### 8.3 Not compared, said once
 
 Compare does what is listed here and nothing more: **not compared** are style and numbering definitions (their properties are the
-next release's "editing numbering and style definitions"), table, row, cell and section properties (`w:tblPr`, `w:trPr`, `w:tcPr`,
-`w:tblGrid`, `w:sectPr`, and so headers' references and page setup), document and package properties and settings, a
-field's code, the original's comments, and the wrappers of content controls. The redline carries the revised document's value for each of
+next release's "editing numbering and style definitions"), the grid of a table and what fitting it rewrites (`w:tblGrid`,
+`w:gridSpan`, `w:gridBefore`, `w:gridAfter`), a row's table property exceptions (`w:tblPrEx`), section properties (`w:sectPr`,
+and so headers' references and page setup), document and package properties and settings, a field's code, a comment that
+pairs with none, and the wrappers of content controls. Since decision 0022 compare does compare table, row and cell properties
+(a `w:tblPrChange`, `w:trPrChange` or `w:tcPrChange` with the original's), a hyperlink's address (the old link deleted beside
+the new one inserted), and the text of two comments whose references pair (tracked inside `comments.xml`). The redline carries the revised document's value for each of
 them, and `FIDELITY.md` lists them. The quality check's normalization leaves them out of both sides, so the law is a law about what compare
 promises (9.1). A reader who needs one of them compared should tell us, and the answer is a property writer of `revisions`
 (`Extend compare to a new property` in the where-do-I-change table), not a change of the structure here.

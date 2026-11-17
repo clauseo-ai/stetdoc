@@ -4,6 +4,7 @@
 
 use super::{Cx, Importer, numbering, styles};
 use crate::api::error::StetError;
+use crate::compare::plan_props::NOT_TABLE;
 use crate::revisions::import_writer::ImportWriter;
 use crate::revisions::types::PropElement;
 use crate::wordml::{Mode, NodeId, Paragraph};
@@ -89,6 +90,38 @@ impl Importer<'_> {
         let mut out = Vec::new();
         for c in props.iter() {
             if !NOT_MARK.contains(&c.local_name())
+                && let Some(e) = self.convert(tx, &c)?
+            {
+                out.push(e);
+            }
+        }
+        Ok(out)
+    }
+
+    /// The properties of an original table, row or cell (`owner` is the `w:tbl`, `w:tr` or `w:tc`): the children of its
+    /// `container` (`tblPr`, `trPr` or `tcPr`) that are not revisions, with style ids mapped. Empty when it has none.
+    pub(in crate::compare) fn container_snapshot(
+        &mut self,
+        tx: &mut ImportWriter<'_, '_>,
+        cx: Cx<'_>,
+        owner: NodeId,
+        container: &str,
+    ) -> Result<Vec<PropElement>, StetError> {
+        let view = self.orig.parts();
+        let id = view
+            .id(cx.src)
+            .ok_or_else(|| super::internal("the original has no such part"))?;
+        let tree = view.tree(id)?;
+        let Some(pr) = tree
+            .node_ref(owner)
+            .child_elements()
+            .find(|c| c.local_name() == container)
+        else {
+            return Ok(Vec::new());
+        };
+        let mut out = Vec::new();
+        for c in pr.child_elements() {
+            if !NOT_TABLE.contains(&c.local_name())
                 && let Some(e) = self.convert(tx, &c)?
             {
                 out.push(e);

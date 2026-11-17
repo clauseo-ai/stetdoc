@@ -27,6 +27,17 @@ pub(crate) struct CompareWarning {
     pub count: usize,
 }
 
+/// A difference that the redline cannot show as a tracked change, named by the block of the redline it is about (decision 0022).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct Notice {
+    /// The code, from the table of design 8.2.
+    pub code: &'static str,
+    /// The block of the redline.
+    pub block: BlockKey,
+    /// What differs, as a phrase that follows the block's ref.
+    pub message: String,
+}
+
 /// What the receipt names for an exclusion. Never a block of the original: its key is a node of the original's tree, which the
 /// redline's refs do not read, so it would name nothing, or another paragraph.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -91,6 +102,8 @@ pub(crate) struct Counts {
     pub split: usize,
     /// As above.
     pub merged: usize,
+    /// Tables, rows and cells whose properties changed.
+    pub props: usize,
 }
 
 /// The receipt of a comparison.
@@ -100,6 +113,8 @@ pub(crate) struct CompareReceipt {
     pub moves: Vec<MoveKeys>,
     /// The warnings, each once.
     pub warnings: Vec<CompareWarning>,
+    /// The differences that no tracked change shows, each with its block.
+    pub notices: Vec<Notice>,
     /// What could not be redlined.
     pub exclusions: Vec<Exclusion>,
     /// What the plan held.

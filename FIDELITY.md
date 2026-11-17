@@ -104,8 +104,9 @@ Each of these was decided in a design, with the evidence there.
 - **Pattern shading is not read for hidden text.** Only `w:fill` is read, so white text on a shading pattern whose colour is
   the pattern's own counts as on no background and is flagged, although it is readable. See
   [styles and numbering 3.6](docs/design/styles-and-numbering.md#36-hidden-text).
-- **Compare does not compare** table, row, cell and section properties, style and numbering definitions, field codes, or the
-  original's comments. See [compare 8.3](docs/design/compare.md#83-not-compared-said-once).
+- **Compare does not compare** section properties, a table's grid, style and numbering definitions, field codes, or a
+  comment that has no partner in the other document. A comment's changed author or initials has no tracked form: the
+  redline keeps the revised value and warns (`compare_not_tracked`). See [compare 8.3](docs/design/compare.md#83-not-compared-said-once).
 - **Compare excludes** equations, charts and SmartArt in deleted content, because their changed form cannot be written the way
   Word writes it. See [compare 19](docs/design/compare.md#19-the-build-and-the-quality-check-as-built).
 - **Compare does not carry content controls into deleted content.** A deleted copy of the original's text keeps the text of

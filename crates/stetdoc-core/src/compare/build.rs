@@ -147,6 +147,7 @@ impl Builder<'_, '_, '_> {
             Entry::Delete { blocks, .. } => (Vec::new(), blocks.clone()),
             Entry::Split(s) => (s.parts.iter().filter_map(|p| p.b).collect(), vec![s.a]),
             Entry::Merge(m) => (vec![m.b], m.parts.iter().filter_map(|p| p.a).collect()),
+            Entry::Props(pp) => (vec![pp.block], Vec::new()),
         };
         let redline: Vec<BlockKey> = rev.iter().map(|&n| Self::key(&sp.part_b, n)).collect();
         let copies: Vec<BlockKey> = orig
@@ -173,6 +174,7 @@ impl Builder<'_, '_, '_> {
                 } => self.delete(sp, blocks, at.anchor, at.before, *trailing)?,
                 Entry::Split(s) => self.split(sp, s)?,
                 Entry::Merge(m) => self.merge(sp, m)?,
+                Entry::Props(pp) => self.props(sp, pp),
             }
             self.flush_notes()?;
             let after = self.losses();
@@ -479,6 +481,13 @@ impl Builder<'_, '_, '_> {
             "blocks that could not be written as changes are shown as the revised document has them",
             replaced,
         );
+        for (block, what) in &plan.comment_meta {
+            rc.notices.push(super::receipt::Notice {
+                code: "compare_not_tracked",
+                block: block.clone(),
+                message: format!("a comment changed in a way no tracked change records: {what}, and the redline has the revised comment's"),
+            });
+        }
         rc.stats = stats;
         Ok(rc)
     }

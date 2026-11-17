@@ -15,6 +15,7 @@ use super::units::all_units;
 use super::units::{Changed, Layout, UnitKind, changed_units, layout_of};
 use super::verdict::{Verdict, Verified};
 use super::{audit, fields, package};
+use crate::api::check::FindingCode;
 use crate::api::error::StetError;
 use crate::schema::validate_part;
 use crate::state::{Dep, PartsView, Tx};
@@ -68,19 +69,55 @@ pub(crate) fn edit_located(tx: &Tx<'_>, declared: &Declared) -> Result<Verified,
         .map_err(|e| refuse(e, block))
 }
 
-/// `edit_located` for the redline of `compare` (decision 0021): a new violation whose code `known` gives is carried, not new,
-/// since an input already had it and the redline may only have carried it back. `known` is asked only when a violation is new,
-/// and gives the codes of the violations of both inputs.
+/// The codes the redline never carries on the strength of an input having them (decision 0021): the structure of tables and
+/// containers, the schema's shape of an element, the package and the comments. Word repairs or refuses a file with any of them,
+/// so one the redline adds is refused even when an input has the same problem elsewhere. A copy of the original's content still
+/// keeps its own problems through its foreign origins, as for any import.
+const NEVER_CARRIED: [FindingCode; 18] = [
+    FindingCode::CellWithoutFinalParagraph,
+    FindingCode::TableWithoutRow,
+    FindingCode::RowWithoutCell,
+    FindingCode::ContainerWithoutBlock,
+    FindingCode::SchemaUnexpectedChild,
+    FindingCode::SchemaMissingChild,
+    FindingCode::SchemaOutOfOrder,
+    FindingCode::SchemaUnexpectedText,
+    FindingCode::SchemaWrongRoot,
+    FindingCode::McPrefixUndeclared,
+    FindingCode::RelationshipTargetMissing,
+    FindingCode::RelationshipIdDuplicate,
+    FindingCode::PartWithoutContentType,
+    FindingCode::MarkerUnpaired,
+    FindingCode::MarkerWithoutComment,
+    FindingCode::ReferenceMissing,
+    FindingCode::ReferenceDuplicate,
+    FindingCode::CommentIdDuplicate,
+];
+
+/// `edit_located` for the redline of `compare` (decision 0021). A new violation that the origins could not carry is carried
+/// when its code is not in `NEVER_CARRIED` and the whole redline has no more violations of that code than the two inputs
+/// have together: then the redline has only moved an input's problem into a container of the revised document. `inputs` gives
+/// how many violations of each code the inputs have, and is asked only when a violation is new.
 pub(crate) fn compare_located(
     tx: &Tx<'_>,
     declared: &Declared,
-    known: impl FnOnce() -> Vec<crate::api::check::FindingCode>,
+    inputs: impl FnOnce() -> Vec<(FindingCode, usize)>,
 ) -> Result<Verified, Box<Refusal>> {
     let refuse = |error: StetError, block: Option<BlockKey>| Box::new(Refusal { error, block });
     let (list, mut verdict) =
         collect(tx, declared, Mode::Shortcuts).map_err(|e| refuse(e, None))?;
     if verdict.refuses() {
-        verdict.carry_codes(&known());
+        let had = inputs();
+        let now = super::document(&tx.parts()).by_code;
+        let count = |codes: &[(FindingCode, usize)], code: FindingCode| {
+            codes
+                .iter()
+                .find(|(c, _)| *c == code)
+                .map_or(0, |(_, n)| *n)
+        };
+        verdict.carry_where(&|code| {
+            !NEVER_CARRIED.contains(&code) && count(&now, code) <= count(&had, code)
+        });
     }
     let block = verdict.first_block(&tx.parts(), &list);
     verdict

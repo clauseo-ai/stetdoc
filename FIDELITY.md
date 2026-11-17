@@ -108,6 +108,12 @@ Each of these was decided in a design, with the evidence there.
   original's comments. See [compare 8.3](docs/design/compare.md#83-not-compared-said-once).
 - **Compare excludes** equations, charts and SmartArt in deleted content, because their changed form cannot be written the way
   Word writes it. See [compare 19](docs/design/compare.md#19-the-build-and-the-quality-check-as-built).
+- **Compare does not carry content controls into deleted content.** A deleted copy of the original's text keeps the text of
+  an inline content control but not the control, and a deleted table or paragraph that sat in a block-level content control
+  (at body level or in a cell) is copied without it. So Reject All gives the text back without the control, also for a
+  locked or data-bound control in a paragraph that compare replaced whole (a change inside the control, or a word that runs
+  into it). The receipt does not warn. See [compare 7.2](docs/design/compare.md#72-fragments-runs-of-a-paragraph) and
+  [decision 0021](docs/decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md).
 - **A header or footer present on one side only is skipped by compare**, with a `compare_story_unmatched` warning in the
   receipt. See [compare 4.7](docs/design/compare.md#47-stories).
 - **White space at the ends of a `w:t` without `xml:space="preserve"` is text**, as Word shows it (checked in Word for the

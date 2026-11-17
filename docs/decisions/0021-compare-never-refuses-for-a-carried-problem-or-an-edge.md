@@ -37,12 +37,15 @@ For the safety net, when `check` still finds a new violation in a redline:
 
 | Option | Strength | Weakness |
 |---|---|---|
-| A. Count only violations whose code neither input has; carry the rest | stetdoc still never writes a problem neither input had | A real new violation hides behind an input's problem of the same code |
+| A. Carry a violation whose code either input has, anywhere | Simple | One such problem anywhere in an input hides every new one of that code; a cell the redline breaks would ship |
+| A2. Carry by origin: only a violation at a block that came from the input that had it | Exact | The violation that needs carrying sits in a container of the revised document, which has no origin in the original |
+| A3. Carry by count per code, never for the classes Word repairs or refuses | A new problem shows as one more of its code than the inputs have | A new problem can still hide behind one the redline dropped elsewhere, for the carriable codes only |
 | B. Write the output with a warning for every violation | Compare never refuses for a violation | A defect in compare would ship a file Word may refuse |
 
 ## Decision
 
-Option 1 for the nested table, and option A for the safety net.
+Option 1 for the nested table, and option A3 for the safety net. A review of the first version (option A) found that
+it would have written `nl_a`'s broken cell on its own, without the empty paragraph, because `nl_a` has that code.
 
 - **The empty paragraph.** `Compiler::place_deleted` follows a deleted table that ends a cell, a text box, a header, a
   footer, a note or a comment with a new `<w:p/>`, live and untracked (`end_after_deleted_table`). The body is left out: its
@@ -50,12 +53,21 @@ Option 1 for the nested table, and option A for the safety net.
   no origin. Compare lists it with the code `compare_not_restored`, naming its ref, and says that it stays when the changes
   are accepted or rejected. The compare laws leave it out of both sides. With it, accepting gives the revised cell and an
   empty paragraph, and rejecting gives the original cell as Word reads it, with the paragraph Word adds there.
-- **The safety net.** `document::compare` runs `check::compare_located` in place of `check::edit_located`. When a violation
-  is new, it reads the violations of both inputs (each with its revisions accepted, as compare reads them), and a new
-  violation whose code either input has is carried, not new: the receipt lists it with the carried problems. This is the
-  rule of the compare law N5 (`stetdoc_testkit::laws::compare::validity`). A violation that neither input has still
-  refuses, as `validation_failed`, now worded "The redline would add N violations that neither input has", with a next step
-  that says it is a defect to report.
+- **The safety net.** `document::compare` runs `check::compare_located` in place of `check::edit_located`. The foreign
+  origins carry what they always did: a copy of the original's content keeps its own problems. When a violation is still
+  new, it counts the violations of each code in both inputs (each with its revisions accepted, as compare reads them) and
+  in the whole redline. A new violation is carried, and listed with the carried problems, only when its code is not one of
+  the classes below and the redline has no more violations of that code than the two inputs together. Otherwise it refuses,
+  as `validation_failed`, worded "The redline would add N violations that neither input has", with a next step that says
+  it is a defect to report.
+- **Never carried by the net**, whoever had them first, since Word repairs or refuses a file with them
+  (`check::edit::NEVER_CARRIED`): the structure of tables and containers (`cell_without_final_paragraph`,
+  `table_without_row`, `row_without_cell`, `container_without_block`), the schema's shape of an element
+  (`schema_unexpected_child`, `schema_missing_child`, `schema_out_of_order`, `schema_unexpected_text`,
+  `schema_wrong_root`), the package (`mc_prefix_undeclared`, `relationship_target_missing`, `relationship_id_duplicate`,
+  `part_without_content_type`) and the comments (`marker_unpaired`, `marker_without_comment`, `reference_missing`,
+  `reference_duplicate`, `comment_id_duplicate`). Carrying by origin alone was not taken: the violation that needs it is
+  keyed to a container of the revised document, which has no origin in the original.
 - **The edge rule.** A change right before or after a simple field, a complex field or a content control that is locked,
   bound to data or showing its placeholder is written in place. Deleted text goes into the gap outside the field or the
   control, as an insertion does (`check_redline_gap`, which refuses a gap only when both neighbours are inside the same
@@ -73,6 +85,9 @@ Option 1 for the nested table, and option A for the safety net.
   `compare_not_restored` warning, and `check` finds nothing on it.
 - A word deleted next to a field or a locked control is one deletion, not a replaced paragraph, and so is a merge cut at a
   field's end.
-- A redline can carry a violation whose code an input has into a new place. The receipt lists it as carried.
+- A redline can carry a violation of a carriable code into a new place, as long as it has no more of that code than the
+  inputs. The receipt lists it as carried.
+- Not changed, and recorded in `FIDELITY.md`: a deleted copy does not keep a content control, inline or block-level, so
+  Reject All gives the text back without it. That is the import's rule (design `compare.md` 7.2) and holds on c4d3ebb too.
 - Word for Mac checks the empty paragraph and the edge deletions in batch 5 (`a1-*` folders). If Word drops the empty
   paragraph on accept, or keeps it differently on reject, the warning's wording changes, not the rule.

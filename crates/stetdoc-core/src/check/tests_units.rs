@@ -132,25 +132,18 @@ fn a_row_added_to_a_table_validates_the_table_and_the_cells_paragraphs() {
     assert_eq!(said.new, [C::CellWithoutFinalParagraph]);
 }
 
-/// Decision 0021: `compare` counts a violation as new only when neither input has its code; else it is carried, and a
-/// refusal that remains says it is the redline's.
+/// Decision 0021: a structural violation that the redline adds is refused, even when an input has the same code.
 #[test]
-fn the_redline_carries_a_violation_whose_code_an_input_has() {
+fn the_redline_never_carries_a_cell_that_does_not_end_with_a_paragraph() {
     let s = state(TABLE);
     let tx = transaction(&s, |t| {
         let p = nth(t, "p", 0);
         detach(t, p);
     });
     let declared = Declared::default();
-    let v = super::compare_located(&tx, &declared, || vec![C::CellWithoutFinalParagraph])
-        .expect("an input has the violation, so the redline only carries it");
-    assert_eq!(v.carried_total, 1);
-    assert_eq!(
-        v.carried.first().map(|f| f.code),
-        Some(C::CellWithoutFinalParagraph)
-    );
-    let refused = super::compare_located(&tx, &declared, || vec![C::TableWithoutRow])
-        .expect_err("neither input has the violation");
+    let refused =
+        super::compare_located(&tx, &declared, || vec![(C::CellWithoutFinalParagraph, 5)])
+            .expect_err("a cell without a final paragraph is never carried");
     let message = refused.error.message().to_owned();
     assert!(
         message.starts_with("The redline would add 1 violation that neither input has."),
@@ -161,6 +154,38 @@ fn the_redline_carries_a_violation_whose_code_an_input_has() {
     let v = super::compare_located(&clean, &declared, || panic!("no violation is new"))
         .expect("a clean edit passes");
     assert_eq!(v.carried_total, 0);
+}
+
+/// Decision 0021: a violation of a class the redline may carry is carried when the inputs have at least as many of its code
+/// as the whole redline, and refused when the redline has more.
+#[test]
+fn the_redline_carries_an_inputs_violation_and_no_more_of_it() {
+    let s = state(&format!("{}{}", para("one"), para("two")));
+    let bogus = |count: usize| {
+        transaction(&s, move |t| {
+            for n in 0..count {
+                let p = nth(t, "p", n);
+                set_attr(t, p, "bogus", "1");
+            }
+        })
+    };
+    let declared = Declared::default();
+    let one = bogus(1);
+    let code = said(&s, |t| {
+        let p = nth(t, "p", 0);
+        set_attr(t, p, "bogus", "1");
+    })
+    .new;
+    assert_eq!(code.len(), 1, "{code:?}");
+    let code = code[0];
+    let v = super::compare_located(&one, &declared, || vec![(code, 1)])
+        .expect("an input has one, and the redline has one");
+    assert_eq!(v.carried_total, 1);
+    assert_eq!(v.carried.first().map(|f| f.code), Some(code));
+    let two = bogus(2);
+    super::compare_located(&two, &declared, || vec![(code, 1)])
+        .expect_err("the redline has two, and the inputs only one");
+    super::compare_located(&one, &declared, Vec::new).expect_err("no input has it");
 }
 
 fn said_after(s: &State, change: impl FnOnce(&mut SpanTree)) -> Said {

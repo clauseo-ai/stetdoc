@@ -9,8 +9,8 @@
 //! received content from the original, with the keys of its block there (`check::unit_keys` on the original's view); and every
 //! style or numbering definition and part that the import added, with the keys of its element or whole part there
 //! (`check::part_keys`). So a problem the original's content already had is carried into the redline. `check::compare_located`
-//! carries, too, a violation whose code either input already has, which the redline may have carried into a container of the
-//! revised document (decision 0021), and one that neither input has is refused, as `validation_failed`.
+//! carries, too, a violation whose code is not one it never carries, when the redline has no more of that code than the inputs
+//! together (decision 0021); any other new violation is refused, as `validation_failed`.
 //!
 //! The redline is a `Document` whose original is the revised input as given, so `save` writes the redline and a working copy keeps
 //! both. The receipt has the revisions by author (one author, the stamp's), the moves as refs, compare's warnings, a warning for
@@ -91,14 +91,18 @@ fn in_schema(schema: &[std::sync::Arc<str>], part: &str) -> bool {
     schema.iter().any(|name| **name == *part)
 }
 
-/// The codes of the violations that either input has with its revisions accepted, which is what the redline is built from: a
-/// violation of the redline with one of these codes is carried, not new (decision 0021).
-fn input_violations(prepared: &Prepared) -> Vec<crate::api::check::FindingCode> {
-    let mut out = Vec::new();
+/// How many violations of each code the two inputs have together, each with its revisions accepted, which is what the redline
+/// is built from (`check::compare_located`, decision 0021).
+fn input_violations(prepared: &Prepared) -> Vec<(crate::api::check::FindingCode, usize)> {
+    let mut out: Vec<(crate::api::check::FindingCode, usize)> = Vec::new();
     for state in [&prepared.original, &prepared.revised] {
-        for (code, _) in check::document(&state.parts()).by_code {
-            if code.class() == crate::api::check::Class::Violation && !out.contains(&code) {
-                out.push(code);
+        for (code, n) in check::document(&state.parts()).by_code {
+            if code.class() != crate::api::check::Class::Violation {
+                continue;
+            }
+            match out.iter_mut().find(|(c, _)| *c == code) {
+                Some(entry) => entry.1 += n,
+                None => out.push((code, n)),
             }
         }
     }

@@ -6,7 +6,7 @@
 //! names (`check/notes.rs`), which only `Document::check` reports.
 //!
 //! **Interface.** `edit(&Tx, &Declared) -> Result<Verified, StetError>` for the commit pipeline, and
-//! `compare_located`, which carries a violation whose code an input of `compare` has (decision 0021),
+//! `compare_located`, which carries a violation of a carriable code that the inputs of `compare` have as often (decision 0021),
 //! `document(&PartsView) -> CheckReport` for `Document::check`, `scan_unit` and `scan_part` for the
 //! Word rules of one unit and of a whole part, which the compiler's post-conditions use as well,
 //! `unit_keys` for `compare`'s origins in another package, and `undeclared`, the prefixes a

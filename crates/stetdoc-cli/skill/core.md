@@ -161,7 +161,7 @@ text and keeps the empty paragraph under the same ref. The receipt says `p2 empt
 `kept_required_paragraph` warning with the reason.
 
 When the document holds tracked changes you did not make, receipts and views say so in a line such as
-`4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #0 insert p1 "shall pay ", ...`, followed by
+`4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #101 insert p1 "shall pay ", ...`, followed by
 `Tell the user about them.` Do it: name who made them and what they change. `stetdoc view FILE --revisions --context 1`
 shows each of them in its paragraph. Without a saved author, a view says the changes are `already in the document`:
 tell the user about them if you did not make them.

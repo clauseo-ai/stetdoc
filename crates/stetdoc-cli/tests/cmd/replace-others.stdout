@@ -4,5 +4,5 @@ applied 1 operation, tracked as Claude 2026-10-06T09:30:00Z. base 3d9cb29951923b
 p2 {--Price--}{#5 C}{++Cost++}{#6 C} {--gross--}{#2 EW} net
 validated 1 unit: no problems, and this file needs no separate check.
 wrote edited.docx
-4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #0 insert p1 "shall pay ", #3 delete p2 "gross", #4 run format p3; all 4: stetdoc view edited.docx --revisions.
+4 tracked changes by others (Jane Doe 2, Eric White 2) you did not make: #1 insert p1 "shall pay ", #2 delete p2 "gross", #3 run format p3; all 4: stetdoc view edited.docx --revisions.
 Tell the user about them.

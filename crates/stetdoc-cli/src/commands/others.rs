@@ -1,8 +1,8 @@
 //! The tracked changes that authors other than the current one made: one or two lines that every receipt of an edit, and the
 //! head of a view, carry, so that an agent tells the user about changes it did not make instead of passing over them.
 //!
-//! The changes are `Document::revisions` with no filter, in document order, so the number of each is the one the ledger
-//! (`stetdoc view FILE --revisions`) shows. There is no line when every change is the current author's, or there is none.
+//! The changes are `Document::revisions` with no filter, in document order. Each is named by its revision ids, the ones the
+//! ledger (`stetdoc view FILE --revisions`) shows and `accept` and `reject` take, never by its place in the list. There is no line when every change is the current author's, or there is none.
 
 use crate::output::Failure;
 use serde_json::{Value, json};
@@ -31,16 +31,15 @@ pub fn others(
     file: &Path,
 ) -> Result<Option<Others>, Failure> {
     let all = doc.revisions(&RevisionFilter::default())?;
-    let theirs: Vec<(usize, &RevisionInfo)> = all
+    let theirs: Vec<&RevisionInfo> = all
         .iter()
-        .enumerate()
-        .filter(|(_, r)| author.is_none_or(|me| r.author.as_deref() != Some(me)))
+        .filter(|r| author.is_none_or(|me| r.author.as_deref() != Some(me)))
         .collect();
     if theirs.is_empty() {
         return Ok(None);
     }
     let mut by_author: Vec<(String, usize)> = Vec::new();
-    for (_, change) in &theirs {
+    for change in &theirs {
         let name = change
             .author
             .clone()
@@ -59,11 +58,7 @@ pub fn others(
             format!("by others ({})", each.join(", "))
         }
     };
-    let named: Vec<String> = theirs
-        .iter()
-        .take(NAMED)
-        .map(|(n, c)| line(*n, c))
-        .collect();
+    let named: Vec<String> = theirs.iter().take(NAMED).map(|c| line(c)).collect();
     let more = if total > NAMED {
         format!("; all {total}: stetdoc view {} --revisions", quoted(file))
     } else {
@@ -84,8 +79,9 @@ pub fn others(
     let json = json!({
         "count": total,
         "by_author": by_author.iter().map(|(n, c)| json!({ "author": n, "count": c })).collect::<Vec<_>>(),
-        "first": theirs.iter().take(NAMED).map(|(n, c)| json!({
-            "change": n,
+        "first": theirs.iter().take(NAMED).map(|c| json!({
+            "change": c.ids.first(),
+            "ids": c.ids,
             "kind": kind(c),
             "author": c.author,
             "block": c.block,
@@ -96,9 +92,11 @@ pub fn others(
     Ok(Some(Others { text, json }))
 }
 
-/// `#56 insert p146 "rated at least A-"`.
-fn line(number: usize, change: &RevisionInfo) -> String {
-    let mut out = format!("#{number} {}", kind(change));
+/// `#56 insert p146 "rated at least A-"`. The number is the one `accept` and `reject` take, and `view --revisions` shows: every
+/// id of the change, joined by commas, as `#107,109 move p5`.
+fn line(change: &RevisionInfo) -> String {
+    let ids: Vec<String> = change.ids.iter().map(|id| id.to_string()).collect();
+    let mut out = format!("#{} {}", ids.join(","), kind(change));
     if let Some(block) = &change.block {
         out.push_str(&format!(" {block}"));
     }

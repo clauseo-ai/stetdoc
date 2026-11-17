@@ -27,6 +27,9 @@ All notable changes to stetdoc are recorded here. The format follows
   The row now goes with its last cell, and the table goes with its last row, so the result holds the content of the
   document as it was before the cell was inserted, or after it was deleted. This is the same by all, by author and by id
   (decision 0024).
+- The banner that names the tracked changes by others (in `view` and in every receipt) gave each change its place in the
+  list, such as `#0`, where `accept` and `reject` take the revision id, `#101`. It now names the ids the ledger shows, and
+  `check --json` names the same ids in `first`. A change with two ids, such as a move, shows both: `#107,109`.
 - An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
   over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in
   its part, referenced by nothing, while the receipt and `check` said nothing. The note now goes with its reference, as

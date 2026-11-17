@@ -256,7 +256,7 @@ fn receipt_of(
     }
     for n in &rc.notices {
         let at = shown(&n.block);
-        let message = format!("{}: {}.", at.as_deref().unwrap_or("a block"), n.message);
+        let message = format!("{}.", n.message);
         warnings.push(warn(warning_code(n.code), at, message));
     }
     for block in merged {

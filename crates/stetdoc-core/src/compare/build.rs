@@ -485,7 +485,7 @@ impl Builder<'_, '_, '_> {
             rc.notices.push(super::receipt::Notice {
                 code: "compare_not_tracked",
                 block: block.clone(),
-                message: format!("a comment changed in a way no tracked change records: {what}, and the redline has the revised comment's"),
+                message: format!("this comment's {what}, which no tracked change can record, so the redline keeps the revised comment's"),
             });
         }
         rc.stats = stats;

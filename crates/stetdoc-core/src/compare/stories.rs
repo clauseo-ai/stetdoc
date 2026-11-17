@@ -280,7 +280,7 @@ fn comment_meta(
         ] {
             if x != y {
                 what.push(format!(
-                    "its {name} was \"{}\" and is \"{}\"",
+                    "{name} \"{}\" became \"{}\"",
                     x.as_deref().unwrap_or(""),
                     y.as_deref().unwrap_or("")
                 ));

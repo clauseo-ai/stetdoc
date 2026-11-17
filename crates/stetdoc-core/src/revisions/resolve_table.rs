@@ -1,7 +1,8 @@
 //! Resolving rows and cells (design `revisions.md`, 3B and 3.4). Accepting a deleted row or rejecting an
 //! inserted one removes the row, and the refs of what was in it go with the reason of the change. A cell
 //! that is removed because it was deleted widens the nearest live cell before it, so that the row still
-//! covers the grid. Each row-level wrapper left with no row is removed, innermost first: a repeating-section
+//! covers the grid. A row whose last cell is removed, by an accepted cell deletion or a rejected cell
+//! insertion, is removed as a row is (decision 0024). Each row-level wrapper left with no row is removed, innermost first: a repeating-section
 //! item whose only row went, and the section with its last item. A table left with no row is removed. A row removed with the start of a vertical merge, on accept
 //! or reject, makes the continuation below it the new start (`merge_rows.rs`).
 
@@ -176,6 +177,7 @@ impl Engine<'_, '_> {
                 } else {
                     None
                 };
+                let row = ancestor_row(tree, cell);
                 let (to, swallowed) = remove_hoisting(tree, cell)?;
                 self.swallowed.extend(swallowed);
                 if is_w(&self.tx.part_mut(&part)?.node_ref(to), "p") {
@@ -187,6 +189,14 @@ impl Engine<'_, '_> {
                 }
                 for (node, _) in blocks {
                     self.record_removed(&BlockKey::new(part.clone(), node), !accept)?;
+                }
+                // A row has at least one cell, so a row whose last cell went goes with it, and its table
+                // if that was the last row (decision 0024).
+                if let Some(r) = row {
+                    let tree = self.tx.part_mut(&part)?;
+                    if is_attached(tree, r) && !holds_cell(tree, r) {
+                        self.remove_row(r)?;
+                    }
                 }
                 continue;
             }
@@ -324,6 +334,33 @@ fn ancestor_table(tree: &SpanTree, row: NodeId) -> Option<NodeId> {
         cur = n.parent();
     }
     None
+}
+
+/// The row a cell stands in, directly or in a cell-level wrapper.
+fn ancestor_row(tree: &SpanTree, cell: NodeId) -> Option<NodeId> {
+    let mut cur = tree.node_ref(cell).parent();
+    while let Some(n) = cur {
+        if is_w(&n, "tr") {
+            return Some(n.id());
+        }
+        if is_w(&n, "tbl") {
+            return None;
+        }
+        cur = n.parent();
+    }
+    None
+}
+
+/// True if a cell of this row stands in `row`, directly or in a cell-level wrapper.
+fn holds_cell(tree: &SpanTree, row: NodeId) -> bool {
+    let mut stack: Vec<_> = tree.node_ref(row).child_elements().collect();
+    while let Some(n) = stack.pop() {
+        if is_w(&n, "tc") {
+            return true;
+        }
+        stack.extend(n.child_elements());
+    }
+    false
 }
 
 /// True if a row of this table stands in `el`, directly or in a wrapper, but not in a nested table.

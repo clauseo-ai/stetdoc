@@ -22,6 +22,11 @@ All notable changes to stetdoc are recorded here. The format follows
 
 ### Fixed
 
+- Rejecting a tracked inserted table cell (`w:cellIns`) that was its row's only cell failed with `validation_failed`
+  ("a table row has no cell"), and so did accepting a tracked deleted cell (`w:cellDel`) that was its row's only cell.
+  The row now goes with its last cell, and the table goes with its last row, so the result holds the content of the
+  document as it was before the cell was inserted, or after it was deleted. This is the same by all, by author and by id
+  (decision 0024).
 - An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
   over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in
   its part, referenced by nothing, while the receipt and `check` said nothing. The note now goes with its reference, as

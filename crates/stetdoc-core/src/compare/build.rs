@@ -481,12 +481,12 @@ impl Builder<'_, '_, '_> {
             "blocks that could not be written as changes are shown as the revised document has them",
             replaced,
         );
-        for (block, message, uncompared) in &plan.comment_notices {
+        for (block, message, left_out) in &plan.comment_notices {
             rc.notices.push(super::receipt::Notice {
                 code: "compare_not_tracked",
                 block: block.clone(),
                 message: message.clone(),
-                uncompared: *uncompared,
+                left_out: left_out.clone(),
             });
         }
         rc.stats = stats;

@@ -357,8 +357,8 @@ pub(super) struct Dump {
     pub slots: Vec<(Slot, String)>,
     /// How many sections the body has.
     pub sections: usize,
-    /// The text of each comment that a reference names, in order of text.
-    pub comments: Vec<String>,
+    /// The id and the text of each comment that a reference names, in order of text.
+    pub comments: Vec<(i64, String)>,
 }
 
 /// The slots of the body's sections.
@@ -474,23 +474,23 @@ pub(super) fn dump(state: &State, opts: &DumpOpts) -> Result<Dump, StetError> {
                 );
             }
             StoryKind::Comments => {
-                let mut by_unit: Vec<(u32, Vec<String>)> = Vec::new();
+                let mut by_unit: Vec<(u32, i64, Vec<String>)> = Vec::new();
                 for (u, l) in lines {
-                    let named = story
+                    let Some(id) = story
                         .units()
                         .get(u as usize)
                         .and_then(|x| x.id)
-                        .is_some_and(|i| commented.contains(&i));
-                    if !named {
+                        .filter(|i| commented.contains(i))
+                    else {
                         continue;
-                    }
+                    };
                     match by_unit.last_mut() {
-                        Some((last, ls)) if *last == u => ls.extend(l),
-                        _ => by_unit.push((u, l)),
+                        Some((last, _, ls)) if *last == u => ls.extend(l),
+                        _ => by_unit.push((u, id, l)),
                     }
                 }
                 out.comments
-                    .extend(by_unit.into_iter().map(|(_, l)| l.join("\n")));
+                    .extend(by_unit.into_iter().map(|(_, id, l)| (id, l.join("\n"))));
             }
             StoryKind::Header | StoryKind::Footer => {
                 out.sides.insert(
@@ -501,7 +501,8 @@ pub(super) fn dump(state: &State, opts: &DumpOpts) -> Result<Dump, StetError> {
         }
     }
     notes.sort();
-    out.comments.sort();
+    out.comments
+        .sort_by(|x, y| x.1.cmp(&y.1).then(x.0.cmp(&y.0)));
     out.body.push("--notes--".to_owned());
     out.body.extend(notes);
     let (slots, sections) = slots_of(state)?;

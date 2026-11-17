@@ -2,8 +2,10 @@
 //! comment that no tracked change records.
 //!
 //! A comment pairs by its `w:commentReference`: the references of two comments are the same place in an unchanged stretch of two
-//! paired body paragraphs. Several comments at one place (comments on the same text) pair by id first, then by author, initials
-//! and text, each match unique on both sides; one comment on each side pairs as it is. Comments left on both sides of such a
+//! paired body paragraphs. Several comments at one place (comments on the same text) pair by content and never by id, which
+//! Word renumbers on save: the same author, initials and text first (the id orders otherwise identical comments), then the
+//! same author and initials when that is unique on both sides. One comment on each side pairs as it is. Reply links
+//! (`commentsExtended`) are not read. Comments left on both sides of such a
 //! place are ambiguous and are not compared, with a notice, rather than pairing the wrong two. A paired comment is compared like
 //! a note. A notice also names a paired comment whose author or initials changed, and a comment whose reference moved, which
 //! is compared with nothing while the original has a comment of the same id that reads differently.
@@ -16,6 +18,26 @@ use crate::state::State;
 use crate::wordml::{BlockKey, BlockKind, Mode, NodeId, Paragraph};
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::sync::Arc;
+
+/// The comments a notice leaves out of the comparison: the original's ids and the revised comment's id.
+pub(super) type LeftOut = (Vec<i64>, i64);
+
+/// A pass of the pairing at one place: whether a match must be unique on both sides, and the key it matches.
+type Pass = (bool, fn(&Fact) -> String);
+
+/// The key that pairs two comments at one place first: author, initials and text.
+fn full_key(f: &Fact) -> String {
+    format!("{}\u{1f}{}", who_key(f), f.text)
+}
+
+/// The key that pairs them next, when unique on both sides: author and initials.
+fn who_key(f: &Fact) -> String {
+    format!(
+        "{}\u{1f}{}",
+        f.author.as_deref().unwrap_or(""),
+        f.initials.as_deref().unwrap_or("")
+    )
+}
 
 /// What a comment is, for pairing and notices.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
@@ -31,8 +53,9 @@ struct Fact {
 pub(super) struct Found {
     /// (id in the original, id in the revised document).
     pub pairs: Vec<(i64, i64)>,
-    /// The revised comment's first paragraph, the message, and whether the comment was left out of the comparison.
-    pub notices: Vec<(BlockKey, String, bool)>,
+    /// The revised comment's first paragraph, the message, and for a comment left out of the comparison the original's
+    /// comments it was not compared with and its own id.
+    pub notices: Vec<(BlockKey, String, Option<LeftOut>)>,
 }
 
 /// The comments of a comments part by id.
@@ -77,14 +100,14 @@ pub(super) fn pair_comments(
     let (fa, fb) = (facts(original, part_a)?, facts(revised, part_b)?);
     let mut found = Found::default();
     let mut noticed: HashSet<i64> = HashSet::new();
-    let mut notice = |found: &mut Found, id: i64, message: String, uncompared: bool| {
+    let mut notice = |found: &mut Found, id: i64, message: String, left_out: Option<Vec<i64>>| {
         if let Some(first) = fb.get(&id).and_then(|f| f.first)
             && noticed.insert(id)
         {
             found.notices.push((
                 BlockKey::new(Arc::clone(part_b), first),
                 message,
-                uncompared,
+                left_out.map(|a| (a, id)),
             ));
         }
     };
@@ -155,40 +178,40 @@ pub(super) fn pair_comments(
                         }
                         continue;
                     }
-                    // the same id, then the same author, initials and text, each match unique on both sides
-                    let same_id: Vec<i64> = ga.iter().copied().filter(|a| gb.contains(a)).collect();
-                    for id in same_id {
-                        found.pairs.push((id, id));
-                    }
-                    ga.retain(|a| !found.pairs.iter().any(|p| p.0 == *a));
-                    gb.retain(|b| !found.pairs.iter().any(|p| p.1 == *b));
-                    let mut matched: Vec<(i64, i64)> = Vec::new();
-                    for &a in &ga {
-                        let Some(f) = fa.get(&a) else { continue };
-                        let on_b: Vec<i64> = gb
-                            .iter()
-                            .copied()
-                            .filter(|b| {
-                                fb.get(b) == Some(f)
-                                    || fb.get(b).is_some_and(|g| same_comment(f, g))
-                            })
-                            .collect();
-                        let on_a = ga
-                            .iter()
-                            .filter(|x| fa.get(x).is_some_and(|g| same_comment(f, g)))
-                            .count();
-                        if let ([b], 1) = (&on_b[..], on_a) {
-                            matched.push((a, *b));
+                    // by content, never by id, which Word renumbers on save: the same author, initials and text, then the same
+                    // author and initials when that is unique in the group; the id only orders otherwise identical comments
+                    ga.sort_unstable();
+                    gb.sort_unstable();
+                    let passes: [Pass; 2] = [(false, full_key), (true, who_key)];
+                    for (unique_only, key) in passes {
+                        let keys_a: Vec<Option<String>> =
+                            ga.iter().map(|a| fa.get(a).map(key)).collect();
+                        let keys_b: Vec<Option<String>> =
+                            gb.iter().map(|b| fb.get(b).map(key)).collect();
+                        let mut matched: Vec<(i64, i64)> = Vec::new();
+                        for (ia, &a) in ga.iter().enumerate() {
+                            let Some(Some(k)) = keys_a.get(ia) else {
+                                continue;
+                            };
+                            let count_a = keys_a.iter().filter(|x| x.as_ref() == Some(k)).count();
+                            let count_b = keys_b.iter().filter(|x| x.as_ref() == Some(k)).count();
+                            if unique_only && (count_a != 1 || count_b != 1) {
+                                continue;
+                            }
+                            let free = gb.iter().zip(&keys_b).find(|(b, kb)| {
+                                kb.as_ref() == Some(k) && !matched.iter().any(|m| m.1 == **b)
+                            });
+                            if let Some((&b, _)) = free {
+                                matched.push((a, b));
+                            }
                         }
+                        found.pairs.extend(matched);
+                        ga.retain(|a| !found.pairs.iter().any(|p| p.0 == *a));
+                        gb.retain(|b| !found.pairs.iter().any(|p| p.1 == *b));
                     }
-                    for (a, b) in matched {
-                        found.pairs.push((a, b));
-                    }
-                    ga.retain(|a| !found.pairs.iter().any(|p| p.0 == *a));
-                    gb.retain(|b| !found.pairs.iter().any(|p| p.1 == *b));
                     if !ga.is_empty() {
                         for &b in &gb {
-                            notice(&mut found, b, "this comment shares its place with other comments and none of the original's comments there could be matched to it, so it was not compared; the redline keeps it as the revised document has it".to_owned(), true);
+                            notice(&mut found, b, "this comment shares its place with other comments and none of the original's comments there could be matched to it, so it was not compared; the redline keeps it as the revised document has it".to_owned(), Some(ga.clone()));
                         }
                     }
                 }
@@ -221,7 +244,7 @@ pub(super) fn pair_comments(
                     "this comment's {}, which no tracked change can record, so the redline keeps the revised comment's",
                     what.join(" and ")
                 ),
-                false,
+                None,
             );
         }
     }
@@ -241,7 +264,7 @@ pub(super) fn pair_comments(
         if let (Some(x), Some(y)) = (fa.get(&b), fb.get(&b))
             && !same_comment(x, y)
         {
-            notice(&mut found, b, "this comment's reference moved, so it was not compared with the original's comment, which reads differently; the redline keeps the revised comment and rejecting does not bring back the original's".to_owned(), true);
+            notice(&mut found, b, "this comment's reference moved, so it was not compared with the original's comment, which reads differently; the redline keeps the revised comment and rejecting does not bring back the original's".to_owned(), Some(vec![b]));
         }
     }
     Ok(found)

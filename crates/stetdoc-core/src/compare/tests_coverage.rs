@@ -287,16 +287,88 @@ fn a_new_comment_at_an_existing_comment_s_place_does_not_take_its_pair() {
 }
 
 #[test]
+fn a_parent_and_its_reply_pair_by_content_when_word_renumbered_their_ids() {
+    // an earlier comment is deleted, and Word renumbers the two that stay, at one place, from 1 and 2 to 0 and 1
+    let a = comments_on(
+        &[
+            (0, "Ann", "An earlier note."),
+            (1, "Ann", "Parent note."),
+            (2, "Ann", "Reply note."),
+        ],
+        &[1, 2],
+        &[0],
+    );
+    let b = comments_on(
+        &[(0, "Ann", "Parent note."), (1, "Ann", "Reply note.")],
+        &[0, 1],
+        &[],
+    );
+    let (v, _) = run(&a, &b);
+    assert!(v.receipt.notices.is_empty(), "{:?}", v.receipt.notices);
+    let comments = xml_of(&v, "word/comments.xml");
+    assert!(
+        !comments.contains("<w:ins ") && !comments.contains("<w:del "),
+        "{comments}"
+    );
+    // with other authors, and the reply's text edited, the pair of the same author still finds each other
+    let a = comments_on(
+        &[
+            (0, "Ann", "An earlier note."),
+            (1, "Ann", "Parent note."),
+            (2, "Bea", "Reply note."),
+        ],
+        &[1, 2],
+        &[0],
+    );
+    let b = comments_on(
+        &[(0, "Ann", "Parent note."), (1, "Bea", "Reply, edited.")],
+        &[0, 1],
+        &[],
+    );
+    let (v, _) = run(&a, &b);
+    assert!(v.receipt.notices.is_empty(), "{:?}", v.receipt.notices);
+    let comments = xml_of(&v, "word/comments.xml");
+    assert!(comments.contains("> note</w:delText>"), "{comments}");
+}
+
+#[test]
+fn a_left_out_comment_does_not_keep_the_laws_from_reading_the_others() {
+    // two comments by one author at one place, both edited, cannot be told apart; a third elsewhere is still compared
+    let a = comments_on(
+        &[
+            (0, "Ann", "First note."),
+            (1, "Ann", "Second note."),
+            (2, "Cy", "Last note."),
+        ],
+        &[0, 1],
+        &[2],
+    );
+    let b = comments_on(
+        &[
+            (0, "Ann", "First, edited."),
+            (1, "Ann", "Second, edited."),
+            (2, "Cy", "Last note, edited."),
+        ],
+        &[0, 1],
+        &[2],
+    );
+    let (v, _) = run(&a, &b);
+    assert_eq!(v.receipt.notices.len(), 2, "{:?}", v.receipt.notices);
+    let comments = xml_of(&v, "word/comments.xml");
+    assert_eq!(comments.matches("<w:ins ").count(), 1, "{comments}");
+}
+
+#[test]
 fn comments_at_one_place_that_cannot_be_told_apart_are_not_compared_and_say_so() {
     let a = comments_on(
-        &[(0, "Ann", "First note."), (1, "Bea", "Second note.")],
+        &[(0, "Ann", "First note."), (1, "Ann", "Second note.")],
         &[0, 1],
         &[],
     );
     let b = comments_on(
         &[
             (7, "Ann", "First note, edited."),
-            (8, "Bea", "Second note, edited."),
+            (8, "Ann", "Second note, edited."),
         ],
         &[7, 8],
         &[],

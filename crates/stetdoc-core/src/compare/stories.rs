@@ -59,8 +59,12 @@ pub(super) struct Pairings {
     /// How many rows had different cell shapes and were left unpaired, over all stories.
     pub table_replaced: usize,
     /// The comments whose difference no tracked change records (`comments`): the revised comment's first paragraph and the
-    /// message, and whether the comment was left out of the comparison.
-    pub comment_notices: Vec<(crate::wordml::BlockKey, String, bool)>,
+    /// message, and the comments it leaves out of the comparison.
+    pub comment_notices: Vec<(
+        crate::wordml::BlockKey,
+        String,
+        Option<super::comments::LeftOut>,
+    )>,
 }
 
 /// Pairs the stories of `original` with those of `revised`. `atoms` is the dictionary of the two sides.

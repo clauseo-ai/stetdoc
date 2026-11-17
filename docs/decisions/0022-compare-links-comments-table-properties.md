@@ -31,8 +31,10 @@ Write the tracked form OOXML has for each difference, and warn, naming the block
   inside the one link. The deleted link's address gets a new external relationship when the revised part has none for it.
   Before this, the link was dropped and `compare_hyperlinks_unlinked` counted it.
 - **Comments.** Two comments pair the way notes do: their `w:commentReference`s sit at the same place in the unchanged
-  text of two paired body paragraphs. Several comments at one place (comments on the same text) pair by id first, then
-  by author, initials and text, each match unique on both sides, and one comment on each side pairs as it is. Comments
+  text of two paired body paragraphs. Several comments at one place (comments on the same text) pair by content, never
+  by id, because Word renumbers comment ids on save: first the same author, initials and text, then the same author and
+  initials when that is unique on both sides. The id only orders comments that are otherwise identical. One comment on
+  each side pairs as it is. Reply links in `commentsExtended` are not read. Comments
   left on both sides of such a place cannot be told apart. They are not compared, and each revised one gets a
   `compare_not_tracked` notice, rather than pairing the wrong two and swapping their texts on Reject All. A comment
   whose reference moved to another paragraph is compared with nothing, and gets the same notice when the original's
@@ -58,8 +60,8 @@ either.
 
 - The compare laws read more. The dump that N1 and N2 compare lists table, row and cell properties without the grid
   layout and `w:tblLook`. Each stretch of text names the address of its link, and each referenced comment's text is
-  listed. N2 compares comments only when both inputs have the same number of them and the receipt names none that compare
-  left out. A test runs every combination of a link's text growing, shrinking, staying or changing with its address kept,
+  listed. N2 leaves out the comments a notice names as not compared, on both sides, and compares the rest when both
+  sides have as many. A test runs every combination of a link's text growing, shrinking, staying or changing with its address kept,
   changed or taken away, and the text around it kept or edited, through the laws in both directions.
 - One curated pair changed class: `dcb:interaction.word_hyperlink_field_target_retargeted` changes a simple `HYPERLINK`
   field's address. A simple field's result cannot be edited in place, so the paragraph is now deleted and inserted

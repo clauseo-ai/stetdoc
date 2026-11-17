@@ -36,9 +36,9 @@ pub(crate) struct Notice {
     pub block: BlockKey,
     /// What differs, as a phrase that follows the block's ref.
     pub message: String,
-    /// True if the block was left out of the comparison (a comment compare could not pair), so rejecting does not give the
-    /// original's.
-    pub uncompared: bool,
+    /// The comments a notice leaves out of the comparison (one compare could not pair): the original's ids and the revised
+    /// comment's id. Rejecting does not give back the original's text for them.
+    pub left_out: Option<(Vec<i64>, i64)>,
 }
 
 /// What the receipt names for an exclusion. Never a block of the original: its key is a node of the original's tree, which the

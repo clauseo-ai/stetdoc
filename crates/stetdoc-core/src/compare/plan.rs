@@ -82,7 +82,11 @@ pub(super) struct Plan {
     /// Rows that were left unpaired because their cells changed shape.
     pub table_replaced: usize,
     /// Comments whose difference no tracked change records: the revised comment's first paragraph and the message.
-    pub comment_notices: Vec<(crate::wordml::BlockKey, String, bool)>,
+    pub comment_notices: Vec<(
+        crate::wordml::BlockKey,
+        String,
+        Option<super::comments::LeftOut>,
+    )>,
     /// Blocks of the original that had no place to go in the revised document, which cannot happen in a document that has
     /// a block in every container. A count so that it is never silent.
     pub lost: usize,

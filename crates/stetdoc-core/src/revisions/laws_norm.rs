@@ -7,9 +7,12 @@
 //! and adjacent insertions, deletions or moves of one side with equal author and date; unwrap a wrapper with no child; drop an
 //! empty `w:rPr`, `w:pPr`, `w:numPr`, `w:trPr`, `w:tcPr`, wrapper and hyperlink or smart tag, and `xml:space`; drop a property change whose snapshot equals the
 //! properties it sits in; renumber the revision ids by document order; sort attributes and drop white space
-//! between elements. The order of elements is left alone, except among the properties of a container.
+//! between elements. The order of elements is left alone, except among the properties of a container. `normalize_unfolding`
+//! also writes the `w:fldSimple` elements it is given as the runs of a complex field, for the laws that allow that for the
+//! fields a batch unfolded.
 
-use crate::xml::{NodeRef, SpanTree};
+use super::laws_norm_fields::complex_of;
+use crate::xml::{NodeId, NodeRef, SpanTree};
 
 const W: &str = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const W_STRICT: &str = "http://purl.oclc.org/ooxml/wordprocessingml/main";
@@ -20,7 +23,7 @@ fn is_word(ns: &str) -> bool {
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
-enum N {
+pub(super) enum N {
     El {
         ns: String,
         local: String,
@@ -36,7 +39,7 @@ fn is_noise_bookmark(name: &str) -> bool {
     name == "_GoBack" || name.starts_with("lawbm")
 }
 
-fn is(n: &N, local: &str) -> bool {
+pub(super) fn is(n: &N, local: &str) -> bool {
     matches!(n, N::El { ns, local: l, .. } if is_word(ns) && l == local)
 }
 
@@ -59,7 +62,7 @@ fn local_of(n: &N) -> &str {
 }
 
 /// Text nodes of a `w:t` are kept even if they are white space only.
-fn load(n: &NodeRef<'_>) -> N {
+fn load(n: &NodeRef<'_>, unfold: &[NodeId]) -> N {
     let l = n.local_name();
     if matches!(l, "t" | "delText" | "instrText" | "delInstrText") {
         return N::El {
@@ -85,7 +88,17 @@ fn load(n: &NodeRef<'_>) -> N {
         ns: n.namespace().to_owned(),
         local: l.to_owned(),
         attrs,
-        kids: n.child_elements().map(|c| load(&c)).collect(),
+        kids: n
+            .child_elements()
+            .flat_map(|c| {
+                let k = load(&c, unfold);
+                if unfold.contains(&c.id()) && is(&k, "fldSimple") {
+                    complex_of(k)
+                } else {
+                    vec![k]
+                }
+            })
+            .collect(),
     }
 }
 
@@ -172,7 +185,7 @@ fn run_props(run: &N) -> Option<N> {
 
 /// The run properties of a run as they are, with the ids of a change: the first of two runs that merge
 /// keeps them, so that the ids are renumbered the same as in a document that never had the two.
-fn run_own_props(run: &N) -> Option<N> {
+pub(super) fn run_own_props(run: &N) -> Option<N> {
     let N::El { kids, .. } = run else { return None };
     kids.iter().find(|k| is(k, "rPr")).cloned()
 }
@@ -468,7 +481,18 @@ fn write(n: &N, out: &mut String) {
 
 /// The comparison form of a part.
 pub(super) fn normalize(tree: &SpanTree) -> String {
-    normalize_with(tree, false)
+    normalize_with(tree, false, &[])
+}
+
+/// `normalize`, with the `w:fldSimple` elements `unfold` written as the runs of a complex field (`complex_of`), and the
+/// properties of the body's last paragraph left out if `drop_last_ppr`: the original side of R1 and R2, where a batch's
+/// tracked deletion of those simple fields wrote them as complex fields (design `revisions.md`, 3.6.3 and 7.1).
+pub(super) fn normalize_unfolding(
+    tree: &SpanTree,
+    drop_last_ppr: bool,
+    unfold: &[NodeId],
+) -> String {
+    normalize_with(tree, drop_last_ppr, unfold)
 }
 
 /// The comparison form of a part with the properties of the last paragraph of the body left out. They are
@@ -476,11 +500,11 @@ pub(super) fn normalize(tree: &SpanTree) -> String {
 /// cannot remove the last mark, and which paragraph's properties the text before it keeps is a convention
 /// of the resolver that the laws do not fix.
 pub(super) fn normalize_without_last_ppr(tree: &SpanTree) -> String {
-    normalize_with(tree, true)
+    normalize_with(tree, true, &[])
 }
 
-fn normalize_with(tree: &SpanTree, drop_last_ppr: bool) -> String {
-    let mut root = load(&tree.root());
+fn normalize_with(tree: &SpanTree, drop_last_ppr: bool, unfold: &[NodeId]) -> String {
+    let mut root = load(&tree.root(), unfold);
     // The ids of the `_GoBack` bookmarks, whose ends go too.
     let mut gone = Vec::new();
     let mut stack = vec![&root];

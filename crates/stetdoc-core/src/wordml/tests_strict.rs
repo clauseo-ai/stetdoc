@@ -47,8 +47,8 @@ fn a_strict_paragraph_reads_the_same_as_a_transitional_one() {
     for mode in [FINAL, ORIGINAL, REDLINE] {
         assert_eq!(s[0].text(mode), t[0].text(mode), "{mode:?}");
     }
-    assert_eq!(s[0].text(FINAL), "A B4\u{6}hc\t\u{c}");
-    assert_eq!(s[0].text(ORIGINAL), "A  C4\u{6}hc\t\u{c}");
+    assert_eq!(s[0].text(FINAL), "A B4hc\t\u{c}");
+    assert_eq!(s[0].text(ORIGINAL), "A  C4hc\t\u{c}");
     assert_eq!(kinds(&s[0]), kinds(&t[0]));
     assert!(s[0].has_revisions());
     assert_eq!(s[0].fields().len(), 2);

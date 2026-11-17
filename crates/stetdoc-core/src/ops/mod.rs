@@ -229,6 +229,80 @@ fn run_review(
     Ok(())
 }
 
+/// A `kept_required_paragraph` warning for each paragraph that the operation's calls emptied and kept, because its
+/// container needs it, and a `row_outside_repeating_section` warning for each tracked new row that went above a repeating
+/// section and not into it (decision 0020).
+fn kept_warnings(compiler: &Compiler<'_, '_>, done: &mut Done) {
+    let kept: Vec<_> = done.effects.iter().flat_map(|e| e.kept.iter()).collect();
+    for k in kept {
+        let shown = compiler
+            .tx()
+            .parts()
+            .ref_of(&k.block)
+            .map_or_else(|| "the paragraph".to_string(), |r| r.to_string());
+        done.warnings.push(target::warning(
+            WarningCode::KeptRequiredParagraph,
+            compiler.tx(),
+            Some(&k.block),
+            k.reason.sentence(&shown),
+        ));
+    }
+    let outside: Vec<_> = done
+        .effects
+        .iter()
+        .flat_map(|e| e.outside_section.iter())
+        .collect();
+    for anchor in outside {
+        let shown = compiler
+            .tx()
+            .parts()
+            .ref_of(anchor)
+            .map_or_else(|| "the row".to_string(), |r| r.to_string());
+        done.warnings.push(target::warning(
+            WarningCode::RowOutsideRepeatingSection,
+            compiler.tx(),
+            Some(anchor),
+            format!(
+                "The new row before {shown} is above the repeating section, not a new first item in it: Word's Reject All of \
+                 a tracked first item removes the whole section. Insert it untracked to make it the first item."
+            ),
+        ));
+    }
+}
+
+/// A `repeating_section_unwrapped_by_word` warning for each row that an operation deleted tracked and that holds the start
+/// of a repeating section, when the batch's final state still deletes the row and the section still holds a row that
+/// stays. So a batch that deletes every item's row, or rejects or accepts its own deletion, is not warned (decision 0020).
+fn section_warnings(tx: &Tx<'_>, applied: &mut Applied) -> Result<(), StetError> {
+    for op in applied.ops.iter_mut() {
+        let rows: Vec<_> = op
+            .effects
+            .iter()
+            .flat_map(|e| e.section_start_deleted.iter().cloned())
+            .collect();
+        for row in rows {
+            if !crate::revisions::row_controls::section_unwrapped_by_word(tx.parts(), &row)? {
+                continue;
+            }
+            let shown = tx
+                .parts()
+                .ref_of(&row)
+                .map_or_else(|| "the row".to_string(), |r| r.to_string());
+            op.warnings.push(target::warning(
+                WarningCode::RepeatingSectionUnwrappedByWord,
+                tx,
+                Some(&row),
+                format!(
+                    "{shown} holds the start of its repeating section, so Word's Accept All of its tracked deletion removes \
+                     the repeating-section control around the rows that remain. The text and the rows come out right. \
+                     Delete it untracked to keep the section."
+                ),
+            ));
+        }
+    }
+    Ok(())
+}
+
 /// Applies a batch to a transaction. The first failure ends it, with the index of the operation. Nothing is committed here.
 ///
 /// One compiler serves the operations that write, and a run of `accept` and `reject` ends it, resolves, and starts a new one,
@@ -264,7 +338,13 @@ pub(crate) fn apply(
             let mut compiler = Compiler::new(&mut *tx, track.clone()).map_err(|e| at(e, i))?;
             for (k, op) in run.iter().enumerate() {
                 let n = i + k;
-                let done = dispatch(&mut compiler, cx, &base, op).map_err(|e| at(e, n))?;
+                let mut done = dispatch(&mut compiler, cx, &base, op).map_err(|e| at(e, n))?;
+                // A note goes with its last reference, as an accepted deletion takes it (`revisions/notes.rs`).
+                let gone = compiler
+                    .remove_notes_of_dropped_references()
+                    .map_err(|e| at(e, n))?;
+                done.notes_removed.extend(gone);
+                kept_warnings(&compiler, &mut done);
                 // The index of revisions is built at the first `resolve`, and kept current by what the calls did before it.
                 if ops.iter().skip(n + 1).any(is_review) {
                     for effect in &done.effects {
@@ -286,6 +366,7 @@ pub(crate) fn apply(
                     warnings: done.warnings,
                     resolution: None,
                     marked: done.marked,
+                    notes_removed: done.notes_removed,
                 });
             }
             let outcome = compiler
@@ -299,8 +380,18 @@ pub(crate) fn apply(
         }
         i = end;
     }
+    section_warnings(tx, &mut applied)?;
     applied.touched_by_ops = tx.touched().len();
     reconcile(tx, &track, &mut applied)?;
+    // A hyperlink relationship whose last use the batch removed goes with it. The edit that removed the use was itself checked
+    // against the scope, so the relationships part is declared here.
+    for part in crate::revisions::links::drop_unused_link_rels(tx)? {
+        applied.side_effects.push(context::SideEffect {
+            part,
+            why: "a hyperlink relationship that nothing uses any more was removed".to_string(),
+            styles: None,
+        });
+    }
     Ok(applied)
 }
 

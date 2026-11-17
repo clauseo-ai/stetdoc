@@ -63,7 +63,8 @@ mod view;
 pub(crate) use {
     authors::authors, authors::note_ids, files::to_batch, ledger::LedgerFilter, ledger::changes_of,
     ledger::describe, ledger::family, ledger::story_name, lookup::lookup, lookup::render_lookup,
-    occurrences::occurrences, receipt::render_blocks, render::render_files, view::view,
+    occurrences::occurrences, receipt::render_blocks, render::hashes_as_earlier_release,
+    render::render_files, view::view,
 };
 
 #[cfg(test)]

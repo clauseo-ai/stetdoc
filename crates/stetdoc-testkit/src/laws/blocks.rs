@@ -12,7 +12,9 @@
 //! differ (an element the view shows another way) is not checked by block, and the entry check of L2 still holds for it.
 //!
 //! What a batch touches: the blocks its operations name (`ref`, `to`, `second`, and every block from `ref` through `to`), the
-//! block after a merge's paragraph, and the table that holds a named paragraph or row. A merge's paragraph after is the next
+//! block after a merge's paragraph, the blocks after an insertion's paragraph whose mark is gone up to the one it joins on
+//! to, the paragraph with text before the body's last paragraph when a tracked `delete` removes
+//! it (its mark is the one that goes), and the table that holds a named paragraph or row. A merge's paragraph after is the next
 //! one the operations before it left: a deleted paragraph, an earlier merge's second and, untracked, a table whose last row a
 //! `row` operation deleted are passed over. An `accept` or `reject` touches every block with revision markup, an operation
 //! on an existing comment every block with that comment's markers, a `delete-note` every block with a note reference, and a
@@ -191,6 +193,39 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
     // The rows that `row` operations deleted so far, for the table that loses its last row.
     let mut rows_gone: BTreeSet<String> = BTreeSet::new();
     let mut t = Touched::default();
+    // Tracked, the body's last paragraph keeps its mark and the paragraph before it loses its own (revisions.md 3.2.2): when a
+    // whole delete of the blocks `from..=to` reaches the end of the body, the block before them is touched, past the ones
+    // earlier operations removed.
+    let before_last = |t: &mut Touched, gone: &BTreeSet<String>, from: usize, to: usize| {
+        let last = facts.top.iter().skip(to + 1).all(|r| gone.contains(r));
+        if g.tracked && last {
+            let before = facts.top.get(..from).unwrap_or_default();
+            // Only a paragraph with text takes the last one's place: after a table, or an empty paragraph, the last one is
+            // kept and the block before it is left alone.
+            let joins = |r: &String| {
+                facts
+                    .paras
+                    .iter()
+                    .any(|p| p.r == *r && p.story == "body" && !p.text.is_empty())
+            };
+            // A paragraph that an earlier batch emptied and whose mark it deleted already joins on to the next one, so the
+            // paragraph before it takes its place (revisions.md 3.2.2).
+            let emptied = |r: &String| {
+                facts
+                    .paras
+                    .iter()
+                    .any(|p| p.r == *r && p.story == "body" && p.mark_gone && p.text.is_empty())
+            };
+            if let Some(prev) = before
+                .iter()
+                .rev()
+                .find(|r| !gone.contains(*r) && !emptied(r))
+                && joins(prev)
+            {
+                t.tops.insert(prev.clone());
+            }
+        }
+    };
     for op in &g.ops {
         let Ok(v) = serde_json::from_str::<Value>(&op.json) else {
             continue;
@@ -231,11 +266,24 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
                     to.as_deref().and_then(index),
                 ) {
                     (Some(a), Some(b)) => {
+                        // A range from the start of its first paragraph to the end of its last takes both whole.
+                        let at = |k: &str| v.get(k).and_then(Value::as_u64);
+                        let to_len = v
+                            .get("to")
+                            .and_then(Value::as_str)
+                            .and_then(|r| facts.paras.iter().find(|p| p.r == r))
+                            .map(|p| p.text.len() as u64); // `text` is a `Vec<char>`: characters, as offsets count
+                        let ends = at("end").is_none() || at("end") == to_len;
+                        let starts = at("start").is_none_or(|s| s == 0);
+                        if whole || ends && starts && v.get("find").is_none() {
+                            before_last(&mut t, &gone, a.min(b), a.max(b));
+                        }
                         for r in facts.top.get(a.min(b)..=a.max(b)).into_iter().flatten() {
                             gone.insert(r.clone());
                         }
                     }
-                    (Some(_), None) if whole && is_top(v.get("ref").and_then(Value::as_str)) => {
+                    (Some(at), None) if whole && is_top(v.get("ref").and_then(Value::as_str)) => {
+                        before_last(&mut t, &gone, at, at);
                         gone.extend(first.clone());
                     }
                     _ => {}
@@ -256,6 +304,34 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
                 }
             }
             _ => {}
+        }
+        // An insertion after a paragraph whose mark is gone goes after the paragraph it joins on to when that one is emptied
+        // (revisions.md 3.2.2), which then takes the Y's inserted mark: that one and the gone-mark paragraphs before it are
+        // touched. A paragraph with text that it joins on to is left alone, as the write leaves it.
+        if op.name == "insert"
+            && v.get("place").and_then(Value::as_str) == Some("after")
+            && let Some(at) = first.as_deref().and_then(index)
+        {
+            let body_para = |r: &str| {
+                facts
+                    .paras
+                    .iter()
+                    .find(|p| p.r == r && p.story == "body" && !p.in_table)
+            };
+            let mut walked = Vec::new();
+            for r in facts.top.iter().skip(at + 1) {
+                let p = body_para(r);
+                if !p.is_some_and(|p| p.mark_gone) {
+                    if p.is_some_and(|p| p.emptied)
+                        && body_para(&facts.top[at]).is_some_and(|p| p.mark_gone)
+                    {
+                        walked.push(r.clone());
+                        t.tops.extend(walked);
+                    }
+                    break;
+                }
+                walked.push(r.clone());
+            }
         }
         t.tops.extend([first, to, second].into_iter().flatten());
         match op.name {
@@ -380,113 +456,5 @@ pub fn per_block(before: &[u8], after: &[u8], facts: &Facts, g: &Generated) -> R
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::fixtures::parts::{Doc, entries_doc};
-    use crate::fixtures::zip::Zip;
-    use crate::laws::edits::run_batch;
-    use crate::laws::generate::GenOp;
-    use stetdoc_core::{Document, OpenOptions};
-
-    fn generated(ops: &[(&'static str, &str)], tracked: bool) -> Generated {
-        let ops = ops
-            .iter()
-            .map(|(name, json)| GenOp {
-                name,
-                json: (*json).to_string(),
-                refused: None,
-                sticks: None,
-            })
-            .collect();
-        Generated { ops, tracked }
-    }
-
-    /// The bytes after an untracked batch of `ops`.
-    fn edited(bytes: &[u8], ops: &str) -> Vec<u8> {
-        run_batch(bytes, &[], ops, false).unwrap().unwrap().saved
-    }
-
-    #[test]
-    fn a_merge_after_the_last_row_of_a_table_is_deleted_names_the_paragraph_after_the_table() {
-        let para = |t: &str| format!("<w:p><w:r><w:t>{t}</w:t></w:r></w:p>");
-        let body = format!(
-            r#"{}<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr>{}</w:tc></w:tr></w:tbl>{}{}"#,
-            para("Before."),
-            para("Cell."),
-            para("After."),
-            para("Far.")
-        );
-        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
-        let facts =
-            Facts::of(&Document::open(bytes.clone(), &OpenOptions::default()).unwrap()).unwrap();
-        assert_eq!(facts.top, ["p1", "t1", "p3", "p4"]);
-        let (delete, merge) = (
-            r#"{"op":"row","ref":"r1","action":"delete"}"#,
-            r#"{"op":"merge","ref":"p1"}"#,
-        );
-        // Untracked, the row's deletion removes the table, and the merge joins p1 with p3, which the batch names.
-        let g = generated(&[("row", delete), ("merge", merge)], false);
-        let after = edited(&bytes, &g.json());
-        per_block(&bytes, &after, &facts, &g).unwrap();
-        // A paragraph that the batch does not name and that changes is still caught.
-        let changed = edited(
-            &bytes,
-            &format!(
-                r#"{},{{"op":"replace","ref":"p4","find":"Far","with":"Near"}}"#,
-                g.json()
-            ),
-        );
-        let e = per_block(&bytes, &changed, &facts, &g).unwrap_err();
-        assert!(
-            e.starts_with("L2: p4, which the batch does not name"),
-            "{e}"
-        );
-    }
-
-    #[test]
-    fn a_table_after_a_removed_table_may_gain_its_comment_in_its_first_paragraph() {
-        // floattable-anchorpos.docx, seed 10998282968869546347: removing t1 hoists its comment into p2, in t2.
-        let table = |t: &str| {
-            format!(
-                r#"<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/></w:tblPr><w:tblGrid><w:gridCol w:w="2000"/></w:tblGrid><w:tr><w:tc><w:tcPr><w:tcW w:w="2000" w:type="dxa"/></w:tcPr><w:p><w:r><w:t>{t}</w:t></w:r></w:p></w:tc></w:tr></w:tbl>"#
-            )
-        };
-        let body = format!(
-            "{}{}<w:p><w:r><w:t>D</w:t></w:r></w:p>",
-            table("C"),
-            table("A")
-        );
-        let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
-        let facts =
-            Facts::of(&Document::open(bytes.clone(), &OpenOptions::default()).unwrap()).unwrap();
-        assert_eq!(facts.top, ["t1", "t2", "p3"]);
-        let comment = r#"{"op":"comment","ref":"p1","start":0,"end":0,"text":"Note"}"#;
-        let g = generated(
-            &[
-                ("comment", comment),
-                ("delete", r#"{"op":"delete","ref":"t1"}"#),
-            ],
-            false,
-        );
-        let after = edited(&bytes, &g.json());
-        let xml = part(&after, "word/document.xml").unwrap();
-        assert!(
-            String::from_utf8_lossy(&xml).contains("commentReference"),
-            "the comment is gone"
-        );
-        per_block(&bytes, &after, &facts, &g).unwrap();
-        // The table's text changing is still caught.
-        let changed = edited(
-            &bytes,
-            &format!(
-                r#"{},{{"op":"replace","ref":"p2","find":"A","with":"B"}}"#,
-                g.json()
-            ),
-        );
-        let e = per_block(&bytes, &changed, &facts, &g).unwrap_err();
-        assert!(
-            e.starts_with("L2: t2, which the batch does not name"),
-            "{e}"
-        );
-    }
-}
+#[path = "blocks_tests.rs"]
+mod tests;

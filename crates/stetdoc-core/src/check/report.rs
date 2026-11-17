@@ -103,6 +103,9 @@ pub(crate) fn sentence(code: FindingCode, subject: &str) -> String {
         FindingCode::RelationshipIdDuplicate => {
             format!("two relationships{in_part} have the id {thing}")
         }
+        FindingCode::UnreferencedNote => format!(
+            "{thing} is referenced from nowhere in the document: Word keeps its text and shows it nowhere"
+        ),
         other => other.description().to_string(),
     }
 }

@@ -336,8 +336,8 @@ pub enum Inline {
 pub enum Atom { PageBreak, ColumnBreak, NoteRef { kind: NoteKind, ordinal: u32 }, NoteMark { kind: NoteKind },
                 Object(ObjectInfo), Math(String), Auto(AutoKind) }
 pub struct ObjectInfo { pub kind: ObjectKind, pub alt: Option<String>, pub text_box: Option<Vec<String>> }
-pub struct Field { pub keyword: String, pub text: String, pub width: u32, pub target: Option<BlockRef>,
-                   pub opens: bool, pub closes: bool, pub dirty: bool }
+pub struct Field { pub keyword: String, pub text: String, pub width: u32, pub label: bool,
+                   pub target: Option<BlockRef>, pub opens: bool, pub closes: bool, pub dirty: bool }
 pub struct RevTag { pub id: i64, pub author: u32 /* index into Head.authors */, pub date: Option<Arc<str>>,
                     pub peer: Option<i64> /* the id of the other end of a move */ }
 // The kind is carried by the place that holds the tag, so that no combination that cannot happen can be written:
@@ -350,7 +350,7 @@ pub struct RevTag { pub id: i64, pub author: u32 /* index into Head.authors */, 
   characters of `Text`, as wordml's text model makes them (4.1 of that design), because `replace` text may
   contain a tab or a line break (revisions 2.2). A page break and a column break are atoms, because `replace`
   text may not contain them. So is anything with no characters of its own: a drawing, a note reference, an
-  equation, a page number, a field with no stored result that Word still shows.
+  equation, a page number.
 - **Revisions nest as the XML does.** `Rev` wraps inlines, and a deletion inside another author's insertion is a
   `Rev` inside a `Rev`. In `Final` no `Del` or `MoveFrom` is present, in `Original` no `Ins` or `MoveTo`, and in
   `Redline` everything is. `RevTag.id` is the `w:id` of the revision element, which `accept` and `reject` select
@@ -369,7 +369,9 @@ pub struct RevTag { pub id: i64, pub author: u32 /* index into Head.authors */, 
   rejects edits, and a placeholder is not content (wordml 3.8, revisions 2.4).
 - **Fields** are atoms with their result. `text` is the displayed result with nested field codes dropped and
   nested atoms flattened, and `width` is the number of characters the result takes in the paragraph's `Final`
-  text, which is what keeps an offset exact when the text is shown differently from how it is counted. `target`
+  text, which is what keeps an offset exact when the text is shown differently from how it is counted. `label`
+  is true when `text` is not a stored result but the label that a `MACROBUTTON` or `GOTOBUTTON` with no stored
+  result shows from its field code, which takes no characters, so its `width` is 0. `target`
   is the block that a `REF` or `PAGEREF` resolves to, from `index`. A field that begins in one paragraph and ends
   in another gives each paragraph its part, with `opens` and `closes` saying which ends are here.
 - **Hidden and looks-hidden** wrap the runs they apply to. They are decided per run by `Cascade::hidden` and
@@ -424,6 +426,9 @@ code is.
 | `ref_retargeted` | in a receipt: a typed cross-reference (`Clause 16.2(b)`) that resolved to one block before the edit reads the same and names another block now, or a block the batch adds. `Receipt.ref_drift` has its old and new target ([decision 0015](../decisions/0015-cross-reference-drift.md)) | The edit renumbered the clauses and the reference did not follow. It reads right and points at the wrong limb |
 | `ref_unresolved` | in a receipt: a typed cross-reference that resolved to one block before the edit resolves to nothing now, or to several | The clause it named is gone or no longer unique, and the reference needs updating or removing |
 | `definition_removed` | in a receipt: the edit removed the last definition of a term, or its last real one when only paragraphs that give the meaning by pointing elsewhere remain, and the Final text still uses the term | The uses are left without a meaning. The message names the blocks that use the term and the blocks that cite the one that defined it |
+| `kept_required_paragraph` | in a receipt: a `delete` of a whole paragraph emptied it and kept it, because its container needs it: the only paragraph of a cell or of the body, one that ends one after a table, one between two tables, the body's last paragraph after a section break, or one that holds a section break ([decision 0018](../decisions/0018-kept-required-paragraph.md)) | The ref is still there, empty. A caller that keeps its own map of the document would otherwise take the paragraph for removed |
+| `row_outside_repeating_section` | in a receipt: a tracked `row` insert before a repeating section's first item put the row above the section, as a plain row, and not into it as a new first item ([decision 0020](../decisions/0020-tracked-row-before-first-item.md)) | Word's Reject All of a tracked first item removes the whole section. The row is no item; insert it untracked to make it the first item |
+| `repeating_section_unwrapped_by_word` | in a receipt: a tracked deletion of the row that holds a repeating section's start, the first row of its first item, while rows of the section stay ([decision 0020](../decisions/0020-tracked-row-before-first-item.md)) | Word's Accept All removes the repeating-section control around the rows that stay, though the text and rows come out right. An untracked delete keeps the section |
 | `outline_shown` | a view of the whole body (`Auto`) that does not fit the budget shows its outline | Its next step names the range of the whole body and `--all`, so the agent reads the body without guessing a flag |
 | `unreferenced_note` | a note no reference points at | It is in `notes.md` and nowhere in the text |
 | `duplicate_number` | in `render_blocks` for a receipt: a paragraph's text starts with its own computed clause number | The agent typed a number Word also adds |
@@ -518,6 +523,13 @@ staged state of a dry run. The steps:
    (inserted, moved in) and that has nothing left, and a row that is deleted in `Final` or inserted in `Original`
    (with its table, if no row is left). A table with no rows at all, which some producers write, is kept, so that
    every block appears once.
+   In `Final`, a paragraph that shows nothing and keeps its mark, after paragraphs that join on to it through deleted
+   marks, the first of them with text and the rest with none, is not shown, nor are the empty ones between, and the one
+   with text does not get `{joins-next}`: they read as that one, as accept all leaves them. A tracked delete of a
+   container's last paragraph writes this (`revisions.md` 3.2.2), and so does a Word document whose deletion runs from
+   the middle of one paragraph through the whole of the next: there too the emptied paragraph is not shown, as accept
+   leaves it, and the refs stay right, since the paragraph with text is the one accept keeps. With no paragraph with
+   text among them, the view is as before (`StoryCx::takes_joined`).
 5. **Items to inlines.** One pass over the items, each with its chain of wrappers, outermost first: the tracked
    changes (only in `Redline`: `Final` and `Original` are read without change markup), the external link, the
    inline content control and, innermost, the hidden or looks-hidden run. Neighbours that share a prefix of the
@@ -533,7 +545,8 @@ staged state of a dry run. The steps:
    its result and the fields nested in either. The result is one string (an atom inside it takes one character of
    `width` and none of `text`), `width` counts the characters that are in `Final`, and `opens` and `closes` say
    which ends are in this paragraph. A zero-width comment mark inside an extent is kept after the field. A field
-   with no stored result that Word still shows (`MACROBUTTON`) shows the text its code holds.
+   with no stored result has no width, and a `MACROBUTTON` or `GOTOBUTTON` with none shows the text its code holds,
+   with `label` set.
 7. **Tables.** Through `wordml`'s block views, so the rows and cells are found as the scan found them: `cols` is the
    grid, or the widest row if that is more, a cell's column honours `gridBefore`, and a nested table is a block of
    its cell.
@@ -1016,7 +1029,7 @@ else in this document is independent of them.
 | `Atom::Object` | `{img "alt"}`, `{shape "alt"}`, `{chart "alt"}`, `{object "alt"}`, `{textbox box "line one / line two"}`, and `{textbox "alt" box "line one / line two"}` when it has both | one seam, the alt text and the text box text in the key |
 | `Atom::Math` | `{math "x^2 + y"}` | one seam |
 | `Atom::PageBreak`, `ColumnBreak`, `Auto` | `{pagebreak}`, `{colbreak}`, `{page}` | one seam |
-| `Field` | `{field REF "4.2" ->p57}`, and `{field TOC start "..."}`, `{field TOC more "..."}`, `{field TOC end "..."}` for a result that spans paragraphs | one seam, the keyword, the result and the target in the key |
+| `Field` | `{field REF "4.2" ->p57}`, `{field TOC start "..."}`, `{field TOC more "..."}`, `{field TOC end "..."}` for a result that spans paragraphs, `{field MACROBUTTON "Click here" label}` for a label that takes no offsets, and a trailing `dirty` when Word is asked to refresh the result | one seam, the keyword, the result and the target in the key; `label` is in the key and not in its equality |
 | `Link` (external) | `{link "https://example.com"}text{/link}` | `Open` and `Close` around editable text |
 | `Control`, editable | `{ctl date "Closing"}2026-10-01{/ctl}` | `Open` and `Close` around editable text |
 | `Control`, locked, bound or a placeholder | `{ctl text "Name" placeholder "Click to enter"}` | one seam |
@@ -1038,6 +1051,13 @@ Notes on the rows:
   of a table of contents (553 runs in the curated set). It is plain text. Only `vanish` is `{hidden "text"}`, and the
   paragraph flag is `{hidden-para}`, a different word so that neither can be read as the other.
 - **`{field ...}`** shows the keyword and the result, and for a `REF` or `PAGEREF` the block it resolves to.
+  A trailing `label` says that the quoted text is the label a `MACROBUTTON` or `GOTOBUTTON` with no stored result
+  shows from its field code. Such a label takes no offsets, while the same text as a stored result takes one offset
+  for each character, so `label` is the only way to tell the two apart. The reader accepts the word and leaves it
+  out of the key's equality, like a seam's width, because the document decides it: a working copy written before
+  the word existed, which has the same field without it, packs with no change (decision 0017). Such a copy recorded
+  the hash of its rendering without the word, and `hashes_as_earlier_release` gives the hashes of the files rendered
+  that way, which a pack also accepts.
   Every field is read-only, which is architecture rule 6, as the default that a per-keyword table can loosen
   later (wordml 4.4 says Word edits the display text of a `HYPERLINK` and a `FORMTEXT` normally).
 - **A text box** is one string: the text of its paragraphs joined by ` / `, which the model builds, so the key
@@ -1086,6 +1106,11 @@ p14 per unit
   free.
 - A row that Word marked inserted or deleted is `{row inserted #12 JD}` and `{row deleted #12 JD}`, and a cell is
   `{cell inserted ...}` in front of its cell tags. The paragraphs inside show no revision of their own.
+- A row that is the content of a repeating-section item, directly or inside plain controls (a `w:sdt` with `w15:repeatingSectionItem` inside one with
+  `w15:repeatingSection`) is `{row item=2}`, with the item's number in its section from 1, after `header` and before a
+  row change. The rows of one item share the number, and a new section starts at 1 again. It is shown only: the
+  alignment (6) compares a row line that has no `item=` without it, so a working copy written before the token existed
+  still packs, and a row line that shows a number must show the baseline's (decision 0019).
 
 ### 5.7 The knobs and the experiments
 
@@ -1117,7 +1142,9 @@ section 6 run on drafts built by hand and on the JSON format, so a bug in `stet/
 `to_batch`. It is not a working-copy format and no file is ever rendered as JSON for an agent to edit:
 `render_files` and `to_batch` refuse it with `unsupported`, and the tests reach it through `render_files_in` and
 `to_batch_in`. Its shape
-is the model's shape, so it is versioned (`json/1`) and a change to a field is additive or a new version.
+is the model's shape, so it is versioned (`json/1`) and a change to a field is additive or a new version. An
+added field may be missing on the way back, and is then its default: a field's `label`, written next to its
+`width`, is false when it is missing.
 
 ### 5.9 The conformance suite
 
@@ -1169,7 +1196,10 @@ only blank space that is ignored is the five cases of 5.4.
    against the hash of that file as written, which the complement records, and answers `stale_files` on a
    mismatch: "these files were written by another release of stetdoc. Export again and redo the edit." The check
    is `document`'s, because `document` owns the complement, and `to_batch` hands over the baseline so that nothing
-   renders twice.
+   renders twice. One rendering is known to be an earlier release's and is taken as this one's: the files with every
+   marker that `stet/1` gained since 0.9.3 turned off, which are a field's `label` (decision 0017) and a row's `item=`
+   (decision 0019). On a mismatch, `document` hashes the files rendered that way (`projection::hashes_as_earlier_release`,
+   only when the state has such a marker) and takes a match, since those files parse to the same draft here.
 3. `document` applies the batch like any other (`ops::apply` into a `Tx`, `check`, the scope guard, commit or
    discard). The batch carries `Claim::Base(current token)`, so the version checks of refs cannot refuse it: the
    files were just verified to be at the current version, and a file edit is whole-file.

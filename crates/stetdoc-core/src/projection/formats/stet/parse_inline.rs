@@ -539,9 +539,10 @@ fn field(toks: &[Tok]) -> Result<Key, String> {
     let text = quoted(toks, at, "{field}")?;
     at += 1;
     let mut target = None;
-    let mut dirty = false;
+    let (mut label, mut dirty) = (false, false);
     for tok in toks.iter().skip(at) {
         match tok {
+            Tok::Word(w) if w == "label" => label = true,
             Tok::Word(w) if w == "dirty" => dirty = true,
             Tok::Word(w) if w.starts_with("->") => {
                 let token = w.get(2..).unwrap_or("");
@@ -553,6 +554,7 @@ fn field(toks: &[Tok]) -> Result<Key, String> {
     Ok(Key::Field(FieldKey {
         keyword,
         text,
+        label,
         target,
         opens,
         closes,

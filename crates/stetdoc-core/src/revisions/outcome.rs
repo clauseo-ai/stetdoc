@@ -52,6 +52,15 @@ pub(crate) struct Origin {
     pub from: Vec<BlockKey>,
 }
 
+/// A paragraph that a deletion emptied and kept, because its container needs it (`required.rs`).
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(crate) struct KeptParagraph {
+    /// The paragraph.
+    pub block: BlockKey,
+    /// Why it stays.
+    pub reason: super::required::KeptReason,
+}
+
 /// What one call did.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Effect {
@@ -65,6 +74,14 @@ pub(crate) struct Effect {
     pub folded: Vec<Folded>,
     /// Ids of revisions that went with an element removed outright.
     pub swallowed: Vec<i64>,
+    /// Paragraphs that a deletion emptied and kept, because their containers need them.
+    pub kept: Vec<KeptParagraph>,
+    /// The anchor of each tracked new row that went above a repeating section, not into it as a first item
+    /// (decision 0020).
+    pub outside_section: Vec<BlockKey>,
+    /// Each row deleted tracked that holds the start of its repeating section: Word's Accept All removes the section's
+    /// control around the rows that stay (decision 0020). `ops` warns from the batch's final state, when the row is still deleted and rows still stay.
+    pub section_start_deleted: Vec<BlockKey>,
     /// Elements created. Their refs are minted at commit.
     pub new_blocks: Vec<BlockKey>,
     /// Where each new or surviving block came from.
@@ -81,6 +98,10 @@ pub(crate) struct Effect {
     /// Compare only: each definition (a style, a numbering definition) and each part that the import added, with what it was
     /// copied from, so that `check` keys it as foreign.
     pub imported_defs: Vec<super::redline_types::ImportedDef>,
+    /// Each `w:fldSimple` that a tracked deletion of this call wrote as a complex field (`simple_unfold`), by its part and its
+    /// node in the document before the call: rejecting the deletion gives back a complex field where that element was, which
+    /// the laws R1 and R2 allow for exactly these fields.
+    pub unfolded: Vec<(Arc<str>, NodeId)>,
 }
 
 impl Effect {
@@ -91,12 +112,16 @@ impl Effect {
             && self.removed_own.is_empty()
             && self.folded.is_empty()
             && self.swallowed.is_empty()
+            && self.kept.is_empty()
+            && self.outside_section.is_empty()
+            && self.section_start_deleted.is_empty()
             && self.new_blocks.is_empty()
             && self.origins.is_empty()
             && self.survivor.is_none()
             && self.touched.is_empty()
             && self.imported.is_empty()
             && self.imported_defs.is_empty()
+            && self.unfolded.is_empty()
     }
 }
 

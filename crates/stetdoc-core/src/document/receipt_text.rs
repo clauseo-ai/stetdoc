@@ -75,6 +75,18 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
     let mut parts: Vec<String> = comment.into_iter().collect();
     let several = op.blocks.len() + op.added.len() > 1;
     parts.extend(op.marked.iter().map(|m| marked(m, several)));
+    // A deleted paragraph that its container needs is emptied, not removed, and the line says so before its revisions.
+    parts.extend(
+        op.warnings
+            .iter()
+            .filter(|w| w.code == WarningCode::KeptRequiredParagraph)
+            .map(|w| {
+                format!(
+                    "{} emptied and kept",
+                    w.block.as_deref().unwrap_or("a paragraph")
+                )
+            }),
+    );
     parts.extend(op.revisions.iter().map(|c| match c.ids.first() {
         Some(id) => format!("{} #{id}", kind_word(c.kind)),
         None => kind_word(c.kind).to_string(),
@@ -116,7 +128,7 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
     for r in &op.removed_own {
         parts.push(format!("removed your own pending {}", r.kind));
     }
-    if parts.is_empty() {
+    let said = if parts.is_empty() {
         match (op.changed, tracked) {
             (false, _) => "no change".to_string(),
             (true, false) => "applied directly".to_string(),
@@ -124,6 +136,14 @@ fn summary(op: &OpResult, comment: Option<String>, dry_run: bool, r: &Receipt) -
         }
     } else {
         parts.join(", ")
+    };
+    if op.notes_removed.is_empty() {
+        said
+    } else {
+        format!(
+            "{said}, and removed {}, whose last reference went",
+            op.notes_removed.join(", ")
+        )
     }
 }
 

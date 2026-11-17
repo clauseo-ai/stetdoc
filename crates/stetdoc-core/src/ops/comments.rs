@@ -365,5 +365,6 @@ pub(super) fn delete_note(
     done.warnings
         .extend(deleted.warnings.iter().map(comment_warning));
     done.changed = true;
+    done.notes_removed = deleted.removed;
     Ok(done)
 }

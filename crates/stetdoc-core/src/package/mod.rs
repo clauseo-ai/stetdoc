@@ -1,15 +1,16 @@
 //! The ZIP container: part access and package-level byte preservation.
 //!
 //! **Owns.** The ZIP container. It gives lazy access to parts, copies the raw entries of
-//! untouched parts, and registers new parts in the content types and relationships. It
-//! enforces the container's input limits. Only this module writes the ZIP.
+//! untouched parts, registers new parts in the content types and relationships, and removes
+//! relationships that nothing uses any more. It enforces the container's input limits. Only
+//! this module writes the ZIP.
 //!
-//! **Interface.** `Package::{open, part, replace_part, add_part, write}`, and for what a
-//! package says about itself `part_names`, `contains`, `content_type`, `relationships` and
-//! `main_part`. Part names are ZIP entry names without a leading slash, such as
-//! `word/document.xml`, and are compared ignoring ASCII case, as OPC does. A directory entry (a
-//! name ending in `/`) is not a part: it is not listed and cannot be read or replaced, but a new
-//! part cannot take its name.
+//! **Interface.** `Package::{open, part, replace_part, add_part, add_external_relationship,
+//! remove_relationships, write}`, and for what a package says about itself `part_names`,
+//! `contains`, `content_type`, `relationships` and `main_part`. Part names are ZIP entry names
+//! without a leading slash, such as `word/document.xml`, and are compared ignoring ASCII case,
+//! as OPC does. A directory entry (a name ending in `/`) is not a part: it is not listed and
+//! cannot be read or replaced, but a new part cannot take its name.
 //!
 //! **Invariants.**
 //! - An unmodified package writes back the input bytes. A modified one copies every

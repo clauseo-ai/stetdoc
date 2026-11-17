@@ -132,19 +132,19 @@ fn mark_properties_run_properties_and_the_run_style_are_read_from_the_paragraph(
         (Some(true), Some("28"))
     );
     let m = p.map();
-    assert_eq!(m.text(FINAL), "ab\u{6}");
+    assert_eq!(m.text(FINAL), "ab");
     let a = &m.items()[0];
     let b = &m.items()[1];
     assert_eq!(p.run_style(a).as_deref(), Some("Strong"));
     assert_eq!(p.run_props(a).unwrap().on_off("i"), Some(true));
     assert!(p.run_props(b).is_none() && p.run_style(b).is_none());
-    let value = m
+    let field = m
         .items()
         .iter()
-        .find(|i| i.kind == ItemKind::FieldValue)
+        .find(|i| i.kind == ItemKind::FieldBegin)
         .unwrap();
     assert!(
-        p.run_props(value).is_none(),
+        p.run_props(field).is_none(),
         "an item that no run holds has no run properties"
     );
     assert!(story.paragraph(&tree, 0).unwrap().element().is_element());

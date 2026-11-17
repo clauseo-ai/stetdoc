@@ -2,7 +2,8 @@
 //!
 //! **Owns.** The rules that decide whether a document is valid (the schema's keys, the Word
 //! rules, the package rules), the finding vocabulary of `api::check`, and the reports built from
-//! them.
+//! them. Also the note `unreferenced_note`, a footnote or an endnote that no reference in any story
+//! names (`check/notes.rs`), which only `Document::check` reports.
 //!
 //! **Interface.** `edit(&Tx, &Declared) -> Result<Verified, StetError>` for the commit pipeline,
 //! `document(&PartsView) -> CheckReport` for `Document::check`, `scan_unit` and `scan_part` for the
@@ -27,7 +28,8 @@
 //! **Depends on.** `api`, `package`, `xml`, `schema`, `wordml`, `state`, `threads`.
 //!
 //! **Start reading.** `check/mod.rs`, then `check/units.rs` and `check/edit.rs`; the Word rules
-//! are in `check/rules/mod.rs`, and `check/document.rs` is `Document::check`.
+//! are in `check/rules/mod.rs`, `check/document.rs` is `Document::check`, and `check/notes.rs`
+//! finds the notes that nothing references.
 //!
 //! The design is in
 //! [`docs/design/check.md`](../../../../docs/design/check.md).
@@ -49,6 +51,7 @@ mod examine;
 mod fields;
 mod found;
 mod keys;
+mod notes;
 mod origins;
 mod package;
 mod prefixes;

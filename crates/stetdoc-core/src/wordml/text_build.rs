@@ -8,7 +8,7 @@
 use super::anomaly::{Anomaly, AnomalyKind};
 use super::mc;
 use super::names::{CELL_CONTENT, ROW_CONTENT, is_w, is_word_ns, leading_child};
-use super::text_fields::{End, FieldState, OpenField, Phase, keyword, shows_without_result};
+use super::text_fields::{End, FieldState, OpenField, Phase};
 use super::text_model::{
     Context, FIELD_RESULT, FieldRef, Item, ItemKind, NO_CONTEXT, TextMap, Vis, WrapperKind,
 };
@@ -21,12 +21,9 @@ pub(super) enum FrameKind {
     Content,
     /// The content of a run: text, tabs, field characters, references.
     Run,
-    /// The content of a `w:fldSimple`, which closes its field when the frame ends.
-    Simple {
-        node: NodeId,
-        items_before: usize,
-        displayed: bool,
-    },
+    /// The content of a `w:fldSimple`, which closes its field when the frame ends. `marks` is what the field's begin and
+    /// end are read with.
+    Simple { node: NodeId, marks: Info },
 }
 
 pub(super) struct Frame<'t> {
@@ -256,23 +253,10 @@ impl<'t> Builder<'t> {
 
     /// The end of a frame: a `w:fldSimple` closes its field.
     fn exit(&mut self, frame: Frame<'t>) {
-        let FrameKind::Simple {
-            node,
-            items_before,
-            displayed,
-        } = frame.kind
-        else {
+        let FrameKind::Simple { node, marks } = frame.kind else {
             return;
         };
-        let empty = self
-            .items
-            .iter()
-            .skip(items_before)
-            .all(|i| i.kind.is_mark());
-        if empty && displayed {
-            self.atom(ItemKind::FieldValue, node, frame.info);
-        }
-        self.mark(ItemKind::FieldEnd, node, frame.info);
+        self.mark(ItemKind::FieldEnd, node, marks);
         self.pop_field(node);
     }
 
@@ -413,9 +397,4 @@ fn property_revisions(
         deleted |= is_w(&c, names[1]);
     }
     [inserted.then_some(kinds[0]), deleted.then_some(kinds[1])]
-}
-
-/// True if Word shows something for a field with this instruction when it has no stored result.
-pub(super) fn displayed(instr: &str) -> bool {
-    shows_without_result(&keyword(instr))
 }

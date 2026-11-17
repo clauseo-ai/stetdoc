@@ -84,12 +84,16 @@ pub(crate) struct ObjectKey {
 }
 
 /// A field with its result and target.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug)]
 pub(crate) struct FieldKey {
     /// The instruction's keyword.
     pub keyword: Box<str>,
     /// The displayed result.
     pub text: Box<str>,
+    /// The text is a label shown from the field code that takes no characters (`Field::label`). Not part of
+    /// equality: the document decides it, like a seam's width, and a working copy written before the flag
+    /// existed has the same field without it.
+    pub label: bool,
     /// The block a `REF` or `PAGEREF` resolves to.
     pub target: Option<BlockRef>,
     /// The field begins in this paragraph.
@@ -99,6 +103,19 @@ pub(crate) struct FieldKey {
     /// The result needs an update.
     pub dirty: bool,
 }
+
+impl PartialEq for FieldKey {
+    fn eq(&self, other: &FieldKey) -> bool {
+        self.keyword == other.keyword
+            && self.text == other.text
+            && self.target == other.target
+            && self.opens == other.opens
+            && self.closes == other.closes
+            && self.dirty == other.dirty
+    }
+}
+
+impl Eq for FieldKey {}
 
 /// A change anchored at a block that is not text.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -131,6 +148,9 @@ pub(crate) struct RowKey {
     pub r#ref: Option<BlockRef>,
     /// A header row.
     pub header: bool,
+    /// The number of the repeating-section item the row is the content of, `item=N`. It is shown and never
+    /// edited: the alignment of an edited file with its baseline does not compare it (`Key::same_structure`).
+    pub item: Option<u32>,
     /// The row was inserted or deleted.
     pub change: Option<(RowChange, RevRef)>,
     /// Property changes of the row.
@@ -321,6 +341,22 @@ fn quoted(text: &str) -> String {
 }
 
 impl Key {
+    /// True if `edited`, a structure key of an edited file, says what `self`, the baseline's, says. A row's item
+    /// number is only shown, and a working copy written before it was shown has none, so a row line with no
+    /// `item=` matches a row of an item. A row line that shows a number must show the baseline's.
+    pub(crate) fn same_structure(&self, edited: &Key) -> bool {
+        match (self, edited) {
+            (Key::Row(want), Key::Row(got)) if got.item.is_none() => {
+                let shown = RowKey {
+                    item: None,
+                    ..want.clone()
+                };
+                shown == *got
+            }
+            _ => self == edited,
+        }
+    }
+
     /// The key named in plain words, for a message: "the deletion #4 by JD of \"Losses\"".
     pub(crate) fn describe(&self) -> String {
         match self {

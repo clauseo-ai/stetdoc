@@ -100,6 +100,27 @@ impl Package {
             .ok_or_else(|| invalid("no relationship id was made"))
     }
 
+    /// Removes the relationships of `source` whose ids are `ids`. Only those elements leave its relationships part, which keeps
+    /// every other byte. Returns true if the part changed. A source with no relationships part, or none of these ids, is left
+    /// as it is.
+    pub fn remove_relationships(
+        &mut self,
+        source: &str,
+        ids: &[String],
+    ) -> Result<bool, StetError> {
+        let rels_name = opc::rels_part_name(source);
+        let Some(existing) = self.part(&rels_name)? else {
+            return Ok(false);
+        };
+        let Some(updated) = opc::without_relationships(&rels_name, &existing, ids, &self.limits)?
+        else {
+            return Ok(false);
+        };
+        self.check_replace(&rels_name, updated.len())?;
+        self.replace_checked(&rels_name, updated);
+        Ok(true)
+    }
+
     /// Builds what `add_part` will do, without changing the package.
     fn plan_add(&self, new: &NewPart<'_>) -> Result<AddPlan, StetError> {
         let mut plan = AddPlan::default();

@@ -505,6 +505,27 @@ pub(super) fn law_docs() -> Vec<String> {
         rev_by(735, "Zed"),
         r(" more")
     ));
+    // Simple fields (issue #24): a plain one, one whose result is partly another author's insertion, one whose result is all
+    // of it, and one whose result has another author's pending format. A tracked deletion of one writes a complex field.
+    let simple = |inner: &str| format!("<w:fldSimple w:instr=\" PAGE \">{inner}</w:fldSimple>");
+    docs.push(format!(
+        "<w:p>{}{}{}</w:p><w:p>{}{}{}</w:p><w:p>{}{}{}</w:p><w:p>{}{}{}</w:p>",
+        r("page "),
+        simple(&r("1")),
+        r(" of the plan"),
+        r("partly "),
+        simple(&format!("{}<w:ins {}>{}</w:ins>", r("1"), eric(740), r("2"))),
+        r(" theirs"),
+        r("all "),
+        simple(&format!("<w:ins {}>{}</w:ins>", eric(741), r("12"))),
+        r(" theirs"),
+        r("formatted "),
+        simple(&format!(
+            "<w:r><w:rPr><w:i/><w:rPrChange {}><w:rPr><w:b/></w:rPr></w:rPrChange></w:rPr><w:t>7</w:t></w:r>",
+            eric(742)
+        )),
+        r(" by them")
+    ));
     // Text as a converter from PDF writes it: no `xml:space`, with white space at the ends of the text
     // and a run of nothing but a space between words.
     let bare = |t: &str| format!("<w:r><w:t>{t}</w:t></w:r>");

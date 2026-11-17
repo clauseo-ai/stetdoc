@@ -455,7 +455,10 @@ three.
       `w:delText` and `w:instrText` to `w:delInstrText`; or remove outright; or nest our `w:del` among the runs
       of the other author's `w:ins`. Range markers between the first and last carved run go inside the
       `w:del`, as Word does (`w:del{commentRangeStart, r, commentRangeEnd}` occurs 7 times); markers
-      outside them stay.
+      outside them stay. An empty run between them goes inside too (only properties, a
+      `w:lastRenderedPageBreak` and `w:t` elements with no characters), since it has no text of its own to
+      carve. A run with an empty `w:delText` outside any deletion stays where it is, so a rejection gives it
+      back as it was.
    e. **Insert** `with` as one new `w:ins` placed after the last piece that was just deleted. For a pure
       insertion the place is chosen by the gap rule of 4.2. The run's `rPr` is a copy, by the copy rule, of the
       first deleted run's, or of the nearest text on the left (then on the right, then the paragraph mark's),
@@ -552,7 +555,7 @@ Both touch the paragraph. The ids are minted by the caller from `Tx::next_annota
 
 | Code | When |
 |---|---|
-| `readonly_region` | text or property edit in a deleted block; a range that cuts into a field, or a gap strictly inside a field result, or a delete, merge or split at a paragraph that begins or ends a field that spans paragraphs; text in a locked, data-bound or placeholder content control; a property edit on a container that holds another author's pending `*PrChange`; `merge_blocks` where either paragraph carries a section break, or where either holds another author's pending `pPrChange`; `split_block` inside an inline content control or a `w:fldSimple`; `delete_block` on a row that another revision already deletes |
+| `readonly_region` | text or property edit in a deleted block; a range that cuts into a field, or a gap strictly inside a field result, or a delete, merge or split at a paragraph that begins or ends a field that spans paragraphs; text in a locked, data-bound or placeholder content control; a property edit on a container that holds another author's pending `*PrChange`; `merge_blocks` where either paragraph carries a section break, or where either holds another author's pending `pPrChange`; a tracked `insert_block(R, After)` where R ends both its container and a section; `split_block` inside an inline content control or a `w:fldSimple`; a tracked deletion of a range that holds a `w:fldSimple` with no content; `delete_block` on a row that another revision already deletes |
 | `cross_block` | `merge_blocks` of two blocks that are not neighbouring paragraphs of one container (neighbouring in `Final`: only deleted blocks may lie between them); a table range for a paragraph primitive |
 | `invalid_payload` | an offset outside the text or inside an atom or surrogate pair, a character that cannot be written, an empty or over-long author, a date that is not a real ISO 8601 date and time, a `PropEdit` that cannot be placed |
 | `unsupported` | an edit whose target is inside a text box (the text boxes of `Story::text_boxes` have no refs, so `ops` refuses before the compiler), and a primitive that is not built in 1.0 |
@@ -704,15 +707,25 @@ stetdoc writes the same shapes and chooses by position:
   inserted mark, and rejecting the mark would remove that element (6.2) and keep the new one, losing P's attributes and
   its ref. The X keeps P's element, attributes, text and ref, so a reject gives back the very `w:p`.
 - `insert_block(R, Before, ..)` writes X before R.
-- `insert_block(R, After, ..)` writes Y when a paragraph follows R in the same container and R's mark holds no
-  revision of any kind, and **when nothing follows R in its container** (`wordml::ends_container`, which reads through
-  content controls and block wrappers as the join rule does) and R's mark is clean or only inserted: the inserted mark
-  moves with the original `w:pPr` to the new paragraph, which then ends the container, and rejecting joins R back into it.
-  Otherwise it writes X before the paragraph that follows R. Two `ins` cannot be on one mark, and a pending deleted mark is
-  left alone. **At the end of a container where Y cannot go** (R's mark is deleted or moved, or the edit needs a
-  `pPrChange` where another author's is pending) the insertion is `readonly_region`: a paragraph of its own there would be
-  the one that Reject All leaves empty. After a table that ends its container X stays, and rejecting removes it (above).
-  `insert_block(R, After)` is `split_block(R, len)` followed by putting the text in the second paragraph.
+- `insert_block(R, After, ..)` writes Y when a paragraph follows R in the same container, R's mark holds no revision of any
+  kind and R carries no section break, and **when nothing follows R in its container** (`wordml::ends_container`, which
+  reads through content controls and block wrappers as the join rule does) and R's mark is clean or only inserted: the
+  inserted mark moves with the original `w:pPr` to the new paragraph, which then ends the container, and rejecting joins R
+  back into it. `insert_block(R, After)` is then `split_block(R, len)` followed by putting the text in the second paragraph,
+  which goes directly after R. Otherwise it writes X **directly after R**, before whatever follows R (range markers such as a
+  bookmark or a permission range that ends there, a proofing mark, an empty content control or `w:customXml`, a
+  `w:altChunk`, then a table or a content control), so the new paragraph never lands inside a range that R
+  stood outside of, and R keeps its `w:pPr` byte for byte (issue 18). **After a paragraph that carries a section break** the
+  shape is that X even when a paragraph follows, because Y would move the break onto the new paragraph and the section would
+  end one paragraph later; the X is a copy of the next paragraph, its twin, so it needs no `pPrChange`. Where Y is refused because
+  R's mark holds a pending revision (inserted, deleted or moved) or because the edit needs a `pPrChange` where another
+  author's is pending, the X is the same copy of the next paragraph. Two `ins` cannot be on one mark, and a pending deleted mark is left alone. **At the end of a container where Y
+  cannot go** (R's mark is deleted or moved, or the edit needs a `pPrChange` where another author's is pending) the insertion
+  is `readonly_region`: a paragraph of its own there would be the one that Reject All leaves empty. **When R ends both its
+  container and a section** (the body's last paragraph holds a `w:sectPr`, which Word itself never writes) a tracked
+  insertion is `readonly_region` too, as a merge across a section break is (3.2.3): Y would move the break, and no other
+  tracked shape rejects to the original. An untracked insertion there is an X that leaves the break on R. After a table that
+  ends its container X stays, and rejecting removes it (above).
 
 **As built.** After the last block of a content control the next block of the story is in another container, so
 `insert_block(R, After)` writes X right after R in R's own container, with no twin. An insertion before a paragraph that
@@ -720,11 +733,15 @@ a field's result runs into, or after one that it runs out of, would be inside th
 split there is.
 
 **Y in detail.** The first paragraph is the **original element**, as the ref design wants, and it keeps its
-`w14:paraId`. Its `w:pPr` is replaced by a new one: a copy of the original's by the copy rule (2.2), so with no
-`pPrChange`, no revision on the mark and no `sectPr`, and with our `ins` first in the mark's `w:rPr`. The original
+`w14:paraId`. Its `w:pPr` is replaced by a new one: a faithful copy of the original's (`blocks::copy_ppr_faithful`), so with no
+`pPrChange`, no revision on the mark and no `sectPr`, with our `ins` first in the mark's `w:rPr`, and with every other child
+the original had, empty ones included. The copy is a container the transaction created, so `canonical::order_created` puts
+it in schema order: a copy of an order that is not the schema's would be one more `schema_non_canonical_order` finding, which
+the check counts as new. The original
 `w:pPr` moves whole to the second paragraph: its `sectPr`, its pending `pPrChange` and the revisions on its mark come
-with it, because the second paragraph holds the original mark. So a section break stays at the end of the section,
-now on the new paragraph. The second paragraph is new, with a new `w14:paraId` where the first has one (5.4). A
+with it, because the second paragraph holds the original mark. So in a split a section break stays at the end of the
+section, on the second half. An insertion after a paragraph that carries a section break is never a Y (above), so it never
+moves the break. The second paragraph is new, with a new `w14:paraId` where the first has one (5.4). A
 properties edit in `NewParagraph::props` is applied to the second paragraph by `set_props`, which writes a `pPrChange`
 whose snapshot is the original properties (3.3). That is what `FA/005` has: the second paragraph's `pPrChange`
 holds the original, empty `pPr`, and the first paragraph carries the same list formatting with **no** change,
@@ -735,11 +752,13 @@ author's revision written under a new id.
 
 **X in detail.** The new paragraph stands before its **twin**, the paragraph that rejecting its mark joins it
 into (the paragraph after it). Its `w:pPr` is a copy of the twin's by the copy rule, with our `ins` first in the
-mark's `w:rPr`, and its text is in one `w:ins`. When `NewParagraph::props` makes it differ from the twin, the edit is
-applied and the paragraph gets a `pPrChange` whose snapshot is the twin's base properties, so that rejecting gives the
-twin's properties whichever answer 3.2.4 turns out to have. With **no twin** (X after the last paragraph, `RP039`)
+mark's `w:rPr`, and its text is in one `w:ins`. After a paragraph that ends a section it is therefore a paragraph of the
+next section, as the twin is, and needs no change of properties. When `NewParagraph::props` makes it differ from the twin,
+the edit is applied and the paragraph gets a `pPrChange` whose snapshot is the twin's base properties, so that rejecting
+gives the twin's properties whichever answer 3.2.4 turns out to have. With **no twin** (X after the last paragraph, `RP039`)
 there is nothing to join into, the paragraph is copied from R, and edits are applied with no `pPrChange`. That is now
-only the paragraph after a table that ends its container, or after the last block of a content control that blocks follow.
+only the paragraph after a table that ends its container, after the last block of a content control that blocks follow,
+and the paragraph after one that a table, a content control or another block that is not a paragraph follows.
 
 **Run formatting of a new paragraph.** The run's `rPr` is a copy, by the copy rule, of the **mark's** `rPr` of the
 paragraph the new `pPr` was copied from (the original in Y, the twin or R in X), and no `rPr` when the mark has
@@ -753,12 +772,74 @@ bold. `RP039` has the mark's `lang` on the new run, and `FA/005` has no `rPr` on
 - The mark gets `del` when a paragraph follows P in the same container and P carries no section break.
   This is what Word writes (52 whole-paragraph deletions in the corpus), and the next paragraph's properties
   are left alone.
-- Otherwise the mark is left as it is: **the last paragraph of a container keeps its mark** (a `w:tc` must
-  end with a paragraph, and Word writes it that way: `RP040` deletes the content of its last paragraph and leaves the
-  mark plain), and **a paragraph that carries a section break keeps its mark**, so that accepting leaves an
-  empty paragraph that still ends the section. Word would delete the section break with the mark (it did in
-  `n830205`, 7 times). stetdoc does not, on purpose: a lost section drops its headers and footers silently. This is a
-  deliberate difference from Word, and `FIDELITY.md` will say so (decision 8).
+- The mark gets `del` as well when no paragraph follows P but its container does not need it
+  (`revisions/required.rs`, issue #25): the first block of a container before a table, a paragraph between a paragraph
+  and a table when a paragraph whose mark stays follows later in the container. Accepting removes the empty paragraph
+  (3.2.5) and moves its range markers to the end of the paragraph before it.
+- **The last paragraph of a container never gets a deleted mark.** Word cannot accept one: with `del` on the body's final
+  mark, Accept All left an empty paragraph and the revision pending, and with `del` on a cell's last mark Accept All removed
+  the whole table (Word for Mac 16.114.4, batch 2, folders 02 and 19). So when the last paragraph of a cell, the body, a
+  header, a footer, a note, a comment or a text box goes and a paragraph whose mark stays is left before it, its text is
+  deleted, its mark stays, and the mark of that paragraph before it gets `del`, which is Word's own gesture
+  (`revisions/blocks_delete_last.rs`). This is a tracked merge of the two (3.2.3), with the alignment: when their base
+  properties differ, the last paragraph takes the earlier one's in a `pPrChange`, so accepting leaves the earlier
+  paragraph's text with its own properties under either rule of 3.2.4, and Reject All gives back the source. Accepting
+  joins the two, and the last paragraph's ref is retired as merged into the earlier one. An insertion after the earlier
+  paragraph in the same batch goes after the paragraph its deleted mark joins into (a Y on the last paragraph), so it
+  stays a paragraph of its own, and so does an insertion before the last paragraph (it goes after it, and after the
+  paragraphs earlier such insertions put there, so they keep their order). The shape is recognised from the document
+  alone (`revisions/blocks_insert_joined.rs`): a paragraph whose mark is deleted, then the container's last paragraph,
+  which keeps its mark and has all its text deleted. So it holds for any author and any batch. An insertion before the
+  last paragraph takes the properties, the mark's run properties and the run formatting that the last paragraph had
+  before the join, as 0.9.3 gave: in the batch of the join, from what the join recorded; in a later batch, from the
+  join's own property changes, known by the author, date and ids next to the join's mark deletion. When the last
+  paragraph already had the author's own pending property change, the join folds its alignment into it, and in a later
+  batch what the paragraph had is no longer in the file: nothing is guessed, and the insertion takes the earlier
+  paragraph's properties, its mark's run properties and run formatting alike (a known difference from 0.9.3, in
+  FIDELITY.md). Another author's change is never taken for the alignment. An insertion after the paragraph before takes that paragraph's properties, as 0.9.3 gave. A
+  matrix test compares accept all and reject all with 0.9.3's results (`document/last_mark_0_9_3.tsv`). The mark's run
+  properties are carried the same way, with an `rPrChange` on the last paragraph's mark. A paragraph whose mark is
+  already deleted and that joins on to such an emptied last paragraph, when it is deleted in turn, makes the paragraph
+  before it lose its mark too, so deleting the last two paragraphs from the bottom up gives what deleting them from the
+  top down gives. When a paragraph with text whose mark is deleted already joins on to the last paragraph (a range
+  deleted from inside a paragraph to the end), that text takes its place, and no other mark is deleted. When the
+  paragraph before is empty, the last paragraph is kept and reported: joined, the two would
+  read as that empty paragraph, whose ref accepting retires. When the two cannot be merged (another author's pending
+  change to the properties or the mark of either, the earlier paragraph read-only or ending inside a field), the last paragraph is
+  kept, and the warning names the cause. A note whose whole
+  body goes still deletes every mark, its last too, as Word writes it (`RP050`, 3.6.4).
+- Otherwise P is **required** and the mark is left as it is, so that accepting leaves P empty. The neighbours are read as
+  accepting would leave them: a paragraph whose mark is deleted joins the one after it, so it does not count. P is
+  required when removing it would leave a cell, the body, a header, a footer, a note, a comment or a text box with no
+  paragraph, or not ending with a paragraph directly (a `w:tc` must end with a paragraph, and Word writes it that way:
+  `RP040` deletes the content of its last paragraph and leaves the mark plain). So the last paragraph of such a container
+  stays when only tables, block-level content controls, custom XML elements or `w:altChunk` parts follow it, even when
+  the container already ended with one of them; when it stands between two tables, which
+  Word would join; when it is the body's last paragraph and the paragraph before it ends a section, which would leave the
+  last section empty; and when it is the last paragraph of a block-level content control or another wrapper of blocks.
+  **A paragraph that carries a section break keeps its mark** too, so that accepting leaves an empty paragraph that still
+  ends the section. Word would delete the section break with the mark (it did in `n830205`, 7 times). stetdoc does not,
+  on purpose: a lost section drops its headers and footers silently. This is a deliberate difference from Word, and
+  `FIDELITY.md` says so (decision 8). A required paragraph is reported: the call's `Effect::kept` names it with the
+  reason, and the receipt turns it into a `kept_required_paragraph` warning and says `p2 emptied and kept` in the
+  operation's line (decision 0018).
+- Untracked, the same rule decides: a paragraph that is not required is removed at once, and what is left in it (range
+  markers, comment references) goes to the start of the paragraph after it or, with no paragraph after it, to the end of
+  the paragraph before it. With neither, a paragraph that still holds markers is kept, and reported as required. Tracked,
+  such a paragraph keeps its mark for the same reason, since accepting would keep it to hold the markers.
+- A paragraph right before content that is not a block (a `w:altChunk`) is kept, tracked and untracked alike: a deleted
+  mark there reads as joining it with the paragraph after that content, which accepting cannot do (R8).
+- A paragraph that a batch removed is gone for the rest of the batch, whether it was in the middle or the last of its
+  container: a later `insert` after it or `merge` with it is refused (tracked `readonly_region`, since its mark is a
+  pending deletion; untracked `stale_ref`), and the message says to name the paragraph before it, or to delete only its
+  text so that it stays.
+- With no paragraph after it whose mark stays (paragraphs whose marks are already deleted are passed over, since they join
+  on to what follows them), a paragraph whose deletion leaves content that is not range markers or comment references
+  (the shell of a content control, a simple field) keeps its mark as well, since accepting a deleted mark there drops only
+  the revision (3.2.5), and the Final view and accept all would disagree. It is reported the same way. Untracked, such a
+  paragraph is kept too. The same holds for another author's pending deletion in it: accepting only the author's
+  revisions leaves that deletion, so the paragraph would stay and Final would disagree with it (law L5). Such a
+  paragraph keeps its mark, reported with the reason that the other author's change must be resolved first.
 - If the mark is our own pending `ins`, it is removed with the paragraph's content, and when all the
   content was ours too the element is removed outright (`removed_own`, 4.1), and whatever revision of ours was inside it
   is listed in `swallowed`. A mark that is another author's `ins` gets our `del` after it. A mark that is a `moveTo`
@@ -892,23 +973,61 @@ The comparison is of **base properties**: the paragraph's `w:pPr` children witho
   inserted, deleted or formatted does not borrow their revisions. Each cell holds one paragraph with the text from
   `cells` (empty when there is none). The row gets `trPr/ins`. Each paragraph gets the mark `ins` and its content in a
   `w:ins`. There is no `cellIns` (`FA/007`, `RP010`). `gridSpan` is kept. A **vertical merge** needs care, because a copied
-  `restart` would begin a second merge in the middle of the first. After the anchor, the new cell is `w:vMerge` with no
-  value (continue), whether the anchor's cell is `restart` or `continue`. Before the anchor, a new cell above a `restart`
-  has no `vMerge` and the anchor keeps its `restart`, and above a `continue` it is `continue`. A nested table in the
+  `restart` would begin a second merge in the middle of the first, and it is found by grid column (`gridBefore` plus the
+  spans before the cell), never by cell index (`merge_rows.rs`). The new cell continues the merge only inside it, as
+  Word's Insert Rows does: after the anchor it is `w:vMerge` with no value (continue) when the next row's cell in the same
+  grid column continues the merge, and has no `vMerge` when the anchor's row is the merge's last or the table's last.
+  Before the anchor, a new cell above a `restart` has no `vMerge` and the anchor keeps its `restart`, and above a
+  `continue` it is `continue`. A new cell that continues a merge, vertical or a legacy `w:hMerge` copied from the anchor,
+  takes no text, because Word shows only a merge's first cell: a non-empty `cells` entry for it is `invalid_payload`,
+  naming the column and saying to pass `""`. A nested table in the
   anchor is not copied. `w14:paraId` on the row and its paragraphs is new if the anchor has one. The table is touched,
   because its list of rows changed.
+- **Repeating sections.** A table's repeating section is a `w:sdt` with `w15:repeatingSection` around the rows, and
+  each of its items a `w:sdt` with `w15:repeatingSectionItem` around one copy of the section's content, in a table
+  one row. A new row next to a row that is an item's content is the content of a new item, placed before or after that
+  item as `place` says, never inside it, as Word's "Insert item before" and "Insert item after" keep one copy per item
+  (`row_controls.rs`). The new item is a copy of the item's `w:sdtPr` and `w:sdtEndPr`, with a new `w:id` above every
+  content control id in the package (every story part: the body, the headers and footers, the footnotes and endnotes,
+  and the comments), with no `dataBinding` and no `w:showingPlcHdr`, since it holds new content and not the
+  placeholder. That is the rule for the controls a copied row holds too. Next to a row of an item with two rows, the new
+  item still goes beside the whole item, and its merged cells follow the row it lands next to, the item's first row
+  before it and its last row after it, not the anchor row: below the item's last row a cell continues a vertical merge
+  when that row's cell is in one and the next row's cell continues it, and above the item's first row when that row's
+  cell continues one. Tracked, the row has `trPr/ins` inside the new item, which holds
+  no revision of its own: rejecting the row removes the item with it, so rejecting every change gives the source back.
+  The one exception is a tracked row before the section's first item, from any row of that item: it goes before the
+  section, and before each row-level wrapper above the section that starts with the same row, as a plain row and not
+  an item, and the receipt warns `row_outside_repeating_section` (`row_controls::before_first_item`, decision 0020).
+  Word keeps the start of a control that wraps rows in its first row, so Word's Reject All of a tracked first row took
+  the section's start with it and removed the section and every item, keeping their rows (Word for Mac 16.114.4).
+  Untracked, nothing is rejected, and the row is a new first item. The other side of the same Word behaviour: a tracked
+  deletion of the row that holds the section's start, the first row of the first item, is written as any row deletion.
+  When the batch's final state still deletes the row and a section whose start it holds, the innermost or any outer one,
+  still holds a row that no tracked change deletes, the receipt warns `repeating_section_unwrapped_by_word`
+  (`row_controls::sections_started_by`, `row_controls::section_unwrapped_by_word`, `Effect::section_start_deleted`).
+  Word's Accept All then removes the section's control around the rows that stay, while the text and the rows come out
+  right; stetdoc's own accept keeps the section. Untracked, the row goes at once and the section stays. An item is seen
+  through plain controls around its row (`wordml::repeating_item`), for both rules and for `item=N` in the view.
+  Deleting a row removes every wrapper between it and its table that is left with no row, innermost first: the item
+  whose only row it was, at once when the row is removed outright and on accept when it is tracked, and the repeating
+  section itself when that was its last item. An item with other rows stays.
 - **Delete a row** is `delete_block(row)`. It gives `trPr/del` to the row, deletes each cell's paragraphs as in 3.2.2
   but **with the mark deleted for the last paragraph of each cell too** (`FA/006`, `RP009`: the row goes away as a whole,
   so there is nothing to keep a cell valid), and recurses into nested tables. A row that is our own pending
   insertion and whose content is ours is removed outright. A row that another author inserted gets our `del` on
-  `trPr` after their `ins`. `delete_block(table)` does this for every row.
+  `trPr` after their `ins`. `delete_block(table)` does this for every row. When a row that holds a vertical merge's
+  `restart` goes, the next row's continuation cell in the same grid column becomes `w:vMerge w:val="restart"`, as Word's
+  Delete Rows does, and the old start's content goes with its row: at once when the row is removed outright, and when the
+  row goes on accept or reject when it is tracked, so the tracked state keeps the merge as it was. A row stetdoc inserts
+  never holds a `restart` from the source, so rejecting every change still gives the source back.
 - **Cells.** `cellIns`, `cellDel` and `cellMerge` are read, accepted and rejected. They are not written, since
   no operation inserts or deletes a cell. `set_props(Cell)` writes `tcPrChange`.
 - **Accept and reject of rows** remove the row, so the audit retires its refs. A table left with no row is removed.
 
-**As built.** A row may stand in a row-level content control or custom XML element: its table is the nearest one up, a
-table whose other rows stand in such wrappers is not left with no row, and a wrapper that held only the removed row goes
-with it (`Strict01`). An untracked removal of a row or a table hoists its range markers and comment anchors as an
+**As built.** A row may stand in row-level content controls or custom XML elements: its table is the nearest one up, a
+table whose other rows stand in such wrappers is not left with no row, and each wrapper that held only the removed row
+goes with it, the innermost first (`Strict01`, issue 27). An untracked removal of a row or a table hoists its range markers and comment anchors as an
 accepted deletion does (3.6.5), a story or a cell that a removed table was all of keeps one empty paragraph, and a new row
 does not copy the range markers that stand between the model row's cells.
 
@@ -937,7 +1056,10 @@ resolves it as in 3B (an accepted deletion removes the whole `m:r`, where OpenXm
 
 **3.6.2 Content controls and custom XML.** A control is inserted or deleted by markers **around** the `w:sdt`,
 and its text is not wrapped. Edits to the text of an unlocked control are ordinary text edits, with the
-control as a wrapper kept around the new runs.
+control as a wrapper kept around the new runs. The text of a control that is locked against editing (`contentLocked`,
+`sdtContentLocked`), bound to data or showing its placeholder is `readonly_region`, but an insertion at its start or its
+end is outside it, as at a field's edge (4.2 rule 1, issue #26): it goes before or after the `w:sdt`, tracked or not, as
+beside an unlocked control. Only an insertion with both neighbours in the control's text is refused.
 
 **3.6.3 Fields.** Word writes a deleted field as one `w:del` around `begin`, the code, `separate`, the result
 and `end`, with `delInstrText` and `delText`. It writes an inserted field as `ins{begin, code}`, **then the
@@ -956,9 +1078,57 @@ and `end`, with `delInstrText` and `delText`. It writes an inserted field as `in
   field that spans paragraphs (a table of contents) can be deleted only by deleting every paragraph that holds
   a piece, one `delete_block` each, and a paragraph that holds `begin` or the closing `end` of a field that goes
   beyond it is `readonly_region`.
-- `w:fldSimple` cannot sit inside a `w:del` (schema), so a range that covers a `w:fldSimple` whole is
-  `readonly_region`. A range that is inside the result of a field is also refused, as the text model flags
-  results read-only.
+- A replacement works piece by piece of the word-level difference (2.5), and a piece that holds a whole field deletes the
+  field and puts its new text where it was. A piece holds the field when it covers all of the field's result and starts
+  before the field or ends after it, so a piece that starts before a field and ends where its result ends holds it, as
+  does the piece of a replacement of all the text of a paragraph that ends with a field (issue #23): the new text goes
+  where the field's `end` was, outside the field. A piece that starts where a field starts and ends where its result ends
+  is exactly the result: its new text would be the field's result, and the replacement is `readonly_region`
+  (`text::refuse_result_edit`, issue #16). The check is on the pieces, not on the range the operation names: replacing
+  `beta 1`, where `1` is a field's result, with `beta X` keeps `beta ` and leaves one piece that is exactly the result,
+  which is refused, while replacing it with `new text` leaves one piece that holds the field. A deletion of a piece that
+  is exactly the result deletes the field.
+- A `w:fldSimple` takes the same edits as a complex field (issue #24): an insertion at its start or its end goes before or
+  after it, a range, paragraph or row deletion that holds it whole deletes it, and a range that holds it whole is replaced
+  as above. Changing its result alone is `readonly_region`. It cannot sit inside a `w:del` (schema: `w:del` takes no
+  `w:fldSimple`), so **a tracked deletion of a whole `w:fldSimple` writes it as a complex field whose runs are all
+  deleted**, as Word does. `carve` passes the element and takes its runs as the units, the deletion wraps them in a
+  `w:del` inside the element, and then `simple_unfold` replaces the element by the runs of a complex field around that
+  content: `w:fldChar` begin, the code from `w:instr` as `w:delInstrText`, separate, the result as it was, end. The begin
+  carries the element's `w:fldLock`, `w:dirty` and `w:fldData`. The field's runs take the properties of the result's first
+  run, the end those of its last, so the field looks and updates the same. A pending `w:rPrChange` there is copied with
+  them under a new id, which the outcome records as a copy (`split`), so accepting or rejecting that change formats the
+  field's runs as it formats the result. The new
+  runs join the deletion that holds the result, and that one joins a deletion this call wrote just before or after the
+  field, so a deleted paragraph with a field is one `w:del`, as Word writes it. Accepting removes the field; rejecting gives
+  back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is what
+  Word's Reject All gives too. A field whose result is all in insertions was not in `Original` and must stay out of it, so
+  its runs go in a new `w:del` inside a copy of the first and of the last `w:ins`, under new ids recorded as copies; a field
+  whose content is not all insertions of one change (one author and date) then stays a `w:fldSimple` with its runs
+  deleted inside it. With two changes, rejecting one would take a marker and leave the other's text without a field,
+  while the source keeps the field; Word's Accept All may leave an empty field there, a known gap. An insertion that holds only deletions
+  (another author's text that this call deleted) is in neither mode, so a result made of deleted text and such insertions
+  is deleted whole, and the field is written as a complex field.
+
+  The first build (issue #24) kept the element, `w:fldSimple > w:del > w:r > w:delText`, so that rejecting gave the
+  source back byte for byte. Word for Mac 16.114 does not read that as a deleted field: its Accept All removed the text
+  and left an empty `{ PAGE }` field, in the next paragraph when the paragraph mark was deleted too. Word's own tracked
+  deletion of a paragraph that holds a `w:fldSimple` writes the complex form, all in one `w:del`, and its Reject All gives
+  back a complex field. Word also writes every `w:fldSimple` as a complex field when it saves. So laws R1 and R2 allow the
+  change of form for exactly the fields the batch wrote as complex fields: each call lists them (`Effect::unfolded`, by
+  node), and on the original side only, R1 and R2 read those elements as the runs of a complex field by the same rule
+  (`normalize_unfolding`, 7.1). Every other comparison, and every other field, stays strict, so an untouched
+  `w:fldSimple` that changes form is still a difference. The text
+  model still reads a `w:fldSimple` whose content is all in deletions as a field that is gone in `Final` (`wordml.md` 4.4),
+  and accepting such a deletion removes the emptied element with its `w:fldData` (`cleanup::prune_from`), for the files
+  that hold that shape. An untracked deletion removes the element at once (`unwrap_emptied_links`). A `w:fldSimple` with
+  no content (issue #17) holds no run that a `w:del` could hold, so a tracked
+  deletion of a range or a paragraph that holds one is `readonly_region`, and the message says to delete it untracked.
+  Untracked, the empty field goes with the range or the paragraph (`text_apply::drop_empty_simple_fields`).
+- A `w:fldSimple` whose result is inside a hyperlink, control or smart tag gets its `w:del` inside that, and the complex
+  field's begin and end runs get a `w:del` of their own around the wrapper. A field that holds another simple field is
+  written as a complex field once the inner one is, so both become complex fields.
+- A range that is inside the result of a field is refused, as the text model flags results read-only.
 - Rejecting an inserted field and accepting a deleted one remove the field. Everything else leaves it.
 
 **3.6.4 Notes.** A deleted footnote is the reference run in a `w:del` in the body and the note's own paragraphs
@@ -998,7 +1168,12 @@ reference even when that run holds more (a `w:lastRenderedPageBreak`).
 **3.6.6 Hyperlinks, controls, smart tags.** The wrapper stays and the revision goes inside it:
 `w:hyperlink > w:del > w:r`. `w:ins > w:hyperlink` is invalid (the schema tables say `w:ins` takes no
 `w:hyperlink`), and an insertion at the end of a hyperlink goes outside it. An insertion in the middle of
-one goes inside, where both neighbours are in it.
+one goes inside, where both neighbours are in it, and so does the new text of a replacement that selected text of the
+hyperlink up to its end (4.2). A removal that leaves a hyperlink with no text removes the hyperlink too, because Word fills an
+empty one with its address when fields are updated: at once untracked, and tracked when the deletion inside it is accepted.
+Its range markers stay where it was. When nothing in the part uses the hyperlink's relationship any more, the relationship
+goes in the same transaction (`revisions/links.rs`). A bookmark, permission range or content control that a deletion
+empties stays, empty.
 
 **3.6.7 Text boxes.** A text box is written twice, in `mc:Choice` and `mc:Fallback`, with different ids on the
 revisions in each (`Comment042`: 6 and 6). Edits inside a text box are `unsupported` (they have no refs). Accept
@@ -1044,7 +1219,12 @@ the place from that.
 
 1. **Container.** If both neighbours are inside the same hyperlink, control or smart tag, the new run goes inside the
    innermost one that they share. Otherwise it goes at the level of the paragraph: text typed at the end of a
-   hyperlink is not part of the link. A gap inside a field's result is `readonly_region`.
+   hyperlink is not part of the link. A gap inside a field's result, simple or complex, or inside the text of a content
+   control that is locked, bound to data or showing its placeholder, is `readonly_region`: both neighbours are in it
+   (`Compiler::check_gap`, the one test for the three). At its start or end the gap is outside it, and the new run goes
+   before the field's `begin` or after its `end`, before or after the `w:fldSimple`, or before or after the `w:sdt`
+   (`gap::settle`). This agrees with the rule for a replacement (`keep.rs`): a pure insertion at an element's end stays
+   outside it, and one at an element's start goes before it.
 2. **Position.** In that container the run goes after the left neighbour, after every range-**end** marker
    (`bookmarkEnd`, `commentRangeEnd`, `permEnd`, `moveFromRangeEnd`, `moveToRangeEnd`) and after every excluded
    item that follows it, and before the first range-**start** marker or the right neighbour, whichever
@@ -1067,7 +1247,13 @@ the place from that.
    same date, and no adjacent `del` pair has the same date).
 
 A replace is a deletion followed by an insertion at the position **after the last deleted piece**, so
-the result reads `del` then `ins`, and the insertion is found by the same rule.
+the result reads `del` then `ins`, and the insertion is found by the same rule, with one exception that follows Word
+typing over a selection. When what the replacement selected starts inside a hyperlink, a content control, a smart tag, a
+custom XML element, a bookmark, a permission range or a comment's range, or at its start, and ends at its end, the new text
+stays inside it: before `</w:hyperlink>` or `</w:sdtContent>`, and before the `bookmarkEnd`, `permEnd` or
+`commentRangeEnd`. What it selected is each piece of the difference, and for an insertion inside the range the text of the
+range before it (`revisions/keep.rs`). A pure insertion, at an empty range, keeps the rule above: at an element's end it
+goes after the element. A selection that starts before the element does not keep the new text in it.
 
 ### 4.3 Formatting
 
@@ -1201,7 +1387,7 @@ message says to accept or reject that change first.
 | properties | the properties are set on the container. The author's own pending `*PrChange` there stays, and its snapshot is still the baseline. Another author's is `readonly_region` (decision 4) |
 | `insert_block`, `split_block` | a new paragraph with no marks of ours |
 | `merge_blocks` | Q's base properties are aligned to P's, then the join of 6.2: P's element survives, Q's `w:pPr` moves into it, Q's content is appended and Q is removed. Declares `merge(first, second, into: P)` |
-| `delete_block` | the paragraph is removed. A paragraph with a section break, or the last one of a container, is emptied and kept |
+| `delete_block` | the paragraph is removed, unless its container needs it (3.2.2): then it is emptied and kept, and the receipt warns `kept_required_paragraph` |
 | rows | a row is copied by the copy rule and filled, or removed |
 
 The refusals that do not depend on tracking (a deleted block, a field, a locked control) still apply.
@@ -1324,8 +1510,9 @@ For each part with selected elements, over its `SpanTree` from `Tx::part_mut` (t
    paragraph reads and is written as it was before the split. Walking from the end makes a run of consecutive marks collapse
    into the first paragraph of the run, which ends with the properties of the last, as OpenXmlPowerTools' grouping does.
 3. **Rows and cells.** Rows and cells that are removed go, and an accepted `cellDel` widens the cell before it (3B).
-   A cell left with no block gets `<w:p/>`, a table with no row is removed, and a `w:vMerge` is converted for an accepted
-   `cellMerge`. **As built.** A cell gets the paragraph only when what it held was removed: a paragraph, row or table
+   A cell left with no block gets `<w:p/>`, a table with no row is removed, a `w:vMerge` is converted for an accepted
+   `cellMerge`, and a row removed with a vertical merge's `restart`, by an accepted deletion or a rejected insertion,
+   makes the continuation below it the new `restart` (3.4). **As built.** A cell gets the paragraph only when what it held was removed: a paragraph, row or table
    that changed inside it leaves its last block as it was, so a cell that already ended with a table (LibreOffice writes
    them, `tdf153891`) gets none on accept, while a reject of a paragraph inserted after such a table gives the cell the
    paragraph W9 asks for. A story (the body, a note, a comment, a header or a footer) that an accept leaves with no block
@@ -1346,9 +1533,10 @@ is the one being removed.
 
 - If `first` has no content left (a whole-paragraph deletion that is accepted, or an X paragraph whose content was
   rejected), its element is removed and `second` is untouched: it keeps its properties, its element and its ref.
-  **As built.** A `w:proofErr` and a run with nothing but its properties and a `w:lastRenderedPageBreak` are no content
-  here, and the range markers `first` leaves stand between blocks where it was, so `second` keeps its XML; only when a
-  comment reference run is among them do they go to the start of `second` (3.6.5).
+  **As built.** A `w:proofErr` and an empty run are no content here. An empty run holds nothing but its properties, a
+  `w:lastRenderedPageBreak` and text elements with no characters (`<w:t/>`). The range markers `first` leaves stand
+  between blocks where it was, so `second` keeps its XML; only when a comment reference run is among them do they go to
+  the start of `second` (3.6.5).
 - Otherwise `second`'s content moves to the end of `first`, `first`'s `w:pPr` is replaced by `second`'s (the later
   paragraph's properties, mark and section break win, and with no `w:pPr` there `first` ends with none), and `second`'s
   element is removed. **`first` keeps its element**, its attributes (`w14:paraId`, the rsids) and its ref. A split followed by
@@ -1450,7 +1638,10 @@ For a document D, a batch B (a list of compiler calls with one stamp) and the do
      created (W11);
   5. renumber `w:id` by document order and compare author and date as written;
   6. sort attributes, drop white space between elements, and compare namespaces by URI;
-  7. leave the order of elements alone (it carries meaning).
+  7. leave the order of elements alone (it carries meaning);
+  8. for R1 and R2 only, on the original side only, write the `w:fldSimple` elements that the batch's tracked deletions
+     wrote as complex fields (`Effect::unfolded`) as the runs of a complex field, by the rule of 3.6.3, since rejecting such
+     a deletion gives back the complex field (issue #24). Every other `w:fldSimple` is compared as it is.
   `normalize` is a function of the XML of the story parts that a batch can touch. It is written once, in the
   testkit, and the laws call it.
 
@@ -1570,7 +1761,7 @@ to change this design, and it is not entered in a list of exceptions. The one th
 | delete a word | `FA/001-DeletedRun`, `RP002-Deleted-Text` | `replace_text(.., "")` |
 | insert a run | `FA/010-InsertedRun`, `RP003-Inserted-Text` | `replace_text(at..at, text)` |
 | delete a paragraph | `FA/013-DeletedParagraph` | `delete_block` |
-| delete from the end of one paragraph through the end of the last | `RP040-Deleted-Paras-at-End` | `delete_block(P2)`, `delete_block(P3)`, `merge_blocks(P1, P3)`. Word's file has P1's text kept and its mark deleted, P2 deleted whole, and P3's content deleted with its mark kept |
+| delete from the end of one paragraph through the end of the last | `RP040-Deleted-Paras-at-End` | `delete_block(P2)`, `replace_text(P3, all, "")`, `merge_blocks(P1, P3)`. Word's file has P1's text kept and its mark deleted, P2 deleted whole, and P3's content deleted with its mark kept. `delete_block(P3)` would delete P3's own mark now (3.2.2), and a merge with it afterwards is refused, as it is for a deleted middle paragraph |
 | delete numbered paragraphs | `FA/002-DeletedNumberedParagraphs` | `delete_block` five times |
 | insert a paragraph before | `FA/009-InsertedParagraph` | `insert_block(Before)`: shape X before the twin |
 | append paragraphs | `RP039-Inserted-Paras-at-End` | `insert_block(P1, After)` and then `insert_block(P2, After)`: shape Y at the end, twice, since check C11 (3.2.1). Word's file has the first paragraph plain and an inserted mark and inserted content on each new one, which Word's Reject All resolves to an empty last paragraph; stetdoc's keeps the last mark live, so rejecting gives the original back |
@@ -1627,7 +1818,7 @@ does what is described".
 |---|---|---|
 | C1 | Tracked-delete the paragraph mark between a Heading 1 paragraph and a Normal paragraph that both have text. Accept all | which `pPr` the merged paragraph has when a deleted mark is accepted (3.2.4, 6.3). If Word keeps the first paragraph's, resolution changes to "first" and the alignment `pPrChange` becomes unnecessary. For rejecting an inserted mark `FA/005` already says "later" |
 | C2 | Press Enter inside a Heading 1 paragraph, set the second half to Normal, with tracking on. Reject all | the same, for an inserted mark, where the two halves differ (`FA/005` has equal ones in effect) |
-| C3 | Tracked-delete a mark that has no paragraph after it: the last paragraph of a cell, of the body, before a table. Accept all | the "nothing after" rule of 3.2.5 |
+| C3 | Tracked-delete a mark that has no paragraph after it: the last paragraph of a cell, of the body, before a table. Accept all | the "nothing after" rule of 3.2.5, and the removal of a paragraph its container does not need (3.2.2, issue #25). Word for Mac 16.114.4 did not accept `del` on the body's final mark (an empty paragraph and a pending revision were left) and removed the whole table for `del` on a cell's last mark, so 3.2.2 now deletes the mark of the paragraph before instead. Check that Accept All leaves the paragraph before last with its own properties and no empty paragraph after it, that the table stays, and that Reject All gives back the source |
 | C4 | Open a file with `w:date="...T14:00:00Z"` and no `dateUtc`, and one with seconds (`14:03:27Z`) | decision 5 and 5.3: how Word shows a date with no `dateUtc`, and one with seconds |
 | C5 | Insert text, save, reopen after a minute, delete part of it with the same author | own pending text removed outright (4.1) |
 | C6 | Insert text in the middle of another author's insertion. Look at the Reviewing pane | the split in 4.2: three changes |
@@ -1720,18 +1911,20 @@ as built (the design had an `untracked.rs`; each primitive carries its untracked
 | `verify.rs` | deriving `created` from the minted ids; the post-conditions, `check::scan_unit` on each unit that holds a created revision | 200 |
 | `tree_ops.rs` | the small edits of a span tree that everything is built from | 200 |
 | `carve.rs` | splitting a run at a character, carving a range into whole runs (the original node stays the left part), the copy rule | 430 |
-| `gap.rs` | the gap rule (4.2): where new text goes, splitting a wrapper or a container | 520 |
+| `gap.rs`, `keep.rs` | the gap rule (4.2): where new text goes, splitting a wrapper or a container; the elements a replacement's new text stays inside | 620 |
 | `insert_run.rs`, `wrap.rs` | building the run for new text and placing it; deleting what a carve covered, by whose text it is | 560 |
 | `text.rs`, `text_apply.rs`, `diff.rs`, `diff_brackets.rs` | `replace_text`: locate on one map, classify, delete, insert; the word-level difference and its cleaning (pure, shared with `compare`) | 940 |
 | `props.rs`, `props_edit.rs`, `lists.rs` | `set_props`: containers, snapshots, edit, the change element, fold and refuse; `new_list_instance` | 840 |
 | `markers.rs` | `place_markers`, `place_markers_beside`, `remove_markers`, `remove_markers_in_part` | 400 |
 | `blocks.rs`, `blocks_insert.rs`, `blocks_delete.rs`, `join.rs` | what the block primitives share; `insert_block` and `split_block` (shapes X and Y); `delete_block`, `delete_block_with_mark` and `merge_blocks`; the join of two paragraphs | 1,440 |
 | `tables.rs` | `insert_row` (the copy and the vertical merge), the row side of `delete_block`, nested tables | 460 |
+| `merge_rows.rs` | merged cells around a row that is inserted or removed: the plan of a new row's merges, the refusal of hidden text, the moved start | 200 |
+| `row_controls.rs` | content controls around a row: the ids of a copied row's controls, the new repeating-section item of a new row, where a tracked row before the first item goes, the row that holds a section's start, the wrappers that go with a removed row | 130 |
 | `index.rs` | `ChangeIndex`: id to nodes, built at the first `resolve` of a batch and extended after each compiler call | 120 |
 | `changes.rs`, `changes_text.rs`, `changes_rows.rs`, `changes_marks.rs`, `moves.rs` | `changes()` and `Change`: the grouping of 6.1, over a window of entries; the atoms and text groups; rows; paragraphs and moves | 1,350 |
 | `resolve.rs`, `resolve_select.rs` | `resolve`: steps, selection (by id through the index, by window), closure, the driver, the report | 420 |
 | `resolve_run.rs`, `resolve_props.rs`, `resolve_mark.rs`, `resolve_table.rs`, `resolve_control.rs` | accepting and rejecting run-level revisions, math, fields, moves; snapshots and numbering; the join at a paragraph mark; rows and cells; custom XML ranges | 920 |
-| `cleanup.rs`, `notes.rs` | pruning and hoisting range markers; removing a note that no reference names | 380 |
+| `cleanup.rs`, `notes.rs`, `links.rs` | pruning and hoisting range markers, and removing an emptied hyperlink; removing a note that no reference names; removing a hyperlink relationship that nothing uses any more | 460 |
 | `laws*.rs`, `tests_*.rs` | the laws and their generator, normalizer, reference checks and selection checks; the direct tests, the scenario rows, the corpus tests | not counted |
 
 Dependencies are as the Allowed dependencies table says: `api`, `xml`, `schema`, `wordml`, `state`. `revisions` reads
@@ -1856,7 +2049,7 @@ These ten decisions settled the questions of the first version of this design. E
 | # | Decision | Applied in |
 |---|---|---|
 | 1 | A merge of paragraphs whose properties differ writes the alignment `pPrChange` | 3.2.3, 3.2.4 |
-| 2 | Insert-after uses Word's Enter shape (Y), insert-before the self-contained shape (X) | 3.2.1. Position decides: Y when a paragraph follows and the mark is clean, X otherwise (`RP039`) |
+| 2 | Insert-after uses Word's Enter shape (Y), insert-before the self-contained shape (X). **Revised (issue 18): Y keeps the anchor's children, empty ones included, and never goes after a paragraph that carries a section break; there, and wherever else Y is refused, the X is a copy of the next paragraph, so it starts the next section and needs no change of properties. X goes directly after the anchor, before any markup that follows, and copies the anchor when no paragraph follows. Two limits of Y remain: the anchor's copy is in schema order (a copy in another order would be a new `schema_non_canonical_order` finding), and accepting or rejecting the mark drops an empty `w:pPr` or mark `w:rPr` the anchor had (the resolver cannot tell it from one the mark emptied, and the join drops empty ones, 6.2)** | 3.2.1. Position decides: Y when a paragraph follows, the mark is clean and the anchor ends no section, or when nothing follows in the container; X otherwise (`RP039`) |
 | 3 | Deleting your own pending insertion removes it outright, and the receipt says what was removed | 4.1, `Effect::removed_own` and `swallowed` |
 | 4 | Formatting under another author's pending `*PrChange` is `readonly_region`. **Extended in review: untracked mode does not rewrite or hide another author's pending change either**, for text and properties alike: `readonly_region`, with a message saying to accept or reject that change first. Untracked still means the author's own changes go untracked | 4.3, 4.5, 5.5, `foreign.rs` |
 | 5 | `w:date` is the wall-clock time of the date the caller gives, with seconds and `Z`: Word's local time labelled `Z`. A UTC caller gets UTC. The CLI defaults to local time and the receipt records the date written. No `dateUtc` in 1.0 | 5.3, `RevStamp`. `FIDELITY.md` and checklist C4 |
@@ -1952,7 +2145,8 @@ not, or where it settled something the design left open. Each was found by a tes
    exactly `{pStyle}`. The Y shape writes a `pPrChange` with the original snapshot when the style differs from the
    paragraph it splits. The X shape writes none when it has no twin, and aligns to the twin when it has one.
 5. **`new_list_instance(num_id, ilvl, restart_at)`** takes the level, which a restart override names.
-6. **Untracked edits** that stay inside one run are made in place and write no wrapper (`untracked_in_place`).
+6. **Untracked edits** that stay inside one run, outside any field, are made in place and write no wrapper (`untracked_in_place`).
+   Text in a field takes the path of a tracked edit, so a field's result is read-only untracked too (issue 16).
 7. **Carve** leaves a run in fragments when it removes the author's own text. `normalize` merges them, and so does
    the next edit that touches them.
 8. **Merging.** A tracked `merge_blocks` declares nothing, so `ops` resolves refs per call: untracked, the second merge
@@ -2008,7 +2202,9 @@ not, or where it settled something the design left open. Each was found by a tes
     paragraphs that a split cut inside a hyperlink or a smart tag makes the two halves one element again.
 22. **`changes()`** chains an Enter, the text typed, and the next Enter into one `ParagraphInserted` change, takes the
     copy of a text-box revision in the untaken branch into the change of the taken one, and groups the `rPrChange` of
-    consecutive runs and the `pPrChange` of consecutive paragraphs by their old properties and not by their ids.
+    consecutive runs and the `pPrChange` of consecutive paragraphs by their old properties and not by their ids. The runs
+    of a field's begin, code, separate and end count though they have no width, so the copies of a result's format
+    change that a simple field written as a complex field carries (3.6.3) are one change with it.
 23. **`changes(range)` costs what the blocks of the range cost.** It reads a window of entries around the range, widened
     to whole tables and grown by four while a change reaches its edge, and reads the whole story when the window holds
     a move or a custom XML range, which are grouped by a name or an id that can be anywhere, or a wrapper around blocks

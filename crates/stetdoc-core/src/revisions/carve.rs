@@ -163,6 +163,14 @@ impl Compiler<'_, '_> {
             if !item.vis.in_mode(Mode::Final) {
                 continue;
             }
+            // A simple field's begin and end are the `w:fldSimple`, which holds the field's runs: those are the units, and the
+            // element stays around them, as it cannot stand in a `w:del`. Once the deletion is written, a field it deleted whole
+            // becomes a complex field (`simple_unfold`, design `revisions.md`, 3.6.3).
+            if matches!(item.kind, ItemKind::FieldBegin | ItemKind::FieldEnd)
+                && is_w(&tree.node_ref(item.node), "fldSimple")
+            {
+                continue;
+            }
             let unit = match (i == i0, first_unit) {
                 (true, Some(unit)) => unit,
                 _ => unit_of(tree, item.node),
@@ -423,8 +431,8 @@ pub(super) fn is_transparent(n: &crate::xml::NodeRef<'_>) -> bool {
         )
 }
 
-/// Groups units into runs of consecutive siblings of one parent, with the transparent siblings
-/// between them. Each group is the nodes to wrap or to remove together, in order, and the item index
+/// Groups units into runs of consecutive siblings of one parent, with the transparent siblings and the
+/// empty runs between them. Each group is the nodes to wrap or to remove together, in order, and the item index
 /// of its first unit.
 pub(super) fn groups(tree: &SpanTree, units: &[(NodeId, usize)]) -> Vec<(Vec<NodeId>, usize)> {
     let mut out: Vec<(Vec<NodeId>, usize)> = Vec::new();
@@ -444,7 +452,12 @@ pub(super) fn groups(tree: &SpanTree, units: &[(NodeId, usize)]) -> Vec<(Vec<Nod
                         ok = true;
                         break;
                     }
-                    if !is_transparent(&c) {
+                    // an empty run between two units goes with them, so a deletion holds it. Only one whose text
+                    // elements are `w:t`: a stray empty `w:delText` outside any deletion would come back from a
+                    // rejection as a `w:t`, so it stays where it is
+                    let empty = super::join::is_empty_run(&c)
+                        && !c.child_elements().any(|t| is_w(&t, "delText"));
+                    if !is_transparent(&c) && !empty {
                         break;
                     }
                     between.push(c.id());

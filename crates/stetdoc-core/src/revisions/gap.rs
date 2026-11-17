@@ -3,10 +3,12 @@
 //! **settled**: it moves past the range-end markers and the deleted text that follow, and out of any
 //! hyperlink, control or smart tag that it is at the end or the start of, and out of a revision wrapper,
 //! splitting the wrapper if the boundary is inside it. The text of a new insertion is never put in a
-//! hyperlink at its edge, in a deletion, or in another insertion.
+//! hyperlink at its edge, in a deletion, or in another insertion. The new text of a replacement is the
+//! exception: it stays inside the elements that hold the whole of what it replaced (`keep.rs`).
 
 use super::compiler::{Compiler, ParaView};
 use super::errors::{internal, readonly, unsupported};
+use super::keep::Keep;
 use super::names::{first_content, is_blank, is_w, next_content, prev_content, rev_id, wns};
 use super::policy::is_created;
 use super::tree_ops::{child_ids, detach, insert, move_to, next_sibling_of, parent_of, set_w_attr};
@@ -57,7 +59,7 @@ enum Inside {
     Deletion,
     /// A hyperlink, smart tag, custom XML element, directional wrapper or the content of a control.
     Container,
-    /// A simple field: the boundary is inside a field.
+    /// A simple field: the boundary leaves it at its start or its end, and is refused strictly inside, in its result.
     SimpleField,
     /// Something that this release does not edit in: ruby, an alternate content branch.
     Unsupported,
@@ -307,8 +309,20 @@ impl Compiler<'_, '_> {
     pub(super) fn settle(
         &mut self,
         part: &Arc<str>,
+        b: Boundary,
+        mode: SettleMode,
+    ) -> Result<(Boundary, i64), StetError> {
+        self.settle_keeping(part, b, mode, &Keep::default())
+    }
+
+    /// `settle`, for the new text of a replacement: the boundary stays inside the containers of `keep` and before its range
+    /// ends, which hold the whole of what the replacement selected (`keep.rs`).
+    pub(super) fn settle_keeping(
+        &mut self,
+        part: &Arc<str>,
         mut b: Boundary,
         mode: SettleMode,
+        keep: &Keep,
     ) -> Result<(Boundary, i64), StetError> {
         let mut ends = 0i64;
         for _ in 0..100_000 {
@@ -316,6 +330,9 @@ impl Compiler<'_, '_> {
             {
                 let tree = self.tree_ro(part)?;
                 while let Some(next) = b.before {
+                    if mode == SettleMode::Insert && keep.stops_at(next) {
+                        break;
+                    }
                     let n = tree.node_ref(next);
                     match skip_of(&n) {
                         Skip::No => break,
@@ -341,8 +358,9 @@ impl Compiler<'_, '_> {
                     }),
                 };
                 // Something that holds content: a wrapper's children are runs and markers.
-                let content_before =
-                    before_node.is_some_and(|n| !is_w(&n, "pPr") && !is_w(&n, "sdtPr"));
+                let content_before = before_node.is_some_and(|n| {
+                    !is_w(&n, "pPr") && !is_w(&n, "sdtPr") && !is_w(&n, "fldData")
+                });
                 // A control's content is in w:sdtContent, and the node that goes out is the control.
                 let container = if parent.local_name() == "sdtContent" {
                     parent.parent().map(|c| c.id()).unwrap_or(b.parent)
@@ -362,9 +380,28 @@ impl Compiler<'_, '_> {
             match inside {
                 Inside::Paragraph => return Ok((b, ends)),
                 Inside::SimpleField => {
-                    return Err(readonly(
-                        "this position is inside a field, whose result is read-only",
-                    ));
+                    // At the start or the end of a simple field the boundary goes before or after it, as at a complex
+                    // field's, and leaving at the end passes the field's end. Strictly inside, it is in the result.
+                    let Some(grand) = wrapper_parent else {
+                        return Err(internal("a simple field has no parent"));
+                    };
+                    if content_before && content_after {
+                        return Err(readonly(
+                            "this position is inside a field, whose result is read-only",
+                        ));
+                    }
+                    b = if content_after {
+                        Boundary {
+                            parent: grand,
+                            before: Some(container),
+                        }
+                    } else {
+                        ends += 1;
+                        Boundary {
+                            parent: grand,
+                            before: wrapper_next,
+                        }
+                    };
                 }
                 Inside::Unsupported => {
                     return Err(unsupported(
@@ -375,6 +412,9 @@ impl Compiler<'_, '_> {
                     let Some(grand) = wrapper_parent else {
                         return Err(internal("a wrapper has no parent"));
                     };
+                    if mode == SettleMode::Insert && keep.holds(container) {
+                        return Ok((b, ends));
+                    }
                     if content_before && content_after {
                         if mode == SettleMode::Insert {
                             return Ok((b, ends));
@@ -423,7 +463,7 @@ impl Compiler<'_, '_> {
                             let end_marker = self.tracked()
                                 && !content_after
                                 && next_content(&tree.node_ref(b.parent))
-                                    .is_some_and(|n| is_end_marker(&n));
+                                    .is_some_and(|n| is_end_marker(&n) && !keep.stops_at(n.id()));
                             (created, end_marker)
                         };
                         if stay && !climb {

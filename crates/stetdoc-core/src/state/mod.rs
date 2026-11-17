@@ -5,7 +5,7 @@
 //!
 //! **Interface.** `State::{open, resume, export, parts, resolve, opened_bytes, opened_source, cascade, numbers}`, `PartsView`
 //! (with `content_type`),
-//! and `Tx::{part_mut, add_part, add_relationship, resolve, touch, retire, rebind, merge, mint_id,
+//! and `Tx::{part_mut, add_part, add_relationship, remove_relationships, resolve, touch, retire, rebind, merge, mint_id,
 //! next_annotation_id, minted_annotation_ids, note_copied_annotation_id, copied_annotation_ids,
 //! changed_parts, edited_clones, commit, discard}`.
 //! `cascade` and `numbers` are cached accessors over `PartsView::derived` (`cascade.rs`), with

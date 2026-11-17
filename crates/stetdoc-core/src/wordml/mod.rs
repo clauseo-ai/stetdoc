@@ -151,7 +151,9 @@ pub use crate::xml::{NodeId, SpanTree};
 pub use anchors::{Anchors, Bookmark, CommentAnchor, Loc, MoveAnchor};
 pub use anomaly::{Anomaly, AnomalyKind};
 pub use block::{Block, Cell, Row, Table, VMerge};
-pub use control::{Control, ControlKind, Hyperlink, Lock, control, enclosing_controls, hyperlink};
+pub use control::{
+    Control, ControlKind, Hyperlink, Lock, control, enclosing_controls, hyperlink, repeating_item,
+};
 pub use ids::{IdKind, existing_ids, id_parts};
 pub use num_facts::{NumFact, Presence};
 pub use numbering_defs::{NumberingDefs, NumberingIssue};
@@ -171,7 +173,7 @@ pub use story::{
 };
 pub use styles_defs::{StyleDef, StyleDefs, StyleIssue, StyleKind, TableRegion};
 pub use table_site::{TableSite, TblLook};
-pub use text_content::space_preserved;
+pub use text_content::{simple_field_vis, space_preserved};
 pub use text_fields::FieldInfo;
 pub use text_join::{Joined, ends_container};
 pub use text_locate::{Gap, Located, Span, fold_quotes};

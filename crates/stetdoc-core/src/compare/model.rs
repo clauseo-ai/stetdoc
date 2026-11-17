@@ -360,7 +360,7 @@ impl<'a> Reader<'_, 'a> {
             }
             let at = item.at as usize;
             match item.kind {
-                ItemKind::Object | ItemKind::Math | ItemKind::FieldValue => {
+                ItemKind::Object | ItemKind::Math => {
                     let identity = self.identity(item.node);
                     let c = self.atoms.char_of(identity);
                     if let Some(slot) = chars.get_mut(at) {

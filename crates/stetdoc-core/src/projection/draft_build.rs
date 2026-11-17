@@ -231,6 +231,7 @@ impl Build<'_> {
         self.structure(Key::Row(RowKey {
             r#ref: row.r#ref,
             header: row.header,
+            item: row.item,
             change: row
                 .change
                 .as_ref()

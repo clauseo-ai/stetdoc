@@ -58,8 +58,9 @@ pub(super) fn entry(info: &RevisionInfo) -> ChangeEntry {
 pub(super) struct Written {
     /// The change.
     pub info: RevisionInfo,
-    /// The operation that wrote it. An insertion that coalesced into the revision of an earlier operation is listed there.
-    pub op: Option<usize>,
+    /// The operations that wrote it, each one that minted one of its ids: a paragraph insertion that a later operation
+    /// extended is listed by both.
+    pub ops: Vec<usize>,
 }
 
 /// The changes that the batch wrote: the changes in the touched and new blocks that hold a revision the transaction created.
@@ -135,15 +136,17 @@ pub(super) fn written(parts: &PartsView<'_>, applied: &Applied) -> Result<Vec<Wr
                 if first.is_some_and(|id| !counted.insert(id)) {
                     continue;
                 }
-                let op = change
+                let mut ops: Vec<usize> = change
                     .ids
                     .iter()
                     .filter_map(|id| u32::try_from(*id).ok())
                     .filter_map(|n| minted_by.get(&n).copied())
-                    .min();
+                    .collect();
+                ops.sort_unstable();
+                ops.dedup();
                 out.push(Written {
                     info: describe(&change, parts, &story, spec.kind),
-                    op,
+                    ops,
                 });
             }
         }

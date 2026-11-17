@@ -212,6 +212,9 @@ pub(crate) struct Field {
     pub text: Box<str>,
     /// How many characters the result takes in the paragraph's `Final` text.
     pub width: u32,
+    /// `text` is not a stored result but the label that a `MACROBUTTON` or `GOTOBUTTON` with no stored result
+    /// shows from its field code. Such a label takes no characters, so `width` is 0.
+    pub label: bool,
     /// For a `REF` or `PAGEREF`, the block it resolves to.
     pub target: Option<BlockRef>,
     /// The field begins in this paragraph.

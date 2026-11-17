@@ -1,7 +1,7 @@
 //! `delete_block` for paragraphs and `merge_blocks` (design `revisions.md`, 3.2.2 and 3.2.3).
 //!
-//! Deleting a paragraph deletes its content as `replace_text` does, and then its mark, when a paragraph
-//! follows it and it holds no section break. A merge deletes the first paragraph's mark and aligns the
+//! Deleting a paragraph deletes its content as `replace_text` does, and then its mark, unless its container needs it
+//! (`required.rs`): then the empty paragraph stays, and the call's `Effect::kept` says why. A merge deletes the first paragraph's mark and aligns the
 //! second paragraph's properties to the first's, so that accepting gives the same answer under either
 //! rule for which paragraph's properties survive a join (3.2.4). A merge that is real, because the mark is
 //! the author's own insertion or the edit is untracked, is the join of 6.2.
@@ -11,10 +11,11 @@ use super::compiler::{Compiler, ParaView};
 use super::errors::{cross_block, readonly};
 use super::join::{Joined, Why, join, leftovers, ppr_revision_ids};
 use super::names::{is_w, is_word_ns};
-use super::outcome::{Effect, Origin, RemovedKind, RemovedOwn};
+use super::outcome::{Effect, KeptParagraph, Origin, RemovedKind, RemovedOwn};
 use super::policy::is_change_tracking;
 use super::props::Direct;
 use super::props_edit::find_chain;
+use super::required::{KeptReason, Left, holds_markers, left_on_accept, required};
 use super::text::final_starts;
 use super::tree_ops::detach;
 use super::types::{PropEdit, PropElement};
@@ -38,7 +39,7 @@ fn base_of(tree: &SpanTree, para: NodeId) -> Vec<NodeRef<'_>> {
 /// A paragraph's base properties as the copy rule copies them (design `revisions.md`, 2.2): without a change-tracking element
 /// at any depth, such as the `w:numberingChange` in a `w:numPr`. Its id is the paragraph's own, and a copy of it on another
 /// paragraph would give two tracked changes the same id.
-fn copied_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
+pub(super) fn copied_base(tree: &SpanTree, para: NodeId) -> Vec<PropElement> {
     fn strip(mut e: PropElement) -> PropElement {
         e.children = e
             .children
@@ -145,8 +146,9 @@ impl Compiler<'_, '_> {
             let (planned, pieces) = self.plan_text(block, 0..len, "", keep_marks)?;
             let starts = final_starts(&planned.map);
             for piece in pieces.iter().rev() {
-                self.apply_piece(&planned, &starts, piece)?;
+                self.apply_piece(&planned, &starts, piece, &(0..len))?;
             }
+            self.unwrap_emptied_links(&planned)?;
         } else {
             self.check_editable(&p)?;
         }
@@ -165,18 +167,75 @@ impl Compiler<'_, '_> {
                 mark_of(tree, p.node),
             )
         };
+        // A paragraph of a row that goes whole loses its mark whatever follows it; any other stays, emptied, when its
+        // container needs it, and the receipt says why.
+        if force_mark {
+            if section {
+                return Ok(());
+            }
+        } else {
+            // A mark deleted right before content that is not a block (a `w:altChunk`) reads as joining the paragraph with
+            // the one after that content, and accepting it cannot (R8), so the paragraph stays, tracked and untracked alike.
+            let reason = {
+                let tree = self.tree_ro(&part)?;
+                required(tree, p.node).or_else(|| {
+                    opaque_after(tree, &sibs.story, p.node, None)
+                        .then_some(KeptReason::BeforeOpaque)
+                })
+            };
+            if let Some(reason) = reason {
+                self.fx.kept.push(KeptParagraph {
+                    block: block.clone(),
+                    reason,
+                });
+                return Ok(());
+            }
+        }
         if !self.tracked() {
-            return self.untracked_remove(block, &p, section, next_is_paragraph);
+            return self.untracked_remove(block, &p, next_is_paragraph);
         }
-        if section || !(next_is_paragraph || force_mark) {
-            return Ok(());
+        // With no paragraph after it that stays (the paragraphs whose marks are deleted are passed over), accepting the deleted
+        // mark removes the paragraph only when nothing but markers is left, and markers need a paragraph before it to go to,
+        // as `untracked_remove_last` does at once.
+        let live_after = super::required::live_after(self.tree_ro(&part)?, p.node);
+        if !force_mark && !live_after {
+            let reason = {
+                let tree = self.tree_ro(&part)?;
+                let author = self.stamp().map(|s| s.author());
+                match left_on_accept(tree, p.node, author) {
+                    Left::Content => Some(KeptReason::Holds),
+                    Left::Pending => Some(KeptReason::Pending),
+                    Left::Markers => None,
+                }
+                .or_else(|| {
+                    (super::resolve_mark::previous_paragraph(tree, p.node).is_none()
+                        && holds_markers(tree, p.node))
+                    .then_some(KeptReason::Markers)
+                })
+            };
+            if let Some(reason) = reason {
+                self.fx.kept.push(KeptParagraph {
+                    block: block.clone(),
+                    reason,
+                });
+                return Ok(());
+            }
+            // The last paragraph of a container keeps its mark, and the paragraph before it loses its own.
+            let prev = super::required::previous_to_join(self.tree_ro(&part)?, p.node);
+            if let Some(prev) = prev {
+                return self.delete_last_by_join(block, prev, false);
+            }
         }
-        // A mark deleted right before content that is not a block (a `w:altChunk`) reads as joining the
-        // paragraph with the one after that content, and accepting it cannot: the mark stays (R8).
+        // A paragraph of a row that goes whole keeps its mark before content that is not a block, as above.
         if opaque_after(self.tree_ro(&part)?, &sibs.story, p.node, None) {
             return Ok(());
         }
         if mark_now.is_deleted() {
+            // It joins on to the emptied last paragraph that an earlier deletion of this batch left: that one now takes
+            // the text of the paragraph before this one, as if the two had been deleted top-down.
+            if !force_mark && self.tracked() {
+                return self.join_emptied_end(&part, p.node);
+            }
             return Ok(());
         }
         let own = match mark_now.ins {
@@ -196,8 +255,8 @@ impl Compiler<'_, '_> {
     /// content, so whatever is left of its own text (a pending deletion, another author's revisions) is
     /// still in a paragraph that has its ref, and the later paragraph's ref is merged into it. A paragraph
     /// with nothing but range markers and comment references is removed instead, and the markers go to
-    /// the paragraph after it. With nothing after it, it goes only if a paragraph before it is left to end
-    /// the container, as a cell and a body must end with one.
+    /// the paragraph after it. With no paragraph after it, it goes when it holds nothing at all: `delete_paragraph` has
+    /// already found that its container does not need it.
     fn remove_own_paragraph(
         &mut self,
         block: &BlockKey,
@@ -252,11 +311,7 @@ impl Compiler<'_, '_> {
             return Ok(());
         }
         match left {
-            Some(leftover)
-                if leftover.is_empty()
-                    && super::resolve_mark::previous_paragraph(self.tree_ro(&part)?, p.node)
-                        .is_some() =>
-            {
+            Some(leftover) if leftover.is_empty() => {
                 self.fx.removed_own.push(RemovedOwn {
                     id: ins_id,
                     kind: RemovedKind::Paragraph,
@@ -270,18 +325,18 @@ impl Compiler<'_, '_> {
         }
     }
 
-    /// The untracked end of `delete_block`: the paragraph is removed, unless it carries a section break
-    /// or is the last of its container, or holds content that is not its own text (another author's
-    /// pending deletion), in which case it is emptied and kept.
+    /// The untracked end of `delete_block`, for a paragraph that its container does not need: it is removed, unless it
+    /// holds content that is not its own text (another author's pending deletion), in which case it is emptied and kept.
+    /// What is left in it, range markers and comment references, goes to the start of the paragraph after it, or, with no
+    /// paragraph after it, to the end of the paragraph before it.
     fn untracked_remove(
         &mut self,
         block: &BlockKey,
         p: &ParaView,
-        section: bool,
         next_is_paragraph: bool,
     ) -> Result<(), StetError> {
-        if section || !next_is_paragraph {
-            return Ok(());
+        if !next_is_paragraph {
+            return self.untracked_remove_last(block, p);
         }
         let part = block.part().clone();
         let sibs = self.sibs(block)?;
@@ -296,6 +351,44 @@ impl Compiler<'_, '_> {
         detach(tree, p.node)?;
         if moved {
             self.touch(&BlockKey::new(part.clone(), next.node));
+        }
+        Ok(())
+    }
+
+    /// `untracked_remove` for a paragraph with no paragraph after it, as accepting its deleted mark would remove it
+    /// (`resolve_mark`): its leftovers go to the end of the paragraph before it, and with none before it, it goes only when
+    /// nothing is left in it. Otherwise it is kept, and the receipt says why.
+    fn untracked_remove_last(&mut self, block: &BlockKey, p: &ParaView) -> Result<(), StetError> {
+        let part = block.part().clone();
+        let (left, prev) = {
+            let tree = self.tree_ro(&part)?;
+            (
+                leftovers(tree, p.node),
+                super::resolve_mark::previous_paragraph(tree, p.node),
+            )
+        };
+        match (left, prev) {
+            (Some(left), Some(prev)) => {
+                let tree = self.tx.part_mut(&part)?;
+                let gap = super::join::markers_between(tree, prev, p.node);
+                let moved = !(gap.is_empty() && left.is_empty());
+                for n in gap.into_iter().chain(left) {
+                    super::tree_ops::move_to(tree, n, prev, None)?;
+                }
+                detach(tree, p.node)?;
+                if moved {
+                    self.touch(&BlockKey::new(part.clone(), prev));
+                }
+            }
+            (Some(left), None) if left.is_empty() => detach(self.tx.part_mut(&part)?, p.node)?,
+            (Some(_), None) => self.fx.kept.push(KeptParagraph {
+                block: block.clone(),
+                reason: KeptReason::Markers,
+            }),
+            (None, _) => self.fx.kept.push(KeptParagraph {
+                block: block.clone(),
+                reason: KeptReason::Holds,
+            }),
         }
         Ok(())
     }
@@ -316,7 +409,11 @@ impl Compiler<'_, '_> {
         }
     }
 
-    fn merge_inner(&mut self, first: &BlockKey, second: &BlockKey) -> Result<(), StetError> {
+    pub(super) fn merge_inner(
+        &mut self,
+        first: &BlockKey,
+        second: &BlockKey,
+    ) -> Result<(), StetError> {
         let part = first.part().clone();
         if second.part() != first.part() {
             return Err(cross_block(

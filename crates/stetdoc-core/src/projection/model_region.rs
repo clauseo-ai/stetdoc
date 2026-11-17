@@ -138,6 +138,7 @@ impl Walk<'_> {
                     let key = Key::Field(FieldKey {
                         keyword: field.keyword.clone(),
                         text: field.text.clone(),
+                        label: field.label,
                         target: field.target,
                         opens: field.opens,
                         closes: field.closes,

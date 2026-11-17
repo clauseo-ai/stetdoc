@@ -18,8 +18,16 @@ use crate::projection::model::{
 use crate::refs::{BaseToken, BlockRef};
 use crate::wordml::{ControlKind, SectionBreak, StoryKind, VMerge};
 
+/// `json_struct!(T { field => "name", other => "other" or default })` writes and reads `T` as an object. A field
+/// written with `or` may be missing, as in a file written before it existed, and is then the default.
 macro_rules! json_struct {
-    ($ty:ident { $($field:ident => $name:literal),+ $(,)? }) => {
+    (@take $fields:ident, $name:literal) => {
+        $fields.take($name)?
+    };
+    (@take $fields:ident, $name:literal, $default:expr) => {
+        $fields.take::<Option<_>>($name)?.unwrap_or($default)
+    };
+    ($ty:ident { $($field:ident => $name:literal $(or $default:expr)?),+ $(,)? }) => {
         impl ToJson for $ty {
             fn to_json(&self) -> Json {
                 Json::Obj(vec![$(($name.to_string(), self.$field.to_json())),+])
@@ -29,7 +37,7 @@ macro_rules! json_struct {
         impl FromJson for $ty {
             fn from_json(value: &Json) -> Result<$ty, JsonError> {
                 let mut fields = Fields::of(value)?;
-                let out = $ty { $($field: fields.take($name)?),+ };
+                let out = $ty { $($field: json_struct!(@take fields, $name $(, $default)?)),+ };
                 fields.done()?;
                 Ok(out)
             }
@@ -228,7 +236,7 @@ json_struct!(PropRev { kind => "kind", tag => "tag" });
 json_struct!(ParaFlags { hidden => "hidden", joins_next => "joins_next", readonly => "readonly" });
 json_struct!(Table { r#ref => "ref", style => "style", cols => "cols", revs => "revs", rows => "rows" });
 json_struct!(Row {
-    r#ref => "ref", change => "change", header => "header", revs => "revs", cells => "cells"
+    r#ref => "ref", change => "change", header => "header", item => "item", revs => "revs", cells => "cells"
 });
 json_struct!(RowRev { kind => "kind", tag => "tag" });
 json_struct!(Cell {
@@ -241,8 +249,8 @@ json_struct!(SectionLine {
 json_struct!(ControlInfo { kind => "kind", alias => "alias", tag => "tag" });
 json_struct!(ObjectInfo { kind => "kind", alt => "alt", text_box => "text_box" });
 json_struct!(Field {
-    keyword => "keyword", text => "text", width => "width", target => "target", opens => "opens",
-    closes => "closes", dirty => "dirty"
+    keyword => "keyword", text => "text", width => "width", label => "label" or false,
+    target => "target", opens => "opens", closes => "closes", dirty => "dirty"
 });
 json_struct!(RevTag { id => "id", author => "author", date => "date", peer => "peer" });
 

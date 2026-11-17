@@ -406,7 +406,7 @@ fn step_structure(
     let (mut x, mut e) = (0usize, 0usize);
     while x < expected.len() || e < edited.len() {
         match (expected.get(x), edited.get(e)) {
-            (Some((bi, want)), Some((ei, got, number))) if want == got => {
+            (Some((bi, want)), Some((ei, got, number))) if want.same_structure(got) => {
                 matched.push((*ei, *bi));
                 x += 1;
                 e += 1;
@@ -414,11 +414,17 @@ fn step_structure(
             }
             (Some((_, want)), Some((_, got, number))) => {
                 // the edited line is the next expected one: the expected one was removed
-                if expected.get(x + 1).is_some_and(|(_, next)| next == got) {
+                if expected
+                    .get(x + 1)
+                    .is_some_and(|(_, next)| next.same_structure(got))
+                {
                     return Err(missing_structure(file, want));
                 }
                 // the line after the edited one is the expected one: the edited one is extra
-                if edited.get(e + 1).is_some_and(|(_, next, _)| next == want) {
+                if edited
+                    .get(e + 1)
+                    .is_some_and(|(_, next, _)| want.same_structure(next))
+                {
                     return Err(extra_structure(file, *number, got, b_line_of));
                 }
                 if is_new_structure(got, b_line_of) {

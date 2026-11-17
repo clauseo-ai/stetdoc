@@ -3,7 +3,7 @@
 
 use super::build::{Selection, project};
 use super::formats::{Format, files_format};
-use super::model::{Block, Body, Output, Projection};
+use super::model::{Block, Body, Inline, Output, Projection};
 use crate::api::error::StetError;
 use crate::api::files::ReadableFiles;
 use crate::api::view::{FormatId, Mode};
@@ -36,6 +36,82 @@ pub(crate) fn render_files_in(
         files: format.render(&model).files,
         rendered: Vec::new(),
     })
+}
+
+/// The name and SHA-256 of each readable file.
+pub(crate) type FileHashes = Vec<(String, [u8; 32])>;
+
+/// The hashes of the readable files of a state as an earlier release rendered them, with every marker that `stet/1` gained
+/// since 0.9.3 turned off: no `label` on a field (decision 0017) and no item number on a row (decision 0019). A working
+/// copy that such a release wrote recorded these hashes, and its files parse here as they always did, so `document` takes
+/// them as this release's (design 5.10). `None` when no marker of the state is turned off, since then the files render the
+/// same either way.
+pub(crate) fn hashes_as_earlier_release(
+    state: &State,
+    format: &FormatId,
+) -> Result<Option<FileHashes>, StetError> {
+    let format = files_format(format.as_str())?;
+    let mut model = files_model(state.parts(), state.base_token())?;
+    if !as_earlier_release(&mut model) {
+        return Ok(None);
+    }
+    Ok(Some(
+        format
+            .render(&model)
+            .files
+            .iter()
+            .map(|(name, text)| (name.clone(), crate::refs::sha256(text.as_bytes())))
+            .collect(),
+    ))
+}
+
+/// Turns off, in a model of the files, every marker that an earlier release did not render. True if one was on.
+fn as_earlier_release(model: &mut Projection) -> bool {
+    let Body::Stories(stories) = &mut model.body else {
+        return false;
+    };
+    let mut changed = false;
+    for story in stories {
+        for unit in &mut story.units {
+            changed |= blocks_as_earlier_release(&mut unit.blocks);
+        }
+    }
+    changed
+}
+
+fn blocks_as_earlier_release(blocks: &mut [Block]) -> bool {
+    let mut changed = false;
+    for block in blocks {
+        match block {
+            Block::Paragraph(p) => changed |= inlines_as_earlier_release(&mut p.inlines),
+            Block::Table(t) => {
+                for row in &mut t.rows {
+                    changed |= row.item.take().is_some();
+                    for cell in &mut row.cells {
+                        changed |= blocks_as_earlier_release(&mut cell.blocks);
+                    }
+                }
+            }
+            _ => {}
+        }
+    }
+    changed
+}
+
+fn inlines_as_earlier_release(inlines: &mut [Inline]) -> bool {
+    let mut changed = false;
+    for inline in inlines {
+        match inline {
+            Inline::Field(field) => changed |= std::mem::take(&mut field.label),
+            Inline::Rev { inlines, .. }
+            | Inline::Link { inlines, .. }
+            | Inline::Control { inlines, .. }
+            | Inline::Hidden { inlines, .. }
+            | Inline::LooksHidden { inlines, .. } => changed |= inlines_as_earlier_release(inlines),
+            Inline::Text(_) | Inline::Atom(_) | Inline::Mark(_) => {}
+        }
+    }
+    changed
 }
 
 /// Fills each paragraph's `final_text` with its text in `Final` as the document's text map gives it, the text

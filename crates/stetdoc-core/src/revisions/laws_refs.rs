@@ -121,7 +121,12 @@ pub(super) fn check_refs(
     for (key, rf) in before_refs {
         let attached = view.is_attached(&key).unwrap_or(false);
         let retired = committed.retired.iter().find(|(r, _)| r.to_string() == rf);
-        let rebound = committed.rebound.iter().find(|(r, _)| r.to_string() == rf);
+        // A ref rebound twice in one batch (a split, then a join into a new block) names the last element.
+        let rebound = committed
+            .rebound
+            .iter()
+            .rev()
+            .find(|(r, _)| r.to_string() == rf);
         let absorbed = committed
             .merged
             .iter()

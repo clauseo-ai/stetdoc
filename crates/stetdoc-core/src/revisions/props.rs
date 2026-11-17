@@ -254,7 +254,7 @@ impl Compiler<'_, '_> {
             .locate(Mode::Final, range)
             .ok_or_else(|| invalid("a range lies outside the paragraph"))?;
         let loc = cover(&p, loc)?;
-        self.check_items(&p, loc.items.clone())?;
+        self.check_whole_items(&p, loc.items.clone())?;
         self.refuse_foreign_run_changes(&p, loc.items.clone())?;
         self.refuse_foreign_items(&p, loc.items.clone())?;
         let carved = self.carve(&p, &loc)?;

@@ -353,18 +353,27 @@ fn a_copied_content_control_loses_its_data_binding() {
 #[test]
 fn a_continued_vertical_merge_keeps_the_cell_properties_in_order() {
     // The new row is built before it is placed, so its cells have no context from the root: their properties keep
-    // the order of a cell anyway, w:vMerge before w:vAlign.
-    let body = table(&[format!(
-        "<w:tr>{}{}</w:tr>",
-        cell(
-            3000,
-            "<w:vMerge w:val=\"restart\"/><w:vAlign w:val=\"center\"/>",
-            "a"
+    // the order of a cell anyway, w:vMerge before w:vAlign. The merge goes on in the row below, so the new row
+    // continues it, and its continuation cell takes no text.
+    let body = table(&[
+        format!(
+            "<w:tr>{}{}</w:tr>",
+            cell(
+                3000,
+                "<w:vMerge w:val=\"restart\"/><w:vAlign w:val=\"center\"/>",
+                "a"
+            ),
+            cell(3000, "", "b")
         ),
-        cell(3000, "", "b")
-    )]);
-    let s = with_compiler(&body, Track::Tracked(stamp()), |c, all, _| {
-        vec![c.insert_row(&all[1], Place::After, &["x".to_owned()])]
+        format!(
+            "<w:tr>{}{}</w:tr>",
+            cell(3000, "<w:vMerge/>", "c"),
+            cell(3000, "", "d")
+        ),
+    ]);
+    let s = with_compiler(&body, Track::Tracked(stamp()), |c, _, _| {
+        let rows = keys_of(c.tx(), crate::wordml::BlockKind::Row);
+        vec![c.insert_row(&rows[0], Place::After, &[String::new(), "x".to_owned()])]
     });
     s.assert_clean();
     assert!(

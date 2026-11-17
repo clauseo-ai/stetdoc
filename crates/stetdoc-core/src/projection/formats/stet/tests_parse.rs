@@ -177,6 +177,29 @@ fn a_line_with_no_ref_may_use_markers_because_a_split_may_need_them() {
     assert_eq!(new.seams.len(), 2);
 }
 
+#[test]
+fn the_label_word_of_a_field_is_read_and_left_out_of_its_equality() {
+    let labels = |line: &str| -> Vec<bool> {
+        let d = parse("document.md", &with_line(line)).unwrap();
+        let Some(DraftLine::Block(b)) = d.files[0].lines.last() else {
+            panic!("{line}")
+        };
+        b.seams
+            .iter()
+            .map(|s| match &s.key {
+                Key::Field(f) => f.label,
+                other => panic!("{other:?}"),
+            })
+            .collect()
+    };
+    let line = r#"p9 a{field MACROBUTTON "Click here" label}b{field REF "x" ->p2 label dirty}c{field DATE "2026"}"#;
+    assert_eq!(labels(line), [true, true, false]);
+    // A line with the word and the same line without it say the same.
+    let with = parse("document.md", &with_line(line)).unwrap();
+    let without = parse("document.md", &with_line(&line.replace(" label", ""))).unwrap();
+    assert_eq!(with, without);
+}
+
 // F7: every error names the file, the line and the way out.
 
 fn error_of(name: &str, text: &str) -> crate::api::error::StetError {

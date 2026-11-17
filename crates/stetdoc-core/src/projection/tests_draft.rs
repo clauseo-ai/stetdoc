@@ -166,6 +166,7 @@ fn cell_tags_go_on_the_first_block_of_a_cell() {
         r#ref: Some(crate::refs::BlockRef::new(crate::refs::RefKind::Row, 1).unwrap()),
         change: None,
         header: false,
+        item: None,
         revs: Vec::new(),
         cells: vec![c],
     };

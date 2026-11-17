@@ -76,15 +76,3 @@ pub(super) const INSTRS: [&str; 9] = [
     " \"quote\" ZZCODEZZ ",
     " ",
 ];
-
-/// The keywords for which Word shows something with no stored result (4.4).
-pub(super) const SHOWN: [&str; 8] = [
-    "EQ",
-    "MACROBUTTON",
-    "LISTNUM",
-    "SYMBOL",
-    "PAGE",
-    "GOTOBUTTON",
-    "QUOTE",
-    "BARCODE",
-];

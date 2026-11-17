@@ -7,9 +7,9 @@
 use super::anomaly::AnomalyKind;
 use super::mc;
 use super::names::{M, XML, is_in, is_word_ns, w_attr, w_child};
-use super::text_build::{Builder, Frame, FrameKind, Info, displayed};
+use super::text_build::{Builder, Frame, FrameKind, Info};
 use super::text_fields::{Instr, Sep};
-use super::text_model::{CDATA, ItemKind, WrapperKind};
+use super::text_model::{CDATA, ItemKind, Vis, WrapperKind};
 use crate::xml::{NodeKind, NodeRef};
 use std::ops::Range;
 
@@ -342,21 +342,17 @@ impl<'t> Builder<'t> {
         }
     }
 
-    /// The end of a complex field. One that has no result, and is a type Word still shows, gets an
-    /// atom for what it shows.
+    /// The end of a complex field. A field with no `separate` has no stored result, so it has no
+    /// width, whatever its instruction: only its marks are in the map.
     fn field_end(&mut self, c: &NodeRef<'t>, info: Info) {
         let id = c.id();
         if self.state.is_ignoring() {
             self.state.end();
             return;
         }
-        let Some(top) = self.state.stack.last() else {
+        if !self.state.in_field() {
             self.anomaly(AnomalyKind::StrayFieldChar, id);
             return;
-        };
-        if !top.separate && !top.simple && displayed(&top.instr) {
-            self.state.show_value();
-            self.atom(ItemKind::FieldValue, id, info);
         }
         self.mark(ItemKind::FieldEnd, id, info);
         self.pop_field(id);
@@ -367,7 +363,6 @@ impl<'t> Builder<'t> {
         let instr = w_attr(c, "instr")
             .map(|v| v.into_owned())
             .unwrap_or_default();
-        let displayed = displayed(&instr);
         if self.open_field(c, true, instr).is_none() {
             self.anomaly(AnomalyKind::FieldTooDeep, c.id());
             self.push_wrapper(
@@ -380,15 +375,17 @@ impl<'t> Builder<'t> {
             return;
         }
         let inner = self.wrap(info, WrapperKind::FieldSimple, c.id());
-        self.mark(ItemKind::FieldBegin, c.id(), inner);
-        let items_before = self.items.len();
+        let marks = Info {
+            vis: simple_field_vis(c, inner.vis),
+            ..inner
+        };
+        self.mark(ItemKind::FieldBegin, c.id(), marks);
         self.stack.push(Frame {
             it: c.children(),
             info: inner,
             kind: FrameKind::Simple {
                 node: c.id(),
-                items_before,
-                displayed,
+                marks,
             },
         });
     }
@@ -423,4 +420,58 @@ impl<'t> Builder<'t> {
         let text = ch.encode_utf8(&mut buf);
         self.item(ItemKind::Symbol, c.id(), info, text, 0, 0);
     }
+}
+
+/// The modes a `w:fldSimple`'s begin and end are in. A `w:fldSimple` cannot stand in a revision (the schema puts no
+/// `w:fldSimple` in `w:ins` or `w:del`), so a deletion of one can only wrap its content in `w:del` inside the element (stetdoc
+/// then writes it as a complex field, as Word does, but documents can hold the first shape): a field whose content is all in
+/// deletions (or moves away) is gone in `Final`, and one whose content is all in
+/// insertions (or moves in) is not there in `Original`, as accepting or rejecting removes it (`revisions/cleanup.rs`). The
+/// content is read through the hyperlinks, controls, smart tags, custom XML and `w:dir`/`w:bdo` elements that hold it, since
+/// a deletion inside one of those goes inside it. An insertion that holds only deletions (another author's insertion that was
+/// deleted) is in neither mode, so it counts for neither. Range markers, `w:fldData` and a control's properties do not count.
+/// A field with no content, or with some outside a revision, is in the modes of what holds it.
+pub fn simple_field_vis(c: &NodeRef<'_>, vis: Vis) -> Vis {
+    let mut present: u8 = 0;
+    let mut any = false;
+    let mut stack: Vec<NodeRef<'_>> = c.child_elements().collect();
+    stack.reverse();
+    while let Some(k) = stack.pop() {
+        if !is_word_ns(k.namespace()) {
+            return vis;
+        }
+        let modes = match k.local_name() {
+            "fldData" | "bookmarkStart" | "bookmarkEnd" | "commentRangeStart"
+            | "commentRangeEnd" | "permStart" | "permEnd" | "proofErr" | "sdtPr" | "sdtEndPr"
+            | "smartTagPr" | "customXmlPr" => continue,
+            "hyperlink" | "smartTag" | "customXml" | "dir" | "bdo" | "sdt" | "sdtContent" => {
+                let mut kids: Vec<NodeRef<'_>> = k.child_elements().collect();
+                kids.reverse();
+                stack.extend(kids);
+                continue;
+            }
+            "del" | "moveFrom" => Vis::ORIGINAL,
+            "ins" | "moveTo" if holds_only_removals(&k) => 0,
+            "ins" | "moveTo" => Vis::FINAL,
+            _ => return vis,
+        };
+        any = true;
+        present |= modes;
+    }
+    if any { Vis(vis.0 & present) } else { vis }
+}
+
+/// True for an insertion whose content is all deletions, which is in neither mode: accepting keeps the insertion and
+/// removes the deletion, and rejecting removes the insertion. Range markers do not count.
+fn holds_only_removals(ins: &NodeRef<'_>) -> bool {
+    let mut any = false;
+    for k in ins.child_elements() {
+        match k.local_name() {
+            "del" | "moveFrom" if is_word_ns(k.namespace()) => any = true,
+            "bookmarkStart" | "bookmarkEnd" | "commentRangeStart" | "commentRangeEnd"
+            | "permStart" | "permEnd" | "proofErr" => {}
+            _ => return false,
+        }
+    }
+    any
 }

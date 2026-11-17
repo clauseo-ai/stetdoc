@@ -175,7 +175,7 @@ fn a_field_in_a_result_keeps_the_innermost_id_and_both_are_results() {
 // ---- fields with no result ----------------------------------------------------------------------
 
 #[test]
-fn a_field_with_no_result_that_word_shows_is_one_atom_and_the_others_are_empty() {
+fn a_field_with_no_separate_has_no_width_whatever_its_instruction() {
     let shown = |code: &str| {
         para(&format!(
             "{}{}{}{}",
@@ -185,6 +185,8 @@ fn a_field_with_no_result_that_word_shows_is_one_atom_and_the_others_are_empty()
             text("]")
         ))
     };
+    // a field with no `separate` has no stored result, so it is as wide as one with an empty
+    // result, which is nothing, even for the types Word draws a value for (#17)
     for code in [
         " PAGE ",
         " EQ \\f(1,2) ",
@@ -194,19 +196,6 @@ fn a_field_with_no_result_that_word_shows_is_one_atom_and_the_others_are_empty()
         " GOTOBUTTON a [b] ",
         " QUOTE \"q\" ",
         " BARCODE x ",
-    ] {
-        let m = shown(code);
-        assert_eq!(m.text(FINAL), "[\u{6}]", "{code}");
-        let atom = m
-            .items()
-            .iter()
-            .find(|i| i.kind == ItemKind::FieldValue)
-            .unwrap();
-        assert_eq!(atom.len, 1);
-        assert_eq!(atom.flags & FIELD_RESULT, FIELD_RESULT);
-        assert_eq!(atom.field, 0);
-    }
-    for code in [
         " IF x ",
         " REF y ",
         " XE \"z\" ",
@@ -215,7 +204,12 @@ fn a_field_with_no_result_that_word_shows_is_one_atom_and_the_others_are_empty()
     ] {
         let m = shown(code);
         assert_eq!(m.text(FINAL), "[]", "{code}");
-        assert!(m.items().iter().all(|i| i.kind != ItemKind::FieldValue));
+        assert_eq!(m.len(FINAL), 2, "{code}");
+        assert!(
+            m.items()
+                .iter()
+                .all(|i| i.kind.is_mark() || i.field == NO_FIELD)
+        );
     }
 }
 
@@ -320,9 +314,10 @@ fn a_simple_field_is_a_wrapper_whose_content_is_the_result() {
 }
 
 #[test]
-fn an_empty_simple_field_shows_a_value_when_word_does_and_nothing_otherwise() {
+fn an_empty_simple_field_has_no_width_whatever_its_instruction() {
     let m = para("<w:fldSimple w:instr=\" PAGE \"/><w:fldSimple w:instr=\" REF x \"/>");
-    assert_eq!(m.text(FINAL), "\u{6}");
+    assert_eq!(m.text(FINAL), "");
+    assert!(m.items().iter().all(|i| i.kind.is_mark()));
 }
 
 #[test]

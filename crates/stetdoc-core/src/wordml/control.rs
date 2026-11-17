@@ -1,4 +1,4 @@
-//! Content controls and hyperlinks: `control`, `hyperlink` and `enclosing_controls`.
+//! Content controls and hyperlinks: `control`, `hyperlink`, `enclosing_controls` and `repeating_item`.
 //!
 //! `control` reads the `w:sdtPr` of a `w:sdt`. Which kind a control is comes from the one element
 //! of `w:sdtPr` that names a type, and an `sdt` with none is a rich text control, which is what Word
@@ -161,6 +161,53 @@ pub fn control(node: NodeRef<'_>) -> Control {
         }
     }
     c
+}
+
+/// The repeating-section item that the row `row` is the content of, and its number in its section, from 1:
+/// the nearest `w:sdt` above the row and below its table whose `w:sdtPr` holds `w15:repeatingSectionItem`, when
+/// the nearest `w:sdt` above that, still below the table, is a repeating section (`w15:repeatingSection`). Plain
+/// controls may stand between the item and the row: an item's content can be a control around the row. Word writes
+/// an item around each copy of the section's content, in a table one row, and the section around the items. The
+/// number counts the item and the items before it in the section's `w:sdtContent`.
+pub fn repeating_item(row: NodeRef<'_>) -> Option<(NodeRef<'_>, u32)> {
+    let mut item = None;
+    let mut cur = row.parent();
+    while let Some(n) = cur {
+        if is_w(&n, "tbl") {
+            return None;
+        }
+        if is_w(&n, "sdt") {
+            match item {
+                None if is_item(&n) => item = Some(n),
+                None => {}
+                Some(_) => break,
+            }
+        }
+        cur = n.parent();
+    }
+    let section = cur?;
+    let item = item?;
+    if control(section).kind != ControlKind::RepeatingSection {
+        return None;
+    }
+    let mut number = 1u32;
+    let mut prev = item.prev_sibling();
+    while let Some(p) = prev {
+        if is_item(&p) {
+            number = number.saturating_add(1);
+        }
+        prev = p.prev_sibling();
+    }
+    Some((item, number))
+}
+
+/// True if `node` is a `w:sdt` whose `w:sdtPr` holds `w15:repeatingSectionItem`.
+fn is_item(node: &NodeRef<'_>) -> bool {
+    is_w(node, "sdt")
+        && w_child(node, "sdtPr").is_some_and(|pr| {
+            pr.child_elements()
+                .any(|e| is_in(&e, &[W15], "repeatingSectionItem"))
+        })
 }
 
 /// The content controls that enclose `node`, innermost first: every `w:sdt` above it whose

@@ -220,6 +220,11 @@ pub struct OpResult {
     /// With manual markup, what it struck through and underlined, in the order of the text.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub marked: Vec<ManualMark>,
+    /// The notes that went because the operation took out their last reference, as `Resolution::notes_removed` names them:
+    /// `footnote (id 1)`. A reference leaves the document at once when the edit is untracked, and a note goes only when its
+    /// reference goes.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub notes_removed: Vec<String>,
     /// Things worth saying about this operation.
     pub warnings: Vec<Warning>,
 }

@@ -1,17 +1,19 @@
 //! What the block primitives share (design `revisions.md`, 3.2 and 3.4): the neighbours of a block in
-//! its container, what a paragraph mark holds, the copy of a `w:pPr` by the copy rule, and the making
-//! of a new paragraph element.
+//! its container, what a paragraph mark holds, the copy of a `w:pPr` by the copy rule (and the faithful
+//! one that the first half of a Y keeps), the edit a new paragraph's style makes, and the making of a new paragraph
+//! element.
 
 use super::compiler::{Compiler, ParaView};
 use super::errors::{cross_block, internal, stale};
 use super::names::{is_w, is_word_ns};
 use super::props_edit::{find_chain, place};
 use super::tree_ops::{create_w, detach, next_sibling_of, parent_of};
-use super::types::PropElement;
+use super::types::{PropEdit, PropElement};
 use crate::api::error::StetError;
 use crate::wordml::BlockKey;
 use crate::wordml::{
     BlockEntry, BlockKind, IdKind, MARK_DELETED, MARK_MOVED_FROM, Mode, NodeId, Paragraph, Story,
+    revision_at,
 };
 use crate::xml::{NodeRef, SpanTree};
 use std::sync::Arc;
@@ -254,6 +256,44 @@ pub(super) fn copy_ppr(tree: &mut SpanTree, ppr: NodeId) -> Result<Option<NodeId
     Ok(Some(copy))
 }
 
+/// A copy of a `w:pPr` for the paragraph that keeps its element when a Y cuts it (design `revisions.md`, 3.2.1): as
+/// `copy_ppr`, except that an element that was empty in the original stays, so the paragraph keeps the children it had.
+/// A mark's `w:rPr` that held only a revision is left out unless `refill`, when the caller puts a mark of its own in it.
+/// The copy is `None` only when it is empty and the original was not, since an empty `w:pPr` is kept only where it was.
+pub(super) fn copy_ppr_faithful(
+    tree: &mut SpanTree,
+    ppr: NodeId,
+    refill: bool,
+) -> Result<Option<NodeId>, StetError> {
+    let was_empty = tree.node_ref(ppr).child_elements().next().is_none();
+    let rpr_was_empty = tree
+        .node_ref(ppr)
+        .child_elements()
+        .find(|c| is_w(c, "rPr"))
+        .is_some_and(|r| r.child_elements().next().is_none());
+    let copy = tree.edit().clone_subtree(ppr)?;
+    strip_deep(tree, copy)?;
+    let doomed: Vec<NodeId> = tree
+        .node_ref(copy)
+        .child_elements()
+        .filter(|c| {
+            is_w(c, "sectPr")
+                || (is_w(c, "rPr")
+                    && c.child_elements().next().is_none()
+                    && !rpr_was_empty
+                    && !refill)
+        })
+        .map(|c| c.id())
+        .collect();
+    for s in doomed {
+        detach(tree, s)?;
+    }
+    if !was_empty && tree.node_ref(copy).child_elements().next().is_none() {
+        return Ok(None);
+    }
+    Ok(Some(copy))
+}
+
 /// Removes the change-tracking elements below `node`, at any depth.
 fn strip_deep(tree: &mut SpanTree, node: NodeId) -> Result<(), StetError> {
     let mut doomed = Vec::new();
@@ -373,4 +413,41 @@ impl Compiler<'_, '_> {
     pub(super) fn parent_node(&self, part: &Arc<str>, node: NodeId) -> Result<NodeId, StetError> {
         parent_of(self.tree_ro(part)?, node).ok_or_else(|| internal("a block has no parent"))
     }
+}
+
+/// The edit that makes a paragraph's base properties exactly `w:pStyle` with this id: it sets the style
+/// and clears every other base property that the paragraph has.
+pub(super) fn style_edit(tree: &SpanTree, para: NodeId, style: &str, extra: &PropEdit) -> PropEdit {
+    let ns = tree.node_ref(para).namespace().to_owned();
+    let mut clear: Vec<(String, String)> = Vec::new();
+    if let Some(ppr) = find_chain(tree, para, &["pPr"]) {
+        for c in tree.node_ref(ppr).child_elements() {
+            let name = c.local_name();
+            if matches!(name, "rPr" | "sectPr" | "pPrChange" | "pStyle") {
+                continue;
+            }
+            clear.push((c.namespace().to_owned(), name.to_owned()));
+        }
+    }
+    clear.extend(extra.clear.iter().cloned());
+    let mut set: Vec<PropElement> = vec![PropElement {
+        ns: ns.clone(),
+        local: "pStyle".to_owned(),
+        attrs: vec![(ns, "val".to_owned(), style.to_owned())],
+        children: Vec::new(),
+    }];
+    set.extend(extra.set.iter().cloned());
+    PropEdit { set, clear }
+}
+
+/// True if the paragraph's `w:pPr` holds a pending `w:pPrChange` that is not the author's.
+pub(super) fn foreign_ppr_change(tree: &SpanTree, para: NodeId, author: &str) -> bool {
+    find_chain(tree, para, &["pPr"])
+        .and_then(|ppr| {
+            tree.node_ref(ppr)
+                .child_elements()
+                .find(|c| is_w(c, "pPrChange"))
+        })
+        .and_then(|c| revision_at(&c))
+        .is_some_and(|r| r.author.as_deref() != Some(author))
 }

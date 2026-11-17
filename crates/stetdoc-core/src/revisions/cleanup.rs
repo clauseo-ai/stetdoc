@@ -7,7 +7,7 @@ use super::names::{is_w, is_word_ns};
 use super::tree_ops::{child_ids, detach, insert, move_to, next_sibling_of, parent_of, rename};
 use crate::api::error::StetError;
 use crate::wordml::{NodeId, revision_at};
-use crate::xml::{NodeRef, SpanTree};
+use crate::xml::{NodeKind, NodeRef, SpanTree};
 
 /// True if the node is in the document: its ancestors reach the root element.
 pub(super) fn is_attached(tree: &SpanTree, node: NodeId) -> bool {
@@ -346,14 +346,86 @@ pub(super) fn rename_text_back(tree: &mut SpanTree, el: NodeId) -> Result<(), St
     Ok(())
 }
 
+/// True for a `w:hyperlink` that holds nothing but range markers and white space. Word fills an empty link with its address
+/// when fields are updated, so a removal that empties a link removes the link too, and its markers stay where it was.
+pub(super) fn is_empty_link(n: &NodeRef<'_>) -> bool {
+    is_w(n, "hyperlink")
+        && n.children().all(|c| {
+            super::carve::is_transparent(&c) || (!c.is_element() && c.kind() != NodeKind::Text)
+        })
+}
+
+/// True for a `w:fldSimple` that holds nothing but range markers, white space and its `w:fldData`. A removal that empties a
+/// simple field removes the field, as deleting all of a complex field's result deletes the field (`text::cover`): at once
+/// untracked, and tracked when a deletion inside it is accepted. stetdoc writes a tracked deletion of a whole simple field as a
+/// complex field (`simple_unfold`), but a document can hold a `w:fldSimple` whose content is all in a `w:del`.
+pub(super) fn is_empty_simple_field(n: &NodeRef<'_>) -> bool {
+    is_w(n, "fldSimple")
+        && n.children().all(|c| {
+            super::carve::is_transparent(&c)
+                || is_w(&c, "fldData")
+                || (!c.is_element() && c.kind() != NodeKind::Text)
+        })
+}
+
+/// Unwraps each hyperlink or simple field of `links` that is still in the tree and is empty (`is_empty_link`,
+/// `is_empty_simple_field`): an edit that removed all of a link's text removes the link, and one that removed all of a simple
+/// field's result removes the field. Their markers take their place. One element can hold another (a link that ends with a
+/// simple field), and the outer one is empty only once the inner one went, so the passes repeat until one unwraps nothing.
+pub(super) fn unwrap_emptied_links(tree: &mut SpanTree, links: &[NodeId]) -> Result<(), StetError> {
+    let mut left: Vec<NodeId> = links.to_vec();
+    loop {
+        let before = left.len();
+        let mut kept = Vec::with_capacity(left.len());
+        for link in left {
+            if !is_attached(tree, link) {
+                continue;
+            }
+            if is_emptied(&tree.node_ref(link)) {
+                unwrap_emptied(tree, link)?;
+            } else {
+                kept.push(link);
+            }
+        }
+        if kept.len() == before {
+            return Ok(());
+        }
+        left = kept;
+    }
+}
+
+/// True for a hyperlink or a simple field that a removal emptied.
+fn is_emptied(n: &NodeRef<'_>) -> bool {
+    is_empty_link(n) || is_empty_simple_field(n)
+}
+
+/// Unwraps an emptied hyperlink or simple field: its markers take its place, and a simple field's `w:fldData`, which is
+/// part of the field, goes with it. Returns the parent.
+fn unwrap_emptied(tree: &mut SpanTree, el: NodeId) -> Result<NodeId, StetError> {
+    let data: Vec<NodeId> = tree
+        .node_ref(el)
+        .child_elements()
+        .filter(|c| is_w(c, "fldData"))
+        .map(|c| c.id())
+        .collect();
+    for d in data {
+        detach(tree, d)?;
+    }
+    unwrap_element(tree, el)
+}
+
 /// Removes the containers that a removal emptied, from `start` up: an empty `w:rPr`, `w:pPr`, `w:trPr`,
-/// `w:tcPr` or `w:numPr`, and an insertion or deletion with nothing in it. The old properties inside a
-/// `*PrChange` may be empty, and are left. Returns the node that is left in the tree where the pruning
+/// `w:tcPr` or `w:numPr`, an insertion or deletion with nothing in it, and a hyperlink or a simple field with no text left
+/// (`is_empty_link`, `is_empty_simple_field`), whose markers stay. The old properties inside a `*PrChange` may be empty, and are left. Returns the node that is left in the tree where the pruning
 /// stopped: `start` itself if it stays, and what holds it if it went, which is what a caller that marks
 /// `start` as changed marks, because a node that left the tree has no block to touch.
 pub(super) fn prune_from(tree: &mut SpanTree, start: NodeId) -> Result<NodeId, StetError> {
     let mut cur = start;
     loop {
+        if is_emptied(&tree.node_ref(cur)) {
+            cur = unwrap_emptied(tree, cur)?;
+            continue;
+        }
         let (empty, prunable, parent) = {
             let n = tree.node_ref(cur);
             let empty = !n.children().any(|c| c.is_element());

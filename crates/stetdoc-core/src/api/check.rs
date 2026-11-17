@@ -318,6 +318,11 @@ finding_codes! {
         class: Note,
         doc: "A part that could not be read (encrypted, or stored with an unsupported method), so it was not checked.",
     }
+    UnreferencedNote {
+        wire: "unreferenced_note",
+        class: Note,
+        doc: "A footnote or an endnote that no reference in any story names, so Word keeps its text and shows it nowhere. A reference inside a tracked deletion counts, and the separators are never reported. An edit takes a note out with its last reference, so it makes no new one.",
+    }
 }
 
 /// One thing a check found.

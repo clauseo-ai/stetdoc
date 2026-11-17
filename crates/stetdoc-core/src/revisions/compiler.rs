@@ -24,6 +24,19 @@ pub(crate) struct Compiler<'t, 's> {
     warnings: Vec<String>,
     /// The minted range when the call began.
     call_start: Range<u32>,
+    /// True once a call has deleted a footnote or endnote reference, since `remove_notes_of_dropped_references` last looked.
+    pub(super) dropped_reference: bool,
+    /// The properties and mark run properties that a container's last paragraph had when a deletion of this batch joined it
+    /// with the paragraph before it, by element. An insertion before it in the same batch takes them, since the join may have
+    /// folded the author's own pending change, which then no longer holds them (`blocks_insert_joined.rs`).
+    /// For each paragraph that an insertion before it went after (`blocks_insert_joined.rs`), the last paragraph such
+    /// insertions of this batch put there: the next one goes after it, so that they keep their order.
+    pub(super) after_join: Vec<(NodeId, NodeId)>,
+    pub(super) before_join: Vec<(
+        NodeId,
+        Vec<super::types::PropElement>,
+        Vec<super::types::PropElement>,
+    )>,
 }
 
 /// A paragraph read for an edit: everything the primitives need, owned, so that the transaction can
@@ -53,6 +66,9 @@ impl<'t, 's> Compiler<'t, 's> {
             effects: Vec::new(),
             warnings: Vec::new(),
             call_start: 0..0,
+            dropped_reference: false,
+            after_join: Vec::new(),
+            before_join: Vec::new(),
         })
     }
 
@@ -75,6 +91,19 @@ impl<'t, 's> Compiler<'t, 's> {
         rejected: bool,
     ) -> Result<Vec<super::notes::RemovedNote>, StetError> {
         super::notes::remove_unreferenced_notes(&mut *self.tx, rejected)
+    }
+
+    /// Takes out the notes that lost their last reference, when a call since the last time deleted a reference, and returns
+    /// them. A note goes only when its reference goes: untracked, or when the reference was the author's own pending insertion,
+    /// the reference leaves the document at once, and so does the note, as an accepted deletion takes it. Tracked, the reference
+    /// stays in its deletion and so does the note. An operation calls this after its calls, so that its receipt names the notes.
+    pub(crate) fn remove_notes_of_dropped_references(
+        &mut self,
+    ) -> Result<Vec<super::notes::RemovedNote>, StetError> {
+        if !std::mem::take(&mut self.dropped_reference) {
+            return Ok(Vec::new());
+        }
+        self.remove_unreferenced_notes(false)
     }
 
     /// The stamp, if edits are tracked.

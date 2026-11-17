@@ -5,31 +5,56 @@
 use super::carve::groups;
 use super::compiler::{Compiler, ParaView};
 use super::errors::{internal, readonly};
-use super::gap::SettleMode;
+use super::gap::{Boundary, SettleMode};
+use super::keep::{Keep, keep_for};
 use super::names::is_w;
 use super::text::Piece;
 use super::tree_ops::{detach, parent_of, rpr_of};
 use crate::api::error::StetError;
-use crate::wordml::{ItemKind, Mode, NodeId};
+use crate::wordml::{ItemKind, Mode, NO_FIELD, NodeId};
 use crate::xml::NodeKind;
+use std::ops::Range;
 
 impl Compiler<'_, '_> {
-    /// Applies one piece. `starts` are the `Final` offsets at which the map's items start.
+    /// Applies one piece. `starts` are the `Final` offsets at which the map's items start, and `range` is the range the
+    /// caller replaces, of which the piece is a part.
     pub(super) fn apply_piece(
         &mut self,
         p: &ParaView,
         starts: &[usize],
         piece: &Piece,
+        range: &Range<usize>,
     ) -> Result<(), StetError> {
         if !self.tracked() && self.untracked_in_place(p, starts, piece)? {
             return Ok(());
         }
         let map = &p.map;
+        // What the new text replaces: the piece's own characters, or for an insertion inside the range the characters of the
+        // range before it. A pure insertion, at an empty range, replaces nothing.
+        let selection = if piece.start < piece.end {
+            piece.start..piece.end
+        } else if range.start < piece.start {
+            range.start..piece.start
+        } else {
+            piece.start..piece.start
+        };
+        let keep = if piece.with.is_empty() {
+            Keep::default()
+        } else {
+            keep_for(self.tree_ro(&p.part)?, p, selection)
+        };
         let (format, mut boundary, depth_item) = if piece.start < piece.end {
             let loc = map
                 .locate(Mode::Final, piece.start..piece.end)
                 .ok_or_else(|| internal("a range that was checked is outside the paragraph"))?;
             let loc = super::text::cover(p, loc)?;
+            if map
+                .items()
+                .get(loc.items.clone())
+                .is_some_and(|items| items.iter().any(|i| i.kind == ItemKind::NoteRef))
+            {
+                self.dropped_reference = true;
+            }
             let before = map.gap(Mode::Final, piece.start);
             let after = map.gap(Mode::Final, piece.end);
             // The formatting of the first text that is deleted, read before the carve moves anything.
@@ -45,10 +70,15 @@ impl Compiler<'_, '_> {
                     self.format_source(p, left, right)?
                 }
             };
-            let last_item = loc.spans.last().map(|s| s.item);
+            // The new text goes where the whole range was, which `cover` widened to the whole of every field it touches:
+            // the depth that counts is the one after the last item of the widened range, past the end of a field whose
+            // result the range ends with. Replacing exactly a field's result was refused before (`refuse_result_edit`).
+            let last_item = loc.items.end.checked_sub(1);
+            let empty_fields = self.empty_simple_fields(p, loc.items.clone())?;
             let carved = self.carve(p, &loc)?;
             let grouped = groups(self.tree_ro(&p.part)?, &carved.units);
             let boundary = self.delete_groups(p, grouped)?;
+            let boundary = self.drop_empty_simple_fields(p, empty_fields, boundary)?;
             if piece.with.is_empty() {
                 return Ok(());
             }
@@ -75,7 +105,7 @@ impl Compiler<'_, '_> {
             };
             (format, boundary, gap.left)
         };
-        let (settled, ends) = self.settle(&p.part, boundary, SettleMode::Insert)?;
+        let (settled, ends) = self.settle_keeping(&p.part, boundary, SettleMode::Insert, &keep)?;
         boundary = settled;
         if self.field_depth_after(p, depth_item) - ends > 0 {
             return Err(readonly(
@@ -99,8 +129,59 @@ impl Compiler<'_, '_> {
         Ok(())
     }
 
+    /// The simple fields with no content among a deletion's items, found before the deletion changes anything: a field that the
+    /// deletion itself empties is removed after the new text is placed (`unwrap_emptied_links`), as the place may be inside it.
+    fn empty_simple_fields(
+        &self,
+        p: &ParaView,
+        items: Range<usize>,
+    ) -> Result<Vec<NodeId>, StetError> {
+        let tree = self.tree_ro(&p.part)?;
+        Ok(p.map
+            .items()
+            .get(items)
+            .unwrap_or_default()
+            .iter()
+            .filter(|i| i.kind == ItemKind::FieldBegin && i.vis.in_mode(Mode::Final))
+            .map(|i| i.node)
+            .filter(|n| super::cleanup::is_empty_simple_field(&tree.node_ref(*n)))
+            .collect())
+    }
+
+    /// Removes the simple fields with no content that a deletion held (`empty_simple_fields`): untracked, they go with the text
+    /// around them, as they have no run to delete (issue #17). A tracked deletion of one was refused before
+    /// (`text::refuse_empty_simple_fields`). Their range markers stay where they were. Returns the place for the new text, moved
+    /// past a field that went.
+    fn drop_empty_simple_fields(
+        &mut self,
+        p: &ParaView,
+        fields: Vec<NodeId>,
+        mut boundary: Option<Boundary>,
+    ) -> Result<Option<Boundary>, StetError> {
+        if fields.is_empty() {
+            return Ok(boundary);
+        }
+        let tree = self.tx.part_mut(&p.part)?;
+        for field in fields {
+            if !super::cleanup::is_attached(tree, field) {
+                continue;
+            }
+            let next = tree.node_ref(field).next_sibling().map(|s| s.id());
+            super::cleanup::unwrap_emptied_links(tree, &[field])?;
+            if let Some(b) = boundary.as_mut()
+                && b.before == Some(field)
+            {
+                b.before = next;
+            }
+        }
+        Ok(boundary)
+    }
+
     /// Untracked, an edit that lies inside one text node is done in the node, so that the runs of the
-    /// paragraph stay as they were. Returns false when the edit is not that simple.
+    /// paragraph stay as they were. Returns false when the edit is not that simple. Text in a field is never
+    /// that simple: the edit takes the path a tracked edit takes, which widens a deletion to the whole field
+    /// and refuses new text inside a field's result, so that untracked changes only whether the change is
+    /// tracked and never what is read-only.
     fn untracked_in_place(
         &mut self,
         p: &ParaView,
@@ -121,7 +202,7 @@ impl Compiler<'_, '_> {
             let Some(item) = map.items().get(span.item) else {
                 return Ok(false);
             };
-            if item.kind != ItemKind::Text {
+            if item.kind != ItemKind::Text || item.field != NO_FIELD {
                 return Ok(false);
             }
             (span.node, span.start as usize, span.end as usize)
@@ -135,7 +216,7 @@ impl Compiler<'_, '_> {
             let Some(item) = map.items().get(l) else {
                 return Ok(false);
             };
-            if l != r || item.kind != ItemKind::Text {
+            if l != r || item.kind != ItemKind::Text || item.field != NO_FIELD {
                 return Ok(false);
             }
             let at = item.from as usize + (piece.start - starts.get(l).copied().unwrap_or(0));

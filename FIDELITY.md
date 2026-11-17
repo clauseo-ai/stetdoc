@@ -54,9 +54,34 @@ Each of these was decided in a design, with the evidence there.
   replacement, deletion before insertion, as a careful reviewer would write it. See
   [revisions 2.5](docs/design/revisions.md#25-cleaning-the-word-diff).
 - **Moves are written as a deletion plus an insertion**, in edits and in compare. Writing true moves is the next release.
+- **A tracked deletion of a simple field writes it as a complex field** (normalized). A `w:fldSimple` cannot stand in a
+  `w:del`, and Word does not take a `w:fldSimple` whose runs are deleted inside it as a deleted field, so stetdoc writes
+  the field's begin, code, separate, result and end as runs, all deleted, as Word's own tracked deletion does. Rejecting
+  gives back a complex field with the same code, result and formatting where the source had a `w:fldSimple`, which is
+  also what Word's Reject All gives. One known gap: a field whose result two other authors' insertions make up keeps
+  the `w:fldSimple` with its runs deleted inside it, so that rejecting one of them keeps the field as the source does,
+  and Word's Accept All may leave an empty field there. See [revisions 3.6.3](docs/design/revisions.md#36-other-places).
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
+- **Deleting the last paragraph of a container deletes the mark of the paragraph before it** and the last paragraph's
+  text, when a paragraph with text is left before it, so accepting leaves that paragraph last, with its own properties.
+  This is what Word writes in a cell, but in the body Word's own triple-click delete tracks only the text and leaves an
+  empty last paragraph after accepting. When the two paragraphs' properties differ, the last one also gets a
+  paragraph-property change that gives it the earlier one's. In the body only, Word for Mac's single Accept All leaves that
+  change pending on the merged paragraph, which already looks right, and a second Accept All clears it; a table cell clears
+  in one pass. stetdoc keeps the change because without it accepting would reformat a paragraph the user did not touch. A
+  paragraph inserted, in a later batch, before such an emptied last paragraph takes the paragraph before's properties
+  when the deleted paragraph carried the author's own pending property change, which the join folded its change into. And a
+  paragraph inserted after deleting all of the paragraph before an empty last paragraph does not take that last
+  paragraph's alignment, which 0.9.3 kept. A
+  paragraph the container needs is emptied and kept, and the receipt says so (`kept_required_paragraph`). See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
+- **An insertion after a paragraph goes directly after it**, before any bookmark, permission range or other markup that
+  follows, and **a section break stays on that paragraph**. Word's Enter shape moves the break onto the new paragraph, so
+  after a paragraph that ends a section stetdoc writes a self-contained new paragraph instead, with the next paragraph's
+  properties, at the start of the next section. After the last paragraph of a container Word's shape is needed for Reject
+  All, so **a tracked insertion after a body's last paragraph that ends a section is refused** (`readonly_region`). An
+  untracked one keeps the break where it was. See [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
 - **A section break added with `set` is untracked only**, because a `w:pPrChange` cannot hold it. A tracked attempt is
   `invalid_payload`. See [document and ops 2.1](docs/design/document-and-ops.md#21-the-set).
 - **A tracked deletion of an equation that already holds a tracked deletion is refused**, because Word writes a form for it
@@ -96,6 +121,10 @@ Each of these was decided in a design, with the evidence there.
   a note whose reference is a pending deletion, and the `Original` view one whose reference is a pending insertion. A note's
   id (`fn3`), which refs and `delete-note` use, counts every reference and is the same in every view; the two views add the
   number Word shows as its mark once their changes are resolved, when that is another (`{footnote 3 mark=2}`, `"mark"`).
+  An untracked edit (`--no-track`) that takes out a note's last reference, by a replace, a delete or the removal of a row,
+  takes the note out with it, as accepting the deletion would, and the operation's `notes_removed` in the receipt names it.
+  `check` reports a note that no reference in any story names as `unreferenced_note`, a note and not a violation, so a
+  document that already has one can still be edited.
 - **Quotes typed into a paragraph follow its convention**, curly or straight, and the receipt says so. `--quotes as-typed`
   keeps them as typed. See [document and ops 2.8](docs/design/document-and-ops.md#28-quotes).
 

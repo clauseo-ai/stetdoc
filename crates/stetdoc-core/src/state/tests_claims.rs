@@ -173,7 +173,12 @@ fn an_edit_must_name_the_base_token_and_resolves_against_its_own_declarations() 
     detach(&mut tx, &keys[1]);
     let e = tx.resolve(Claim::Base(&claim), "p2").unwrap_err();
     assert_eq!(e.code(), ErrorCode::StaleRef);
-    assert_eq!(e.message(), "p2 was deleted earlier in this batch.");
+    assert!(
+        e.message()
+            .starts_with("p2 was deleted earlier in this batch. Name a block that is still there"),
+        "{}",
+        e.message()
+    );
     // A declared retirement says why.
     tx.retire(&keys[2], Retired::Rejected).unwrap();
     assert!(

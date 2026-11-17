@@ -8,10 +8,11 @@
 
 use super::changes::{ChangeKind, changes};
 use super::index::ChangeIndex;
+use super::laws_norm_fields::unfolded_of;
 use super::laws_refs::{Reasons, check_refs};
 use super::laws_select::{check_ids, check_windows};
 use super::laws_util::{
-    Census, after, after_with, census, ends_in_an_inserted_mark, final_runs, first_difference,
+    Census, after, after_unfolding, census, ends_in_an_inserted_mark, final_runs, first_difference,
     normalized, original_runs_in, skeleton,
 };
 use super::outcome::Outcome;
@@ -410,7 +411,13 @@ fn rejecting_the_work_gives_the_original(
         }
     };
     let rn = after(next, &[], &step(ids_n.clone()));
-    let rd = after(base, &swallowed, &step(ids_d.clone()));
+    let rd = after_unfolding(
+        base,
+        &swallowed,
+        &step(ids_d.clone()),
+        false,
+        &unfolded_of(outcome),
+    );
     if rn != rd {
         return Err(format!(
             "R2 broken: rejecting {ids_n:?} of the result differs from rejecting {ids_d:?} of the original\n{}\nRESULT: {}\nORIGINAL: {}\nEFFECTS: {:#?}",
@@ -558,14 +565,18 @@ pub(super) fn after_commit(
             action: Action::Reject,
             selector: Selector::All,
         }];
-        let (ra, rb) = (after(next, &[], &all), after(base, &[], &all));
+        let unfolded = unfolded_of(outcome);
+        let (ra, rb) = (
+            after(next, &[], &all),
+            after_unfolding(base, &[], &all, false, &unfolded),
+        );
         if ra != rb {
             // A document that ends in a paragraph whose mark is an insertion has no defined original for
             // the properties of its last paragraph (see `normalize_without_last_ppr`).
             let tail = ends_in_an_inserted_mark(next) || ends_in_an_inserted_mark(base);
             let (ta, tb) = (
-                after_with(next, &[], &all, true),
-                after_with(base, &[], &all, true),
+                after_unfolding(next, &[], &all, true, &[]),
+                after_unfolding(base, &[], &all, true, &unfolded),
             );
             if !tail || ta != tb {
                 return Err(format!(

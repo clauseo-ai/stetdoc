@@ -332,6 +332,13 @@ In user-facing text, "tracked change" means revision.
 
 **Accept / reject.** To resolve revisions, applying or undoing them.
 
+**Required paragraph.** A paragraph that a `delete` empties and keeps instead of removing, because its container needs it:
+the only paragraph of a cell or of the body, the last paragraph of a container when only tables, content controls or other
+blocks follow it, one between two tables, the body's last paragraph after a section break, one that holds a section break,
+the last paragraph of a block-level content control, one right before an imported part (`w:altChunk`), one that holds
+markers with no paragraph before it to take them, and a last paragraph whose deletion leaves other content, such as a
+content control. The receipt says so with a `kept_required_paragraph` warning.
+
 **Change.** The unit an agent sees and resolves: the adjacent revision elements of one kind, author and
 date, a deleted or inserted paragraph with its mark, both halves of a move, a field with all its pieces.
 Accepting or rejecting by id acts on the change that holds the id. A change can be several `w:id`s.

@@ -156,6 +156,7 @@ fn plan_row_removed() -> super::Plan {
                 r#ref: crate::refs::BlockRef::new(crate::refs::RefKind::Row, 2),
                 change: None,
                 header: false,
+                item: None,
                 revs: Vec::new(),
                 cells: vec![cell(vec![plain(10, "Gadget")])],
             });

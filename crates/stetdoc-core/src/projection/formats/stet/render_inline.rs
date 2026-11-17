@@ -285,6 +285,9 @@ fn field_marker(buf: &mut LineBuf, field: &FieldKey) {
     if let Some(target) = field.target {
         buf.atomic(&format!(" ->{}", write_ref(target)));
     }
+    if field.label {
+        word(buf, "label");
+    }
     if field.dirty {
         word(buf, "dirty");
     }

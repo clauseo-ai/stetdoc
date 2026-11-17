@@ -194,11 +194,23 @@ mod tests_drift;
 #[cfg(test)]
 mod tests_edit;
 #[cfg(test)]
+mod tests_edit_accept_own;
+#[cfg(test)]
 mod tests_edit_comment_ranges;
 #[cfg(test)]
 mod tests_edit_comment_tables;
 #[cfg(test)]
 mod tests_edit_comments;
+#[cfg(test)]
+mod tests_edit_control_edges;
+#[cfg(test)]
+mod tests_edit_empty_run;
+#[cfg(test)]
+mod tests_edit_field_label;
+#[cfg(test)]
+mod tests_edit_field_ranges;
+#[cfg(test)]
+mod tests_edit_field_width;
 #[cfg(test)]
 mod tests_edit_fields;
 #[cfg(test)]
@@ -206,17 +218,41 @@ mod tests_edit_files;
 #[cfg(test)]
 mod tests_edit_foreign;
 #[cfg(test)]
+mod tests_edit_insert_after;
+#[cfg(test)]
+mod tests_edit_last_mark;
+#[cfg(test)]
+mod tests_edit_last_mark_matrix;
+#[cfg(test)]
 mod tests_edit_manual;
+#[cfg(test)]
+mod tests_edit_merged_rows;
 #[cfg(test)]
 mod tests_edit_ops;
 #[cfg(test)]
 mod tests_edit_order;
 #[cfg(test)]
+mod tests_edit_plain;
+#[cfg(test)]
 mod tests_edit_props;
+#[cfg(test)]
+mod tests_edit_range_ends;
 #[cfg(test)]
 mod tests_edit_reject;
 #[cfg(test)]
+mod tests_edit_repeating;
+#[cfg(test)]
+mod tests_edit_repeating_first;
+#[cfg(test)]
+mod tests_edit_repeating_more;
+#[cfg(test)]
+mod tests_edit_required;
+#[cfg(test)]
 mod tests_edit_review;
+#[cfg(test)]
+mod tests_edit_simple_fields;
+#[cfg(test)]
+mod tests_edit_simple_unfold;
 #[cfg(test)]
 mod tests_edit_toc;
 #[cfg(test)]
@@ -233,3 +269,5 @@ mod tests_scale;
 mod tests_scope_frame;
 #[cfg(test)]
 mod tests_tamper;
+#[cfg(test)]
+mod tests_view_repeating;

@@ -67,6 +67,9 @@ fn row_line(buf: &mut LineBuf, row: &RowKey) {
     if row.header {
         word(buf, "header");
     }
+    if let Some(n) = row.item {
+        buf.atomic(&format!(" item={n}"));
+    }
     if let Some((kind, rev)) = &row.change {
         word(buf, row_word(*kind));
         rev_words(buf, rev);

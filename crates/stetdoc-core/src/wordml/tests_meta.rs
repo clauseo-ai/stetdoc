@@ -102,15 +102,12 @@ fn delete_range(story: &Story, tree: &SpanTree, i: usize, rng: &mut Rng) -> Opti
     let para = story.paragraph(tree, i)?;
     let m = para.map();
     let total = m.len(FINAL);
-    // The result of a `w:fldSimple` that Word shows even when empty (`PAGE`, `QUOTE`) gets a value
-    // atom once its last item is gone (4.4), so deleting the whole of it adds a character. Such a
-    // result is the caller's policy, as the field value atom is, and the sweep leaves it alone.
+    // The result of a `w:fldSimple` is the caller's policy (`ops` keeps it read-only), and the sweep
+    // leaves it alone.
     let simple = m.fields().iter().any(|f| f.simple);
     let editable = |s: &Span| {
         let item = &m.items()[s.item];
-        item.flags & CDATA == 0
-            && item.kind != ItemKind::FieldValue
-            && !(simple && item.flags & FIELD_RESULT != 0)
+        item.flags & CDATA == 0 && !(simple && item.flags & FIELD_RESULT != 0)
     };
     // a few tries for a range that can be edited in place
     let (a, b, located) = (0..6).find_map(|_| {

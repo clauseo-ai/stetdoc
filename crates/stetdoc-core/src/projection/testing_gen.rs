@@ -238,9 +238,11 @@ impl Gen {
             .chance(50)
             .then(|| BlockRef::new(RefKind::Paragraph, 1 + self.rng.below(50) as u32))
             .flatten();
+        let label = !text.is_empty() && self.rng.chance(10);
         Field {
             keyword: self.rng.word(KEYWORDS).into(),
-            width: count(&text),
+            width: if label { 0 } else { count(&text) },
+            label,
             text,
             target,
             opens: self.rng.chance(80),

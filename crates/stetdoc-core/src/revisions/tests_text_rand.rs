@@ -310,12 +310,13 @@ fn replace_rebuilding(
     with: &str,
 ) -> Result<(), crate::api::error::StetError> {
     c.begin();
-    let (_, pieces) = c.plan_text(block, range, with, true)?;
+    let (first, pieces) = c.plan_text(block, range.clone(), with, true)?;
     for piece in pieces.iter().rev() {
         let p = c.paragraph(block)?;
         let starts = super::text::final_starts(&p.map);
-        c.apply_piece(&p, &starts, piece)?;
+        c.apply_piece(&p, &starts, piece, &range)?;
     }
+    c.unwrap_emptied_links(&first)?;
     c.touch(block);
     let _ = c.end();
     Ok(())

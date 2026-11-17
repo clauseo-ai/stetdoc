@@ -12,7 +12,9 @@ use crate::projection::model::UnitKind;
 use crate::refs::{BlockKey, BlockRef};
 use crate::state::{PartId, PartsView, SiteHandle};
 use crate::styles::Cascade;
-use crate::wordml::{BlockEntry, Rels, Section, SpanTree, Story, StoryKind, StyleDefs};
+use crate::wordml::{
+    BlockEntry, BlockKind, NodeId, Rels, Section, SpanTree, Story, StoryKind, StyleDefs,
+};
 use std::cell::OnceCell;
 use std::sync::Arc;
 
@@ -94,6 +96,77 @@ impl<'a> StoryCx<'a> {
         let entry = self.entry(i)?;
         self.parts
             .ref_of(&BlockKey::new(self.name.clone(), entry.node))
+    }
+
+    /// True if, in `Final`, the paragraph at entry `i` takes the text of a paragraph before it: it shows nothing and keeps its
+    /// mark, and the paragraphs right before it in its container join on to it through deleted marks, the first of them with
+    /// text and the rest with none. This is what a tracked delete of a container's last paragraph writes (design
+    /// `revisions.md`, 3.2.2): the last paragraph keeps its mark and loses its text, and the one before loses its mark. The
+    /// paragraphs read as one, the one with text, so this one is not shown, and neither are the empty ones between.
+    pub(super) fn takes_joined(&self, i: usize) -> bool {
+        if self.mode != Mode::Final {
+            return false;
+        }
+        let Some(p) = self.para_at(i, None) else {
+            return false;
+        };
+        if p.joins_next(self.mode) || !super::scan::shows_nothing(&p.map(), self.mode) {
+            return false;
+        }
+        let parent = self.entry(i).map(|e| self.parent_of(e.node));
+        let mut k = i;
+        while let Some(prev) = k.checked_sub(1) {
+            let Some(q) = self.para_at(prev, parent) else {
+                return false;
+            };
+            if !q.joins_next(self.mode) {
+                return false;
+            }
+            if !super::scan::shows_nothing(&q.map(), self.mode) {
+                return true;
+            }
+            k = prev;
+        }
+        false
+    }
+
+    /// True if the paragraph at entry `i` joins, through deleted marks and empty paragraphs only, a paragraph that
+    /// `takes_joined`: then it stands for them, so it is not marked as joining the next.
+    pub(super) fn joins_a_taker(&self, i: usize) -> bool {
+        if self.mode != Mode::Final {
+            return false;
+        }
+        let parent = self.entry(i).map(|e| self.parent_of(e.node));
+        let mut k = i + 1;
+        loop {
+            let Some(p) = self.para_at(k, parent) else {
+                return false;
+            };
+            if !p.joins_next(self.mode) {
+                return self.takes_joined(k);
+            }
+            if !super::scan::shows_nothing(&p.map(), self.mode) {
+                return false;
+            }
+            k += 1;
+        }
+    }
+
+    /// The paragraph at entry `i`, when it is one and, with `parent` given, in that parent.
+    fn para_at(
+        &self,
+        i: usize,
+        parent: Option<Option<NodeId>>,
+    ) -> Option<crate::wordml::Paragraph<'_>> {
+        let e = self.entry(i)?;
+        if e.kind != BlockKind::Paragraph || parent.is_some_and(|p| p != self.parent_of(e.node)) {
+            return None;
+        }
+        self.story.paragraph(self.tree, i)
+    }
+
+    fn parent_of(&self, node: NodeId) -> Option<NodeId> {
+        self.tree.node_ref(node).parent().map(|p| p.id())
     }
 
     /// The sections of the body, read on first use. Any other story has none.

@@ -59,8 +59,6 @@ pub enum ItemKind {
     Math,
     /// A page number or a legacy date element: U+0005.
     Auto,
-    /// A field with no stored result that Word still shows (4.4): U+0006.
-    FieldValue,
     /// `w:bookmarkStart`.
     BookmarkStart,
     /// `w:bookmarkEnd`.
@@ -129,7 +127,6 @@ impl ItemKind {
             ItemKind::NoteMark => Some('\u{3}'),
             ItemKind::Math => Some('\u{4}'),
             ItemKind::Auto => Some('\u{5}'),
-            ItemKind::FieldValue => Some('\u{6}'),
             _ => None,
         }
     }

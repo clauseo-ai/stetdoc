@@ -5,6 +5,106 @@ All notable changes to stetdoc are recorded here. The format follows
 [semantic versioning](https://semver.org/spec/v2.0.0.html) from 1.0.0. Releases before
 1.0.0 may change the interface between minor versions.
 
+## [Unreleased]
+
+### Added
+
+- `view` marks the label of a `MACROBUTTON` or `GOTOBUTTON` field that has no stored result with a trailing `label`:
+  `{field MACROBUTTON "Click here" label}`. Such a label comes from the field code and takes no offsets, while the same
+  text as a stored result takes one offset per character, so the word is the only way to tell the two apart. A field with
+  a stored result prints as before (#17).
+- `view` marks a row that is the content of a repeating section's item with the item's number in its section, counted
+  from 1: `r2 {row item=2}`. The JSON view has `item` on each row. A row insert next to such a row makes a new item, and
+  deleting it removes its item, so the number shows that before the edit (#27).
+- Working copies written by 0.9.3 still open and pack, though this release renders their files with these two markers.
+  The other way does not work: 0.9.3 refuses a working copy that holds `label` or `item=` with `stale_files`, so export
+  again with 0.9.3 if you need to pack there.
+
+### Fixed
+
+- An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
+  over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in
+  its part, referenced by nothing, while the receipt and `check` said nothing. The note now goes with its reference, as
+  it does when a tracked deletion of it is accepted, and the receipt names it in the operation's new `notes_removed`.
+  `check` reports a note that nothing references as the new note `unreferenced_note`, which blocks no edit (#15).
+- `--no-track` could rewrite a complex field's cached result, which Word replaces at its next field update, and deleting
+  the whole result left an empty field behind. An untracked edit now follows the same read-only rules as a tracked one:
+  a replace, insert or delete inside a field's result is refused as `readonly_region`, and so is an untracked edit of
+  only part of a field's displayed text, such as a HYPERLINK field's display text, as a tracked edit already was.
+  Deleting the whole result deletes the field (#16).
+- A complex field written with no stored result (begin, instruction and end, with no separator), such as `PAGE`, `EQ` or
+  `MACROBUTTON`, counted as one character that `view` showed as an empty field. Every offset after it in the paragraph
+  was one character off, so an edit landed on the wrong character and an offset past the visible end was accepted. Such a
+  field, and an empty `w:fldSimple`, now has no width, so offsets match the text `view` shows (#17).
+- `insert` with `place: after` could put the new paragraph in the wrong place. A tracked insert after a paragraph that
+  ends a section moved the section break onto the new paragraph, and an insert after a paragraph followed by a bookmark, a
+  permission range or an empty content control landed past that markup, inside ranges the anchor stood outside of. A
+  tracked insert also rebuilt the anchor's properties and dropped their empty elements. The new paragraph now goes
+  directly after its ref, before any markup that follows, and the ref keeps its section break and its properties as they
+  were. A tracked insert after the body's last paragraph, when that paragraph ends a section, is refused with
+  `readonly_region`, since the only tracked shape that rejects cleanly there would move the break; insert it untracked
+  (`--no-track`) instead. An untracked `split` likewise keeps an empty `w:pPr`, or an empty `w:rPr` inside it, on the
+  first half instead of dropping it (#18).
+- Accepting the deletion of a paragraph that held an empty run (`<w:t/>` or `<w:t></w:t>`) between runs of text merged
+  the next paragraph into it: the deleted paragraph kept its paraId and the next one was retired as merged. The deleted
+  paragraph is now removed (`retired: p1 (deleted)`) and the next one keeps its element and paraId, as when the empty run
+  is not there. A tracked deletion of the text on both sides of an empty run also takes the run into the same `w:del` (#19).
+- A replacement whose range ended at the end of a hyperlink, bookmark, permission range or inline content control wrote
+  the new text after it, so link text lost its link, a REF field to the bookmark lost the new words, and a permission
+  range no longer covered the text it guarded. When the text a replacement replaces starts inside, or at the start of, a
+  hyperlink, content control, smart tag, custom XML element, `dir` or `bdo` element, bookmark, permission range or
+  comment range and ends at its end, the new text now goes inside it, as typing over a selection in Word does. An
+  insertion that replaces nothing still goes after an element that ends where it is inserted. A deletion that empties a
+  hyperlink now removes the link, and the link's relationship when nothing else uses it, at once untracked and when the
+  deletion is accepted tracked (#20).
+- Inserting and deleting rows broke vertically merged cells. A row inserted with the `row` operation copied its anchor
+  row's merges and wrote the given text into every cell, even one that continued a merge, so the text was in the file but
+  Word never showed it. An insert below a merge's last row extended the merge, and deleting the row that held a merge's
+  start left the cells below it with no start. A new cell now continues a vertical merge only when the cell below it in
+  the same grid column does, as Word's Insert Rows leaves it. Text for a cell that continues a merge is refused with
+  `invalid_payload`, which says to pass `""` for that column. Removing the row that holds a merge's start, untracked or
+  by accepting or rejecting a tracked change, makes the next row's cell in that column the start (#21).
+- A `replace` whose range started before a field and ended where its result ended was refused as `readonly_region`, and
+  so was replacing all the text of a paragraph that ends with a field, though `delete` took the same range. Such a range
+  holds the whole field: the field is deleted and the new text goes where it was, tracked or not. The rule applies to each
+  piece of the word-level difference, so replacing `beta 1`, where `1` is a field's result, with `beta X` changes
+  only the result and is still refused, while replacing it with `new text` replaces the field (#23).
+- A simple field (`w:fldSimple`) was read-only beyond its result. An insertion right before or after it, a replace
+  starting right after it, a range, paragraph or row deletion over it, and a format of its paragraph were refused as
+  `readonly_region`, though a complex field took them all. A simple field now takes the same edits. A tracked deletion
+  writes the field as a complex field whose runs are all deleted, as Word does, since Word does not take a simple field
+  whose runs are deleted inside it as deleted: its Accept All left an empty field behind. Accepting removes the field,
+  rejecting gives back a complex field with the same code and result, and changing only its result is still refused. A
+  simple field with no content goes with an untracked deletion and is refused in a tracked one, since there is no run to
+  mark (#24).
+- A `delete` of a whole paragraph emptied it and kept it whenever no paragraph followed it in its container, so the last
+  paragraph of every cell and of the body, and every paragraph before a table, stayed behind, and the receipt said only
+  "deletion #0". Such a paragraph now goes whenever its container does not need it, tracked or not. One that is needed,
+  such as the only paragraph of a cell or the body, one after the last table or between two tables, the body's last
+  paragraph after a section break, or one that holds a section break, is still emptied and kept, and the receipt says so:
+  `p2 emptied and kept`, with the new warning `kept_required_paragraph` that gives the reason. Word cannot accept a deleted
+  mark on a container's last paragraph, so a tracked delete of one keeps its mark and deletes the mark of the paragraph
+  before it instead, with a property change that keeps that paragraph's formatting; in the body Word for Mac needs a second
+  Accept All to clear that change, which alters nothing visible. An operation that names a paragraph an earlier operation
+  of the batch removed is refused (#25).
+- An insertion right before or right after an inline content control that is locked, bound to data or showing its
+  placeholder was refused as `readonly_region`, though the text would sit outside the control. It now goes before or after
+  the control, tracked or not, as beside an unlocked control. An insertion inside the control's text is still refused
+  (#26).
+- A `row` insert next to a row of a repeating section's item put the new row inside that item, so one item held two rows,
+  and deleting an item's only row left the empty item behind. The insert now adds a new item around the new row, before or
+  after that item, with a copy of its properties and a new id, as Word's "Insert item" does, and deleting an item's only
+  row removes the item. Deleting every item's row still removes the section. A tracked insert before the first item
+  goes above the section as a plain row instead, with the new warning `row_outside_repeating_section`, because Word's
+  Reject All of a tracked first item removed the whole section; untracked, it is a new first item. A tracked delete of
+  the first item's first row, with other items left, is written with the new warning
+  `repeating_section_unwrapped_by_word`: Word's Accept All removes the section's control around the rows that stay,
+  though the text and rows come out right. An item whose row sits inside a plain content control now counts as an item
+  for all of this and for `item=N` (#27).
+- `accept` and `reject` by `author` did not find the revisions that earlier operations of the same batch made, so a
+  batch could not make tracked edits and then accept or reject exactly its own revisions in one call. They now find them.
+  A short author code still means the author that the view of the input showed (#28).
+
 ## [0.9.3] - 2026-11-09
 
 ### Added

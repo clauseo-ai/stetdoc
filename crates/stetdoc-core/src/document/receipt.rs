@@ -194,23 +194,22 @@ fn resolution(res: &Resolved, names: &HashMap<BlockKey, String>) -> Resolution {
             .iter()
             .map(|(a, b)| (shown(a), shown(b)))
             .collect(),
-        notes_removed: res
-            .notes
-            .iter()
-            .map(|n| {
-                format!(
-                    "{} (id {})",
-                    if n.endnote { "endnote" } else { "footnote" },
-                    n.id
-                )
-            })
-            .collect(),
+        notes_removed: res.notes.iter().map(note_named).collect(),
         warnings: res
             .warnings
             .iter()
             .map(|m| warning(WarningCode::ReadAnomaly, m.clone()))
             .collect(),
     }
+}
+
+/// A note that went with its last reference, as a receipt names it: `footnote (id 1)`.
+fn note_named(note: &crate::revisions::notes::RemovedNote) -> String {
+    format!(
+        "{} (id {})",
+        if note.endnote { "endnote" } else { "footnote" },
+        note.id
+    )
 }
 
 /// Builds the receipt of what the batch did, up to what only the commit knows.
@@ -303,7 +302,7 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
             added_count,
             revisions: written
                 .iter()
-                .filter(|w| w.op == Some(index))
+                .filter(|w| w.ops.contains(&index))
                 .map(|w| changes::entry(&w.info))
                 .collect(),
             removed_own,
@@ -318,6 +317,7 @@ pub(super) fn build(i: &Inputs<'_>) -> Result<Receipt, StetError> {
                 .iter()
                 .find(|(at, _)| *at == Some(index))
                 .map(|(_, e)| format!("c{}", e.id)),
+            notes_removed: op.notes_removed.iter().map(note_named).collect(),
             marked: op
                 .marked
                 .iter()

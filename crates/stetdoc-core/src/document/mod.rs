@@ -190,6 +190,8 @@ mod tests_check;
 #[cfg(test)]
 mod tests_compare;
 #[cfg(test)]
+mod tests_compare_edges;
+#[cfg(test)]
 mod tests_drift;
 #[cfg(test)]
 mod tests_edit;

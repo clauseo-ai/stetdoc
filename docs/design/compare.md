@@ -580,6 +580,10 @@ reference and is left alone. An inserted table is `mark_inserted` over the table
 
 An unpaired original block is imported (7), then `place_deleted` as in 5.1. A paragraph that carries a section break loses
 the break (the copy rule), so the redline does not reproduce the original's sections: section structure is not compared (8.3).
+A deleted table that ends a cell, a text box, a header, a footer, a note or a comment (an original whose cell ended with a
+nested table) is followed by a new empty paragraph, live and untracked, which Word needs there and adds itself when it opens
+such a file. Accepting and rejecting both keep it, so the receipt names it as `compare_not_restored` and the laws leave it out
+([decision 0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
 
 ### 6.4 Order of the writes and the state they leave
 
@@ -588,8 +592,11 @@ Per story: first the imports (they create detached nodes and parts, and do not c
 paragraphs, last to first, then the splits and merges. The order is only an order of execution: the revised block keys never
 change, because the compiler keeps the original node for everything it does not create, so a plan made before the
 build is valid throughout. `Compiler::finish` checks the compiler's own post-conditions (W1 to W11) for everything that
-was written, and `document` runs `check::edit` with the foreign origins, so a redline that breaks a rule is refused and not
-saved.
+was written, and `document` runs `check::compare_located` with the foreign origins, so a redline that breaks a rule is refused and
+not saved. A violation whose code either input already has is carried and not refused, since the redline may only have carried it
+back into a container of the revised document ([decision 0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
+Deleted text that goes into a gap at the edge of a field or a read-only content control goes outside it, as an insertion does;
+only a change strictly inside a read-only control or a simple field's result replaces its paragraph whole.
 
 ### 6.5 What the redline looks like for the two accepts
 

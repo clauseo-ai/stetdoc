@@ -115,13 +115,13 @@ impl Compiler<'_, '_> {
             if !e.insert.is_empty() {
                 self.precheck_range(p, e.insert.clone())?;
             } else if !e.deleted.is_empty() {
+                // deleted text goes in at a gap, which may be at the edge of a field or a read-only control, as an
+                // insertion may (decision 0021)
                 let gap = p
                     .map
                     .gap(Mode::Final, e.insert.start)
                     .ok_or_else(|| invalid("a range lies outside the paragraph"))?;
-                for i in [gap.left, gap.right].into_iter().flatten() {
-                    self.check_items(p, i..i + 1)?;
-                }
+                self.check_redline_gap(p, gap.left, gap.right)?;
             }
         }
         for f in &plan.fmt {
@@ -178,10 +178,16 @@ impl Compiler<'_, '_> {
                 .map
                 .gap(Mode::Final, cut)
                 .ok_or_else(|| invalid("an offset lies outside the paragraph"))?;
-            for i in [gap.left, gap.right].into_iter().flatten() {
-                self.check_items(&p, i..i + 1)?;
-            }
-            if self.field_depth_after(&p, gap.left) > 0 {
+            self.check_gap(&p, gap.left, gap.right)?;
+            // the cut goes past the ends of fields that close right at it, as `split_block` settles it
+            let ends = p.map.items().get(gap.between.clone()).map_or(0, |items| {
+                items
+                    .iter()
+                    .filter(|i| i.kind == crate::wordml::ItemKind::FieldEnd)
+                    .count()
+            });
+            let ends = i64::try_from(ends).unwrap_or(i64::MAX);
+            if self.field_depth_after(&p, gap.left) - ends > 0 {
                 return Err(super::errors::readonly(
                     "this position is inside a field, whose result is read-only",
                 ));
@@ -192,6 +198,52 @@ impl Compiler<'_, '_> {
             return Err(super::errors::readonly(
                 "this paragraph begins or ends a field that spans paragraphs, so its mark cannot be merged",
             ));
+        }
+        Ok(())
+    }
+
+    /// Refuses a gap where deleted text cannot go: strictly inside a simple field's result or a content control that is locked,
+    /// bound to data or showing its placeholder (both neighbours in it), or beside ruby text or alternate content. At the edge
+    /// of such a field or control the gap is outside it, as for an insertion (decision 0021). A gap inside a complex field's
+    /// result takes deleted text, as a range there takes a replacement.
+    fn check_redline_gap(
+        &self,
+        p: &ParaView,
+        left: Option<usize>,
+        right: Option<usize>,
+    ) -> Result<(), StetError> {
+        use crate::wordml::WrapperKind;
+        let tree = self.tree_ro(&p.part)?;
+        let items = p.map.items();
+        let wrappers = |i: Option<usize>| -> Vec<(WrapperKind, NodeId)> {
+            i.and_then(|i| items.get(i))
+                .map(|item| p.map.context(item.ctx).map(|c| (c.kind, c.node)).collect())
+                .unwrap_or_default()
+        };
+        let (l, r) = (wrappers(left), wrappers(right));
+        for (kind, node) in l.iter().chain(&r) {
+            let around = l.contains(&(*kind, *node)) && r.contains(&(*kind, *node));
+            match kind {
+                WrapperKind::Alternate | WrapperKind::Ruby => {
+                    return Err(super::errors::unsupported(
+                        "this text is inside ruby text or alternate content, which this release does not edit",
+                    ));
+                }
+                WrapperKind::FieldSimple if around => {
+                    return Err(super::errors::readonly(
+                        "this text is the result of a simple field, which is read-only",
+                    ));
+                }
+                WrapperKind::Control if around => {
+                    let c = crate::wordml::control(tree.node_ref(*node));
+                    if c.lock.locks_content() || c.data_bound || c.showing_placeholder {
+                        return Err(super::errors::readonly(
+                            "this text is in a content control that is locked, bound to data or showing its placeholder, so it cannot be edited",
+                        ));
+                    }
+                }
+                _ => {}
+            }
         }
         Ok(())
     }

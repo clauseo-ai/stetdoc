@@ -1059,7 +1059,9 @@ and its text is not wrapped. Edits to the text of an unlocked control are ordina
 control as a wrapper kept around the new runs. The text of a control that is locked against editing (`contentLocked`,
 `sdtContentLocked`), bound to data or showing its placeholder is `readonly_region`, but an insertion at its start or its
 end is outside it, as at a field's edge (4.2 rule 1, issue #26): it goes before or after the `w:sdt`, tracked or not, as
-beside an unlocked control. Only an insertion with both neighbours in the control's text is refused.
+beside an unlocked control. Only an insertion with both neighbours in the control's text is refused. The same edge rule
+applies to a `split` cut, and to the deleted text and the merge cuts of a redline ([decision
+0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
 
 **3.6.3 Fields.** Word writes a deleted field as one `w:del` around `begin`, the code, `separate`, the result
 and `end`, with `delInstrText` and `delText`. It writes an inserted field as `ins{begin, code}`, **then the

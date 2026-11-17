@@ -124,6 +124,17 @@ All notable changes to stetdoc are recorded here. The format follows
 - `accept` and `reject` by `author` did not find the revisions that earlier operations of the same batch made, so a
   batch could not make tracked edits and then accept or reject exactly its own revisions in one call. They now find them.
   A short author code still means the author that the view of the input showed (#28).
+- `compare` refused a whole comparison when the original had a nested table as the last block of a cell, with no paragraph
+  after it, and the revised document dropped that table: `validation_failed`, exit 5, and no output. The redline now
+  puts an empty paragraph after the deleted table, as Word does when it opens such a file, and warns with
+  `compare_not_restored` that the paragraph stays when the changes are accepted or rejected. As a safety net, a violation
+  of the redline whose code either input already has is carried and listed, not refused. One that neither input has is
+  still refused, as "The redline would add ... that neither input has" (decision 0021).
+- `compare` replaced a whole paragraph, with `compare_paragraph_replaced`, for a word deleted right before or after a
+  simple field or a locked content control, and for paragraphs joined right after a field's end. These are now written
+  in place, as `edit` writes an insertion there. A change strictly inside a read-only control or a simple field's result
+  still replaces its paragraph whole, and never fails the comparison. `split` can now also cut right at the edge of a
+  simple field or a read-only control (decision 0021).
 
 ## [0.9.3] - 2026-11-09
 

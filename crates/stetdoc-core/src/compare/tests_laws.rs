@@ -422,8 +422,10 @@ pub(super) fn check_pair(original: Vec<u8>, revised: Vec<u8>) -> Result<Verdict,
     ));
     let rejected = dump(&resolved(&redline, Action::Reject)?, &on_rejected)?;
     // A comment that only one input has is not a change compare can show (decision 0022): the comments are compared when each
-    // input has as many.
-    if want_orig.comments.len() == want_rev.comments.len() {
+    // input has as many and the receipt names none that compare left out.
+    if want_orig.comments.len() == want_rev.comments.len()
+        && !receipt.notices.iter().any(|n| n.uncompared)
+    {
         failures.extend(first_difference(
             "N2 reject comments",
             &rejected.comments,

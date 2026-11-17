@@ -81,8 +81,8 @@ pub(super) struct Plan {
     pub unmatched_slots: usize,
     /// Rows that were left unpaired because their cells changed shape.
     pub table_replaced: usize,
-    /// Paired comments whose author or initials differ: the revised comment's first paragraph and what differs.
-    pub comment_meta: Vec<(crate::wordml::BlockKey, String)>,
+    /// Comments whose difference no tracked change records: the revised comment's first paragraph and the message.
+    pub comment_notices: Vec<(crate::wordml::BlockKey, String, bool)>,
     /// Blocks of the original that had no place to go in the revised document, which cannot happen in a document that has
     /// a block in every container. A count so that it is never silent.
     pub lost: usize,
@@ -99,7 +99,7 @@ pub(super) fn plan(
         stories: Vec::new(),
         unmatched_slots: pairings.unmatched_slots,
         table_replaced: pairings.table_replaced,
-        comment_meta: pairings.comment_meta.clone(),
+        comment_notices: pairings.comment_notices.clone(),
         lost: 0,
     };
     let (va, vb) = (original.parts(), revised.parts());

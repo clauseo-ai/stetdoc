@@ -58,9 +58,9 @@ pub(super) struct Pairings {
     pub unmatched_slots: usize,
     /// How many rows had different cell shapes and were left unpaired, over all stories.
     pub table_replaced: usize,
-    /// The paired comments whose author or initials differ, which no tracked change records: the revised comment's first
-    /// paragraph and what differs.
-    pub comment_meta: Vec<(crate::wordml::BlockKey, String)>,
+    /// The comments whose difference no tracked change records (`comments`): the revised comment's first paragraph and the
+    /// message, and whether the comment was left out of the comparison.
+    pub comment_notices: Vec<(crate::wordml::BlockKey, String, bool)>,
 }
 
 /// Pairs the stories of `original` with those of `revised`. `atoms` is the dictionary of the two sides.
@@ -111,7 +111,6 @@ pub(super) fn pair_documents(
         }
     }
     let notes = paired_notes(&body);
-    let comments = paired_comments(&body);
 
     // sections, and through them the headers and footers
     let tree_a = va.tree(ida)?;
@@ -225,72 +224,31 @@ pub(super) fn pair_documents(
             .find(|s| s.kind == StoryKind::Comments)
             .map(|s| Arc::clone(&s.part))
     };
-    if let (Some(pa), Some(pb)) = (comments_of(&specs_a.0), comments_of(&specs_b.0))
-        && !comments.is_empty()
-    {
-        out.comment_meta = comment_meta(original, revised, &pa, &pb, &comments)?;
-        if let Some(pair) = notes_story(
-            original,
-            revised,
-            StoryKind::Comments,
-            &pa,
-            &pb,
-            &comments,
-            atoms,
-        )? {
+    if let (Some(pa), Some(pb), Some(body)) = (
+        comments_of(&specs_a.0),
+        comments_of(&specs_b.0),
+        out.stories.first(),
+    ) {
+        let found = super::comments::pair_comments(body, original, revised, &pa, &pb)?;
+        out.comment_notices = found.notices;
+        let comments = found.pairs;
+        if !comments.is_empty()
+            && let Some(pair) = notes_story(
+                original,
+                revised,
+                StoryKind::Comments,
+                &pa,
+                &pb,
+                &comments,
+                atoms,
+            )?
+        {
             out.table_replaced += pair
                 .roots
                 .iter()
                 .map(|r| r.pairing.table_replaced)
                 .sum::<usize>();
             out.stories.push(pair);
-        }
-    }
-    Ok(out)
-}
-
-/// The paired comments whose author or initials differ: the revised comment's first paragraph and what differs.
-fn comment_meta(
-    original: &State,
-    revised: &State,
-    part_a: &str,
-    part_b: &Arc<str>,
-    pairs: &[(i64, i64)],
-) -> Result<Vec<(crate::wordml::BlockKey, String)>, StetError> {
-    let (va, vb) = (original.parts(), revised.parts());
-    let (Some(ida), Some(idb)) = (va.id(part_a), vb.id(part_b)) else {
-        return Ok(Vec::new());
-    };
-    let (sa, sb) = (va.story(ida)?, vb.story(idb)?);
-    let mut out = Vec::new();
-    for &(a, b) in pairs {
-        let (Some(ua), Some((ib, ub))) = (
-            sa.units().iter().find(|u| u.id == Some(a)),
-            sb.units().iter().enumerate().find(|(_, u)| u.id == Some(b)),
-        ) else {
-            continue;
-        };
-        let Some(first) = sb.blocks().iter().find(|e| e.unit as usize == ib) else {
-            continue;
-        };
-        let mut what: Vec<String> = Vec::new();
-        for (name, x, y) in [
-            ("author", &ua.author, &ub.author),
-            ("initials", &ua.initials, &ub.initials),
-        ] {
-            if x != y {
-                what.push(format!(
-                    "{name} \"{}\" became \"{}\"",
-                    x.as_deref().unwrap_or(""),
-                    y.as_deref().unwrap_or("")
-                ));
-            }
-        }
-        if !what.is_empty() {
-            out.push((
-                crate::wordml::BlockKey::new(Arc::clone(part_b), first.node),
-                what.join(" and "),
-            ));
         }
     }
     Ok(out)
@@ -415,49 +373,6 @@ fn notes_story(
         model_b,
         roots,
     }))
-}
-
-/// The pairs of comments (the id in the original, the id in the revised document) whose references are the same place in an
-/// unchanged stretch of two paired body paragraphs. A comment of the original pairs with one comment at most, and so does a
-/// revised one.
-fn paired_comments(body: &StoryPair) -> Vec<(i64, i64)> {
-    let mut out: Vec<(i64, i64)> = Vec::new();
-    for root in &body.roots {
-        for c in &root.pairing.containers {
-            for pair in &c.pairs {
-                let (Some(x), Some(y)) = (
-                    body.model_a
-                        .containers
-                        .get(c.ca)
-                        .and_then(|k| k.blocks.get(pair.a)),
-                    body.model_b
-                        .containers
-                        .get(c.cb)
-                        .and_then(|k| k.blocks.get(pair.b)),
-                ) else {
-                    continue;
-                };
-                let (Body::Para(px), Body::Para(py)) = (&x.body, &y.body) else {
-                    continue;
-                };
-                if px.comments.is_empty() || py.comments.is_empty() {
-                    continue;
-                }
-                let edits = word_edits(&px.text, &py.text);
-                for &(oa, ida) in &px.comments {
-                    if let Some(ob) = map_unchanged(&edits, oa)
-                        && let Some(&(_, idb)) = py
-                            .comments
-                            .iter()
-                            .find(|n| n.0 == ob && !out.iter().any(|(a, b)| *a == ida || *b == n.1))
-                    {
-                        out.push((ida, idb));
-                    }
-                }
-            }
-        }
-    }
-    out
 }
 
 /// The pairs of notes (the id in the original, the id in the revised document, endnote or not) whose references are the

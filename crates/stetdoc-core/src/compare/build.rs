@@ -481,11 +481,12 @@ impl Builder<'_, '_, '_> {
             "blocks that could not be written as changes are shown as the revised document has them",
             replaced,
         );
-        for (block, what) in &plan.comment_meta {
+        for (block, message, uncompared) in &plan.comment_notices {
             rc.notices.push(super::receipt::Notice {
                 code: "compare_not_tracked",
                 block: block.clone(),
-                message: format!("this comment's {what}, which no tracked change can record, so the redline keeps the revised comment's"),
+                message: message.clone(),
+                uncompared: *uncompared,
             });
         }
         rc.stats = stats;

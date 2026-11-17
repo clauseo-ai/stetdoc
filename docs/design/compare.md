@@ -747,7 +747,7 @@ count, as `Receipt.warnings` deduplicates:
 | `compare_story_unmatched` | a header or footer slot that exists on one side only, or has no one-to-one partner, was skipped (count) |
 | `compare_table_replaced` | rows whose cells changed shape were written as a deleted row and an inserted row (count) |
 | `compare_not_compared` | styles, numbering or section properties differ and were left as the revised document has them (a count of each kind) |
-| `compare_not_tracked` | a difference has no tracked form, such as a paired comment's author or initials: one warning for each, with the block's ref and what differs (decision 0022) |
+| `compare_not_tracked` | a difference has no tracked form, such as a paired comment's author or initials, or a comment was not compared because it could not be paired (comments on the same text that cannot be told apart, a reference that moved): one warning for each, with the block's ref and what differs (decision 0022) |
 
 ### 8.3 Not compared, said once
 

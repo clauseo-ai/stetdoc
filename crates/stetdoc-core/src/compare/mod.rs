@@ -37,6 +37,7 @@ mod build_exclusions;
 mod build_notes;
 mod build_props;
 mod build_tables;
+mod comments;
 mod edits;
 mod fmt;
 mod import;

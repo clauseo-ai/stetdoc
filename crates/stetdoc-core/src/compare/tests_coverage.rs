@@ -109,6 +109,71 @@ fn a_word_changed_inside_a_link_with_the_same_address_stays_a_word_change() {
     );
 }
 
+/// A paragraph with a link to `url` (none when empty) on `text`, between `before` and `after`.
+fn link_case(before: &str, text: &str, url: &str, after: &str) -> Pk {
+    let link = if url.is_empty() {
+        format!("<w:r><w:t xml:space=\"preserve\">{text}</w:t></w:r>")
+    } else {
+        format!(
+            "<w:hyperlink r:id=\"rId20\"><w:r><w:t xml:space=\"preserve\">{text}</w:t></w:r></w:hyperlink>"
+        )
+    };
+    let body = format!(
+        "<w:p><w:r><w:t xml:space=\"preserve\">{before}</w:t></w:r>{link}<w:r><w:t xml:space=\"preserve\">{after}</w:t></w:r></w:p>"
+    );
+    if url.is_empty() {
+        Pk::new(&body)
+    } else {
+        with_url(&body, url)
+    }
+}
+
+#[test]
+fn a_link_s_address_and_text_changed_together_hold_the_laws_in_every_combination() {
+    // the text growing, shrinking, staying, changing at either end or all through, with the address kept or changed, the
+    // text around it kept or edited, and the link added or taken away
+    let texts = [
+        "the portal",
+        "the web portal",
+        "portal",
+        "the portal page",
+        "our portal",
+        "a new site",
+    ];
+    let urls = ["https://x.example/1", "https://x.example/2", ""];
+    let arounds = [
+        ("Pay at ", " after delivery."),
+        ("Pay now at ", " after the delivery."),
+    ];
+    let original = link_case(
+        "Pay at ",
+        "the portal",
+        "https://x.example/1",
+        " after delivery.",
+    );
+    let mut n = 0;
+    for text in texts {
+        for url in urls {
+            for (before, after) in arounds {
+                let revised = link_case(before, text, url, after);
+                for (a, b) in [(&original, &revised), (&revised, &original)] {
+                    let v = check_pair(a.bytes(), b.bytes()).expect("compares");
+                    assert!(
+                        v.failures.is_empty()
+                            && v.receipt.exclusions.is_empty()
+                            && v.receipt.broken == 0,
+                        "{text:?} {url:?} {before:?}: {}\n{:?}",
+                        v.failures.join("\n"),
+                        v.receipt.exclusions
+                    );
+                    n += 1;
+                }
+            }
+        }
+    }
+    assert_eq!(n, 72);
+}
+
 fn commented(text: &str, author: &str) -> Pk {
     Pk {
         comments: Some(format!(
@@ -154,6 +219,109 @@ fn a_comment_whose_author_changed_is_named_in_a_notice() {
         n.message
     );
     assert_eq!(&**n.block.part(), "word/comments.xml");
+}
+
+/// A package whose comments are `(id, author, text)` and whose one paragraph holds, on "The second clause", the references in
+/// the order of `refs`, then `tail` with the references of `later` after it.
+fn comments_on(comments: &[(i64, &str, &str)], refs: &[i64], later: &[i64]) -> Pk {
+    let defs: String = comments
+        .iter()
+        .map(|(id, author, text)| {
+            format!(
+                "<w:comment w:id=\"{id}\" w:author=\"{author}\" w:initials=\"X\" w:date=\"2026-01-01T00:00:00Z\"><w:p><w:r><w:t xml:space=\"preserve\">{text}</w:t></w:r></w:p></w:comment>"
+            )
+        })
+        .collect();
+    let r = |ids: &[i64]| -> String {
+        ids.iter()
+            .map(|id| format!("<w:r><w:commentReference w:id=\"{id}\"/></w:r>"))
+            .collect()
+    };
+    Pk {
+        comments: Some(defs),
+        ..Pk::new(&format!(
+            "<w:p><w:r><w:t xml:space=\"preserve\">The second clause</w:t></w:r>{}<w:r><w:t xml:space=\"preserve\"> has comments, and so does the last part of it.</w:t></w:r>{}</w:p>",
+            r(refs),
+            r(later)
+        ))
+    }
+}
+
+#[test]
+fn two_comments_on_the_same_text_pair_by_id_when_their_references_swap() {
+    let defs = [(0, "Ann", "First note."), (1, "Bea", "Second note.")];
+    let a = comments_on(&defs, &[0, 1], &[]);
+    let b = comments_on(&defs, &[1, 0], &[]);
+    let (v, _) = run(&a, &b);
+    assert!(v.receipt.notices.is_empty(), "{:?}", v.receipt.notices);
+    let comments = xml_of(&v, "word/comments.xml");
+    assert!(
+        !comments.contains("<w:ins ") && !comments.contains("<w:del "),
+        "{comments}"
+    );
+}
+
+#[test]
+fn a_new_comment_at_an_existing_comment_s_place_does_not_take_its_pair() {
+    let a = comments_on(&[(0, "Ann", "First note.")], &[0], &[]);
+    let b = comments_on(
+        &[(0, "Ann", "First note."), (1, "Bea", "A new note.")],
+        &[1, 0],
+        &[],
+    );
+    let (v, _) = run(&a, &b);
+    assert!(v.receipt.notices.is_empty(), "{:?}", v.receipt.notices);
+    let comments = xml_of(&v, "word/comments.xml");
+    assert!(
+        !comments.contains("<w:ins ") && !comments.contains("<w:del "),
+        "{comments}"
+    );
+    // renumbered, the same author and text still find each other
+    let b = comments_on(
+        &[(5, "Bea", "A new note."), (6, "Ann", "First note.")],
+        &[5, 6],
+        &[],
+    );
+    let (v, _) = run(&a, &b);
+    assert!(v.receipt.notices.is_empty(), "{:?}", v.receipt.notices);
+}
+
+#[test]
+fn comments_at_one_place_that_cannot_be_told_apart_are_not_compared_and_say_so() {
+    let a = comments_on(
+        &[(0, "Ann", "First note."), (1, "Bea", "Second note.")],
+        &[0, 1],
+        &[],
+    );
+    let b = comments_on(
+        &[
+            (7, "Ann", "First note, edited."),
+            (8, "Bea", "Second note, edited."),
+        ],
+        &[7, 8],
+        &[],
+    );
+    let (v, _) = run(&a, &b);
+    assert_eq!(v.receipt.notices.len(), 2, "{:?}", v.receipt.notices);
+    assert!(
+        v.receipt
+            .notices
+            .iter()
+            .all(|n| n.code == "compare_not_tracked" && n.message.contains("shares its place"))
+    );
+    let comments = xml_of(&v, "word/comments.xml");
+    assert!(!comments.contains("<w:ins "), "{comments}");
+}
+
+#[test]
+fn a_comment_whose_reference_moved_and_whose_text_changed_is_named() {
+    let a = comments_on(&[(0, "Ann", "First note.")], &[0], &[]);
+    let b = comments_on(&[(0, "Ann", "First note, edited.")], &[], &[0]);
+    let (v, _) = run(&a, &b);
+    let [n] = &v.receipt.notices[..] else {
+        panic!("{:?}", v.receipt.notices)
+    };
+    assert!(n.message.contains("reference moved"), "{}", n.message);
 }
 
 fn table(tbl: &str, tr: &str, tc: &str) -> Pk {
@@ -211,8 +379,19 @@ fn changed_table_row_and_cell_properties_are_tracked_with_the_original_s() {
 #[test]
 fn table_properties_that_only_differ_in_what_word_rewrites_are_not_a_change() {
     let a = table("", "", "");
-    let b = table("", "", "<w:cnfStyle w:val=\"100000000000\"/>");
-    let (v, xml) = run(&a, &b);
-    assert_eq!(v.receipt.counts.props, 0);
-    assert!(!xml.contains("PrChange"), "{xml}");
+    for b in [
+        table("", "", "<w:cnfStyle w:val=\"100000000000\"/>"),
+        table(
+            "<w:tblLook w:val=\"04A0\" w:firstRow=\"1\" w:lastRow=\"0\" w:firstColumn=\"1\" w:lastColumn=\"0\" w:noHBand=\"0\" w:noVBand=\"1\"/>",
+            "",
+            "",
+        ),
+    ] {
+        let (v, xml) = run(&a, &b);
+        assert_eq!(v.receipt.counts.props, 0);
+        assert!(
+            !xml.contains("PrChange") && v.receipt.notices.is_empty(),
+            "{xml}"
+        );
+    }
 }

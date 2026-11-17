@@ -46,7 +46,8 @@ All notable changes to stetdoc are recorded here. The format follows
   now shows as the old link deleted next to the new one inserted. An edited comment is now tracked inside the comment,
   so Reject All gives back the original's text. A change of table, row or cell properties is now a `w:tblPrChange`,
   `w:trPrChange` or `w:tcPrChange`, counted in the receipt's `counts.props`. A comment whose author or initials
-  changed has no tracked form, so the new warning `compare_not_tracked` names it. A deleted hyperlink keeps its
+  changed has no tracked form, so the new warning `compare_not_tracked` names it, as it names comments on the same text
+  that cannot be told apart and a comment whose reference moved, which are not compared. A deleted hyperlink keeps its
   address now, through a new relationship when the revised document has none for it (decision 0022).
 - An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
   over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in

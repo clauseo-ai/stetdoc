@@ -8,7 +8,7 @@
 //! deleted and the revised one inserted, which is how a change of address reads as a tracked change, since OOXML has no change
 //! element for it.
 
-use super::edits::{Replace, merge_touching, widen};
+use super::edits::{Replace, cuts, merge_touching};
 use super::model::ParaInfo;
 use super::text::hash_bytes;
 use crate::api::view::Mode;
@@ -161,11 +161,80 @@ pub(super) fn with_link_changes(reps: Vec<Replace>, a: &ParaInfo, b: &ParaInfo) 
     if extra.is_empty() {
         return reps;
     }
-    let spans =
-        |p: &ParaInfo| -> Vec<Range<usize>> { p.links.iter().map(|(r, _)| r.clone()).collect() };
-    let extra = widen(extra, &spans(a), &spans(b));
+    let spans = |p: &ParaInfo| -> Vec<Range<usize>> {
+        p.links
+            .iter()
+            .map(|(r, _)| r.clone())
+            .chain(p.fields.iter().cloned())
+            .collect()
+    };
     let mut all = reps;
     all.extend(extra);
-    all.sort_by_key(|r| (r.a.start, r.b.start));
-    widen(merge_touching(all), &a.fields, &b.fields)
+    grow(all, &spans(a), &spans(b))
+}
+
+/// Replacements widened until none cuts a span of either side. A widened replacement takes the other side's range from the text
+/// the two sides have in common, through the other replacements, so a link whose text changed with its address is replaced as
+/// a whole on both sides and no more.
+pub(super) fn grow(
+    mut reps: Vec<Replace>,
+    spans_a: &[Range<usize>],
+    spans_b: &[Range<usize>],
+) -> Vec<Replace> {
+    reps.sort_by_key(|r| (r.a.start, r.b.start));
+    reps = merge_touching(reps);
+    // each pass that changes something grows a range, and a range cannot grow past the ends of the texts
+    for _ in 0..(spans_a.len() + spans_b.len() + 2) * (reps.len() + 2) {
+        let mut changed = false;
+        for i in 0..reps.len() {
+            for flip in [false, true] {
+                let spans = if flip { spans_b } else { spans_a };
+                for s in spans {
+                    let Some(r) = reps.get(i) else { break };
+                    let own = if flip { &r.b } else { &r.a };
+                    if !cuts(own, s) {
+                        continue;
+                    }
+                    let (lo, hi) = (own.start.min(s.start), own.end.max(s.end));
+                    let other_lo = other_side(&reps, i, lo, flip, true);
+                    let other_hi = other_side(&reps, i, hi, flip, false);
+                    if let Some(r) = reps.get_mut(i) {
+                        if flip {
+                            r.b = lo..hi;
+                            r.a = other_lo.min(r.a.start)..other_hi.max(r.a.end);
+                        } else {
+                            r.a = lo..hi;
+                            r.b = other_lo.min(r.b.start)..other_hi.max(r.b.end);
+                        }
+                    }
+                    changed = true;
+                }
+            }
+        }
+        reps.sort_by_key(|r| (r.a.start, r.b.start));
+        reps = merge_touching(reps);
+        if !changed {
+            break;
+        }
+    }
+    reps
+}
+
+/// The offset on the other side of `at`, an offset of one side (the revised one when `flip`), read through the replacements
+/// other than `skip` when `at` starts a range and through all of them when it ends one. An offset inside another replacement
+/// takes that replacement's start or end on the other side.
+fn other_side(reps: &[Replace], skip: usize, at: usize, flip: bool, start: bool) -> usize {
+    let mut delta: isize = 0;
+    for (j, r) in reps.iter().enumerate() {
+        let (own, other) = if flip { (&r.b, &r.a) } else { (&r.a, &r.b) };
+        if start && j == skip {
+            continue;
+        }
+        if own.end <= at && !(start && own.start == at && own.is_empty()) {
+            delta += other.len() as isize - own.len() as isize;
+        } else if own.start < at && at < own.end {
+            return if start { other.start } else { other.end };
+        }
+    }
+    at.saturating_add_signed(delta)
 }

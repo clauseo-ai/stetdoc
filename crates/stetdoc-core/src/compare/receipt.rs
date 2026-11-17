@@ -36,6 +36,9 @@ pub(crate) struct Notice {
     pub block: BlockKey,
     /// What differs, as a phrase that follows the block's ref.
     pub message: String,
+    /// True if the block was left out of the comparison (a comment compare could not pair), so rejecting does not give the
+    /// original's.
+    pub uncompared: bool,
 }
 
 /// What the receipt names for an exclusion. Never a block of the original: its key is a node of the original's tree, which the

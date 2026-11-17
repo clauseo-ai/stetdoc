@@ -36,12 +36,16 @@ pub(super) struct PropsPlan {
     pub container: &'static str,
 }
 
+/// Properties that say which parts of a table style apply, which Word rewrites as it pleases: not a difference, though a
+/// snapshot keeps them.
+pub(super) const TABLE_NOISE: &[&str] = &["tblLook"];
+
 /// The canonical form of the properties container `name` of `owner`, after the ignore list, without revisions.
 fn canon_of(tree: &SpanTree, owner: NodeId, name: &str) -> String {
     tree.node_ref(owner)
         .child_elements()
         .find(|c| c.is_element() && c.local_name() == name)
-        .map(|pr| canon(&Props::read(pr).without(NOT_TABLE)))
+        .map(|pr| canon(&Props::read(pr).without(NOT_TABLE).without(TABLE_NOISE)))
         .unwrap_or_default()
 }
 

@@ -113,7 +113,7 @@ pub(super) fn widen(
 }
 
 /// True if `r` overlaps `field` without covering all of it, or is an empty range strictly inside it.
-fn cuts(r: &std::ops::Range<usize>, field: &std::ops::Range<usize>) -> bool {
+pub(super) fn cuts(r: &std::ops::Range<usize>, field: &std::ops::Range<usize>) -> bool {
     if field.is_empty() {
         return false;
     }

@@ -302,6 +302,7 @@ fn container(
         .unwrap_or_default();
     let mut skip: Vec<&str> = super::plan_props::NOT_TABLE.to_vec();
     skip.extend(LAYOUT);
+    skip.extend(super::plan_props::TABLE_NOISE);
     skip.push("tblStyle");
     format!("{style}{}", canon_once(&props.without(&skip)))
 }

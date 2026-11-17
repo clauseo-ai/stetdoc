@@ -2,14 +2,15 @@
 //!
 //! `compare` opens both packages and accepts their revisions (`compare::prepare`), writes the redline on an open transaction of
 //! the revised state (`compare::redline`, which fails closed: a call that broke after writing is `internal`, and no transaction it
-//! cannot vouch for comes back), runs `check::edit` on that transaction, commits it, and builds the receipt. The order is an
+//! cannot vouch for comes back), runs `check::compare_located` on that transaction, commits it, and builds the receipt. The order is an
 //! edit's with a longer first step.
 //!
 //! What `check` is told: the origins of the compiler's calls, as for an edit (`declared::build`); every block of the redline that
 //! received content from the original, with the keys of its block there (`check::unit_keys` on the original's view); and every
 //! style or numbering definition and part that the import added, with the keys of its element or whole part there
-//! (`check::part_keys`). So a problem the original's content already had is carried into the redline, and one that the redline
-//! adds is refused, as `validation_failed`.
+//! (`check::part_keys`). So a problem the original's content already had is carried into the redline. `check::compare_located`
+//! carries, too, a violation whose code either input already has, which the redline may have carried into a container of the
+//! revised document (decision 0021), and one that neither input has is refused, as `validation_failed`.
 //!
 //! The redline is a `Document` whose original is the revised input as given, so `save` writes the redline and a working copy keeps
 //! both. The receipt has the revisions by author (one author, the stamp's), the moves as refs, compare's warnings, a warning for
@@ -56,7 +57,14 @@ pub fn compare(
     } = compare::redline(&prepared, &stamp)?;
     crate::revisions::canonical::order_created(&mut tx)?;
     let told = declared_of(&prepared, &tx, &rc)?;
-    let verified = check::edit_located(&tx, &told.declared).map_err(|refusal| refusal.error)?;
+    let verified = check::compare_located(&tx, &told.declared, || {
+        input_violations(&prepared)
+    })
+    .map_err(|refusal| {
+        refusal.error.with_next(
+            "This is a defect in stetdoc's compare: report it with both inputs. Comparing a copy of either input that Word has opened and saved may avoid it.",
+        )
+    })?;
     let repairs = super::repair::repair(&mut tx)?;
     let (next, _committed) = tx.commit()?;
     let document = Document {
@@ -81,6 +89,20 @@ pub fn compare(
 /// True if the part has a schema, and so blocks whose keys `check` can compute.
 fn in_schema(schema: &[std::sync::Arc<str>], part: &str) -> bool {
     schema.iter().any(|name| **name == *part)
+}
+
+/// The codes of the violations that either input has with its revisions accepted, which is what the redline is built from: a
+/// violation of the redline with one of these codes is carried, not new (decision 0021).
+fn input_violations(prepared: &Prepared) -> Vec<crate::api::check::FindingCode> {
+    let mut out = Vec::new();
+    for state in [&prepared.original, &prepared.revised] {
+        for (code, _) in check::document(&state.parts()).by_code {
+            if code.class() == crate::api::check::Class::Violation && !out.contains(&code) {
+                out.push(code);
+            }
+        }
+    }
+    out
 }
 
 /// What `check` is told about a redline, and what the receipt says of it.

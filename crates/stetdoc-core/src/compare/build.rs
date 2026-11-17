@@ -369,6 +369,15 @@ impl Builder<'_, '_, '_> {
                     .zip(fx.new_blocks.iter().cloned())
                     .collect();
                 self.note_copied_rows(sp, &pairs);
+                // past the copies: the empty paragraph that ends a container after a deleted table (decision 0021)
+                for end in fx.new_blocks.iter().skip(placed.len()) {
+                    self.exclude(
+                        vec![end.clone()],
+                        Vec::new(),
+                        "not_restored",
+                        "the original's container ends with a table, which Word does not allow, so the redline puts an empty paragraph after the deleted table, and it stays when the changes are accepted or rejected",
+                    );
+                }
             }
             Err(e) => self.broken(anchor_key, &e),
         }

@@ -68,6 +68,30 @@ pub(crate) fn edit_located(tx: &Tx<'_>, declared: &Declared) -> Result<Verified,
         .map_err(|e| refuse(e, block))
 }
 
+/// `edit_located` for the redline of `compare` (decision 0021): a new violation whose code `known` gives is carried, not new,
+/// since an input already had it and the redline may only have carried it back. `known` is asked only when a violation is new,
+/// and gives the codes of the violations of both inputs.
+pub(crate) fn compare_located(
+    tx: &Tx<'_>,
+    declared: &Declared,
+    known: impl FnOnce() -> Vec<crate::api::check::FindingCode>,
+) -> Result<Verified, Box<Refusal>> {
+    let refuse = |error: StetError, block: Option<BlockKey>| Box::new(Refusal { error, block });
+    let (list, mut verdict) =
+        collect(tx, declared, Mode::Shortcuts).map_err(|e| refuse(e, None))?;
+    if verdict.refuses() {
+        verdict.carry_codes(&known());
+    }
+    let block = verdict.first_block(&tx.parts(), &list);
+    verdict
+        .conclude_as(
+            (&tx.base().parts(), &tx.parts()),
+            &list,
+            super::verdict::Subject::Redline,
+        )
+        .map_err(|e| refuse(e, block))
+}
+
 pub(super) fn run(tx: &Tx<'_>, declared: &Declared, mode: Mode) -> Result<Verified, StetError> {
     let (list, verdict) = collect(tx, declared, mode)?;
     verdict.conclude((&tx.base().parts(), &tx.parts()), &list)

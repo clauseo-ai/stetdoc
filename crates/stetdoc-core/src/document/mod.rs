@@ -206,6 +206,8 @@ mod tests_edit_control_edges;
 #[cfg(test)]
 mod tests_edit_empty_run;
 #[cfg(test)]
+mod tests_edit_field_in_control;
+#[cfg(test)]
 mod tests_edit_field_label;
 #[cfg(test)]
 mod tests_edit_field_ranges;

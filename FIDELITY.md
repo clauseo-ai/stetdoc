@@ -61,6 +61,12 @@ Each of these was decided in a design, with the evidence there.
   also what Word's Reject All gives. One known gap: a field whose result two other authors' insertions make up keeps
   the `w:fldSimple` with its runs deleted inside it, so that rejecting one of them keeps the field as the source does,
   and Word's Accept All may leave an empty field there. See [revisions 3.6.3](docs/design/revisions.md#36-other-places).
+- **A content control or smart tag whose content is deleted stays, empty.** Deleting all of an inline `w:sdt`'s or
+  `w:smartTag`'s content, untracked, or tracked and then accepted, keeps the element with nothing in it, as Word keeps a
+  content control whose content is deleted. A field there goes the same way as text of the same extent: a simple or a
+  complex field deleted inside a control leaves the same empty control that deleting plain text does. No text edit
+  removes an inline control, even with the text around it, and a working copy whose `{ctl}` markers were removed is
+  `readonly_region`; deleting the whole paragraph removes it.
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).

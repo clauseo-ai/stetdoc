@@ -16,6 +16,11 @@ All notable changes to stetdoc are recorded here. The format follows
 - `view` marks a row that is the content of a repeating section's item with the item's number in its section, counted
   from 1: `r2 {row item=2}`. The JSON view has `item` on each row. A row insert next to such a row makes a new item, and
   deleting it removes its item, so the number shows that before the edit (#27).
+- A `limit_exceeded` error names the limit it passed. Its JSON has `limit`, the field of `Limits` that was exceeded (such as
+  `max_archive_bytes`, `max_entries`, `max_entry_bytes`, `max_total_bytes`, `max_compression_ratio`, `max_xml_depth`,
+  `max_xml_nodes`, `max_xml_attributes` or `max_xml_namespaces_in_scope`), with `value`, what the input had, and `max`, the
+  limit. Its message says the limit in words, such as "over the archive size limit of 536870912 bytes". A limit that is not
+  a field of `Limits` has none of the three.
 - Working copies written by 0.9.3 still open and pack, though this release renders their files with these two markers.
   The other way does not work: 0.9.3 refuses a working copy that holds `label` or `item=` with `stale_files`, so export
   again with 0.9.3 if you need to pack there.
@@ -30,6 +35,9 @@ All notable changes to stetdoc are recorded here. The format follows
 - The banner that names the tracked changes by others (in `view` and in every receipt) gave each change its place in the
   list, such as `#0`, where `accept` and `reject` take the revision id, `#101`. It now names the ids the ledger shows, and
   `check --json` names the same ids in `first`. A change with two ids, such as a move, shows both: `#107,109`.
+- The hint of a `limit_exceeded` error named the open options, which the command line and MCP do not have. Those surfaces
+  now say to use a smaller input, and that a Node or Rust caller can raise the limit in its open options. A batch limit
+  keeps its own hint, which says to apply the batch in parts.
 - An untracked edit that took out a footnote or endnote reference left the note behind. A `--no-track` replace or delete
   over a reference, or an untracked removal of a row or table holding one, took the reference out and kept the note in
   its part, referenced by nothing, while the receipt and `check` said nothing. The note now goes with its reference, as

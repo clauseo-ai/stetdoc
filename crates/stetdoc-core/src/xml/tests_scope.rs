@@ -177,7 +177,7 @@ fn declarations_in_scope_are_limited_and_the_editor_keeps_to_the_limit() {
     assert_eq!(e.code(), ErrorCode::LimitExceeded);
     assert!(
         e.message()
-            .contains("more than 1024 namespace declarations are in scope"),
+            .contains("More than 1024 namespace declarations are in scope"),
         "{e}"
     );
     // A declaration that a closer one hides still counts: it is what a lookup walks past. Three

@@ -38,3 +38,6 @@ pub(crate) mod revision;
 pub(crate) mod stamp;
 pub(crate) mod view;
 pub(crate) mod working_copy;
+
+#[cfg(test)]
+mod tests_error;

@@ -1106,14 +1106,20 @@ export type StetError = {
   code: ErrorCode;
   /** The readable file the failure came from. */
   file?: string | null;
+  /** The field of `Limits` that was exceeded, such as `max_archive_bytes`. */
+  limit?: string | null;
   /** The one-based line in `file`. */
   line?: number | null;
+  /** The limit that `value` passed, for `limit`. */
+  max?: number | null;
   /** The one-line message. */
   message: string;
   /** The hint for the next step. */
   next: string;
   /** The zero-based index of the failing operation. */
   op_index?: number | null;
+  /** What the input or request had, for `limit`. */
+  value?: number | null;
 };
 
 /** One of the document's stories, by the name an agent uses. */

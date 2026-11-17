@@ -299,7 +299,7 @@ impl Workdir {
             .collect();
         let record = self.dir.join(STET).join(PACKED);
         refuse_link(&record)?;
-        if let Some(text) = super::read_text_if_any(&record, MAX_PACKED)? {
+        if let Some(text) = super::read_text_if_any(&record, None, MAX_PACKED)? {
             digests.extend(
                 text.lines()
                     .map(str::trim)
@@ -315,7 +315,7 @@ impl Workdir {
     pub fn record_packed(&self, digest: &str) -> Result<(), Failure> {
         let record = self.dir.join(STET).join(PACKED);
         refuse_link(&record)?;
-        let mut text = super::read_text_if_any(&record, MAX_PACKED)?.unwrap_or_default();
+        let mut text = super::read_text_if_any(&record, None, MAX_PACKED)?.unwrap_or_default();
         if text.lines().any(|line| line.trim() == digest) {
             return Ok(());
         }
@@ -336,7 +336,11 @@ impl Workdir {
             if !has_extension(&name, &extensions) {
                 continue;
             }
-            let bytes = super::read_file(&path, Limits::default().max_entry_bytes)?;
+            let bytes = super::read_file(
+                &path,
+                Some("max_entry_bytes"),
+                Limits::default().max_entry_bytes,
+            )?;
             if std::str::from_utf8(&bytes).is_ok() {
                 continue;
             }
@@ -360,7 +364,7 @@ impl Workdir {
             if !has_extension(&name, &extensions) {
                 continue;
             }
-            let bytes = super::read_file(&path, limits.max_entry_bytes)?;
+            let bytes = super::read_file(&path, Some("max_entry_bytes"), limits.max_entry_bytes)?;
             let text = String::from_utf8(bytes).map_err(|_| {
                 Failure::Core(
                     StetError::new(
@@ -380,7 +384,10 @@ impl Workdir {
             {
                 continue;
             }
-            entries.push((name, super::read_file(&path, limits.max_archive_bytes)?));
+            entries.push((
+                name,
+                super::read_file(&path, Some("max_archive_bytes"), limits.max_archive_bytes)?,
+            ));
         }
         Ok(WorkingCopy {
             files,

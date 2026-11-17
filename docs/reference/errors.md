@@ -116,9 +116,9 @@ Exit 6 (input). The input is not a readable .docx package: a bad ZIP structure, 
 
 ### `limit_exceeded`
 
-Exit 6 (input). The input or the request exceeds a configured limit, such as entry count, size, compression ratio, nesting depth or batch size.
+Exit 6 (input). The input or the request exceeds a configured limit, such as entry count, size, compression ratio, nesting depth or batch size. When the limit is one of the fields of `Limits`, the error names it in `limit`, with what the input had in `value` and the limit in `max`.
 
-**Next:** Use a smaller input, or raise the limit in the open options if the source is trusted.
+**Next:** Use a smaller input. A Node or Rust caller can raise the limit that the error names, in its open options, if the source is trusted.
 
 ### `corrupt_complement`
 

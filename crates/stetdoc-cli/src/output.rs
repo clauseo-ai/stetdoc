@@ -69,6 +69,21 @@ pub fn to_json<T: Serialize>(data: &T) -> Result<Value, Failure> {
     })
 }
 
+/// The error as the command line and MCP say it. A `limit_exceeded` keeps the core's message and its `limit`, `value` and
+/// `max`, but its default hint names the open options, which neither surface has, so it gets a hint these surfaces can act
+/// on. A hint the failure sets itself is kept.
+fn surface(error: &StetError) -> StetError {
+    if error.code() != ErrorCode::LimitExceeded
+        || error.next() != ErrorCode::LimitExceeded.next_hint()
+    {
+        return error.clone();
+    }
+    error.clone().with_next(
+        "Use a smaller input: split the document into parts, or take out what makes the file large, such as embedded \
+         images. The command line and MCP cannot raise this limit; a Node or Rust caller can, in its open options.",
+    )
+}
+
 /// Why a command failed: always a code of the one error table, so the exit status, the JSON and the text agree.
 #[derive(Debug)]
 pub enum Failure {
@@ -107,14 +122,14 @@ impl Failure {
 
     /// The failure as data: `{"error": {...}}`, the shape napi throws.
     pub fn to_json(&self) -> Value {
-        let error = serde_json::to_value(self.error()).unwrap_or(Value::Null);
+        let error = serde_json::to_value(surface(self.error())).unwrap_or(Value::Null);
         serde_json::json!({ "error": error })
     }
 
     /// The failure as text: `error[code]: message`, then `next: hint`. The operation and the readable file's place are said
     /// once: a message that already names its file (`document.md line 4: ...`) gets no second copy of the place.
     pub fn to_text(&self) -> String {
-        let error = self.error();
+        let error = surface(self.error());
         let mut text = format!("error[{}]: {}", error.code().as_str(), error.message());
         if let Some(index) = error.op_index() {
             text.push_str(&format!(" (operation {index})"));

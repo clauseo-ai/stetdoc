@@ -67,8 +67,12 @@ fn logical_lines(name: &str, text: &str, limits: &Limits) -> Result<Vec<(u32, St
     if physical.len() > max_lines {
         return Err(StetError::new(
             ErrorCode::LimitExceeded,
-            format!("{name} has more than {max_lines} lines, which is the limit."),
+            format!(
+                "{name} has {} lines, over the XML node limit of {max_lines}.",
+                physical.len()
+            ),
         )
+        .with_limit("max_xml_nodes", physical.len() as u64, max_lines as u64)
         .in_file(name, 0));
     }
     let mut lines = Vec::new();
@@ -171,10 +175,12 @@ fn parse_file(name: &str, text: &str, limits: &Limits) -> Result<DraftFile, Stet
         return Err(StetError::new(
             ErrorCode::LimitExceeded,
             format!(
-                "{name} is larger than the limit of {} bytes for one file.",
+                "{name} is {} bytes, over the file size limit of {} bytes.",
+                text.len(),
                 limits.max_entry_bytes
             ),
         )
+        .with_limit("max_entry_bytes", text.len() as u64, limits.max_entry_bytes)
         .in_file(name, 0));
     }
     let text = text.strip_prefix('\u{feff}').unwrap_or(text);

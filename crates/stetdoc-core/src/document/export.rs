@@ -19,14 +19,14 @@ fn corrupt(message: impl Into<String>) -> StetError {
     StetError::new(ErrorCode::CorruptComplement, message)
 }
 
-fn over(what: &str, size: usize, limit: u64) -> StetError {
+fn over(what: &str, size: usize, field: &'static str, limit: u64) -> StetError {
     StetError::new(
         ErrorCode::LimitExceeded,
-        format!("The complement entry `{what}` is {size} bytes, over the limit of {limit}."),
+        format!(
+            "The complement entry `{what}` is {size} bytes, over the size limit of {limit} bytes."
+        ),
     )
-    .with_next(
-        "Use a smaller document, or raise the limit in the open options if the source is trusted.",
-    )
+    .with_limit(field, size as u64, limit)
 }
 
 impl Document {
@@ -108,32 +108,38 @@ impl Document {
             )
         })?;
         let complement = &working_copy.complement;
-        let entry = |name: &str, bound: u64| -> Result<&[u8], StetError> {
+        let entry = |name: &str, field: &'static str, bound: u64| -> Result<&[u8], StetError> {
             let bytes = complement.entry(name)?.ok_or_else(|| {
                 corrupt(format!(
                     "The complement has no entry `{name}`, which the manifest names."
                 ))
             })?;
             if bytes.len() as u64 > bound {
-                return Err(over(name, bytes.len(), bound));
+                return Err(over(name, bytes.len(), field, bound));
             }
             Ok(bytes)
         };
-        let original = entry(ORIGINAL, limits.max_archive_bytes)?;
+        let original = entry(ORIGINAL, "max_archive_bytes", limits.max_archive_bytes)?;
         if sha256(original) != manifest.original {
             return Err(corrupt(
                 "`original.docx` does not match the digest recorded in the manifest.",
             ));
         }
         let head = match &manifest.head {
-            Some(named) => entry(&named.name, limits.max_archive_bytes)?.to_vec(),
+            Some(named) => {
+                entry(&named.name, "max_archive_bytes", limits.max_archive_bytes)?.to_vec()
+            }
             None => original.to_vec(),
         };
         let head_sha256 = manifest
             .head
             .as_ref()
             .map_or(manifest.original, |h| h.sha256);
-        let refs = entry(&manifest.refs.name, limits.max_entry_bytes)?;
+        let refs = entry(
+            &manifest.refs.name,
+            "max_entry_bytes",
+            limits.max_entry_bytes,
+        )?;
         let recorded = Recorded {
             base: manifest.base,
             head_sha256,

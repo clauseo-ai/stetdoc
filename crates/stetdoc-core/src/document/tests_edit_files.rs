@@ -388,7 +388,7 @@ fn an_edit_that_changes_too_many_blocks_is_refused_with_the_count() {
     assert_eq!(e.code(), ErrorCode::LimitExceeded);
     assert!(
         e.message()
-            .contains("changes 3 blocks, over the limit of 2"),
+            .contains("changes 3 blocks, over the batch limit of 2"),
         "{e}"
     );
     assert!(e.next().contains("in parts"), "{}", e.next());

@@ -47,10 +47,15 @@ impl ScopeSet {
             return Err(StetError::new(
                 ErrorCode::LimitExceeded,
                 format!(
-                    "the scope has {} entries, over the limit of {}.",
+                    "The scope has {} entries, over the scope entry limit of {}.",
                     entries.len(),
                     limits.max_scope_refs
                 ),
+            )
+            .with_limit(
+                "max_scope_refs",
+                entries.len() as u64,
+                u64::from(limits.max_scope_refs),
             )
             .with_next("Name a range such as p40..p60 instead of each block."));
         }

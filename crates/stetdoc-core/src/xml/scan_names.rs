@@ -169,9 +169,14 @@ impl<'a> Parser<'a> {
             let in_scope = self.scope.mark();
             if in_scope > self.limits.max_xml_namespaces_in_scope as usize {
                 return Err(limit(format!(
-                    "more than {} namespace declarations are in scope at once (byte {at}{})",
+                    "More than {} namespace declarations are in scope at once, over the namespace limit (byte {at}{}).",
                     self.limits.max_xml_namespaces_in_scope, self.note
-                )));
+                ))
+                .with_limit(
+                    "max_xml_namespaces_in_scope",
+                    in_scope as u64,
+                    u64::from(self.limits.max_xml_namespaces_in_scope),
+                ));
             }
             self.ns_peak = self.ns_peak.max(in_scope);
         }

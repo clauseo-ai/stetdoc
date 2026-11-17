@@ -224,7 +224,11 @@ fn apply_docx(
     let stamp = stamp::resolve(stamp)?;
     let author = stamp.author.clone();
     let options = OpenOptions::default();
-    let input = fsio::read_file(path, options.limits.max_archive_bytes)?;
+    let input = fsio::read_file(
+        path,
+        Some("max_archive_bytes"),
+        options.limits.max_archive_bytes,
+    )?;
     let digest = fsio::sha256_hex(&input);
     let mut doc = Document::open(input, &options)?;
     let made = make(&doc, stamp)?;

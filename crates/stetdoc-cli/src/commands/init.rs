@@ -245,7 +245,7 @@ fn install(
     }
     if scope == Scope::Project {
         let agents_md = block::resolve_link(&base.join("AGENTS.md"))?;
-        let current = fsio::read_text_if_any(&agents_md, MAX_FILE)?;
+        let current = fsio::read_text_if_any(&agents_md, None, MAX_FILE)?;
         let text = block::with_block(current.as_deref().unwrap_or(""), &agents_md)?;
         plan.push((agents_md, text, "AGENTS.md".into(), String::new(), false));
     }
@@ -263,7 +263,7 @@ fn install(
                 "Remove the link, or run stetdoc init --force to replace it with the stetdoc stub.",
             ));
         }
-        let current = fsio::read_file_if_any(path, MAX_FILE)?;
+        let current = fsio::read_file_if_any(path, None, MAX_FILE)?;
         if current.as_deref() == Some(text.as_bytes()) {
             unchanged.push((shown, agents));
             continue;
@@ -455,7 +455,7 @@ fn remove(args: &InitArgs, scope: Scope, base: &Path, picked: &Picked) -> Result
     // The block serves every agent, so it goes only when no agent is named, which removes them all.
     if scope == Scope::Project && !picked.named {
         let path = block::resolve_link(&base.join("AGENTS.md"))?;
-        if let Some(current) = fsio::read_text_if_any(&path, MAX_FILE)? {
+        if let Some(current) = fsio::read_text_if_any(&path, None, MAX_FILE)? {
             agents_md = block::without_block(&current, &path)?.map(|text| (path, text));
         }
     }
@@ -516,7 +516,7 @@ fn not_ours(dir: &Path) -> Result<Option<String>, Failure> {
     if is_link(&skill) {
         return Ok(Some("has a SKILL.md that is a symbolic link".into()));
     }
-    let text = fsio::read_file_if_any(&skill, MAX_FILE)?;
+    let text = fsio::read_file_if_any(&skill, None, MAX_FILE)?;
     Ok(match text.as_deref().map(std::str::from_utf8) {
         None => Some("has no SKILL.md".into()),
         Some(Ok(text)) if skill::is_ours(text) => None,

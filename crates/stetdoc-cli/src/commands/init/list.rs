@@ -13,7 +13,7 @@ use std::path::Path;
 /// What is installed in one folder: the version, `None` for nothing, or a word for something else.
 fn installed(base: &Path, folder: &str) -> (bool, Option<String>, &'static str) {
     let path = base.join(folder).join("SKILL.md");
-    match fsio::read_text_if_any(&path, MAX_FILE) {
+    match fsio::read_text_if_any(&path, None, MAX_FILE) {
         Ok(None) => (false, None, "no"),
         Ok(Some(text)) if skill::is_ours(&text) => {
             let version = skill::stub_version(&text);

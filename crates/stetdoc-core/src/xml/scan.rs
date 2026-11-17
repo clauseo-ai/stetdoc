@@ -194,10 +194,16 @@ impl Parser<'_> {
 
     fn push_node(&mut self, n: Node) -> Result<u32, StetError> {
         if self.nodes.len().saturating_add(self.attrs.len()) >= self.limits.max_xml_nodes as usize {
+            let count = self.nodes.len().saturating_add(self.attrs.len());
             return Err(limit(format!(
-                "XML part has more than {} nodes and attributes",
+                "The XML part has {count} nodes and attributes, over the XML node limit of {}.",
                 self.limits.max_xml_nodes
-            )));
+            ))
+            .with_limit(
+                "max_xml_nodes",
+                count as u64,
+                u64::from(self.limits.max_xml_nodes),
+            ));
         }
         let id = u32::try_from(self.nodes.end()).map_err(|_| limit("too many XML nodes"))?;
         // The parent is the open element, or the document node. It keeps the last child it has,
@@ -410,9 +416,14 @@ impl Parser<'_> {
         }
         if self.stack.len() >= self.limits.max_xml_depth as usize {
             return Err(limit(format!(
-                "XML nesting is deeper than {} levels (byte {at}{})",
+                "XML nesting is deeper than the nesting depth limit of {} levels (byte {at}{}).",
                 self.limits.max_xml_depth, self.note
-            )));
+            ))
+            .with_limit(
+                "max_xml_depth",
+                self.stack.len() as u64 + 1,
+                u64::from(self.limits.max_xml_depth),
+            ));
         }
         let mut p = at + 1;
         let name_start = p;
@@ -459,9 +470,10 @@ impl Parser<'_> {
             let most = (self.limits.max_xml_attributes as usize).min(MOST_ATTRIBUTES);
             if attr_count >= most {
                 return Err(limit(format!(
-                    "an element has more than {most} attributes (byte {at}{})",
+                    "An element has more than the attribute limit of {most} attributes (byte {at}{}).",
                     self.note
-                )));
+                ))
+                .with_limit("max_xml_attributes", attr_count as u64 + 1, most as u64));
             }
             let a_name_start = p;
             while src.get(p).is_some_and(|&b| is_name_char(b)) {

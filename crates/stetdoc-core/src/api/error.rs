@@ -278,9 +278,11 @@ error_codes! {
         wire: "limit_exceeded",
         exit: Input,
         doc: "The input or the request exceeds a configured limit, such as entry count, \
-              size, compression ratio, nesting depth or batch size.",
-        next: "Use a smaller input, or raise the limit in the open options if \
-               the source is trusted.",
+              size, compression ratio, nesting depth or batch size. When the limit is one \
+              of the fields of `Limits`, the error names it in `limit`, with what the input \
+              had in `value` and the limit in `max`.",
+        next: "Use a smaller input. A Node or Rust caller can raise the limit that the \
+               error names, in its open options, if the source is trusted.",
     }
     CorruptComplement {
         wire: "corrupt_complement",
@@ -363,6 +365,17 @@ pub struct StetError {
     op_index: Option<usize>,
     file: Option<String>,
     line: Option<u32>,
+    /// Boxed so that a failure without a limit stays small: `Result` carries the error on every call.
+    limit: Option<Box<Exceeded>>,
+}
+
+/// The bound a `limit_exceeded` failure is over: the name of its field in `Limits`, the value the input or request had and
+/// the bound it passed.
+#[derive(Clone, Debug, PartialEq, Eq)]
+struct Exceeded {
+    name: &'static str,
+    value: u64,
+    max: u64,
 }
 
 impl StetError {
@@ -375,6 +388,7 @@ impl StetError {
             op_index: None,
             file: None,
             line: None,
+            limit: None,
         }
     }
 
@@ -408,6 +422,30 @@ impl StetError {
         self.file = Some(file.into());
         self.line = (line > 0).then_some(line);
         self
+    }
+
+    /// Records the bound a `limit_exceeded` failure is over: `name` is the field of `Limits` (such as `max_archive_bytes`),
+    /// `value` is what the input or the request had and `max` is the limit it passed. The JSON form carries them as `limit`,
+    /// `value` and `max`, so a caller can tell which limit was hit without reading the message.
+    #[must_use]
+    pub fn with_limit(mut self, name: &'static str, value: u64, max: u64) -> StetError {
+        self.limit = Some(Box::new(Exceeded { name, value, max }));
+        self
+    }
+
+    /// The name of the field of `Limits` that a `limit_exceeded` failure is over, when the failure names one.
+    pub fn limit_name(&self) -> Option<&'static str> {
+        self.limit.as_ref().map(|e| e.name)
+    }
+
+    /// What the input or request had, for the limit that [`StetError::limit_name`] names.
+    pub fn limit_value(&self) -> Option<u64> {
+        self.limit.as_ref().map(|e| e.value)
+    }
+
+    /// The limit that [`StetError::limit_name`] names.
+    pub fn limit_max(&self) -> Option<u64> {
+        self.limit.as_ref().map(|e| e.max)
     }
 
     /// Clears the operation index, for a failure that is reported by file and line instead.
@@ -469,6 +507,15 @@ struct StetErrorData<'a> {
     /// The one-based line in `file`.
     #[serde(skip_serializing_if = "Option::is_none")]
     line: Option<u32>,
+    /// The field of `Limits` that was exceeded, such as `max_archive_bytes`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    limit: Option<&'a str>,
+    /// What the input or request had, for `limit`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    value: Option<u64>,
+    /// The limit that `value` passed, for `limit`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    max: Option<u64>,
 }
 
 impl Serialize for StetError {
@@ -480,6 +527,9 @@ impl Serialize for StetError {
             op_index: self.op_index,
             file: self.file.as_deref(),
             line: self.line,
+            limit: self.limit_name(),
+            value: self.limit_value(),
+            max: self.limit_max(),
         }
         .serialize(serializer)
     }
@@ -509,92 +559,3 @@ impl fmt::Display for StetError {
 }
 
 impl std::error::Error for StetError {}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::collections::HashSet;
-
-    #[test]
-    fn codes_have_unique_snake_case_names() {
-        let names: HashSet<_> = ErrorCode::ALL.iter().map(|c| c.as_str()).collect();
-        assert_eq!(names.len(), ErrorCode::ALL.len());
-        for name in names {
-            assert!(
-                name.chars().all(|c| c.is_ascii_lowercase() || c == '_'),
-                "{name} is not snake_case"
-            );
-        }
-    }
-
-    #[test]
-    fn wire_names_round_trip() {
-        for code in ErrorCode::ALL {
-            assert_eq!(ErrorCode::from_wire(code.as_str()), Some(*code));
-        }
-        assert_eq!(ErrorCode::from_wire("nope"), None);
-    }
-
-    #[test]
-    fn every_code_has_documentation_and_a_surface_neutral_hint() {
-        for code in ErrorCode::ALL {
-            assert!(
-                code.description().ends_with('.'),
-                "{code} doc is not a sentence"
-            );
-            let hint = code.next_hint();
-            assert!(hint.ends_with('.'), "{code} hint is not a sentence");
-            assert!(!hint.contains('`'), "{code} hint names a command: {hint}");
-        }
-    }
-
-    #[test]
-    fn exit_classes_are_numbered_one_to_seven_in_order() {
-        let numbers: Vec<u8> = ExitClass::ALL.iter().map(|c| c.number()).collect();
-        assert_eq!(numbers, [1, 2, 3, 4, 5, 6, 7]);
-    }
-
-    #[test]
-    fn exit_classes_match_the_architecture_table() {
-        assert_eq!(
-            ErrorCode::Unsupported.exit_class(),
-            ExitClass::OperationFailed
-        );
-        assert_eq!(ErrorCode::InvalidPayload.exit_class(), ExitClass::Usage);
-        assert_eq!(ErrorCode::AmbiguousMatch.exit_class(), ExitClass::Target);
-        assert_eq!(ErrorCode::PendingEdits.exit_class(), ExitClass::Stale);
-        assert_eq!(
-            ErrorCode::ValidationFailed.exit_class(),
-            ExitClass::Validation
-        );
-        assert_eq!(ErrorCode::UnsupportedVersion.exit_class(), ExitClass::Input);
-        assert_eq!(ErrorCode::Internal.exit_class(), ExitClass::Internal);
-    }
-
-    #[test]
-    fn the_internal_hint_asks_for_a_report_and_never_for_another_edit() {
-        let hint = ErrorCode::Internal.next_hint();
-        assert!(hint.starts_with("Report"), "{hint}");
-        assert!(hint.contains("Do not try a different edit"), "{hint}");
-    }
-
-    #[test]
-    fn an_error_carries_its_code_message_hint_and_operation_index() {
-        let error = StetError::new(ErrorCode::StaleRef, "p42 was deleted").at_op(3);
-        assert_eq!(error.code(), ErrorCode::StaleRef);
-        assert_eq!(error.message(), "p42 was deleted");
-        assert_eq!(error.op_index(), Some(3));
-        assert_eq!(error.next(), ErrorCode::StaleRef.next_hint());
-        assert_eq!(
-            error.to_string(),
-            "stale_ref: p42 was deleted (operation 3)"
-        );
-    }
-
-    #[test]
-    fn a_specific_hint_overrides_the_default() {
-        let error = StetError::new(ErrorCode::NotFound, "no p9").with_next("run `stetdoc view`");
-        assert_eq!(error.next(), "run `stetdoc view`");
-        assert_eq!(error.op_index(), None);
-    }
-}

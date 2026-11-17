@@ -186,7 +186,7 @@ fn a_raised_attribute_limit_cannot_make_the_count_wrap() {
             .err()
             .expect("more attributes than the tree can hold");
         assert_eq!(e.code(), ErrorCode::LimitExceeded);
-        assert!(e.message().contains("more than 4096 attributes"), "{e}");
+        assert!(e.message().contains("attribute limit of 4096"), "{e}");
     }
     // Exactly a chunk of them is fine, and is stored whole.
     let attrs: String = (0..4096).map(|i| format!(" a{i}=\"\"")).collect();

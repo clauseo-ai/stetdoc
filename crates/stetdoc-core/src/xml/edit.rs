@@ -90,9 +90,15 @@ impl Editor<'_> {
     pub(super) fn replace_attrs(&mut self, el: u32, list: Vec<Attr>) -> Result<(), StetError> {
         if list.len() > self.tree.max_attrs {
             return Err(limit(format!(
-                "an element would have more than {} attributes",
+                "An element would have {} attributes, over the attribute limit of {}.",
+                list.len(),
                 self.tree.max_attrs
-            )));
+            ))
+            .with_limit(
+                "max_xml_attributes",
+                list.len() as u64,
+                self.tree.max_attrs as u64,
+            ));
         }
         let old = *self.tree.node(el);
         if old.attr_count > 0
@@ -293,10 +299,12 @@ impl Editor<'_> {
 
     fn push(&mut self, n: Node) -> Result<NodeId, StetError> {
         if self.tree.nodes.len() + self.tree.attrs.len() >= self.tree.max_nodes {
+            let count = self.tree.nodes.len() + self.tree.attrs.len();
             return Err(limit(format!(
-                "the part would have more than {} nodes and attributes",
+                "The part would have {count} nodes and attributes, over the XML node limit of {}.",
                 self.tree.max_nodes
-            )));
+            ))
+            .with_limit("max_xml_nodes", count as u64, self.tree.max_nodes as u64));
         }
         let id = u32::try_from(self.tree.nodes.end())
             .ok()

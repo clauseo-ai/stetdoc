@@ -110,7 +110,12 @@ pub fn run(args: &PackArgs) -> Result<Outcome, Failure> {
 /// Refuses an output that exists and holds a document this working copy neither came from nor packed: a newer version that
 /// someone else wrote, which a pack would overwrite with an older one (`stale_target`, exit 4).
 fn refuse_foreign(workdir: &Workdir, disk: &WorkingCopy, output: &Path) -> Result<(), Failure> {
-    let Some(bytes) = fsio::read_file_if_any(output, Limits::default().max_archive_bytes)? else {
+    let Some(bytes) = fsio::read_file_if_any(
+        output,
+        Some("max_archive_bytes"),
+        Limits::default().max_archive_bytes,
+    )?
+    else {
         return Ok(());
     };
     let digest = fsio::sha256_hex(&bytes);

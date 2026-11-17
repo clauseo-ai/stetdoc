@@ -48,9 +48,15 @@ impl<'a> Envelope<'a> {
             }
             _ => error.message().to_string(),
         };
-        StetError::new(error.code(), message)
+        let mut located = StetError::new(error.code(), message)
             .with_next(error.next())
-            .at_line(origin.file.clone(), origin.line.max(1))
+            .at_line(origin.file.clone(), origin.line.max(1));
+        if let (Some(name), Some(value), Some(max)) =
+            (error.limit_name(), error.limit_value(), error.limit_max())
+        {
+            located = located.with_limit(name, value, max);
+        }
+        located
     }
 }
 
@@ -147,9 +153,14 @@ impl Document {
             return Err(StetError::new(
                 ErrorCode::LimitExceeded,
                 format!(
-                    "The edit changes {blocks} blocks, over the limit of {}.",
+                    "The edit changes {blocks} blocks, over the batch limit of {} operations.",
                     self.limits.max_batch_ops
                 ),
+            )
+            .with_limit(
+                "max_batch_ops",
+                blocks as u64,
+                u64::from(self.limits.max_batch_ops),
             )
             .with_next(
                 "Apply the edit in parts: keep some of the changes, save and export, then make the rest.",

@@ -192,8 +192,10 @@ impl Package {
         }
         if len as u64 > self.limits.max_entry_bytes {
             return Err(limit(format!(
-                "part {name:?} would be {len} bytes, over the limit"
-            )));
+                "Part {name:?} would be {len} bytes, over the entry size limit of {} bytes.",
+                self.limits.max_entry_bytes
+            ))
+            .with_limit("max_entry_bytes", len as u64, self.limits.max_entry_bytes));
         }
         Ok(())
     }

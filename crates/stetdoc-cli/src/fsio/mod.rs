@@ -17,8 +17,9 @@ pub fn present(path: &Path) -> Result<(), Failure> {
     }
 }
 
-/// Reads a whole file of at most `max` bytes. A missing file is `not_found`, a larger one `limit_exceeded`.
-pub fn read_file(path: &Path, max: u64) -> Result<Vec<u8>, Failure> {
+/// Reads a whole file of at most `max` bytes. A missing file is `not_found`, a larger one `limit_exceeded`. `field` is the
+/// field of `Limits` that `max` is, or `None` for a limit of the command line's own.
+pub fn read_file(path: &Path, field: Option<&'static str>, max: u64) -> Result<Vec<u8>, Failure> {
     let meta = fs::metadata(path).map_err(|e| missing(path, &e))?;
     if meta.is_dir() {
         return Err(StetError::new(
@@ -32,29 +33,36 @@ pub fn read_file(path: &Path, max: u64) -> Result<Vec<u8>, Failure> {
         .into());
     }
     if meta.len() > max {
-        return Err(too_big(path, max).into());
+        return Err(too_big(path, field, meta.len(), max).into());
     }
     let file = File::open(path).map_err(|e| missing(path, &e))?;
-    read_bounded(file, max, path)
+    read_bounded(file, field, max, path)
 }
 
 /// Reads at most `max` bytes, and refuses more.
-pub fn read_bounded(reader: impl Read, max: u64, path: &Path) -> Result<Vec<u8>, Failure> {
+pub fn read_bounded(
+    reader: impl Read,
+    field: Option<&'static str>,
+    max: u64,
+    path: &Path,
+) -> Result<Vec<u8>, Failure> {
     let mut bytes = Vec::new();
     reader
         .take(max.saturating_add(1))
         .read_to_end(&mut bytes)
         .map_err(|e| missing(path, &e))?;
-    if u64::try_from(bytes.len()).unwrap_or(u64::MAX) > max {
-        return Err(too_big(path, max).into());
+    let read = u64::try_from(bytes.len()).unwrap_or(u64::MAX);
+    if read > max {
+        return Err(too_big(path, field, read, max).into());
     }
     Ok(bytes)
 }
 
 /// The text of a batch: from `--ops`, or from stdin when the flag is absent or `-`.
 pub fn read_batch(ops: Option<&Path>, max: u64) -> Result<String, Failure> {
+    let field = Some("max_batch_bytes");
     let bytes = match ops {
-        Some(path) if path != Path::new("-") => read_file(path, max)?,
+        Some(path) if path != Path::new("-") => read_file(path, field, max)?,
         _ => {
             let stdin = std::io::stdin();
             if stdin.is_terminal() {
@@ -63,7 +71,7 @@ pub fn read_batch(ops: Option<&Path>, max: u64) -> Result<String, Failure> {
                     "Pass the batch with a heredoc (stetdoc edit DIR <<'EOF' ... EOF) or with --ops FILE.",
                 ));
             }
-            read_bounded(stdin.lock(), max, Path::new("stdin"))?
+            read_bounded(stdin.lock(), field, max, Path::new("stdin"))?
         }
     };
     String::from_utf8(bytes).map_err(|_| {
@@ -102,7 +110,11 @@ pub fn replace_atomic(path: &Path, bytes: &[u8], expected: &str) -> Result<(), F
         ));
     }
     write_through_temp(&target, path, bytes, Some(permissions), || {
-        let now = read_file(&target, stetdoc_core::Limits::default().max_archive_bytes)?;
+        let now = read_file(
+            &target,
+            Some("max_archive_bytes"),
+            stetdoc_core::Limits::default().max_archive_bytes,
+        )?;
         if sha256_hex(&now) == expected {
             return Ok(());
         }
@@ -246,19 +258,27 @@ pub fn ensure_dir(dir: &Path) -> Result<(), Failure> {
 }
 
 /// The bytes of a file, or `None` when there is none.
-pub fn read_file_if_any(path: &Path, max: u64) -> Result<Option<Vec<u8>>, Failure> {
+pub fn read_file_if_any(
+    path: &Path,
+    field: Option<&'static str>,
+    max: u64,
+) -> Result<Option<Vec<u8>>, Failure> {
     if !path.exists() {
         return Ok(None);
     }
-    read_file(path, max).map(Some)
+    read_file(path, field, max).map(Some)
 }
 
 /// The text of a file, or `None` when there is none. A file that is there and cannot be read is an error.
-pub fn read_text_if_any(path: &Path, max: u64) -> Result<Option<String>, Failure> {
+pub fn read_text_if_any(
+    path: &Path,
+    field: Option<&'static str>,
+    max: u64,
+) -> Result<Option<String>, Failure> {
     if !path.exists() {
         return Ok(None);
     }
-    let bytes = read_file(path, max)?;
+    let bytes = read_file(path, field, max)?;
     String::from_utf8(bytes).map(Some).map_err(|_| {
         Failure::usage(
             format!("{} is not UTF-8 text.", path.display()),
@@ -345,15 +365,23 @@ fn missing(path: &Path, error: &std::io::Error) -> Failure {
         .into()
 }
 
-fn too_big(path: &Path, max: u64) -> StetError {
-    StetError::new(
+/// A file over its size limit. The default hint of the code (what a library caller can do) is replaced by the command
+/// line's own in `output`, so none is set here.
+fn too_big(path: &Path, field: Option<&'static str>, value: u64, max: u64) -> StetError {
+    let what = match field {
+        Some("max_batch_bytes") => "the batch size limit",
+        Some("max_entry_bytes") => "the size limit of one part",
+        Some(_) => "the archive size limit",
+        None => "the size limit",
+    };
+    let error = StetError::new(
         ErrorCode::LimitExceeded,
-        format!(
-            "{} is larger than the limit of {max} bytes.",
-            path.display()
-        ),
-    )
-    .with_next("Split the input, or ask whoever runs stetdoc to raise the limit.")
+        format!("{} is larger than {what} of {max} bytes.", path.display()),
+    );
+    match field {
+        Some(name) => error.with_limit(name, value, max),
+        None => error,
+    }
 }
 
 #[cfg(test)]

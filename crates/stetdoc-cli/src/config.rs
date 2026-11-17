@@ -26,7 +26,7 @@ pub fn path() -> Option<PathBuf> {
 
 /// The saved author, when the file says one. A file that cannot be read gives none.
 pub fn author() -> Option<String> {
-    let text = fsio::read_text_if_any(&path()?, MAX_CONFIG).ok()??;
+    let text = fsio::read_text_if_any(&path()?, None, MAX_CONFIG).ok()??;
     text.lines().find_map(author_line)
 }
 
@@ -38,7 +38,7 @@ pub fn save_author(name: &str) -> Result<PathBuf, Failure> {
             "Set HOME, or set STETDOC_AUTHOR instead.",
         )
     })?;
-    let current = fsio::read_text_if_any(&path, MAX_CONFIG)?.unwrap_or_default();
+    let current = fsio::read_text_if_any(&path, None, MAX_CONFIG)?.unwrap_or_default();
     let line = format!("author = {}", quote(name));
     let mut lines: Vec<String> = Vec::new();
     let mut replaced = false;

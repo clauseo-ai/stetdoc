@@ -88,6 +88,8 @@ fn blocks_as_earlier_release(blocks: &mut [Block]) -> bool {
                 for row in &mut t.rows {
                     changed |= row.item.take().is_some();
                     for cell in &mut row.cells {
+                        changed |= !cell.revs.is_empty();
+                        cell.revs.clear();
                         changed |= blocks_as_earlier_release(&mut cell.blocks);
                     }
                 }

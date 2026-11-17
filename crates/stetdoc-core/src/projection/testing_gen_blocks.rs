@@ -120,6 +120,7 @@ impl Gen {
                         VMerge::Restart,
                         VMerge::Continue,
                     ]),
+                    revs: Vec::new(),
                     change: self.rng.chance(8).then(|| CellRev {
                         kind: *self.rng.pick(&[
                             CellChange::Inserted,

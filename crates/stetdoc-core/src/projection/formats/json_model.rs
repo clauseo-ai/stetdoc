@@ -240,7 +240,7 @@ json_struct!(Row {
 });
 json_struct!(RowRev { kind => "kind", tag => "tag" });
 json_struct!(Cell {
-    col => "col", span => "span", v_merge => "v_merge", change => "change", blocks => "blocks"
+    col => "col", span => "span", v_merge => "v_merge", change => "change", revs => "revs" or Vec::new(), blocks => "blocks"
 });
 json_struct!(CellRev { kind => "kind", tag => "tag" });
 json_struct!(SectionLine {

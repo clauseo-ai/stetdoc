@@ -267,6 +267,7 @@ impl Build<'_> {
             VMerge::Restart => tags.push(Key::CellVMerge { restart: true }),
             VMerge::Continue => tags.push(Key::CellVMerge { restart: false }),
         }
+        tags.extend(self.prop_keys(&cell.revs).into_iter().map(Key::Rev));
         tags
     }
 

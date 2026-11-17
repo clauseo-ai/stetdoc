@@ -487,6 +487,18 @@ impl<'a> StoryCx<'a> {
         let mut col = before;
         for wc in wr.cells() {
             let span = wc.grid_span();
+            let mut cell_revs = Vec::new();
+            if self.mode == Mode::Redline
+                && let Some(rev) = wc
+                    .props()
+                    .and_then(|p| p.get("tcPrChange"))
+                    .and_then(|n| revision_at(&n))
+            {
+                cell_revs.push(PropRev {
+                    kind: ChangeKind::Cell,
+                    tag: self.tag_of(&rev),
+                });
+            }
             let cell_change = if self.mode == Mode::Redline {
                 wc.revisions().next().map(|x| CellRev {
                     kind: match x.kind {
@@ -533,6 +545,7 @@ impl<'a> StoryCx<'a> {
                 span,
                 v_merge: wc.v_merge(),
                 change: cell_change,
+                revs: cell_revs,
                 blocks,
             });
             col = col.saturating_add(span);

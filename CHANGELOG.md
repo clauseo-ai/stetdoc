@@ -21,6 +21,10 @@ All notable changes to stetdoc are recorded here. The format follows
   `max_xml_nodes`, `max_xml_attributes` or `max_xml_namespaces_in_scope`), with `value`, what the input had, and `max`, the
   limit. Its message says the limit in words, such as "over the archive size limit of 536870912 bytes". A limit that is not
   a field of `Limits` has none of the three.
+- `view` marks a cell whose properties a tracked change changed (`w:tcPrChange`) with `{rev cell #id AUTH}` on the cell's first
+  paragraph, as it marks a row with `{rev row #id AUTH}`. The change was listed in the ledger only. The JSON view has `revs`
+  on each cell. A working copy packs with the tag and without it, so a copy written by an earlier release still packs
+  (decision 0023).
 - Working copies written by 0.9.3 still open and pack, though this release renders their files with these two markers.
   The other way does not work: 0.9.3 refuses a working copy that holds `label` or `item=` with `stale_files`, so export
   again with 0.9.3 if you need to pack there.

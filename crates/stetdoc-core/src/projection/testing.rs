@@ -115,6 +115,7 @@ pub(super) fn cell(blocks: Vec<Block>) -> Cell {
         span: 1,
         v_merge: VMerge::None,
         change: None,
+        revs: Vec::new(),
         blocks,
     }
 }

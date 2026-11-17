@@ -76,3 +76,8 @@ p4 Governing law: {++English law++}{#4 EW}
 {position: p1..p4 of changes by Eric White: 2 changes in 2 blocks (4 of 4 blocks)}
 
 ```
+
+A change to the properties of a run, a paragraph, a numbering, a table, a row, a cell or a section is marked `{rev KIND #id AUTH}`,
+where KIND is `run`, `para`, `numbering`, `table`, `grid`, `row`, `cell` or `section`. A run, a paragraph or a numbering
+carries the mark on its line, as `p3 {rev run #3 JD} Bold now` does above, a table or a row on its own line, and a cell on
+the first paragraph of the cell. The id is the one `accept` and `reject` take and `--revisions` lists.

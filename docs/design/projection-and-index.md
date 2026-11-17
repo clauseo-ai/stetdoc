@@ -899,10 +899,11 @@ p10 Notices go to {link "https://example.com/notices"}the notices page{/link}.
 
 - **Ref, tags, text.** `p42` is the ref (`BlockRef::parse` is the only parser, refs-and-state 3.1). Tags follow, each
   in braces and each a closed form: `{style "Name"}`, `{§"label"}`, `{§"label" ghost}`, `{•}`, `{¶+ #id AUTH}` and
-  `{¶- #id AUTH}` for an inserted or deleted paragraph mark, `{rev KIND #id AUTH}` for a change to
-  the properties of the run, paragraph or numbering anchored here, KIND being `run`, `para` or `numbering`; a table, a row or
-  a section names its own change on its own line (5.6). Also `{hidden-para}` for a paragraph that Word hides, `{joins-next}`,
-  and the cell tags of 5.6. Then one space, and the text, which may be empty. A line with no text ends after the last tag, with no trailing space.
+  `{¶- #id AUTH}` for an inserted or deleted paragraph mark, `{rev KIND #id AUTH}` for a change to the properties of the run,
+  paragraph or numbering anchored here, KIND being `run`, `para` or `numbering`, and for a cell's change on its first
+  paragraph, KIND `cell` (5.6). A table, a row or a section names its own change on its own line. Also `{hidden-para}` for
+  a paragraph that Word hides, `{joins-next}`, and the cell tags of 5.6. Then one space, and the text, which may be empty.
+  A line with no text ends after the last tag, with no trailing space.
   The tag forms and the inline markers have disjoint opening words, which a test over the grammar checks, so the
   first thing that is not a tag starts the text.
 - **Read-only prefix.** The ref and every tag are read-only. A parse compares them with the baseline's and a
@@ -1107,6 +1108,10 @@ p14 per unit
   free.
 - A row that Word marked inserted or deleted is `{row inserted #12 JD}` and `{row deleted #12 JD}`, and a cell is
   `{cell inserted ...}` in front of its cell tags. The paragraphs inside show no revision of their own.
+- A cell whose properties Word changed (`w:tcPrChange`) carries `{rev cell #12 JD}` among the tags of its first paragraph,
+  after its other cell tags, as `p2 {rev cell #12 JD} CELL-FMT`. It is shown only, and a line written before it existed
+  matches its baseline with no such tag (`matched::tags_agree`). The reason is in decision 0023. A cell whose first block
+  is a nested table has no paragraph to carry the tag, so it shows none, as with `{cell inserted}`.
 - A row that is the content of a repeating-section item, directly or inside plain controls (a `w:sdt` with `w15:repeatingSectionItem` inside one with
   `w15:repeatingSection`) is `{row item=2}`, with the item's number in its section from 1, after `header` and before a
   row change. The rows of one item share the number, and a new section starts at 1 again. It is shown only: the

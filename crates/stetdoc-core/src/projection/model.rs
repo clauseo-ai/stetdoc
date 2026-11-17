@@ -418,6 +418,8 @@ pub(crate) struct Cell {
     pub v_merge: VMerge,
     /// The cell was inserted, deleted or merged as a tracked change.
     pub change: Option<CellRev>,
+    /// The cell's properties were changed as a tracked change (`w:tcPrChange`). Only in `Redline`.
+    pub revs: Vec<PropRev>,
     /// The blocks in the cell: at least one.
     pub blocks: Vec<Block>,
 }

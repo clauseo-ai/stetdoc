@@ -305,25 +305,32 @@ fn touched(facts: &Facts, g: &Generated) -> Touched {
             }
             _ => {}
         }
-        // An insertion after a paragraph whose mark is gone goes after the paragraph it joins on to (revisions.md 3.2.2),
-        // which then takes the Y's inserted mark: that one and the gone-mark paragraphs before it are touched.
+        // An insertion after a paragraph whose mark is gone goes after the paragraph it joins on to when that one is emptied
+        // (revisions.md 3.2.2), which then takes the Y's inserted mark: that one and the gone-mark paragraphs before it are
+        // touched. A paragraph with text that it joins on to is left alone, as the write leaves it.
         if op.name == "insert"
             && v.get("place").and_then(Value::as_str) == Some("after")
             && let Some(at) = first.as_deref().and_then(index)
         {
-            let gone_mark = |r: &str| {
+            let body_para = |r: &str| {
                 facts
                     .paras
                     .iter()
-                    .any(|p| p.r == r && p.story == "body" && !p.in_table && p.mark_gone)
+                    .find(|p| p.r == r && p.story == "body" && !p.in_table)
             };
-            for (k, r) in facts.top.iter().enumerate().skip(at) {
-                if k > at {
-                    t.tops.insert(r.clone());
-                }
-                if !gone_mark(r) {
+            let mut walked = Vec::new();
+            for r in facts.top.iter().skip(at + 1) {
+                let p = body_para(r);
+                if !p.is_some_and(|p| p.mark_gone) {
+                    if p.is_some_and(|p| p.emptied)
+                        && body_para(&facts.top[at]).is_some_and(|p| p.mark_gone)
+                    {
+                        walked.push(r.clone());
+                        t.tops.extend(walked);
+                    }
                     break;
                 }
+                walked.push(r.clone());
             }
         }
         t.tops.extend([first, to, second].into_iter().flatten());

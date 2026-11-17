@@ -24,6 +24,8 @@ pub struct Para {
     pub joins_next: bool,
     /// True if its mark is deleted or moved away: in `Final` it joins the paragraph after it.
     pub mark_gone: bool,
+    /// True if it has content and all of it is tracked-deleted: nothing in `Final`, a deletion with text or an object in it.
+    pub emptied: bool,
     /// The top-level block of its story that holds it: its own ref, or the ref of its table.
     pub top: String,
     /// The part that holds its story, such as `word/document.xml` or `word/footer1.xml`.
@@ -220,6 +222,11 @@ impl Facts {
                         .pointer("/flags/joins_next")
                         .and_then(Value::as_bool)
                         .unwrap_or(false),
+                    emptied: p
+                        .get("final_text")
+                        .and_then(Value::as_str)
+                        .is_some_and(str::is_empty)
+                        && p.get("inlines").is_some_and(has_deleted),
                     mark_gone: matches!(
                         p.pointer("/mark/kind").and_then(Value::as_str),
                         Some("deleted" | "moved_from")
@@ -278,5 +285,21 @@ fn revision_ids(value: &Value, out: &mut Vec<i64>) {
         }
         Value::Array(items) => items.iter().for_each(|v| revision_ids(v, out)),
         _ => {}
+    }
+}
+
+/// True if `v` holds a tracked deletion with something in it (text or an object such as an image).
+fn has_deleted(v: &Value) -> bool {
+    match v {
+        Value::Object(m) => m.iter().any(|(k, x)| {
+            (k == "rev"
+                && x.get("kind").and_then(Value::as_str) == Some("del")
+                && x.get("inlines")
+                    .and_then(Value::as_array)
+                    .is_some_and(|a| !a.is_empty()))
+                || has_deleted(x)
+        }),
+        Value::Array(a) => a.iter().any(has_deleted),
+        _ => false,
     }
 }

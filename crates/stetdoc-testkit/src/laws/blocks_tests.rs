@@ -227,3 +227,24 @@ fn deleting_to_the_end_past_an_emptied_paragraph_touches_the_one_before_it() {
         .saved;
     per_block(&preluded, &after, &facts, &g).unwrap();
 }
+
+#[test]
+fn an_insertion_after_another_authors_deleted_mark_before_text_touches_nothing_after() {
+    // After another author's deleted mark before a paragraph with text, the new paragraph follows the anchor directly, so
+    // the paragraph with text is not touched, and L2 checks it.
+    let para = |t: &str| format!("<w:p><w:r><w:t>{t}</w:t></w:r></w:p>");
+    let gone = r#"<w:p><w:pPr><w:rPr><w:del w:id="1" w:author="Other" w:date="2020-01-01T00:00:00Z"/></w:rPr></w:pPr><w:r><w:t>Lead.</w:t></w:r></w:p>"#;
+    let body = format!("{gone}{}{}", para("Kept."), para("End."));
+    let bytes = Zip::new(entries_doc(&Doc::new().body(&body).bytes())).build();
+    let facts =
+        Facts::of(&Document::open(bytes.clone(), &OpenOptions::default()).unwrap()).unwrap();
+    let op = r#"{"op":"insert","ref":"p1","place":"after","paragraphs":["New."]}"#;
+    let g = generated(&[("insert", op)], true);
+    let tops = touched(&facts, &g).tops;
+    assert!(!tops.contains("p2"), "{tops:?}");
+    let after = run_batch(&bytes, &[], &g.json(), true)
+        .unwrap()
+        .unwrap()
+        .saved;
+    per_block(&bytes, &after, &facts, &g).unwrap();
+}

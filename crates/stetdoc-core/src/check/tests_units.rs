@@ -132,21 +132,35 @@ fn a_row_added_to_a_table_validates_the_table_and_the_cells_paragraphs() {
     assert_eq!(said.new, [C::CellWithoutFinalParagraph]);
 }
 
+/// A paragraph whose `w:jc` has the value given.
+fn aligned(value: &str, text: &str) -> String {
+    format!(r#"<w:p><w:pPr><w:jc w:val="{value}"/></w:pPr><w:r><w:t>{text}</w:t></w:r></w:p>"#)
+}
+
+/// Sets the `w:val` of the nth `w:jc`.
+fn realign(t: &mut SpanTree, n: usize, value: &str) {
+    let jc = nth(t, "jc", n);
+    set_attr(t, jc, "val", value);
+}
+
 /// Decision 0021: a structural violation that the redline adds is refused, even when an input has the same code.
 #[test]
 fn the_redline_never_carries_a_cell_that_does_not_end_with_a_paragraph() {
     let s = state(TABLE);
+    let input = state(&format!(
+        "{TABLE}{}",
+        TABLE.replace("<w:p><w:r><w:t>cell</w:t></w:r></w:p>", "")
+    ));
     let tx = transaction(&s, |t| {
         let p = nth(t, "p", 0);
         detach(t, p);
     });
     let declared = Declared::default();
-    let refused =
-        super::compare_located(&tx, &declared, || vec![(C::CellWithoutFinalParagraph, 5)])
-            .expect_err("a cell without a final paragraph is never carried");
+    let refused = super::compare_located(&tx, &declared, || (input.parts(), input.parts()))
+        .expect_err("a cell without a final paragraph is never carried");
     let message = refused.error.message().to_owned();
     assert!(
-        message.starts_with("The redline would add 1 violation that neither input has."),
+        message.starts_with("The redline would add 1 violation that neither input has as often."),
         "{message}"
     );
     // the inputs are read only when a violation is new
@@ -156,36 +170,44 @@ fn the_redline_never_carries_a_cell_that_does_not_end_with_a_paragraph() {
     assert_eq!(v.carried_total, 0);
 }
 
-/// Decision 0021: a violation of a class the redline may carry is carried when the inputs have at least as many of its code
-/// as the whole redline, and refused when the redline has more.
+/// Decision 0021: a violation of a class the redline may carry is carried while the redline has its key (code, attribute and
+/// value) no more often than the input that has it more often; the inputs' counts are not added, since content they share is
+/// in the redline once.
 #[test]
-fn the_redline_carries_an_inputs_violation_and_no_more_of_it() {
-    let s = state(&format!("{}{}", para("one"), para("two")));
-    let bogus = |count: usize| {
-        transaction(&s, move |t| {
-            for n in 0..count {
-                let p = nth(t, "p", n);
-                set_attr(t, p, "bogus", "1");
-            }
-        })
-    };
+fn the_redline_carries_an_inputs_invalid_value_and_no_more_of_it() {
+    let s = state(&format!(
+        "{}{}",
+        aligned("bogus", "one"),
+        aligned("left", "two")
+    ));
     let declared = Declared::default();
-    let one = bogus(1);
-    let code = said(&s, |t| {
-        let p = nth(t, "p", 0);
-        set_attr(t, p, "bogus", "1");
-    })
-    .new;
-    assert_eq!(code.len(), 1, "{code:?}");
-    let code = code[0];
-    let v = super::compare_located(&one, &declared, || vec![(code, 1)])
-        .expect("an input has one, and the redline has one");
+    // the reviewer's case: both inputs keep the one paragraph with the invalid value, and the redline makes a second
+    let shared = state(&format!(
+        "{}{}",
+        aligned("bogus", "one"),
+        aligned("left", "two")
+    ));
+    let tx = transaction(&s, |t| realign(t, 1, "bogus"));
+    super::compare_located(&tx, &declared, || (shared.parts(), shared.parts()))
+        .expect_err("two in the redline, and one in each input");
+    // another invalid value is another key
+    let tx = transaction(&s, |t| realign(t, 1, "other"));
+    super::compare_located(&tx, &declared, || (shared.parts(), shared.parts()))
+        .expect_err("no input has this value");
+    // an input that has the value twice covers two
+    let twice = state(&format!(
+        "{}{}",
+        aligned("bogus", "one"),
+        aligned("bogus", "two")
+    ));
+    let tx = transaction(&s, |t| realign(t, 1, "bogus"));
+    let v = super::compare_located(&tx, &declared, || (twice.parts(), shared.parts()))
+        .expect("the original has it twice");
     assert_eq!(v.carried_total, 1);
-    assert_eq!(v.carried.first().map(|f| f.code), Some(code));
-    let two = bogus(2);
-    super::compare_located(&two, &declared, || vec![(code, 1)])
-        .expect_err("the redline has two, and the inputs only one");
-    super::compare_located(&one, &declared, Vec::new).expect_err("no input has it");
+    assert_eq!(
+        v.carried.first().map(|f| f.code),
+        Some(C::SchemaInvalidAttributeValue)
+    );
 }
 
 fn said_after(s: &State, change: impl FnOnce(&mut SpanTree)) -> Said {

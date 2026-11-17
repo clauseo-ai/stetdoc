@@ -283,3 +283,37 @@ fn a_change_inside_a_locked_control_or_a_simple_fields_result_replaces_the_parag
         );
     }
 }
+
+/// Decision 0021: an input's own invalid value compares, in content both inputs share and in content the revised document
+/// deleted.
+#[test]
+fn an_inputs_own_invalid_value_is_carried_in_shared_and_deleted_content() {
+    let bad = |text: &str| {
+        format!(
+            r#"<w:p><w:pPr><w:jc w:val="bogus"/></w:pPr>{}</w:p>"#,
+            r(text)
+        )
+    };
+    let shared = bad("This paragraph has an alignment that Word does not know and stays.");
+    let deleted = bad("This paragraph has the same alignment and the revised document drops it.");
+    let a = Pkg::new(&format!(
+        "{shared}{deleted}{}",
+        p("The supplier delivers within thirty days.")
+    ))
+    .bytes();
+    let b = Pkg::new(&format!(
+        "{shared}{}",
+        p("The supplier delivers within sixty days.")
+    ))
+    .bytes();
+    assert!(!open(&a).check().ok, "the original has the invalid value");
+    let compared = compare(a.clone(), b.clone(), &options()).expect("compares");
+    assert_eq!(
+        blocks(&resolved(&compared.document, "accept")),
+        blocks(&open(&b))
+    );
+    assert_eq!(
+        blocks(&resolved(&compared.document, "reject")),
+        blocks(&open(&a))
+    );
+}

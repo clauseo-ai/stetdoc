@@ -9,8 +9,8 @@
 //! received content from the original, with the keys of its block there (`check::unit_keys` on the original's view); and every
 //! style or numbering definition and part that the import added, with the keys of its element or whole part there
 //! (`check::part_keys`). So a problem the original's content already had is carried into the redline. `check::compare_located`
-//! carries, too, a violation whose code is not one it never carries, when the redline has no more of that code than the inputs
-//! together (decision 0021); any other new violation is refused, as `validation_failed`.
+//! carries, too, a violation whose code is not one it never carries, when the redline has its key no more often than the input
+//! that has it more often (decision 0021); any other new violation is refused, as `validation_failed`.
 //!
 //! The redline is a `Document` whose original is the revised input as given, so `save` writes the redline and a working copy keeps
 //! both. The receipt has the revisions by author (one author, the stamp's), the moves as refs, compare's warnings, a warning for
@@ -58,11 +58,11 @@ pub fn compare(
     crate::revisions::canonical::order_created(&mut tx)?;
     let told = declared_of(&prepared, &tx, &rc)?;
     let verified = check::compare_located(&tx, &told.declared, || {
-        input_violations(&prepared)
+        (prepared.original.parts(), prepared.revised.parts())
     })
     .map_err(|refusal| {
         refusal.error.with_next(
-            "This is a defect in stetdoc's compare: report it with both inputs. Comparing a copy of either input that Word has opened and saved may avoid it.",
+            "If the original's paragraph with this problem was deleted and the revised document adds another with the same problem, this is a known limitation of compare (decision 0021): compare copies of the inputs that Word has opened and saved. Otherwise it is a defect in stetdoc's compare: report it with both inputs.",
         )
     })?;
     let repairs = super::repair::repair(&mut tx)?;
@@ -89,24 +89,6 @@ pub fn compare(
 /// True if the part has a schema, and so blocks whose keys `check` can compute.
 fn in_schema(schema: &[std::sync::Arc<str>], part: &str) -> bool {
     schema.iter().any(|name| **name == *part)
-}
-
-/// How many violations of each code the two inputs have together, each with its revisions accepted, which is what the redline
-/// is built from (`check::compare_located`, decision 0021).
-fn input_violations(prepared: &Prepared) -> Vec<(crate::api::check::FindingCode, usize)> {
-    let mut out: Vec<(crate::api::check::FindingCode, usize)> = Vec::new();
-    for state in [&prepared.original, &prepared.revised] {
-        for (code, n) in check::document(&state.parts()).by_code {
-            if code.class() != crate::api::check::Class::Violation {
-                continue;
-            }
-            match out.iter_mut().find(|(c, _)| *c == code) {
-                Some(entry) => entry.1 += n,
-                None => out.push((code, n)),
-            }
-        }
-    }
-    out
 }
 
 /// What `check` is told about a redline, and what the receipt says of it.

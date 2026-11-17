@@ -593,7 +593,8 @@ paragraphs, last to first, then the splits and merges. The order is only an orde
 change, because the compiler keeps the original node for everything it does not create, so a plan made before the
 build is valid throughout. `Compiler::finish` checks the compiler's own post-conditions (W1 to W11) for everything that
 was written, and `document` runs `check::compare_located` with the foreign origins, so a redline that breaks a rule is refused and
-not saved. A violation of a carriable code is carried and not refused when the redline has no more of that code than the inputs together,
+not saved. A violation of a carriable code is carried and not refused when the redline has its key (code, element, attribute, value) no
+more often than the input that has it more often,
 since the redline may only have carried it back into a container of the revised document; structural, schema, package and comment
 problems never are ([decision 0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
 Deleted text that goes into a gap at the edge of a field or a read-only content control goes outside it, as an insertion does;

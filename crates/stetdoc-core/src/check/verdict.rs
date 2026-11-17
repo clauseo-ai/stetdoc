@@ -142,12 +142,12 @@ impl Verdict {
         self.conclude_as(views, parts, Subject::Edit)
     }
 
-    /// Moves each new violation whose code `carried` accepts to the carried ones (`compare`, decision 0021). A violation that
+    /// Moves each new violation whose key `carries` accepts to the carried ones (`compare`, decision 0021). A violation that
     /// could not be located stays new.
-    pub(super) fn carry_where(&mut self, carries: &dyn Fn(crate::api::check::FindingCode) -> bool) {
+    pub(super) fn carry_where(&mut self, carries: &dyn Fn(&super::keys::Key) -> bool) {
         let (carried, new): (Vec<Reported>, Vec<Reported>) = std::mem::take(&mut self.new)
             .into_iter()
-            .partition(|r| carries(r.found.code));
+            .partition(|r| carries(&r.found.key));
         self.new = new;
         self.new_total = self.new_total.saturating_sub(carried.len());
         self.carried_total += carried.len();
@@ -204,7 +204,7 @@ impl Verdict {
                     },
                     match subject {
                         Subject::Edit => "",
-                        Subject::Redline => " that neither input has",
+                        Subject::Redline => " that neither input has as often",
                     },
                     named.join(" ")
                 ),

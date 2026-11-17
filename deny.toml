@@ -8,6 +8,13 @@ all-features = true
 
 [advisories]
 yanked = "deny"
+# Each ignore names why it is safe and when to drop it.
+ignore = [
+    # humantime is unmaintained. It reaches the build only as a test dependency, through trycmd, which runs the CLI
+    # snapshot tests, so it is in no shipped binary. Every trycmd release up to 1.2.1 still depends on it. Drop this
+    # when trycmd does.
+    { id = "RUSTSEC-2026-0542", reason = "humantime is unmaintained; test-only, through trycmd, which still depends on it" },
+]
 
 [licenses]
 # Permissive licences only. Add a licence here only after checking that code under it

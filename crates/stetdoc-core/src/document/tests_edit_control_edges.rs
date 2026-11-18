@@ -1,6 +1,6 @@
 //! An insertion at the start or the end of a read-only inline content control (locked against editing, bound to data or
 //! showing its placeholder) lands outside the control, before or after it, tracked and then accepted, and untracked, as beside
-//! an unlocked control (issue #26). An insertion strictly inside such a control, and an edit of its text, stay
+//! an unlocked control (issue #26), and a split there cuts outside it (decision 0021). An insertion strictly inside such a control, and an edit of its text, stay
 //! `readonly_region`. This is the edge rule fields and simple fields follow (`Compiler::check_gap`).
 
 use super::tests_edit_field_ranges::{every_way, refused_both_ways, wr};
@@ -70,5 +70,36 @@ fn an_edit_inside_a_read_only_control_stays_refused() {
             &body,
             r#"{"op":"replace","ref":"p1","start":4,"end":11,"with":"Q"}"#,
         );
+    }
+}
+
+/// Decision 0021: `split` cuts at the start or the end of a read-only control, outside it, tracked and untracked, and rejecting
+/// gives the paragraph back. A cut strictly inside stays refused.
+#[test]
+fn a_split_at_a_read_only_controls_start_or_end_cuts_outside_it() {
+    use super::tests_edit::run;
+    use super::tests_edit_field_ranges::{edit, main_xml, merged, open};
+    for (_, props) in KINDS.iter().skip(1) {
+        let body = fixture(props);
+        for before in ["Value", " tail"] {
+            let ops = format!(r#"{{"op":"split","ref":"p1","before":"{before}"}}"#);
+            for tracked in [true, false] {
+                let mut doc = open(&body);
+                edit(&mut doc, &ops, tracked).unwrap_or_else(|e| panic!("{ops}: {e}"));
+                assert!(doc.check().ok, "{ops}: {:?}", doc.check());
+                let xml = main_xml(&doc);
+                assert_eq!(
+                    xml.matches("<w:p>").count() + xml.matches("<w:p ").count(),
+                    2,
+                    "{xml}"
+                );
+                assert_eq!(xml.matches("<w:sdt>").count(), 1, "{xml}");
+                if tracked {
+                    run(&mut doc, r#"{"op":"reject","all":true}"#);
+                    assert_eq!(merged(&main_xml(&doc)), merged(&main_xml(&open(&body))));
+                }
+            }
+        }
+        refused_both_ways(&body, r#"{"op":"split","ref":"p1","before":"lue"}"#);
     }
 }

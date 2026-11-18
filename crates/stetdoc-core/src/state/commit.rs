@@ -73,8 +73,9 @@ fn hash_changed(tx: &Tx<'_>, edited: &[PartId]) -> Result<Vec<(PartId, [u8; 32])
                 let len = bytes.len() as u64;
                 if len > max {
                     return Err(limit(format!(
-                        "{name} would be {len} bytes after this edit, over the limit of {max}"
-                    )));
+                        "{name} would be {len} bytes after this edit, over the entry size limit of {max} bytes."
+                    ))
+                    .with_limit("max_entry_bytes", len, max));
                 }
                 failpoint::here("commit:hash")?;
                 sha256(&bytes)

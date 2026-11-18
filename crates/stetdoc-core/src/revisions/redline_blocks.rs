@@ -14,6 +14,9 @@
 //! That paragraph is given the live paragraph's properties and mark properties, with its own in a `pPrChange` and an
 //! `rPrChange`, so that accepting joins them into a paragraph that has the live one's properties, and rejecting restores the
 //! original paragraphs and their marks.
+//!
+//! A deleted table that ends its container is followed by a new empty paragraph with a live mark, as Word needs (decision
+//! 0021): the original's cell ended with the table, which Word does not allow and repairs the same way when it opens it.
 
 use super::compiler::Compiler;
 use super::errors::{internal, invalid, stale};
@@ -28,6 +31,18 @@ use super::redline_types::Imported;
 use super::redline_wrap::{Rev, blocks_below};
 use super::tree_ops::{child_element_ids, create_w, detach, insert, next_sibling_of, parent_of};
 use super::types::Place;
+
+/// The containers of blocks, for the one a placed table ends.
+const CONTAINERS: [&str; 8] = [
+    "tc",
+    "body",
+    "txbxContent",
+    "hdr",
+    "ftr",
+    "footnote",
+    "endnote",
+    "comment",
+];
 use crate::api::error::StetError;
 use crate::wordml::{BlockKey, NodeId};
 use std::sync::Arc;
@@ -228,6 +243,46 @@ impl Compiler<'_, '_> {
         if let (Some(live_key), Some(last)) = (live, blocks.last()) {
             self.take_the_mark(&part, live_key, last.node)?;
         }
+        if let Some(last) = blocks.last() {
+            self.end_after_deleted_table(&part, last.node)?;
+        }
+        Ok(())
+    }
+
+    /// A deleted table that ends its container (an original whose cell ended with a nested table, as some generators write
+    /// it) is followed by an empty live paragraph, which Word needs there and adds itself when it opens such a file (decision
+    /// 0021). It is new, with no origin, and listed after the placed blocks in the effect's new blocks, so that the caller can
+    /// tell it from them: accepting and rejecting both leave it.
+    fn end_after_deleted_table(&mut self, part: &Arc<str>, table: NodeId) -> Result<(), StetError> {
+        let parent = {
+            let tree = self.tree_ro(part)?;
+            if !is_w(&tree.node_ref(table), "tbl") || !crate::wordml::ends_container(tree, table) {
+                return Ok(());
+            }
+            // the body ends with the paragraph that holds its last section, which a placed block never follows
+            let mut up = tree.node_ref(table).parent();
+            while let Some(n) = up {
+                if CONTAINERS.contains(&n.local_name()) {
+                    break;
+                }
+                up = n.parent();
+            }
+            if up.is_none_or(|n| is_w(&n, "body")) {
+                return Ok(());
+            }
+            parent_of(tree, table).ok_or_else(|| internal("a placed table has no parent"))?
+        };
+        let tree = self.tx.part_mut(part)?;
+        let uri = wns(tree);
+        let p = create_w(tree, &uri, "p")?;
+        let next = next_sibling_of(tree, table);
+        insert(tree, parent, next, p)?;
+        let key = BlockKey::new(Arc::clone(part), p);
+        self.fx.new_blocks.push(key.clone());
+        self.fx.origins.push(Origin {
+            block: key,
+            from: Vec::new(),
+        });
         Ok(())
     }
 

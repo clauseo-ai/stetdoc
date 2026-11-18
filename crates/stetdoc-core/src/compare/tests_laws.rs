@@ -415,7 +415,33 @@ pub(super) fn check_pair(original: Vec<u8>, revised: Vec<u8>) -> Result<Verdict,
         let want = want_rev.sides.get(part).unwrap_or(&none);
         failures.extend(first_difference(&format!("N1 accept {part}"), got, want));
     }
+    let texts = |c: &[(i64, String)], skip: &HashSet<i64>| -> Vec<String> {
+        c.iter()
+            .filter(|(id, _)| !skip.contains(id))
+            .map(|(_, t)| t.clone())
+            .collect()
+    };
+    let none_left: HashSet<i64> = HashSet::new();
+    failures.extend(first_difference(
+        "N1 accept comments",
+        &texts(&accepted.comments, &none_left),
+        &texts(&want_rev.comments, &none_left),
+    ));
     let rejected = dump(&resolved(&redline, Action::Reject)?, &on_rejected)?;
+    // A comment that only one input has is not a change compare can show (decision 0022), and nor is one the receipt names as
+    // left out of the comparison: those are taken out of both sides, and the rest are compared when each side has as many.
+    let (mut left_a, mut left_b) = (HashSet::new(), HashSet::new());
+    for (a, b) in receipt.notices.iter().filter_map(|n| n.left_out.as_ref()) {
+        left_a.extend(a.iter().copied());
+        left_b.insert(*b);
+    }
+    let (got, want) = (
+        texts(&rejected.comments, &left_b),
+        texts(&want_orig.comments, &left_a),
+    );
+    if got.len() == want.len() {
+        failures.extend(first_difference("N2 reject comments", &got, &want));
+    }
     failures.extend(first_difference(
         "N2 reject",
         &without_emptied_notes(&rejected.body, &want_orig.empty_notes),

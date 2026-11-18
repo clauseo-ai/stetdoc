@@ -429,6 +429,7 @@ code is.
 | `kept_required_paragraph` | in a receipt: a `delete` of a whole paragraph emptied it and kept it, because its container needs it: the only paragraph of a cell or of the body, one that ends one after a table, one between two tables, the body's last paragraph after a section break, or one that holds a section break ([decision 0018](../decisions/0018-kept-required-paragraph.md)) | The ref is still there, empty. A caller that keeps its own map of the document would otherwise take the paragraph for removed |
 | `row_outside_repeating_section` | in a receipt: a tracked `row` insert before a repeating section's first item put the row above the section, as a plain row, and not into it as a new first item ([decision 0020](../decisions/0020-tracked-row-before-first-item.md)) | Word's Reject All of a tracked first item removes the whole section. The row is no item; insert it untracked to make it the first item |
 | `repeating_section_unwrapped_by_word` | in a receipt: a tracked deletion of the row that holds a repeating section's start, the first row of its first item, while rows of the section stay ([decision 0020](../decisions/0020-tracked-row-before-first-item.md)) | Word's Accept All removes the repeating-section control around the rows that stay, though the text and rows come out right. An untracked delete keeps the section |
+| `compare_not_tracked` | in a compare receipt: a difference that no tracked change records, such as a paired comment's author or initials, with the ref of the block ([decision 0022](../decisions/0022-compare-links-comments-table-properties.md)) | The redline has the revised document's value, and Reject All does not bring back the original's. Fix it by hand if the original's matters |
 | `outline_shown` | a view of the whole body (`Auto`) that does not fit the budget shows its outline | Its next step names the range of the whole body and `--all`, so the agent reads the body without guessing a flag |
 | `unreferenced_note` | a note no reference points at | It is in `notes.md` and nowhere in the text |
 | `duplicate_number` | in `render_blocks` for a receipt: a paragraph's text starts with its own computed clause number | The agent typed a number Word also adds |
@@ -899,9 +900,11 @@ p10 Notices go to {link "https://example.com/notices"}the notices page{/link}.
 
 - **Ref, tags, text.** `p42` is the ref (`BlockRef::parse` is the only parser, refs-and-state 3.1). Tags follow, each
   in braces and each a closed form: `{style "Name"}`, `{§"label"}`, `{§"label" ghost}`, `{•}`, `{¶+ #id AUTH}` and
-  `{¶- #id AUTH}` for an inserted or deleted paragraph mark, `{rev fmt #id AUTH}` for a change anchored here that
-  is not text, `{hidden-para}` for a paragraph that Word hides, `{joins-next}`, and the cell tags of 5.6. Then one
-  space, and the text, which may be empty. A line with no text ends after the last tag, with no trailing space.
+  `{¶- #id AUTH}` for an inserted or deleted paragraph mark, `{rev KIND #id AUTH}` for a change to the properties of the run,
+  paragraph or numbering anchored here, KIND being `run`, `para` or `numbering`, and for a cell's change on its first
+  paragraph, KIND `cell` (5.6). A table, a row or a section names its own change on its own line. Also `{hidden-para}` for
+  a paragraph that Word hides, `{joins-next}`, and the cell tags of 5.6. Then one space, and the text, which may be empty.
+  A line with no text ends after the last tag, with no trailing space.
   The tag forms and the inline markers have disjoint opening words, which a test over the grammar checks, so the
   first thing that is not a tag starts the text.
 - **Read-only prefix.** The ref and every tag are read-only. A parse compares them with the baseline's and a
@@ -1106,6 +1109,10 @@ p14 per unit
   free.
 - A row that Word marked inserted or deleted is `{row inserted #12 JD}` and `{row deleted #12 JD}`, and a cell is
   `{cell inserted ...}` in front of its cell tags. The paragraphs inside show no revision of their own.
+- A cell whose properties Word changed (`w:tcPrChange`) carries `{rev cell #12 JD}` among the tags of its first paragraph,
+  after its other cell tags, as `p2 {rev cell #12 JD} CELL-FMT`. It is shown only, and a line written before it existed
+  matches its baseline with no such tag (`matched::tags_agree`). The reason is in decision 0023. A cell whose first block
+  is a nested table has no paragraph to carry the tag, so it shows none, as with `{cell inserted}`.
 - A row that is the content of a repeating-section item, directly or inside plain controls (a `w:sdt` with `w15:repeatingSectionItem` inside one with
   `w15:repeatingSection`) is `{row item=2}`, with the item's number in its section from 1, after `header` and before a
   row change. The rows of one item share the number, and a new section starts at 1 again. It is shown only: the

@@ -9,6 +9,7 @@
 use super::model::{Body, Container, Node};
 use super::plan_fields::dissolve_field_groups;
 use super::plan_para::{MergePlan, ParaEdits, Reader, SplitPlan};
+use super::plan_props::{PropsPlan, table_props};
 use super::regroup::Group;
 use super::stories::{Pairings, RootPair, StoryPair};
 use super::tables::RowsPairing;
@@ -50,6 +51,8 @@ pub(super) enum Entry {
     Split(SplitPlan),
     /// Several original paragraphs that became one.
     Merge(MergePlan),
+    /// A paired table, row or cell whose properties differ.
+    Props(PropsPlan),
 }
 
 /// The plan of one story.
@@ -78,6 +81,12 @@ pub(super) struct Plan {
     pub unmatched_slots: usize,
     /// Rows that were left unpaired because their cells changed shape.
     pub table_replaced: usize,
+    /// Comments whose difference no tracked change records: the revised comment's first paragraph and the message.
+    pub comment_notices: Vec<(
+        crate::wordml::BlockKey,
+        String,
+        Option<super::comments::LeftOut>,
+    )>,
     /// Blocks of the original that had no place to go in the revised document, which cannot happen in a document that has
     /// a block in every container. A count so that it is never silent.
     pub lost: usize,
@@ -94,6 +103,7 @@ pub(super) fn plan(
         stories: Vec::new(),
         unmatched_slots: pairings.unmatched_slots,
         table_replaced: pairings.table_replaced,
+        comment_notices: pairings.comment_notices.clone(),
         lost: 0,
     };
     let (va, vb) = (original.parts(), revised.parts());
@@ -421,6 +431,11 @@ fn plan_container(
             }
             (Body::Table(ra), Body::Table(rb)) => {
                 if let Some(rows) = &p.rows {
+                    entries.extend(
+                        table_props((reader.a, reader.b), (x.id, y.id), (ra, rb), rows)
+                            .into_iter()
+                            .map(Entry::Props),
+                    );
                     plan_rows(
                         ra.len(),
                         rb.len(),

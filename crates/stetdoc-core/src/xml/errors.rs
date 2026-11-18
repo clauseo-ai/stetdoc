@@ -31,7 +31,10 @@ pub(super) fn not_found(message: impl Into<String>) -> StetError {
 /// hint is kept.
 pub(super) fn with_part(e: StetError, part: &str) -> StetError {
     let hint = (e.next() != e.code().next_hint()).then(|| e.next().to_owned());
-    let named = StetError::new(e.code(), format!("{part}: {}", e.message()));
+    let mut named = StetError::new(e.code(), format!("{part}: {}", e.message()));
+    if let (Some(name), Some(value), Some(max)) = (e.limit_name(), e.limit_value(), e.limit_max()) {
+        named = named.with_limit(name, value, max);
+    }
     match hint {
         Some(h) => named.with_next(h),
         None => named,

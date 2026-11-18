@@ -15,6 +15,7 @@ use super::units::all_units;
 use super::units::{Changed, Layout, UnitKind, changed_units, layout_of};
 use super::verdict::{Verdict, Verified};
 use super::{audit, fields, package};
+use crate::api::check::FindingCode;
 use crate::api::error::StetError;
 use crate::schema::validate_part;
 use crate::state::{Dep, PartsView, Tx};
@@ -66,6 +67,71 @@ pub(crate) fn edit_located(tx: &Tx<'_>, declared: &Declared) -> Result<Verified,
     verdict
         .conclude((&tx.base().parts(), &tx.parts()), &list)
         .map_err(|e| refuse(e, block))
+}
+
+/// The codes the redline never carries on the strength of an input having them (decision 0021): the structure of tables and
+/// containers, the schema's shape of an element, the package and the comments. Word repairs or refuses a file with any of them,
+/// so one the redline adds is refused even when an input has the same problem elsewhere. A copy of the original's content still
+/// keeps its own problems through its foreign origins, as for any import.
+const NEVER_CARRIED: [FindingCode; 18] = [
+    FindingCode::CellWithoutFinalParagraph,
+    FindingCode::TableWithoutRow,
+    FindingCode::RowWithoutCell,
+    FindingCode::ContainerWithoutBlock,
+    FindingCode::SchemaUnexpectedChild,
+    FindingCode::SchemaMissingChild,
+    FindingCode::SchemaOutOfOrder,
+    FindingCode::SchemaUnexpectedText,
+    FindingCode::SchemaWrongRoot,
+    FindingCode::McPrefixUndeclared,
+    FindingCode::RelationshipTargetMissing,
+    FindingCode::RelationshipIdDuplicate,
+    FindingCode::PartWithoutContentType,
+    FindingCode::MarkerUnpaired,
+    FindingCode::MarkerWithoutComment,
+    FindingCode::ReferenceMissing,
+    FindingCode::ReferenceDuplicate,
+    FindingCode::CommentIdDuplicate,
+];
+
+/// `edit_located` for the redline of `compare` (decision 0021). A new violation that the origins could not carry is carried
+/// when its code is not in `NEVER_CARRIED` and the whole redline has its key (the code with its detail: the element, the
+/// attribute, the value) no more often than the input that has it more often: then the redline has only moved that input's
+/// problem into a container of the revised document. `inputs` gives the views of the original and the revised document, each
+/// with its revisions accepted, and is asked only when a violation is new.
+pub(crate) fn compare_located<'v>(
+    tx: &Tx<'_>,
+    declared: &Declared,
+    inputs: impl FnOnce() -> (PartsView<'v>, PartsView<'v>),
+) -> Result<Verified, Box<Refusal>> {
+    let refuse = |error: StetError, block: Option<BlockKey>| Box::new(Refusal { error, block });
+    let (list, mut verdict) =
+        collect(tx, declared, Mode::Shortcuts).map_err(|e| refuse(e, None))?;
+    if verdict.refuses() {
+        let (original, revised) = inputs();
+        let keys = |parts: &PartsView<'_>| document_keys(parts).map_err(|e| refuse(e, None));
+        let (a, b, now) = (keys(&original)?, keys(&revised)?, keys(&tx.parts())?);
+        verdict.carry_where(&|key| {
+            !NEVER_CARRIED.contains(&key.code()) && now.count(key) <= a.count(key).max(b.count(key))
+        });
+    }
+    let block = verdict.first_block(&tx.parts(), &list);
+    verdict
+        .conclude_as(
+            (&tx.base().parts(), &tx.parts()),
+            &list,
+            super::verdict::Subject::Redline,
+        )
+        .map_err(|e| refuse(e, block))
+}
+
+/// The keys of every part of a document that has a schema, with their counts (`part_keys` of each).
+fn document_keys(parts: &PartsView<'_>) -> Result<KeySet, StetError> {
+    let mut keys = KeySet::default();
+    for part in listing(parts)?.parts {
+        keys.extend(&super::origins::part_keys(parts, &part.name)?);
+    }
+    Ok(keys)
 }
 
 pub(super) fn run(tx: &Tx<'_>, declared: &Declared, mode: Mode) -> Result<Verified, StetError> {

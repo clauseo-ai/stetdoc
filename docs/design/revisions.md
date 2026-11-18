@@ -655,7 +655,7 @@ accepting and rejecting do. The notes after them are the parts that need an argu
 | `numPr/ins` | remove the element | remove the whole `numPr` |
 | row `ins` | remove the marker | remove the row |
 | row `del` | remove the row | remove the marker |
-| `cellIns`, `cellDel` | `cellIns`: the marker is removed. `cellDel`: the cell is removed, and the `gridSpan` of the nearest live cell before it grows by the deleted cell's own span, so that the row still covers the grid (with no live cell before it, the next live cell grows). OpenXmlPowerTools does the same, but adds one per deleted cell and notes in its source that the sum is the right amount | `cellIns`: the cell is removed. `cellDel`: the marker is removed |
+| `cellIns`, `cellDel` | `cellIns`: the marker is removed. `cellDel`: the cell is removed, and the `gridSpan` of the nearest live cell before it grows by the deleted cell's own span, so that the row still covers the grid (with no live cell before it, the next live cell grows). OpenXmlPowerTools does the same, but adds one per deleted cell and notes in its source that the sum is the right amount. A row whose last cell is removed goes too, as an accepted row deletion does, and its table with its last row (decision 0024) | `cellIns`: the cell is removed, and a row left with no cell goes as on accept. `cellDel`: the marker is removed |
 | `cellMerge` | becomes `w:vMerge` (`rest` is `restart`, `cont` is `continue`) | remove the marker (the cell's `tcPrChange`, if there is one, is a change of its own) |
 | `ins` in `m:r` | unwrap | remove the `m:r` |
 | `del` in `m:r` | remove the `m:r` | unwrap |
@@ -1059,7 +1059,9 @@ and its text is not wrapped. Edits to the text of an unlocked control are ordina
 control as a wrapper kept around the new runs. The text of a control that is locked against editing (`contentLocked`,
 `sdtContentLocked`), bound to data or showing its placeholder is `readonly_region`, but an insertion at its start or its
 end is outside it, as at a field's edge (4.2 rule 1, issue #26): it goes before or after the `w:sdt`, tracked or not, as
-beside an unlocked control. Only an insertion with both neighbours in the control's text is refused.
+beside an unlocked control. Only an insertion with both neighbours in the control's text is refused. The same edge rule
+applies to a `split` cut, and to the deleted text and the merge cuts of a redline ([decision
+0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
 
 **3.6.3 Fields.** Word writes a deleted field as one `w:del` around `begin`, the code, `separate`, the result
 and `end`, with `delInstrText` and `delText`. It writes an inserted field as `ins{begin, code}`, **then the

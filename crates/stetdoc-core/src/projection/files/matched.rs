@@ -13,7 +13,7 @@ use crate::api::error::StetError;
 use crate::api::files::PlannedOp;
 use crate::projection::draft::DraftBlock;
 use crate::projection::keys::Key;
-use crate::projection::model::count;
+use crate::projection::model::{ChangeKind, count};
 use crate::refs::BlockRef;
 
 /// The first place where two lists of keys differ: `(was, now)`.
@@ -28,9 +28,32 @@ fn first_difference<'a>(
     })
 }
 
-/// True if the edited line is the baseline's paragraph, tag for tag, seam for seam and slot for slot.
+/// True if the edited line is the baseline's paragraph, tag for tag, seam for seam and slot for slot, except for a
+/// cell's property change that the edited line leaves out (`tags_agree`).
 pub(super) fn same(old: &DraftBlock, new: &DraftBlock) -> bool {
     old == new
+        || (old.tags != new.tags
+            && tags_agree(&old.tags, &new.tags)
+            && DraftBlock {
+                tags: new.tags.clone(),
+                ..old.clone()
+            } == *new)
+}
+
+/// A cell's property change is a tag of its first paragraph that the reader sees (`{rev cell #id AUTH}`). A working copy
+/// written before the tag existed has none, so an edited line that shows no such tag says what the baseline says. A line
+/// that shows one must show the baseline's.
+pub(crate) fn tags_agree(was: &[Key], now: &[Key]) -> bool {
+    let shown = now.iter().any(is_cell_change);
+    let was: Vec<&Key> = was
+        .iter()
+        .filter(|key| shown || !is_cell_change(key))
+        .collect();
+    was.len() == now.len() && was.iter().zip(now).all(|(w, n)| *w == n)
+}
+
+fn is_cell_change(key: &Key) -> bool {
+    matches!(key, Key::Rev(prop) if prop.kind == ChangeKind::Cell)
 }
 
 /// The operations that turn the old paragraph into the edited line, or why they cannot.
@@ -40,7 +63,9 @@ pub(super) fn compare(
     old: &DraftBlock,
     new: &DraftBlock,
 ) -> Result<Vec<PlannedOp>, StetError> {
-    if let Some((was, now)) = first_difference(&old.tags, &new.tags) {
+    if !tags_agree(&old.tags, &new.tags)
+        && let Some((was, now)) = first_difference(&old.tags, &new.tags)
+    {
         return Err(refuse::tag_changed(file, new.line, r, was, now));
     }
     let old_seams: Vec<Key> = old.seams.iter().map(|s| s.key.clone()).collect();

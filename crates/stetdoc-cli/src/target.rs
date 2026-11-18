@@ -30,13 +30,21 @@ impl Source {
 /// Reads and opens a package.
 pub fn open_docx(path: &Path) -> Result<Document, Failure> {
     let options = OpenOptions::default();
-    let bytes = fsio::read_file(path, options.limits.max_archive_bytes)?;
+    let bytes = fsio::read_file(
+        path,
+        Some("max_archive_bytes"),
+        options.limits.max_archive_bytes,
+    )?;
     Ok(Document::open(bytes, &options)?)
 }
 
 /// Reads a package's bytes, bounded by the default limits.
 pub fn read_docx(path: &Path) -> Result<Vec<u8>, Failure> {
-    fsio::read_file(path, Limits::default().max_archive_bytes)
+    fsio::read_file(
+        path,
+        Some("max_archive_bytes"),
+        Limits::default().max_archive_bytes,
+    )
 }
 
 /// A document opened for a command that only reads, with the notes to print on stderr.

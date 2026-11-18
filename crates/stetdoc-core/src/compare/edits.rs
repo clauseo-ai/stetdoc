@@ -69,6 +69,17 @@ pub(super) fn replacements(
         delta += with - cut;
         out.push(Replace { a: e.range, b });
     }
+    widen(out, spans_a, spans_b)
+}
+
+/// Replacements, sorted by their start, widened so that none cuts one of the spans of either side: an edit that overlaps a span
+/// without covering it, or that is an insertion strictly inside one, takes the whole span on its own side and the same stretch on
+/// the other, and edits that then touch are one.
+pub(super) fn widen(
+    mut out: Vec<Replace>,
+    spans_a: &[std::ops::Range<usize>],
+    spans_b: &[std::ops::Range<usize>],
+) -> Vec<Replace> {
     loop {
         let mut changed = false;
         for r in &mut out {
@@ -102,7 +113,7 @@ pub(super) fn replacements(
 }
 
 /// True if `r` overlaps `field` without covering all of it, or is an empty range strictly inside it.
-fn cuts(r: &std::ops::Range<usize>, field: &std::ops::Range<usize>) -> bool {
+pub(super) fn cuts(r: &std::ops::Range<usize>, field: &std::ops::Range<usize>) -> bool {
     if field.is_empty() {
         return false;
     }
@@ -122,8 +133,8 @@ fn shift(at: usize, from: usize, to: usize) -> usize {
     }
 }
 
-/// Edits that overlap or touch on either side are one edit, from the first start to the last end.
-fn merge_touching(edits: Vec<Replace>) -> Vec<Replace> {
+/// Edits that overlap or touch on either side are one edit, from the first start to the last end. The edits are in order.
+pub(super) fn merge_touching(edits: Vec<Replace>) -> Vec<Replace> {
     let mut out: Vec<Replace> = Vec::with_capacity(edits.len());
     for e in edits {
         match out.last_mut() {

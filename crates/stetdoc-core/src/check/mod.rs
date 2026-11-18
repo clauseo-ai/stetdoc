@@ -5,7 +5,8 @@
 //! them. Also the note `unreferenced_note`, a footnote or an endnote that no reference in any story
 //! names (`check/notes.rs`), which only `Document::check` reports.
 //!
-//! **Interface.** `edit(&Tx, &Declared) -> Result<Verified, StetError>` for the commit pipeline,
+//! **Interface.** `edit(&Tx, &Declared) -> Result<Verified, StetError>` for the commit pipeline, and
+//! `compare_located`, which carries a violation whose key an input of `compare` has as often (decision 0021),
 //! `document(&PartsView) -> CheckReport` for `Document::check`, `scan_unit` and `scan_part` for the
 //! Word rules of one unit and of a whole part, which the compiler's post-conditions use as well,
 //! `unit_keys` for `compare`'s origins in another package, and `undeclared`, the prefixes a
@@ -89,7 +90,7 @@ mod units;
 mod verdict;
 
 pub(crate) use document::{document, schema_parts};
-pub(crate) use edit::{Refusal, edit, edit_located};
+pub(crate) use edit::{Refusal, compare_located, edit, edit_located};
 pub(crate) use found::Found;
 pub(crate) use keys::{Key, KeySet};
 pub(crate) use origins::{Declared, Origin, part_keys, unit_keys};

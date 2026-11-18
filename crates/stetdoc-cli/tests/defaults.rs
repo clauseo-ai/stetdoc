@@ -187,7 +187,7 @@ fn every_receipt_and_the_view_name_the_changes_another_author_made() {
     let cwd = tmp.path();
     let body = concat!(
         r#"<w:p><w:r><w:t xml:space="preserve">Rated at least </w:t></w:r>"#,
-        r#"<w:ins w:id="1" w:author="Dana Chen" w:date="2026-01-02T10:00:00Z"><w:r><w:t>A-</w:t></w:r></w:ins></w:p>"#,
+        r#"<w:ins w:id="101" w:author="Dana Chen" w:date="2026-01-02T10:00:00Z"><w:r><w:t>A-</w:t></w:r></w:ins></w:p>"#,
         r#"<w:p><w:r><w:t>Payment is due within thirty days.</w:t></w:r></w:p>"#,
     );
     let doc = parts::Doc::new().body(body).bytes();
@@ -196,7 +196,8 @@ fn every_receipt_and_the_view_name_the_changes_another_author_made() {
         Zip::new(parts::entries_doc(&doc)).build(),
     )
     .unwrap();
-    let line = "1 tracked change by Dana Chen you did not make: #0 insert p1 \"A-\".\nTell the user about it.\n";
+    // The banner names the change by its revision id, the one `accept` takes and the ledger shows, not by its place in the list.
+    let line = "1 tracked change by Dana Chen you did not make: #101 insert p1 \"A-\".\nTell the user about it.\n";
 
     let view = text(&stetdoc(cwd, &["view", "rated.docx"]).stdout);
     assert!(
@@ -238,6 +239,29 @@ fn every_receipt_and_the_view_name_the_changes_another_author_made() {
     assert!(!text(&own.stdout).contains("did not make"));
     let ledger = text(&stetdoc(cwd, &["view", "rated.docx", "--revisions"]).stdout);
     assert!(!ledger.contains("did not make"), "{ledger}");
+    assert!(ledger.contains("#101 insert DC"), "{ledger}");
+
+    // The id the banner names is the one that accepts the change.
+    fs::write(
+        cwd.join("accept.json"),
+        r#"{"ops":[{"op":"accept","ids":[101]}]}"#,
+    )
+    .unwrap();
+    let accepted = stetdoc(
+        cwd,
+        &[
+            "edit",
+            "rated.docx",
+            "--ops",
+            "accept.json",
+            "-o",
+            "accepted.docx",
+        ],
+    );
+    assert!(accepted.status.success(), "{}", text(&accepted.stderr));
+    let after = text(&stetdoc(cwd, &["view", "accepted.docx", "--revisions"]).stdout);
+    assert!(after.contains("{changes: 0 changes}"), "{after}");
+    assert!(text(&stetdoc(cwd, &["view", "accepted.docx"]).stdout).contains("Rated at least A-"));
 }
 
 #[test]

@@ -147,6 +147,7 @@ impl Builder<'_, '_, '_> {
             Entry::Delete { blocks, .. } => (Vec::new(), blocks.clone()),
             Entry::Split(s) => (s.parts.iter().filter_map(|p| p.b).collect(), vec![s.a]),
             Entry::Merge(m) => (vec![m.b], m.parts.iter().filter_map(|p| p.a).collect()),
+            Entry::Props(pp) => (vec![pp.block], Vec::new()),
         };
         let redline: Vec<BlockKey> = rev.iter().map(|&n| Self::key(&sp.part_b, n)).collect();
         let copies: Vec<BlockKey> = orig
@@ -173,6 +174,7 @@ impl Builder<'_, '_, '_> {
                 } => self.delete(sp, blocks, at.anchor, at.before, *trailing)?,
                 Entry::Split(s) => self.split(sp, s)?,
                 Entry::Merge(m) => self.merge(sp, m)?,
+                Entry::Props(pp) => self.props(sp, pp),
             }
             self.flush_notes()?;
             let after = self.losses();
@@ -369,6 +371,15 @@ impl Builder<'_, '_, '_> {
                     .zip(fx.new_blocks.iter().cloned())
                     .collect();
                 self.note_copied_rows(sp, &pairs);
+                // past the copies: the empty paragraph that ends a container after a deleted table (decision 0021)
+                for end in fx.new_blocks.iter().skip(placed.len()) {
+                    self.exclude(
+                        vec![end.clone()],
+                        Vec::new(),
+                        "not_restored",
+                        "the original's container ends with a table, which Word does not allow, so the redline puts an empty paragraph after the deleted table, and it stays when the changes are accepted or rejected",
+                    );
+                }
             }
             Err(e) => self.broken(anchor_key, &e),
         }
@@ -470,6 +481,14 @@ impl Builder<'_, '_, '_> {
             "blocks that could not be written as changes are shown as the revised document has them",
             replaced,
         );
+        for (block, message, left_out) in &plan.comment_notices {
+            rc.notices.push(super::receipt::Notice {
+                code: "compare_not_tracked",
+                block: block.clone(),
+                message: message.clone(),
+                left_out: left_out.clone(),
+            });
+        }
         rc.stats = stats;
         Ok(rc)
     }

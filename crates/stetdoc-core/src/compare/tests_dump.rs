@@ -5,8 +5,10 @@
 //! in), the style by name (with ` (original)` removed), the direct paragraph properties and the properties of the mark, the list
 //! by its definition, the computed clause number where both inputs have the list's definition, the text, and the run properties
 //! of each stretch of text with the character style by name. The blocks that the receipt excludes are left out of both sides, and
-//! a header or footer slot that exists on one side only is not compared. What `compare` does not compare (design 8.3) is not in
-//! it: table, row, cell and section properties, style and numbering definitions, comments.
+//! a header or footer slot that exists on one side only is not compared. Table, row and cell properties are in it (decision 0022)
+//! without the layout that fitting a grid rewrites (`gridSpan`, `gridBefore`, `gridAfter`), each stretch of text says the
+//! address of the hyperlink it is in, and the text of each comment that a reference names is listed apart. What `compare` does not
+//! compare (design 8.3) is not in it: the grid, section properties, style and numbering definitions.
 
 use super::fmt::canon;
 use super::import::list_definitions;
@@ -161,23 +163,26 @@ fn dump_story(
         return Vec::new();
     };
     let numbers = view.numbers(id, Mode::Final).ok();
+    let rels = view.rels(id).ok();
     let mut units: Vec<(u32, Vec<String>)> = Vec::new();
     for e in story.blocks().iter() {
         if dropped(tree, part, e.node, opts) {
             continue;
         }
         let line = match e.kind {
-            BlockKind::Table => "T".to_owned(),
-            BlockKind::Row => "R".to_owned(),
+            BlockKind::Table => format!("T p={}", container(tree, e.node, "tblPr", names)),
+            BlockKind::Row => format!("R p={}", container(tree, e.node, "trPr", names)),
             BlockKind::Paragraph => {
                 let Some(p) = Paragraph::new(tree, e.node) else {
                     continue;
                 };
                 // the cell, if the paragraph is in a table: its place among the cells of its row, whatever wraps them
                 let mut cell = String::new();
+                let mut cell_props: Option<String> = None;
                 let mut cur = tree.node_ref(e.node).parent();
                 while let Some(n) = cur {
                     if n.local_name() == "tc" {
+                        cell_props.get_or_insert_with(|| container(tree, n.id(), "tcPr", names));
                         let mut row = n.parent();
                         while let Some(r) = row {
                             if r.local_name() == "tr" {
@@ -248,13 +253,15 @@ fn dump_story(
                                 .unwrap_or_else(|| s.into_owned())
                         })
                         .unwrap_or_default();
-                    let sig = format!("{rs}|{rpr}");
+                    let link = link_of(&map, item, tree, rels.as_deref());
+                    let sig = format!("{rs}|{rpr}{link}");
                     if runs.last() != Some(&sig) {
                         runs.push(sig);
                     }
                 }
+                let cell_props = cell_props.unwrap_or_default();
                 format!(
-                    "P c={cell} s={style} l={list} n={number} p={ppr} m={mark} runs={runs:?} | {}",
+                    "P c={cell} cp={cell_props} s={style} l={list} n={number} p={ppr} m={mark} runs={runs:?} | {}",
                     p.text(Mode::Final)
                         .chars()
                         .map(|c| if c < ' ' {
@@ -269,6 +276,68 @@ fn dump_story(
         units.push((e.unit, vec![line]));
     }
     units
+}
+
+/// Layout that fitting a grid rewrites, and that the pairing reads as a row's shape: not compared.
+const LAYOUT: &[&str] = &["gridSpan", "gridBefore", "gridAfter"];
+
+/// The properties container `name` of a table, row or cell, without revisions and layout, with the table style by name.
+fn container(
+    tree: &crate::xml::SpanTree,
+    owner: crate::wordml::NodeId,
+    name: &str,
+    names: &HashMap<String, String>,
+) -> String {
+    let Some(pr) = tree
+        .node_ref(owner)
+        .child_elements()
+        .find(|c| c.local_name() == name)
+    else {
+        return String::new();
+    };
+    let props = crate::wordml::Props::read(pr);
+    let style = props
+        .val("tblStyle")
+        .map(|s| names.get(s).cloned().unwrap_or_else(|| s.to_owned()))
+        .unwrap_or_default();
+    let mut skip: Vec<&str> = super::plan_props::NOT_TABLE.to_vec();
+    skip.extend(LAYOUT);
+    skip.extend(super::plan_props::TABLE_NOISE);
+    skip.push("tblStyle");
+    format!("{style}{}", canon_once(&props.without(&skip)))
+}
+
+/// The address of the hyperlink an item is in, as ` link=<target>#<anchor>`, or nothing.
+fn link_of(
+    map: &crate::wordml::TextMap,
+    item: &crate::wordml::Item,
+    tree: &crate::xml::SpanTree,
+    rels: Option<&crate::wordml::Rels>,
+) -> String {
+    let Some(h) = map
+        .context(item.ctx)
+        .find(|c| c.kind == crate::wordml::WrapperKind::Hyperlink)
+    else {
+        return String::new();
+    };
+    let el = tree.node_ref(h.node);
+    let attr = |local: &str, rel: bool| {
+        el.attrs()
+            .find(|a| a.local_name() == local && a.namespace().ends_with("/relationships") == rel)
+            .map(|a| a.value().into_owned())
+    };
+    let target = attr("id", true)
+        .and_then(|rid| rels.and_then(|r| r.get(&rid)).map(|r| r.target.clone()))
+        .map(|t| match t {
+            RelTarget::External(u) => u,
+            RelTarget::Part(p) => p.to_string(),
+            RelTarget::Invalid => String::new(),
+        })
+        .unwrap_or_default();
+    format!(
+        " link={target}#{}",
+        attr("anchor", false).unwrap_or_default()
+    )
 }
 
 /// A slot of a header or footer: the section's place, header or footer, and the type.
@@ -288,6 +357,8 @@ pub(super) struct Dump {
     pub slots: Vec<(Slot, String)>,
     /// How many sections the body has.
     pub sections: usize,
+    /// The id and the text of each comment that a reference names, in order of text.
+    pub comments: Vec<(i64, String)>,
 }
 
 /// The slots of the body's sections.
@@ -329,6 +400,7 @@ pub(super) fn dump(state: &State, opts: &DumpOpts) -> Result<Dump, StetError> {
     let mut notes: Vec<String> = Vec::new();
     // the notes that a reference names: a note that nothing names is not shown, and a redline does not carry one
     let mut referenced: HashSet<(bool, i64)> = HashSet::new();
+    let mut commented: HashSet<i64> = HashSet::new();
     for spec in specs.0.iter() {
         let Some(id) = view.id(&spec.part) else {
             continue;
@@ -345,6 +417,14 @@ pub(super) fn dump(state: &State, opts: &DumpOpts) -> Result<Dump, StetError> {
                         .and_then(|a| a.value().parse::<i64>().ok())
                 {
                     referenced.insert((l == "endnoteReference", v));
+                }
+                if l == "commentReference"
+                    && let Some(v) = c
+                        .attrs()
+                        .find(|a| a.local_name() == "id")
+                        .and_then(|a| a.value().parse::<i64>().ok())
+                {
+                    commented.insert(v);
                 }
                 stack.push(c);
             }
@@ -393,16 +473,36 @@ pub(super) fn dump(state: &State, opts: &DumpOpts) -> Result<Dump, StetError> {
                         .map(|(_, l)| format!("{tag} {}", l.join("\n"))),
                 );
             }
+            StoryKind::Comments => {
+                let mut by_unit: Vec<(u32, i64, Vec<String>)> = Vec::new();
+                for (u, l) in lines {
+                    let Some(id) = story
+                        .units()
+                        .get(u as usize)
+                        .and_then(|x| x.id)
+                        .filter(|i| commented.contains(i))
+                    else {
+                        continue;
+                    };
+                    match by_unit.last_mut() {
+                        Some((last, _, ls)) if *last == u => ls.extend(l),
+                        _ => by_unit.push((u, id, l)),
+                    }
+                }
+                out.comments
+                    .extend(by_unit.into_iter().map(|(_, id, l)| (id, l.join("\n"))));
+            }
             StoryKind::Header | StoryKind::Footer => {
                 out.sides.insert(
                     spec.part.to_string(),
                     lines.into_iter().flat_map(|(_, l)| l).collect(),
                 );
             }
-            _ => {}
         }
     }
     notes.sort();
+    out.comments
+        .sort_by(|x, y| x.1.cmp(&y.1).then(x.0.cmp(&y.0)));
     out.body.push("--notes--".to_owned());
     out.body.extend(notes);
     let (slots, sections) = slots_of(state)?;

@@ -83,17 +83,23 @@ impl Editor<'_> {
         let depth = self.tree.depth_of(parent) + height;
         if depth > self.tree.max_depth {
             return Err(limit(format!(
-                "inserting here would nest elements {depth} levels deep, over the limit of {}",
+                "Inserting here would nest elements {depth} levels deep, over the XML nesting depth limit of {}.",
                 self.tree.max_depth
-            )));
+            ))
+            .with_limit("max_xml_depth", depth as u64, self.tree.max_depth as u64));
         }
         if in_document && declared > 0 {
             let in_scope = self.tree.declarations_in_scope(parent) + declared;
             if in_scope > self.tree.max_ns_scope {
                 return Err(limit(format!(
-                    "inserting here would put {in_scope} namespace declarations in scope at once, over the limit of {}",
+                    "Inserting here would put {in_scope} namespace declarations in scope at once, over the namespace limit of {}.",
                     self.tree.max_ns_scope
-                )));
+                ))
+                .with_limit(
+                    "max_xml_namespaces_in_scope",
+                    in_scope as u64,
+                    self.tree.max_ns_scope as u64,
+                ));
             }
             self.tree.ns_peak = self.tree.ns_peak.max(in_scope);
         }
@@ -106,9 +112,14 @@ impl Editor<'_> {
     pub(super) fn count_declaration(&mut self) -> Result<(), StetError> {
         if self.tree.ns_peak >= self.tree.max_ns_scope {
             return Err(limit(format!(
-                "declaring another namespace would put more than {} declarations in scope at once",
+                "Declaring another namespace would put more than {} declarations in scope at once, over the namespace limit.",
                 self.tree.max_ns_scope
-            )));
+            ))
+            .with_limit(
+                "max_xml_namespaces_in_scope",
+                self.tree.ns_peak as u64 + 1,
+                self.tree.max_ns_scope as u64,
+            ));
         }
         self.tree.ns_peak += 1;
         Ok(())

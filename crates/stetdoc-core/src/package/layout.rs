@@ -98,10 +98,15 @@ fn short(what: &str) -> StetError {
 pub(crate) fn parse(src: &[u8], limits: &Limits) -> Result<Layout, StetError> {
     if src.len() as u64 > limits.max_archive_bytes {
         return Err(limit(format!(
-            "package is {} bytes, over the limit of {}",
+            "The package is {} bytes, over the archive size limit of {} bytes.",
             src.len(),
             limits.max_archive_bytes
-        )));
+        ))
+        .with_limit(
+            "max_archive_bytes",
+            src.len() as u64,
+            limits.max_archive_bytes,
+        ));
     }
     if src.starts_with(&[0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1]) {
         // Do not read the OLE directory to tell the two apart: stetdoc reads neither.
@@ -117,9 +122,10 @@ fn parse_at(src: &[u8], eocd_pos: usize, limits: &Limits) -> Result<Layout, Stet
     let end = read_end(src, eocd_pos)?;
     if end.total > u64::from(limits.max_entries) {
         return Err(limit(format!(
-            "package has {} entries, over the limit of {}",
+            "The package has {} entries, over the entry count limit of {}.",
             end.total, limits.max_entries
-        )));
+        ))
+        .with_limit("max_entries", end.total, u64::from(limits.max_entries)));
     }
     let total = usize::try_from(end.total).map_err(|_| short("entry count"))?;
     let size = usize::try_from(end.cd_size).map_err(|_| short("central directory size"))?;
@@ -261,18 +267,20 @@ fn parse_cd_record(
 
     if usize_ > limits.max_entry_bytes {
         return Err(limit(format!(
-            "entry {:?} declares {} bytes uncompressed, over the limit of {}",
+            "Entry {:?} declares {} bytes uncompressed, over the entry size limit of {} bytes.",
             name_to_string(raw_name),
             usize_,
             limits.max_entry_bytes
-        )));
+        ))
+        .with_limit("max_entry_bytes", usize_, limits.max_entry_bytes));
     }
     *sum = sum.saturating_add(usize_);
     if *sum > limits.max_total_bytes {
         return Err(limit(format!(
-            "entries declare more than {} bytes uncompressed in total",
-            limits.max_total_bytes
-        )));
+            "The entries declare {} bytes uncompressed in total, over the total size limit of {} bytes.",
+            *sum, limits.max_total_bytes
+        ))
+        .with_limit("max_total_bytes", *sum, limits.max_total_bytes));
     }
 
     // The local header.

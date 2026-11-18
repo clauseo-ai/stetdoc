@@ -49,6 +49,15 @@ pub(crate) struct Verified {
     pub(crate) changed: Vec<BlockKey>,
 }
 
+/// What a refusal says was checked: an edit, or the redline of a comparison.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(super) enum Subject {
+    /// An edit.
+    Edit,
+    /// The redline of `compare`.
+    Redline,
+}
+
 /// A finding of the edit, and the place of its part in the list of parts. The finding of a rule
 /// that spans parts has none.
 struct Reported {
@@ -130,6 +139,33 @@ impl Verdict {
         views: (&PartsView<'_>, &PartsView<'_>),
         parts: &[SchemaPart],
     ) -> Result<Verified, StetError> {
+        self.conclude_as(views, parts, Subject::Edit)
+    }
+
+    /// Moves each new violation whose key `carries` accepts to the carried ones (`compare`, decision 0021). A violation that
+    /// could not be located stays new.
+    pub(super) fn carry_where(&mut self, carries: &dyn Fn(&super::keys::Key) -> bool) {
+        let (carried, new): (Vec<Reported>, Vec<Reported>) = std::mem::take(&mut self.new)
+            .into_iter()
+            .partition(|r| carries(&r.found.key));
+        self.new = new;
+        self.new_total = self.new_total.saturating_sub(carried.len());
+        self.carried_total += carried.len();
+        self.carried.extend(carried);
+    }
+
+    /// True if a violation is new.
+    pub(super) fn refuses(&self) -> bool {
+        self.new_total > 0
+    }
+
+    /// `conclude`, with the refusal's words for what was checked.
+    pub(super) fn conclude_as(
+        self,
+        views: (&PartsView<'_>, &PartsView<'_>),
+        parts: &[SchemaPart],
+        subject: Subject,
+    ) -> Result<Verified, StetError> {
         let after = views.1;
         if self.new_total > 0 {
             let named: Vec<String> = self
@@ -156,11 +192,19 @@ impl Verdict {
             return Err(StetError::new(
                 ErrorCode::ValidationFailed,
                 format!(
-                    "The edit would add {total} {}. {}{tail}",
+                    "{} {total} {}{}. {}{tail}",
+                    match subject {
+                        Subject::Edit => "The edit would add",
+                        Subject::Redline => "The redline would add",
+                    },
                     if total == 1 {
                         "violation"
                     } else {
                         "violations"
+                    },
+                    match subject {
+                        Subject::Edit => "",
+                        Subject::Redline => " that neither input has as often",
                     },
                     named.join(" ")
                 ),

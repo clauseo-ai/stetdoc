@@ -102,9 +102,15 @@ impl Format for JsonFormat {
                 return Err(StetError::new(
                     ErrorCode::LimitExceeded,
                     format!(
-                        "{name} is larger than the limit of {} bytes for one file.",
+                        "{name} is {} bytes, over the file size limit of {} bytes.",
+                        text.len(),
                         limits.max_entry_bytes
                     ),
+                )
+                .with_limit(
+                    "max_entry_bytes",
+                    text.len() as u64,
+                    limits.max_entry_bytes,
                 ));
             }
             let projection = Json::parse(text, MAX_DEPTH)

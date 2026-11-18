@@ -17,8 +17,10 @@ fn invalid(message: impl Into<String>) -> StetError {
     StetError::new(ErrorCode::InvalidPayload, message)
 }
 
-fn too_big(message: impl Into<String>) -> StetError {
+/// A batch or one of its texts is over a limit: `name` is the field of `Limits` it passed, with what it had and the limit.
+fn too_big(message: impl Into<String>, name: &'static str, value: u64, max: u64) -> StetError {
     StetError::new(ErrorCode::LimitExceeded, message)
+        .with_limit(name, value, max)
         .with_next("Apply the batch in parts: fewer operations or shorter texts, then the rest.")
 }
 
@@ -30,11 +32,16 @@ pub(crate) fn batch(batch: &Batch, limits: &Limits) -> Result<(), StetError> {
         );
     }
     if batch.ops.len() as u64 > u64::from(limits.max_batch_ops) {
-        return Err(too_big(format!(
-            "The batch holds {} operations, over the limit of {}.",
-            batch.ops.len(),
-            limits.max_batch_ops
-        )));
+        return Err(too_big(
+            format!(
+                "The batch holds {} operations, over the batch limit of {}.",
+                batch.ops.len(),
+                limits.max_batch_ops
+            ),
+            "max_batch_ops",
+            batch.ops.len() as u64,
+            u64::from(limits.max_batch_ops),
+        ));
     }
     // Each paragraph of an `insert` costs what an operation does (a tracked insertion, its checks and its place in the
     // receipt), and on the files path every new paragraph is a changed block, so each counts as one operation.
@@ -47,12 +54,17 @@ pub(crate) fn batch(batch: &Batch, limits: &Limits) -> Result<(), StetError> {
         })
         .sum();
     if counted > u64::from(limits.max_batch_ops) {
-        return Err(too_big(format!(
-            "The batch holds {} operations and makes {counted} paragraphs and operations together, over the limit of {}: \
-             each paragraph of an `insert` counts as one operation.",
-            batch.ops.len(),
-            limits.max_batch_ops
-        ))
+        return Err(too_big(
+            format!(
+                "The batch holds {} operations and makes {counted} paragraphs and operations together, over the batch limit of {}: \
+                 each paragraph of an `insert` counts as one operation.",
+                batch.ops.len(),
+                limits.max_batch_ops
+            ),
+            "max_batch_ops",
+            counted,
+            u64::from(limits.max_batch_ops),
+        )
         .with_next("Apply the batch in parts: insert fewer paragraphs in each batch, then the rest."));
     }
     BaseToken::parse(&batch.base).map_err(|e| {
@@ -67,10 +79,15 @@ pub(crate) fn batch(batch: &Batch, limits: &Limits) -> Result<(), StetError> {
     for (index, op) in batch.ops.iter().enumerate() {
         bytes += operation(op, limits).map_err(|e| e.at_op(index))?;
         if bytes > limits.max_batch_bytes {
-            return Err(too_big(format!(
-                "The batch is over {} bytes of text.",
-                limits.max_batch_bytes
-            ))
+            return Err(too_big(
+                format!(
+                    "The batch is over {} bytes of text, the batch size limit.",
+                    limits.max_batch_bytes
+                ),
+                "max_batch_bytes",
+                bytes,
+                limits.max_batch_bytes,
+            )
             .at_op(index));
         }
     }
@@ -327,11 +344,16 @@ fn reference(op: &str, key: &str, text: &str) -> Result<(), StetError> {
 /// A text is within the size limit and holds only characters that XML can carry: a tab, a newline and printable text.
 fn text(op: &str, key: &str, text: &str, limits: &Limits) -> Result<(), StetError> {
     if text.len() as u64 > u64::from(limits.max_op_text_bytes) {
-        return Err(too_big(format!(
-            "`{key}` of `{op}` is {} bytes, over the limit of {}.",
-            text.len(),
-            limits.max_op_text_bytes
-        )));
+        return Err(too_big(
+            format!(
+                "`{key}` of `{op}` is {} bytes, over the text limit of {} bytes per operation.",
+                text.len(),
+                limits.max_op_text_bytes
+            ),
+            "max_op_text_bytes",
+            text.len() as u64,
+            u64::from(limits.max_op_text_bytes),
+        ));
     }
     if let Some(c) = text
         .chars()

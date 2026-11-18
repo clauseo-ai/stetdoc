@@ -549,9 +549,8 @@ impl Compiler<'_, '_> {
             .map
             .gap(Mode::Final, at)
             .ok_or_else(|| invalid("an offset lies outside the paragraph"))?;
-        for i in [gap.left, gap.right].into_iter().flatten() {
-            self.check_items(&p, i..i + 1)?;
-        }
+        // a cut at the edge of a field or a read-only control is outside it, as an insertion there is (decision 0021)
+        self.check_gap(&p, gap.left, gap.right)?;
         self.refuse_foreign_gap(&p, gap.left, gap.right)?;
         let raw = match (gap.left, gap.right) {
             (Some(l), Some(r)) if l == r => {

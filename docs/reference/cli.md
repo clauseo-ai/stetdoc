@@ -226,6 +226,11 @@ p4 Governing law: {++English law++}{#4 EW}
 
 ```
 
+A change to the properties of a run, a paragraph, a numbering, a table, a row, a cell or a section is marked `{rev KIND #id AUTH}`,
+where KIND is `run`, `para`, `numbering`, `table`, `grid`, `row`, `cell` or `section`. A run, a paragraph or a numbering
+carries the mark on its line, as `p3 {rev run #3 JD} Bold now` does above, a table or a row on its own line, and a cell on
+the first paragraph of the cell. The id is the one `accept` and `reject` take and `--revisions` lists.
+
 ## `stetdoc inspect`
 
 Show the effective formatting of a block and where each value comes from, or the styles, lists or sections.
@@ -711,7 +716,7 @@ stetdoc capabilities [OPTIONS]
 
 ```console
 $ stetdoc capabilities
-stetdoc 0.9.3
+stetdoc 0.9.4
 formats: stet/1 (.md)
 complement: 1.0
 

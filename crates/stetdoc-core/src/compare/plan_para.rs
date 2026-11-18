@@ -124,6 +124,7 @@ impl Reader<'_> {
         } else {
             replacements(&pa.text, &pb.text, &pa.fields, &pb.fields)
         };
+        let reps = super::links::with_link_changes(reps, pa, pb);
         let fmt = match (self.sigs_of(true, a.id), self.sigs_of(false, b.id)) {
             (Some(sa), Some(sb)) => run_changes(&sa, &sb, &reps),
             _ => Vec::new(),

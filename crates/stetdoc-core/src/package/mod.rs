@@ -249,12 +249,16 @@ impl Package {
             && e.usize_ >= RATIO_FLOOR
             && e.usize_ / e.csize.max(1) > u64::from(self.limits.max_compression_ratio)
         {
+            let ratio = e.usize_ / e.csize.max(1);
             return Err(limit(format!(
-                "part {:?} compresses {}:1, over the limit of {}:1",
-                e.name,
-                e.usize_ / e.csize.max(1),
-                self.limits.max_compression_ratio
-            )));
+                "Part {:?} compresses {}:1, over the compression ratio limit of {}:1.",
+                e.name, ratio, self.limits.max_compression_ratio
+            ))
+            .with_limit(
+                "max_compression_ratio",
+                ratio,
+                u64::from(self.limits.max_compression_ratio),
+            ));
         }
         let arc: Bytes = match e.method {
             0 => {
@@ -309,8 +313,10 @@ impl Package {
     fn check_replace(&self, name: &str, len: usize) -> Result<(), StetError> {
         if len as u64 > self.limits.max_entry_bytes {
             return Err(limit(format!(
-                "part {name:?} would be {len} bytes, over the limit"
-            )));
+                "Part {name:?} would be {len} bytes, over the entry size limit of {} bytes.",
+                self.limits.max_entry_bytes
+            ))
+            .with_limit("max_entry_bytes", len as u64, self.limits.max_entry_bytes));
         }
         if let Some(e) = self
             .part_index(name)

@@ -190,6 +190,8 @@ mod tests_check;
 #[cfg(test)]
 mod tests_compare;
 #[cfg(test)]
+mod tests_compare_edges;
+#[cfg(test)]
 mod tests_drift;
 #[cfg(test)]
 mod tests_edit;
@@ -205,6 +207,8 @@ mod tests_edit_comments;
 mod tests_edit_control_edges;
 #[cfg(test)]
 mod tests_edit_empty_run;
+#[cfg(test)]
+mod tests_edit_field_in_control;
 #[cfg(test)]
 mod tests_edit_field_label;
 #[cfg(test)]
@@ -223,6 +227,8 @@ mod tests_edit_insert_after;
 mod tests_edit_last_mark;
 #[cfg(test)]
 mod tests_edit_last_mark_matrix;
+#[cfg(test)]
+mod tests_edit_lone_cell;
 #[cfg(test)]
 mod tests_edit_manual;
 #[cfg(test)]

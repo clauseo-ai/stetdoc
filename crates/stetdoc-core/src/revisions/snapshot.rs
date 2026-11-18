@@ -46,6 +46,47 @@ impl Compiler<'_, '_> {
         }
     }
 
+    /// Writes a `w:tblPrChange`, `w:trPrChange` or `w:tcPrChange` whose old properties are `items`, in the properties of
+    /// `owner`: a `w:tbl`, a `w:tr` or a `w:tc` of the block `block` (the table, or the row that holds the cell). The
+    /// container is made when the revised element has none. Nothing else is changed (design `compare.md`, 8.3 as of
+    /// decision 0022).
+    pub(crate) fn set_container_snapshot(
+        &mut self,
+        block: &BlockKey,
+        owner: NodeId,
+        items: &[PropElement],
+    ) -> Result<Effect, StetError> {
+        self.begin();
+        let res = (|| {
+            let part = block.part().clone();
+            let (container, change) = {
+                let tree = self.tree_ro(&part)?;
+                let n = tree.node_ref(owner);
+                if is_w(&n, "tbl") {
+                    ("tblPr", "tblPrChange")
+                } else if is_w(&n, "tr") {
+                    ("trPr", "trPrChange")
+                } else if is_w(&n, "tc") {
+                    ("tcPr", "tcPrChange")
+                } else {
+                    return Err(invalid(
+                        "a properties snapshot of a table is written to a table, a row or a cell",
+                    ));
+                }
+            };
+            self.write_change(&part, owner, &[container], change, container, items)?;
+            self.touch(block);
+            Ok(())
+        })();
+        match res {
+            Ok(()) => Ok(self.end()),
+            Err(e) => {
+                self.fx = Effect::default();
+                Err(e)
+            }
+        }
+    }
+
     /// The body of `set_snapshot` for a paragraph element.
     pub(super) fn write_snapshot(
         &mut self,

@@ -61,6 +61,12 @@ Each of these was decided in a design, with the evidence there.
   also what Word's Reject All gives. One known gap: a field whose result two other authors' insertions make up keeps
   the `w:fldSimple` with its runs deleted inside it, so that rejecting one of them keeps the field as the source does,
   and Word's Accept All may leave an empty field there. See [revisions 3.6.3](docs/design/revisions.md#36-other-places).
+- **A content control or smart tag whose content is deleted stays, empty.** Deleting all of an inline `w:sdt`'s or
+  `w:smartTag`'s content, untracked, or tracked and then accepted, keeps the element with nothing in it, as Word keeps a
+  content control whose content is deleted. A field there goes the same way as text of the same extent: a simple or a
+  complex field deleted inside a control leaves the same empty control that deleting plain text does. No text edit
+  removes an inline control, even with the text around it, and a working copy whose `{ctl}` markers were removed is
+  `readonly_region`; deleting the whole paragraph removes it.
 - **A deleted paragraph that carries a section break keeps its mark and the break**, so accepting leaves an empty paragraph
   that still ends the section. Word drops the break with the mark. See
   [revisions 3.2](docs/design/revisions.md#32-paragraph-marks).
@@ -98,10 +104,17 @@ Each of these was decided in a design, with the evidence there.
 - **Pattern shading is not read for hidden text.** Only `w:fill` is read, so white text on a shading pattern whose colour is
   the pattern's own counts as on no background and is flagged, although it is readable. See
   [styles and numbering 3.6](docs/design/styles-and-numbering.md#36-hidden-text).
-- **Compare does not compare** table, row, cell and section properties, style and numbering definitions, field codes, or the
-  original's comments. See [compare 8.3](docs/design/compare.md#83-not-compared-said-once).
+- **Compare does not compare** section properties, a table's grid, style and numbering definitions, field codes, or a
+  comment that has no partner in the other document. A comment's changed author or initials has no tracked form: the
+  redline keeps the revised value and warns (`compare_not_tracked`). See [compare 8.3](docs/design/compare.md#83-not-compared-said-once).
 - **Compare excludes** equations, charts and SmartArt in deleted content, because their changed form cannot be written the way
   Word writes it. See [compare 19](docs/design/compare.md#19-the-build-and-the-quality-check-as-built).
+- **Compare does not carry content controls into deleted content.** A deleted copy of the original's text keeps the text of
+  an inline content control but not the control, and a deleted table or paragraph that sat in a block-level content control
+  (at body level or in a cell) is copied without it. So Reject All gives the text back without the control, also for a
+  locked or data-bound control in a paragraph that compare replaced whole (a change inside the control, or a word that runs
+  into it). The receipt does not warn. See [compare 7.2](docs/design/compare.md#72-fragments-runs-of-a-paragraph) and
+  [decision 0021](docs/decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md).
 - **A header or footer present on one side only is skipped by compare**, with a `compare_story_unmatched` warning in the
   receipt. See [compare 4.7](docs/design/compare.md#47-stories).
 - **White space at the ends of a `w:t` without `xml:space="preserve"` is text**, as Word shows it (checked in Word for the

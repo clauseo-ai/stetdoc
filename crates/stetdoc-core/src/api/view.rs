@@ -338,11 +338,14 @@ pub enum WarningCode {
     /// A tracked deletion of the row that holds a repeating section's start, with rows of the section left: Word's
     /// Accept All removes the section's control around them, though the text and rows come out right (decision 0020).
     RepeatingSectionUnwrappedByWord,
+    /// Compare found a difference that no tracked change can record, such as a comment's author, and left it as the revised
+    /// document has it. The warning names the block and what differs (decision 0022).
+    CompareNotTracked,
 }
 
 impl WarningCode {
     /// Every code, in the order of the design's table.
-    pub const ALL: [WarningCode; 41] = [
+    pub const ALL: [WarningCode; 42] = [
         WarningCode::LooksHidden,
         WarningCode::HiddenText,
         WarningCode::NumberingApproximate,
@@ -384,6 +387,7 @@ impl WarningCode {
         WarningCode::KeptRequiredParagraph,
         WarningCode::RowOutsideRepeatingSection,
         WarningCode::RepeatingSectionUnwrappedByWord,
+        WarningCode::CompareNotTracked,
     ];
 
     /// The snake_case name used on the wire.
@@ -430,6 +434,7 @@ impl WarningCode {
             WarningCode::KeptRequiredParagraph => "kept_required_paragraph",
             WarningCode::RowOutsideRepeatingSection => "row_outside_repeating_section",
             WarningCode::RepeatingSectionUnwrappedByWord => "repeating_section_unwrapped_by_word",
+            WarningCode::CompareNotTracked => "compare_not_tracked",
         }
     }
 

@@ -35,14 +35,18 @@ mod build_checks;
 mod build_edit;
 mod build_exclusions;
 mod build_notes;
+mod build_props;
 mod build_tables;
+mod comments;
 mod edits;
 mod fmt;
 mod import;
+mod links;
 mod model;
 mod plan;
 mod plan_fields;
 mod plan_para;
+mod plan_props;
 mod prepare;
 mod receipt;
 mod regroup;
@@ -79,6 +83,8 @@ pub(crate) fn compare_states(
 mod tests_align;
 #[cfg(test)]
 mod tests_corpus;
+#[cfg(test)]
+mod tests_coverage;
 #[cfg(test)]
 mod tests_dump;
 #[cfg(test)]

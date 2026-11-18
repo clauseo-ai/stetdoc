@@ -10,7 +10,7 @@
 use super::align::Ctx;
 use super::anchor::Lines;
 use super::checks::{check_merge, check_split};
-use super::matched::same;
+use super::matched::{same, tags_agree};
 use super::refuse;
 use super::split::{Cut, Merge, Split, match_merge, match_split};
 use crate::api::error::StetError;
@@ -279,7 +279,7 @@ fn natural_merge(
     let (Some(par), Some(line)) = (par_block(ctx, bi), block_of(ctx, p)) else {
         return Ok(());
     };
-    if line.tags != par.tags || same(par, line) {
+    if !tags_agree(&par.tags, &line.tags) || same(par, line) {
         return Ok(());
     }
     let run: Vec<usize> = rem
@@ -314,7 +314,7 @@ fn later_merge(
     let (Some(par), Some(line)) = (par_block(ctx, bi), block_of(ctx, n)) else {
         return Ok(());
     };
-    if line.tags != par.tags || same(par, line) {
+    if !tags_agree(&par.tags, &line.tags) || same(par, line) {
         return Ok(());
     }
     let mut run: Vec<usize> = Vec::new();

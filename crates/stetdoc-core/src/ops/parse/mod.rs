@@ -21,11 +21,12 @@ impl Batch {
             return Err(StetError::new(
                 ErrorCode::LimitExceeded,
                 format!(
-                    "The batch is {} bytes, over the limit of {}.",
+                    "The batch is {} bytes, over the batch size limit of {} bytes.",
                     text.len(),
                     limits.max_batch_bytes
                 ),
             )
+            .with_limit("max_batch_bytes", text.len() as u64, limits.max_batch_bytes)
             .with_next("Apply the batch in parts: fewer operations, then the rest."));
         }
         let batch = match text.trim_start().chars().next() {

@@ -8,10 +8,14 @@
 # would make, and a change to the cleaning constants or the alignment floor re-takes them in the same commit. Re-taken
 # 2026-11-02 for the bracket rule of the cleaning (docs/design/revisions.md, 2.5 rule 5): against the code before it, full lab
 # red_chars went from 7294106 to 7298104 (+0.05%) and fmt_spans from 17795 to 16707, and every other row is the same.
+# Curated rows re-taken 2026-11-17 for decision 0022 (compare writes table, row and cell property changes and a changed
+# hyperlink address): curated oxpt red_chars went from 11768 to 11800 (oxpt:WC019, whose link changes address and text, is
+# now the old link deleted beside the new one) and fmt_spans from 1 to 4, and curated dcb red_chars from 0 to 451 (one
+# recorded outlier). The full rows were not re-taken: the full set was not at hand.
 # set	class	pairs	min_chars	red_chars	fmt_spans	excluded	p99	C
 curated	lab	40	563372	686894	1383	0	2.149	2.37
-curated	oxpt	181	8716	11768	1	17	2.659	2.93
-curated	dcb	20	0	0	1	0	1.000	1.10
+curated	oxpt	181	8716	11800	4	17	2.659	2.93
+curated	dcb	20	0	451	1	0	1.000	1.10
 full	lab	354	6071900	7298104	16707	0	1.543	1.70
 full	oxpt	184	8734	11786	1	17	2.659	2.93
 full	dox	200	156605	185027	221	0	4.126	4.54

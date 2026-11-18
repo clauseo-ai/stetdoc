@@ -543,6 +543,8 @@ pub struct Imported { pub node: NodeId, /* detached, in the redline's tree */ pu
   `trailing`), and N4 does not call it kept. N1 and N2 do **not** inherit R8's exclusion of trailing paragraphs: the redline has no
   paragraph more or less than the two inputs. The call declares an `Origin` with an empty `from` for each block, and
   `Effect::imported` lists `(block, source)` for each (an addition to `Effect`, for `document`'s `Declared`).
+- **`set_container_snapshot`** (decision 0022) writes a `w:tblPrChange`, `w:trPrChange` or `w:tcPrChange` with the original's
+  table, row or cell properties into the revised element's container, creating it when missing, and changes nothing else.
 - **`set_snapshot`** is `set_props` with the old value given and the new one left alone: it checks the container for a
   pending `*PrChange` (none will exist, because revisions were accepted first and this transaction writes one per
   container), writes `w:pPrChange` last in `w:pPr` with the snapshot (the paragraph's, minus `rPr`, `sectPr` and `pPrChange`, by
@@ -580,6 +582,10 @@ reference and is left alone. An inserted table is `mark_inserted` over the table
 
 An unpaired original block is imported (7), then `place_deleted` as in 5.1. A paragraph that carries a section break loses
 the break (the copy rule), so the redline does not reproduce the original's sections: section structure is not compared (8.3).
+A deleted table that ends a cell, a text box, a header, a footer, a note or a comment (an original whose cell ended with a
+nested table) is followed by a new empty paragraph, live and untracked, which Word needs there and adds itself when it opens
+such a file. Accepting and rejecting both keep it, so the receipt names it as `compare_not_restored` and the laws leave it out
+([decision 0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
 
 ### 6.4 Order of the writes and the state they leave
 
@@ -588,8 +594,13 @@ Per story: first the imports (they create detached nodes and parts, and do not c
 paragraphs, last to first, then the splits and merges. The order is only an order of execution: the revised block keys never
 change, because the compiler keeps the original node for everything it does not create, so a plan made before the
 build is valid throughout. `Compiler::finish` checks the compiler's own post-conditions (W1 to W11) for everything that
-was written, and `document` runs `check::edit` with the foreign origins, so a redline that breaks a rule is refused and not
-saved.
+was written, and `document` runs `check::compare_located` with the foreign origins, so a redline that breaks a rule is refused and
+not saved. A violation of a carriable code is carried and not refused when the redline has its key (code, element, attribute, value) no
+more often than the input that has it more often,
+since the redline may only have carried it back into a container of the revised document; structural, schema, package and comment
+problems never are ([decision 0021](../decisions/0021-compare-never-refuses-for-a-carried-problem-or-an-edge.md)).
+Deleted text that goes into a gap at the edge of a field or a read-only content control goes outside it, as an insertion does;
+only a change strictly inside a read-only control or a simple field's result replaces its paragraph whole.
 
 ### 6.5 What the redline looks like for the two accepts
 
@@ -735,14 +746,18 @@ count, as `Receipt.warnings` deduplicates:
 | `compare_bookmarks_dropped` | an imported bookmark's name was taken (count) |
 | `compare_story_unmatched` | a header or footer slot that exists on one side only, or has no one-to-one partner, was skipped (count) |
 | `compare_table_replaced` | rows whose cells changed shape were written as a deleted row and an inserted row (count) |
-| `compare_not_compared` | styles, numbering, table, row, cell or section properties differ and were left as the revised document has them (a count of each kind) |
+| `compare_not_compared` | styles, numbering or section properties differ and were left as the revised document has them (a count of each kind) |
+| `compare_not_tracked` | a difference has no tracked form, such as a paired comment's author or initials, or a comment was not compared because it could not be paired (comments on the same text that cannot be told apart, a reference that moved): one warning for each, with the block's ref and what differs (decision 0022) |
 
 ### 8.3 Not compared, said once
 
 Compare does what is listed here and nothing more: **not compared** are style and numbering definitions (their properties are the
-next release's "editing numbering and style definitions"), table, row, cell and section properties (`w:tblPr`, `w:trPr`, `w:tcPr`,
-`w:tblGrid`, `w:sectPr`, and so headers' references and page setup), document and package properties and settings, a
-field's code, the original's comments, and the wrappers of content controls. The redline carries the revised document's value for each of
+next release's "editing numbering and style definitions"), the grid of a table and what fitting it rewrites (`w:tblGrid`,
+`w:gridSpan`, `w:gridBefore`, `w:gridAfter`), a row's table property exceptions (`w:tblPrEx`), section properties (`w:sectPr`,
+and so headers' references and page setup), document and package properties and settings, a field's code, a comment that
+pairs with none, and the wrappers of content controls. Since decision 0022 compare does compare table, row and cell properties
+(a `w:tblPrChange`, `w:trPrChange` or `w:tcPrChange` with the original's), a hyperlink's address (the old link deleted beside
+the new one inserted), and the text of two comments whose references pair (tracked inside `comments.xml`). The redline carries the revised document's value for each of
 them, and `FIDELITY.md` lists them. The quality check's normalization leaves them out of both sides, so the law is a law about what compare
 promises (9.1). A reader who needs one of them compared should tell us, and the answer is a property writer of `revisions`
 (`Extend compare to a new property` in the where-do-I-change table), not a change of the structure here.

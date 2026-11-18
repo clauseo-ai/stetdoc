@@ -1,8 +1,7 @@
 //! Relationships and the parts they name (design `compare.md`, 7.5).
 //!
 //! An attribute of the `r` namespace in imported content names a relationship of the source part. A hyperlink's address is
-//! carried when the revised part already has a relationship to the same address, and otherwise the link is left out (a
-//! relationship with no part is `Tx::add_relationship`, which the transaction does not have yet). A part that the content names
+//! carried by the revised part's relationship to the same address, or by a new one (`Tx::add_relationship`) when it has none. A part that the content names
 //! (a picture) is copied with `Tx::add_part`, under a name the revised package does not have, once for the same bytes.
 
 use super::{Cx, Importer};
@@ -111,13 +110,20 @@ fn map_uncached(
                 return Ok(None);
             };
             let there = view.rels(dst_id)?;
-            Ok(there
+            let found = there
                 .iter()
                 .find(|r| {
                     r.rel_type == rel.rel_type
                         && matches!(&r.target, RelTarget::External(u) if u == url)
                 })
-                .map(|r| r.id.clone()))
+                .map(|r| r.id.clone());
+            // a relationship that cannot be added leaves the link out, which the receipt counts
+            match found {
+                Some(id) => Ok(Some(id)),
+                None => Ok(tx
+                    .add_external_relationship(cx.dst, &rel.rel_type, url)
+                    .ok()),
+            }
         }
         RelTarget::Part(name) => {
             // a part with relationships of its own (a chart, a diagram) is not carried

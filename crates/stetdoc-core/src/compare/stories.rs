@@ -5,7 +5,9 @@
 //! effective part of a type (default, first, even), inheritance applied. The pairing of parts is one to one. A slot that
 //! exists on one side only cannot be shown as a revision (a header reference is not tracked), so it is skipped and
 //! counted. A note follows its reference: two notes pair when their references are the same character of an unchanged
-//! stretch of two paired paragraphs, and every other note is new or deleted with its reference.
+//! stretch of two paired paragraphs, and every other note is new or deleted with its reference. A comment pairs the same way,
+//! by its `w:commentReference` (decision 0022), and a comment that pairs with none is not compared: no tracked change adds or
+//! removes a comment.
 
 use super::edits::{map_unchanged, word_edits};
 use super::model::{Atoms, Body, StoryModel, root_of, story_model};
@@ -56,6 +58,13 @@ pub(super) struct Pairings {
     pub unmatched_slots: usize,
     /// How many rows had different cell shapes and were left unpaired, over all stories.
     pub table_replaced: usize,
+    /// The comments whose difference no tracked change records (`comments`): the revised comment's first paragraph and the
+    /// message, and the comments it leaves out of the comparison.
+    pub comment_notices: Vec<(
+        crate::wordml::BlockKey,
+        String,
+        Option<super::comments::LeftOut>,
+    )>,
 }
 
 /// Pairs the stories of `original` with those of `revised`. `atoms` is the dictionary of the two sides.
@@ -203,6 +212,40 @@ pub(super) fn pair_documents(
             .collect();
         if let Some(pair) =
             notes_story(original, revised, kind, &pa.part, &pb.part, &wanted, atoms)?
+        {
+            out.table_replaced += pair
+                .roots
+                .iter()
+                .map(|r| r.pairing.table_replaced)
+                .sum::<usize>();
+            out.stories.push(pair);
+        }
+    }
+    // comments, by reference
+    let comments_of = |specs: &[crate::wordml::StorySpec]| {
+        specs
+            .iter()
+            .find(|s| s.kind == StoryKind::Comments)
+            .map(|s| Arc::clone(&s.part))
+    };
+    if let (Some(pa), Some(pb), Some(body)) = (
+        comments_of(&specs_a.0),
+        comments_of(&specs_b.0),
+        out.stories.first(),
+    ) {
+        let found = super::comments::pair_comments(body, original, revised, &pa, &pb)?;
+        out.comment_notices = found.notices;
+        let comments = found.pairs;
+        if !comments.is_empty()
+            && let Some(pair) = notes_story(
+                original,
+                revised,
+                StoryKind::Comments,
+                &pa,
+                &pb,
+                &comments,
+                atoms,
+            )?
         {
             out.table_replaced += pair
                 .roots

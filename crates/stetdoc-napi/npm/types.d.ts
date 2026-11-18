@@ -1106,14 +1106,20 @@ export type StetError = {
   code: ErrorCode;
   /** The readable file the failure came from. */
   file?: string | null;
+  /** The field of `Limits` that was exceeded, such as `max_archive_bytes`. */
+  limit?: string | null;
   /** The one-based line in `file`. */
   line?: number | null;
+  /** The limit that `value` passed, for `limit`. */
+  max?: number | null;
   /** The one-line message. */
   message: string;
   /** The hint for the next step. */
   next: string;
   /** The zero-based index of the failing operation. */
   op_index?: number | null;
+  /** What the input or request had, for `limit`. */
+  value?: number | null;
 };
 
 /** One of the document's stories, by the name an agent uses. */
@@ -1181,4 +1187,4 @@ export type Warning = {
   story?: string | null;
 };
 
-export type WarningCode = "looks_hidden" | "hidden_text" | "numbering_approximate" | "read_anomaly" | "opaque_content" | "unreferenced_note" | "duplicate_number" | "looks_like_rewrite" | "split_at_wrap" | "no_change" | "own_text_removed" | "property_change_folded" | "revision_removed_with_text" | "quotes_curled" | "quotes_straightened" | "find_matched_loosely" | "already_resolved" | "reply_to_resolved" | "anchor_emptied" | "comment_removed" | "compare_revisions_accepted" | "compare_paragraph_replaced" | "compare_not_redlined" | "compare_not_restored" | "compare_keys_merged" | "compare_table_replaced" | "compare_story_unmatched" | "compare_comments_dropped" | "compare_bookmarks_dropped" | "compare_hyperlinks_unlinked" | "compare_objects_dropped" | "compare_notes_dropped" | "compare_lists_dropped" | "outline_shown" | "repaired" | "ref_retargeted" | "ref_unresolved" | "definition_removed" | "kept_required_paragraph" | "row_outside_repeating_section" | "repeating_section_unwrapped_by_word";
+export type WarningCode = "looks_hidden" | "hidden_text" | "numbering_approximate" | "read_anomaly" | "opaque_content" | "unreferenced_note" | "duplicate_number" | "looks_like_rewrite" | "split_at_wrap" | "no_change" | "own_text_removed" | "property_change_folded" | "revision_removed_with_text" | "quotes_curled" | "quotes_straightened" | "find_matched_loosely" | "already_resolved" | "reply_to_resolved" | "anchor_emptied" | "comment_removed" | "compare_revisions_accepted" | "compare_paragraph_replaced" | "compare_not_redlined" | "compare_not_restored" | "compare_keys_merged" | "compare_table_replaced" | "compare_story_unmatched" | "compare_comments_dropped" | "compare_bookmarks_dropped" | "compare_hyperlinks_unlinked" | "compare_objects_dropped" | "compare_notes_dropped" | "compare_lists_dropped" | "outline_shown" | "repaired" | "ref_retargeted" | "ref_unresolved" | "definition_removed" | "kept_required_paragraph" | "row_outside_repeating_section" | "repeating_section_unwrapped_by_word" | "compare_not_tracked";
